@@ -5,7 +5,7 @@ import csv
 #Prepacing - Still undecided if it is worth it in the benchmark
 #Benchmarker requires data file, but data file is generated using benchmarker
 #Set tolerances
-#Noise adds in bias, need to make sure it doesn't move optimal parameters [currently a big issue: error at "optimum" is 0.449, error at default is 0.527, error after fitting is 0.00022]
+#Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 
 class HH_Benchmarker():
     def __init__(self):
@@ -21,8 +21,13 @@ class HH_Benchmarker():
             for row in reader:
                 tmp.append(float(row[0]))
         self.data = np.array(tmp)
+        tmp=[]
+        with open('trueParamsHH.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                tmp.append(float(row[0]))
+        self.__trueParams = np.array(tmp)
         self.__solveCount = 0
-        self.__trueParams = np.array([1]*len(self.defaultParams))
         
     def n_parameters(self):
         return len(self.defaultParams)
