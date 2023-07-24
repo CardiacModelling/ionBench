@@ -9,29 +9,14 @@ import csv
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
 #Improve style of evaluate output
 
-class HH_Benchmarker():
+class Benchmarker():
     def __init__(self):
-        print('Initialising Hodgkin-Huxley IKr benchmark')
-        self.model = myokit.load_model('beattie-2017-ikr-hh.mmt')
+        self.__solveCount = 0
         self.sim = myokit.Simulation(self.model)
+        self.sim.set_tolerance(1e-8,1e-8)
         log = myokit.DataLog.load_csv('staircase-ramp.csv')
         self.sim.set_fixed_form_protocol(log.time(), log['voltage'])
-        self.defaultParams = [2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524]
         self.tmax = log.time()[-1]
-        tmp=[]
-        with open('dataHH.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                tmp.append(float(row[0]))
-        self.data = np.array(tmp)
-        tmp=[]
-        with open('trueParamsHH.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                tmp.append(float(row[0]))
-        self.__trueParams = np.array(tmp)
-        self.__solveCount = 0
-        print('Benchmarker initialised')
         
     def n_parameters(self):
         return len(self.defaultParams)
@@ -45,6 +30,20 @@ class HH_Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return np.sqrt(np.mean((testOutput-self.data)**2))
     
+    def loadData(self, modelType):
+        tmp=[]
+        with open('data'+modelType+'.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                tmp.append(float(row[0]))
+        self.data = np.array(tmp)
+        tmp=[]
+        with open('trueParams'+modelType+'.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                tmp.append(float(row[0]))
+        self.__trueParams = np.array(tmp)
+    
     def simulate(self, parameters, times):
         #Simulate the model and find the current
         # Reset the simulation
@@ -52,13 +51,13 @@ class HH_Benchmarker():
         
         # Update the parameters
         for i in range(len(self.defaultParams)):
-            self.sim.set_constant('ikr.p'+str(i+1), self.defaultParams[i]*parameters[i])
+            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
         
         # Run a simulation
         self.__solveCount += 1
         try:
-            log = self.sim.run(self.tmax, log_times = times, log = ['ikr.IKr'])
-            return log['ikr.IKr']
+            log = self.sim.run(self.tmax, log_times = times, log = [self._outputName])
+            return log[self._outputName]
         except:
             return [np.inf]*len(times)
     
@@ -76,14 +75,47 @@ class HH_Benchmarker():
         print('Total number of parameters in model: '+str(self.n_parameters()))
         print('Benchmark complete')
 
-def generateData():
-    bm = HH_Benchmarker()
+class HH_Benchmarker(Benchmarker):
+    def __init__(self):
+        print('Initialising Hodgkin-Huxley IKr benchmark')
+        self.model = myokit.load_model('beattie-2017-ikr-hh.mmt')
+        self.__outputName = 'ikr.IKr'
+        self.__paramContainer = 'ikr'
+        super().__init__()
+        self.defaultParams = [2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524]
+        try:
+            self.loadData('HH')
+        except FileNotFoundError:
+            self.data = None
+            self.__trueParams = None
+        print('Benchmarker initialised')
+
+class MM_Benchmarker(Benchmarker):
+    def __init__(self):
+        print('Initialising Markov Model IKr benchmark')
+        self.model = myokit.load_model('fink-2008-ikr-mm.mmt')
+        self._outputName = 'IKr.i_Kr'
+        self._paramContainer = 'iKr_Markov'
+        super().__init__()
+        self.defaultParams = [-1.579, 0.0112, -3.168, -3.816, 0.0365, -0.872, 0.0223, -2.019, -0.0603, -2.514, -8.394, -0.0399, -3.182, -0.0312]
+        try:
+            self.loadData('MM')
+        except FileNotFoundError:
+            self.data = None
+            self.__trueParams = None
+        print('Benchmarker initialised')
+
+def generateData(modelType):
+    if modelType == 'HH':
+        bm = HH_Benchmarker()
+    elif modelType == 'MM':
+        bm = MM_Benchmarker()
     trueParams = np.random.uniform(0.5,1.5,bm.n_parameters())
     out = bm.simulate(trueParams, np.arange(bm.tmax))
     out = out + np.random.normal(0, np.mean(np.abs(out))*0.05, len(out))
-    with open('dataHH.csv', 'w', newline = '') as csvfile:
+    with open('data'+modelType+'.csv', 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))
-    with open('trueParamsHH.csv', 'w', newline = '') as csvfile:
+    with open('trueParams'+modelType+'.csv', 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], trueParams))

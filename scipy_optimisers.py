@@ -15,6 +15,9 @@ Inputs for binding:
   pace = -80.0
 Function CVode() failed with flag -4 CV_CONV_FAILURE: Convergence test failures occurred too many times during one internal time step or minimum step size was reached.
 """
+#TODO:
+#Fix SLSQP error above
+#I think it isn't recording the derivative cost function evaluations
 
 bm = benchmarker.HH_Benchmarker()
 
