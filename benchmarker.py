@@ -6,9 +6,12 @@ import csv
 #Benchmarker requires data file, but data file is generated using benchmarker
 #Set tolerances
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
+#Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
+#Improve style of evaluate output
 
 class HH_Benchmarker():
     def __init__(self):
+        print('Initialising Hodgkin-Huxley IKr benchmark')
         self.model = myokit.load_model('beattie-2017-ikr-hh.mmt')
         self.sim = myokit.Simulation(self.model)
         log = myokit.DataLog.load_csv('staircase-ramp.csv')
@@ -28,9 +31,14 @@ class HH_Benchmarker():
                 tmp.append(float(row[0]))
         self.__trueParams = np.array(tmp)
         self.__solveCount = 0
+        print('Benchmarker initialised')
         
     def n_parameters(self):
         return len(self.defaultParams)
+    
+    def reset(self):
+        self.__solveCount = 0
+        self.sim.reset()
     
     def cost(self, parameters):
         #Calculate cost for a given set of parameters
@@ -47,22 +55,26 @@ class HH_Benchmarker():
             self.sim.set_constant('ikr.p'+str(i+1), self.defaultParams[i]*parameters[i])
         
         # Run a simulation
-        self.__solveCount = self.__solveCount + 1
-        log = self.sim.run(self.tmax, log_times = times, log = ['ikr.IKr'])
-        return log['ikr.IKr']
-        #Add error exceptions once I find the failed myokit solver error - need to be error specific
+        self.__solveCount += 1
+        try:
+            log = self.sim.run(self.tmax, log_times = times, log = ['ikr.IKr'])
+            return log['ikr.IKr']
+        except:
+            return [np.inf]*len(times)
     
     def evaluate(self, parameters):
         print('Evaluating final parameters')
-        cost =  self.cost(parameters)
-        print('Final cost: '+str(cost))
         print('Number of evaluations: '+str(self.__solveCount))
+        cost =  self.cost(parameters)
+        self.__solveCount -= 1
+        print('Final cost: '+str(cost))
         parameters = np.array(parameters)
         rmse = np.sqrt(np.mean((parameters-self.__trueParams)**2))
         identifiedCount = np.sum(np.abs(parameters-self.__trueParams)<0.05)
         print('Parameter RMSE: '+str(rmse))
         print('Number of parameters correctly identified: '+str(identifiedCount))
         print('Total number of parameters in model: '+str(self.n_parameters()))
+        print('Benchmark complete')
 
 def generateData():
     bm = HH_Benchmarker()
