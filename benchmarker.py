@@ -8,6 +8,7 @@ import csv
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
 #Improve style of evaluate output
+#fink2008 needs to have alpha rates moved out of exponential to match HH
 
 class Benchmarker():
     def __init__(self):
