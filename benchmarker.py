@@ -3,8 +3,6 @@ import myokit
 import csv
 #TODO:
 #Prepacing - Still undecided if it is worth it in the benchmark
-#Benchmarker requires data file, but data file is generated using benchmarker
-#Set tolerances
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
 #Improve style of evaluate output
@@ -14,9 +12,10 @@ class Benchmarker():
     def __init__(self):
         self.__solveCount = 0
         self.sim = myokit.Simulation(self.model)
-        self.sim.set_tolerance(1e-8,1e-8)
+        self.sim.set_tolerance(1e-6,1e-5)
         log = myokit.DataLog.load_csv('staircase-ramp.csv')
-        self.sim.set_fixed_form_protocol(log.time(), log['voltage'])
+        protocol = myokit.TimeSeriesProtocol(log.time(), log['voltage'])
+        self.sim.set_protocol(protocol)
         self.tmax = log.time()[-1]
         
     def n_parameters(self):
@@ -80,8 +79,8 @@ class HH_Benchmarker(Benchmarker):
     def __init__(self):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self.model = myokit.load_model('beattie-2017-ikr-hh.mmt')
-        self.__outputName = 'ikr.IKr'
-        self.__paramContainer = 'ikr'
+        self._outputName = 'ikr.IKr'
+        self._paramContainer = 'ikr'
         super().__init__()
         self.defaultParams = [2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524]
         try:
