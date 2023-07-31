@@ -63,7 +63,7 @@ maxIter = 1000
 model = Model()
 problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
 parameters = np.ones(model.n_parameters())
-error = pints.MeanSquaredError(problem)
+error = pints.RootMeanSquaredError(problem)
 logTransforms = [0, 2, 4, 6]
 
 for i in range(len(parameters)):
