@@ -30,6 +30,16 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return np.sqrt(np.mean((testOutput-self.data)**2))
     
+    def signedError(self, parameters):
+        #Calculate cost for a given set of parameters
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        return (testOutput-self.data)
+    
+    def squaredError(self, parameters):
+        #Calculate cost for a given set of parameters
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        return (testOutput-self.data)**2
+    
     def loadData(self, modelType):
         tmp=[]
         with open('data'+modelType+'.csv', newline='') as csvfile:
@@ -48,6 +58,9 @@ class Benchmarker():
         #Simulate the model and find the current
         # Reset the simulation
         self.sim.reset()
+        
+        if any(p<0 for p in parameters):
+            return [np.inf]*len(times)
         
         # Update the parameters
         for i in range(len(self.defaultParams)):

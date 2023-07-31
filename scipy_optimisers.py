@@ -19,7 +19,11 @@ Function CVode() failed with flag -4 CV_CONV_FAILURE: Convergence test failures 
 #Fix SLSQP error above
 #I think it isn't recording the derivative cost function evaluations
 
-bm = benchmarker.HH_Benchmarker()
+try: bm
+except NameError:
+    print('No benchmarker loaded. Creating a new one')
+    bm = benchmarker.HH_Benchmarker()
+else: bm.reset()
 
 x0 = np.ones(bm.n_parameters())
 
