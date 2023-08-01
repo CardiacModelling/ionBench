@@ -16,6 +16,7 @@ class Benchmarker():
         self.plotter = True
         self._costs = []
         self._paramRMSE = []
+        self._paramIdentifiedCount = []
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-6,1e-5)
         log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'staircase-ramp.csv'))
@@ -66,6 +67,7 @@ class Benchmarker():
     def simulate(self, parameters, times):
         #Add parameter error to list
         self._paramRMSE.append(np.sqrt(np.mean((parameters-self.__trueParams)**2)))
+        self._paramIdentifiedCount.append(np.sum(np.abs(parameters-self.__trueParams)<0.05))
         #Simulate the model and find the current
         # Reset the simulation
         self.sim.reset()
@@ -107,6 +109,10 @@ class Benchmarker():
             plt.scatter(range(len(self._paramRMSE)),self._paramRMSE, c="k", marker=".")
             plt.xlabel('Cost function calls')
             plt.ylabel('Parameter RMSE')
+            plt.figure()
+            plt.scatter(range(len(self._paramIdentifiedCount)),self._paramIdentifiedCount, c="k", marker=".")
+            plt.xlabel('Cost function calls')
+            plt.ylabel('Number of parameters identified')
 
 class HH_Benchmarker(Benchmarker):
     def __init__(self):
