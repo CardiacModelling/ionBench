@@ -2,6 +2,8 @@ import numpy as np
 import myokit
 import csv
 import os
+import ionBench
+import matplotlib.pyplot as plt
 #TODO:
 #Prepacing - Still undecided if it is worth it in the benchmark
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
@@ -11,6 +13,9 @@ import os
 class Benchmarker():
     def __init__(self):
         self.__solveCount = 0
+        self.plotter = True
+        self._costs = []
+        self._paramRMSE = []
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-6,1e-5)
         log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'staircase-ramp.csv'))
@@ -28,16 +33,20 @@ class Benchmarker():
     def cost(self, parameters):
         #Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
-        return np.sqrt(np.mean((testOutput-self.data)**2))
+        tmp = np.sqrt(np.mean((testOutput-self.data)**2))
+        self._costs.append(tmp)
+        return tmp
     
     def signedError(self, parameters):
         #Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        self._costs.append(np.sqrt(np.mean((testOutput-self.data)**2)))
         return (testOutput-self.data)
     
     def squaredError(self, parameters):
         #Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        self._costs.append(np.sqrt(np.mean((testOutput-self.data)**2)))
         return (testOutput-self.data)**2
     
     def loadData(self, modelType):
@@ -55,6 +64,8 @@ class Benchmarker():
         self.__trueParams = np.array(tmp)
     
     def simulate(self, parameters, times):
+        #Add parameter error to list
+        self._paramRMSE.append(np.sqrt(np.mean((parameters-self.__trueParams)**2)))
         #Simulate the model and find the current
         # Reset the simulation
         self.sim.reset()
@@ -87,6 +98,15 @@ class Benchmarker():
         print('Number of parameters correctly identified: '+str(identifiedCount))
         print('Total number of parameters in model: '+str(self.n_parameters()))
         print('Benchmark complete')
+        if self.plotter:
+            plt.figure()
+            plt.scatter(range(len(self._costs)),self._costs, c="k", marker=".")
+            plt.xlabel('Cost function calls')
+            plt.ylabel('RMSE cost')
+            plt.figure()
+            plt.scatter(range(len(self._paramRMSE)),self._paramRMSE, c="k", marker=".")
+            plt.xlabel('Cost function calls')
+            plt.ylabel('Parameter RMSE')
 
 class HH_Benchmarker(Benchmarker):
     def __init__(self):
