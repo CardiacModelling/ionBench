@@ -1,5 +1,5 @@
 import numpy as np
-import benchmarker
+from ionBench import benchmarker
 import scipy.optimize
 
 try: bm

@@ -1,5 +1,5 @@
 import numpy as np
-import benchmarker
+from ionBench import benchmarker
 import spsa
 import time
 #To do:

@@ -1,5 +1,5 @@
 import numpy as np
-import benchmarker
+from ionBench import benchmarker
 #Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 class particle:

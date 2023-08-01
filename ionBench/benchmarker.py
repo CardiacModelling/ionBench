@@ -1,19 +1,19 @@
 import numpy as np
 import myokit
 import csv
+import os
 #TODO:
 #Prepacing - Still undecided if it is worth it in the benchmark
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
 #Improve style of evaluate output
 #fink2008 needs to have alpha rates moved out of exponential to match HH
-
 class Benchmarker():
     def __init__(self):
         self.__solveCount = 0
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-6,1e-5)
-        log = myokit.DataLog.load_csv('staircase-ramp.csv')
+        log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'staircase-ramp.csv'))
         protocol = myokit.TimeSeriesProtocol(log.time(), log['voltage'])
         self.sim.set_protocol(protocol)
         self.tmax = log.time()[-1]
@@ -42,13 +42,13 @@ class Benchmarker():
     
     def loadData(self, modelType):
         tmp=[]
-        with open('data'+modelType+'.csv', newline='') as csvfile:
+        with open(os.path.join(ionBench.DATA_DIR, 'data'+modelType+'.csv'), newline='') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 tmp.append(float(row[0]))
         self.data = np.array(tmp)
         tmp=[]
-        with open('trueParams'+modelType+'.csv', newline='') as csvfile:
+        with open(os.path.join(ionBench.DATA_DIR, 'trueParams'+modelType+'.csv'), newline='') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 tmp.append(float(row[0]))
@@ -91,7 +91,7 @@ class Benchmarker():
 class HH_Benchmarker(Benchmarker):
     def __init__(self):
         print('Initialising Hodgkin-Huxley IKr benchmark')
-        self.model = myokit.load_model('beattie-2017-ikr-hh.mmt')
+        self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'beattie-2017-ikr-hh.mmt'))
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
         super().__init__()
@@ -106,7 +106,7 @@ class HH_Benchmarker(Benchmarker):
 class MM_Benchmarker(Benchmarker):
     def __init__(self):
         print('Initialising Markov Model IKr benchmark')
-        self.model = myokit.load_model('fink-2008-ikr-mm.mmt')
+        self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, "fink-2008-ikr-mm.mmt"))
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         super().__init__()

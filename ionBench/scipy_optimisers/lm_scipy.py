@@ -1,5 +1,5 @@
 import numpy as np
-import benchmarker
+from ionBench import benchmarker
 import scipy.optimize
 
 try: bm
@@ -10,7 +10,7 @@ else: bm.reset()
 
 x0 = np.ones(bm.n_parameters())
 
-out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': 1e-4, 'fatol': 1e-4, 'maxiter': 5000, 'maxfev': 20000}, bounds = [(0,None)]*bm.n_parameters())
+out = scipy.optimize.least_squares(bm.signedError, x0, method='lm', diff_step=1e-3, verbose=1)
 
 bm.evaluate(out.x)
 

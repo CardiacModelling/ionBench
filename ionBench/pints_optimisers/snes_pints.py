@@ -1,5 +1,5 @@
 import pints
-import benchmarker
+from ionBench import benchmarker
 import numpy as np
 
 class Model(pints.ForwardModel):
@@ -37,7 +37,7 @@ fbest = np.inf
 for i in range(iterCount):
     x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
     # Create an optimisation controller
-    opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.PSO)
+    opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.SNES)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     x, f = opt.run()

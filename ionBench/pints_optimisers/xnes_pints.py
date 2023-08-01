@@ -1,5 +1,5 @@
 import pints
-import benchmarker
+from ionBench import benchmarker
 import numpy as np
 
 class Model(pints.ForwardModel):

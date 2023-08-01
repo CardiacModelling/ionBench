@@ -1,15 +1,13 @@
 import numpy as np
-import scipy
-import benchmarker
+from ionBench import benchmarker
 from functools import cache
 
 from pymoo.core.individual import Individual
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.sbx import SBX
-
-#Todo:
-#Seems to devolve into many individuals giving infinite cost (likely negative parameters)
-
+from pymoo.operators.mutation.pm import PolynomialMutation
+from pymoo.core.population import Population
+#should probably cache the cost function
 class individual():
     def __init__(self):
         self.x = np.random.rand(bm.n_parameters())*2
@@ -26,28 +24,23 @@ def costFunc(x):
 nGens = 50
 debug = True
 eta_cross = 10
-elitePercentage = 0.066
 eta_mut = 20
 popSize = 50
-eliteCount = int(np.round(popSize*elitePercentage))
 pop = [None]*popSize
 for i in range(popSize):
     pop[i] = individual()
     pop[i].findCost()
 
 for gen in range(nGens):
-    costVec = [0]*popSize
+    minCost = np.inf
     for i in range(popSize):
-        costVec[i] = pop[i].cost
-    eliteIndices = np.argsort(costVec)[:eliteCount]
-    elites = [None]*eliteCount
-    for i in range(eliteCount):
-        elites[i] = pop[eliteIndices[i]]
+        if pop[i].cost < minCost:
+            minCost = pop[i].cost
+            elite = pop[i]
     if debug:
         print("------------")
         print("Gen "+str(gen))
-        print("Best cost: "+str(min(costVec)))
-        print("Average cost: "+str(np.mean(costVec)))
+        print("Best cost: "+str(minCost))
     #Tournement selection
     newPop = []
     for j in range(2):
@@ -73,24 +66,23 @@ for gen in range(nGens):
         newPop[-1].x = Xp[1] #Can this be done in one line
     pop = newPop
     #Mutation
+    mutation = PolynomialMutation(prob=0.1*bm.n_parameters(), eta=eta_mut)
     for i in range(popSize):
-        if np.random.rand()<0.9:
-            direc = np.random.rand(bm.n_parameters())
-            direc = direc/np.linalg.norm(direc)
-            mag = scipy.stats.cauchy.rvs(loc=0, scale=0.18)
-            pop[i].x += mag*direc
+        ind = Population.new(X=[pop[i].x])
+        off = mutation(problem, ind)
+        pop[i].x = off.get("X")[0]
     if debug:
         print("Finishing gen "+str(gen))
     #Find costs
     for i in range(popSize):
         pop[i].findCost()
     #Elitism
-    costVec = [0]*popSize
+    maxCost = -np.inf
     for i in range(popSize):
-        costVec[i] = pop[i].cost
-    eliteIndices = np.argsort(costVec)[-eliteCount:]
-    for i in range(eliteCount):
-        pop[eliteIndices[i]] = elites[i]
+        if pop[i].cost > maxCost:
+            maxCost = pop[i].cost
+            maxIndex = i
+    pop[maxIndex] = elite
 
 minCost = np.inf
 for i in range(popSize):
