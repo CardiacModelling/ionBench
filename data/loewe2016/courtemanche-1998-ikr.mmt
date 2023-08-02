@@ -1,0 +1,142 @@
+[[model]]
+name: Beattie-2017-IKr
+author: Michael Clerx
+# Initial values
+ikr.xr = 3.29e-5
+
+#
+# Simulation engine variables
+#
+[engine]
+time = 0 [ms] bind time
+    in [ms]
+pace = 0 [mV] bind pace
+    in [mV]
+
+#
+# Membrane potential
+#
+[membrane]
+V = engine.pace
+    desc: membane potential
+    in [mV]
+EK = R*T/F*log(Ko/Ki)
+    in [mV]
+Ko = 5 [mmol]
+    in [mmol]
+Ki = ikr.p12
+    in [mmol]
+F =  9.6485e4 [C/mol]
+    in [C/mol]
+K_o = 5.4 [mM]
+    in [mM]
+R = 8314.472 [mJ/mol/K]
+    in [mJ/mol/K]
+T = 295 [K] #22C (from 20C-25C)
+    in [K]
+
+[ikr]
+use membrane.V
+IKr = gkr * xr / (1 + exp((V+gkr1)/gkr2)) * (V - membrane.EK)
+    in [A/F]
+dot(xr) = (inf - xr) / tau
+    inf = 1 / (1 + exp((V+xrm1)/xrm2)) in [1]
+    tau = 1 [ms*mV] / ((alphaxr + betaxr)*xrkq10) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaxr = xra1*(V+xra2)/(1-exp((V+xra2)/xra3)) in [mV]
+    betaxr = 7.3898e-5 [1]*(V+xrb1)/(exp((V+xrb1)/xrb2)-1) in [mV]
+p1 = 3e-4 [1]
+    in [1]
+xra1 = p1
+    in [1]
+p2 = 14.1 [mV]
+    in [mV]
+xra2 = p2
+    in [mV]
+p3 = 5 [mV]
+    in [mV]
+xra3 = -p3
+    in [mV]
+p4 = 3.3328 [mV]
+    in [mV]
+xrb1 = p4
+    in [mV]
+p5 = 5.1237 [mV]
+    in [mV]
+xrb2 = p5
+    in [mV]
+p6 = 1 [1]
+    in [1]
+xrkq10 = p6
+    in [1]
+p7 = 14.1 [mV]
+    in [mV]
+xrm1 = p7
+    in [mV]
+p8 = 6.5 [mV]
+    in [mV]
+xrm2 = -p8
+    in [mV]
+p9 = 15 [mV]
+    in [mV]
+gkr1 = p9
+    in [mV]
+p10 = 22.4 [mV]
+    in [mV]
+gkr2 = p10
+    in [mV]
+p11 = 0.029411765 [nS/pF]
+    in [nS/pF]
+gkr = p11
+    in [nS/pF]
+p12 = 138.994 [mmol]
+    in [mmol]
+
+[[script]]
+import myokit
+import myokit.pacing as pacing
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as pl
+
+#
+# Simple IKr test script
+#
+
+# Get model
+m = get_model()
+
+# Create pacing protocol
+v = np.arange(-100, 50 + 10, 10)
+p = pacing.steptrain(
+        vsteps=v,
+        vhold=-80,
+        tpre=2000,
+        tstep=5000,
+        tpost=3000)
+
+d = [
+    'engine.time',
+    'membrane.V',
+    'ikr.IKr',
+    ]
+
+# Run simulation
+s = myokit.Simulation(m, p)
+d = s.run(p.characteristic_time(), log=d)
+
+# Create colormap for plotting
+cmap = matplotlib.cm.get_cmap('viridis')
+norm = matplotlib.colors.Normalize(0, len(v))
+
+# Plot data as overlapping steps
+d2 = d.npview()
+d2 = d2.regularize(0.1)
+d2 = d2.fold(10000)
+pl.figure()
+for k in xrange(len(v)):
+    pl.subplot(2,1,1)
+    pl.plot(d2.time(), d2['membrane.V', k], color=cmap(norm(k)))
+    pl.subplot(2,1,2)
+    pl.plot(d2.time(), d2['ikr.IKr', k], color=cmap(norm(k)))
+pl.show()
+
