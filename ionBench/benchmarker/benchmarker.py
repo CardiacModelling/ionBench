@@ -18,14 +18,15 @@ class Benchmarker():
         self._costs = []
         self._paramRMSE = []
         self._paramIdentifiedCount = []
+        try:
+            self.addModel(self.model, self._log)
+        except:
+            warnings.warn("No model or protocol has been defined for this benchmark. Please use the addModel function on this object along with a Myokit model object and log to add the desired voltage protocol.")
+    
+    def addModel(self, model, log):
+        self.model = model
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-6,1e-5)
-        try:
-            self.addProtocol(self._log)
-        except:
-            warnings.warn("No protocol has been defined for this benchmark. Please use the addProtocol function on this object along with a Myokit log to add the desired voltage protocol.")
-    
-    def addProtocol(self, log):
         protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
         self.sim.set_protocol(protocol)
         self.tmax = self._log.time()[-1]
