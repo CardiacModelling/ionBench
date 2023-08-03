@@ -8,7 +8,6 @@ import warnings
 #TODO:
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
-#Improve style of evaluate output
 #fink2008 needs to have alpha rates moved out of exponential to match HH
 class Benchmarker():
     def __init__(self):
@@ -98,18 +97,21 @@ class Benchmarker():
             return [np.inf]*len(times)
     
     def evaluate(self, parameters):
-        print('Evaluating final parameters')
-        print('Number of evaluations: '+str(self._solveCount))
+        print('=========================================')
+        print('===    Evaluating Final Parameters    ===')
+        print('=========================================')
+        print('')
+        print('Number of cost evaluations:      '+str(self._solveCount))
         cost =  self.cost(parameters)
         self._solveCount -= 1
-        print('Final cost: '+str(cost))
+        print('Final cost:                      {0:.6f}'.format(cost))
         parameters = np.array(parameters)
         rmse = np.sqrt(np.mean((parameters-self._trueParams)**2))
         identifiedCount = np.sum(np.abs(parameters-self._trueParams)<0.05)
-        print('Parameter RMSE: '+str(rmse))
-        print('Number of parameters correctly identified: '+str(identifiedCount))
-        print('Total number of parameters in model: '+str(self.n_parameters()))
-        print('Benchmark complete')
+        print('Parameter RMSE:                  {0:.6f}'.format(rmse))
+        print('Number of identified parameters: '+str(identifiedCount))
+        print('Total number of parameters:      '+str(self.n_parameters()))
+        print('')
         if self.plotter:
             plt.figure()
             plt.scatter(range(len(self._costs)),self._costs, c="k", marker=".")
