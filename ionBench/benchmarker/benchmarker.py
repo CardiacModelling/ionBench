@@ -6,7 +6,6 @@ import ionBench
 import matplotlib.pyplot as plt
 import warnings
 #TODO:
-#Prepacing - Still undecided if it is worth it in the benchmark
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
 #Improve style of evaluate output
@@ -30,6 +29,7 @@ class Benchmarker():
         protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
         self.sim.set_protocol(protocol)
         self.tmax = self._log.time()[-1]
+        self.sim.pre(500) #Prepace for 500ms
         
     def n_parameters(self):
         return len(self.defaultParams)
