@@ -1,10 +1,10 @@
 import pints
-from ionBench import benchmarker
+from ionBench.problems import staircase
 import numpy as np
 
 class Model(pints.ForwardModel):
     def __init__(self):
-        self.bm = benchmarker.HH_Benchmarker()
+        self.bm = staircase.HH_Benchmarker()
         
     def n_parameters(self):
         return self.bm.n_parameters()

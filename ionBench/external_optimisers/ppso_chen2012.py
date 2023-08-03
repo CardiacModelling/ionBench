@@ -1,5 +1,5 @@
 import numpy as np
-from ionBench import benchmarker
+from ionBench.problems import staircase
 #Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 class particle:
@@ -27,7 +27,7 @@ w = 0.6 #Inertia weight
 
 q = 0 #Number of generations without improvement
 
-bm = benchmarker.HH_Benchmarker()
+bm = staircase.HH_Benchmarker()
 
 #Generate patterns
 groups = [[0,2,4,6],[1,3,5,7],[8]]

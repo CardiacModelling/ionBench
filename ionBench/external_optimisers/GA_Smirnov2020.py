@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from ionBench import benchmarker
+from ionBench.problems import staircase
 from functools import cache
 
 from pymoo.core.individual import Individual
@@ -17,7 +17,7 @@ class individual():
     def findCost(self):
         self.cost = costFunc(tuple(self.x))
 
-bm = benchmarker.HH_Benchmarker()
+bm = staircase.HH_Benchmarker()
 
 @cache
 def costFunc(x):

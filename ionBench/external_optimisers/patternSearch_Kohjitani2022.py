@@ -1,7 +1,7 @@
-import benchmarker
+from ionBench.problems import staircase
 from functools import cache
 
-bm = benchmarker.HH_Benchmarker()
+bm = staircase.HH_Benchmarker()
 @cache
 def costFunc(x):
     return bm.cost(x)
