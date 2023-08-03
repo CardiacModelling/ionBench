@@ -8,7 +8,7 @@ import warnings
 #TODO:
 #Noise adds in bias, need to make sure it doesn't move optimal parameters [currently doesn't seem to be a big issue]
 #Parallel processes won't give the correct solveCount. Will need to build a test case and see how I can resolve this. shared_memory from the multiprocessing class seems to be a good option
-#fink2008 needs to have alpha rates moved out of exponential to match HH
+
 class Benchmarker():
     def __init__(self):
         self._solveCount = 0
@@ -150,7 +150,7 @@ class MM_Benchmarker(Benchmarker):
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         super().__init__()
-        self.defaultParams = [-1.579, 0.0112, -3.168, -3.816, 0.0365, -0.872, 0.0223, -2.019, -0.0603, -2.514, -8.394, -0.0399, -3.182, -0.0312]
+        self.defaultParams = [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, -0.0603, 0.08094, 0.0002262, -0.0399, 0.04150, -0.0312]
         try:
             self.loadData('MM')
         except FileNotFoundError:

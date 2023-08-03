@@ -56,48 +56,48 @@ dot(Ir5) = alpha_xr4 * Or4 - beta_xr4 * Ir5
     in [1]
 dot(Or4) = alpha_xr3 * Cr3 + beta_xr4 * Ir5 - (alpha_xr4 + beta_xr3) * Or4
     in [1]
-alpha_xr1 = 1 [mS/uF] * exp(p1 + p2 * cell.V)
+alpha_xr1 = 1 [mS/uF] * p1 * exp(p2 * cell.V)
     in [mS/uF]
-alpha_xr2 = 1 [mS/uF] * exp(p3)
+alpha_xr2 = 1 [mS/uF] * p3
     in [mS/uF]
-alpha_xr3 = 1 [mS/uF] * exp(p4 + p5 * cell.V)
+alpha_xr3 = 1 [mS/uF] * p4 * exp(p5 * cell.V)
     in [mS/uF]
-alpha_xr4 = 1 [mS/uF] * exp(p6 + p7 * cell.V) * (5.4 [mM] / Environment.K_o)^0.4
+alpha_xr4 = 1 [mS/uF] * p6 * exp(p7 * cell.V) * (5.4 [mM] / Environment.K_o)^0.4
     in [mS/uF]
-beta_xr1 = 1 [mS/uF] * exp(p8 + p9 * cell.V)
+beta_xr1 = 1 [mS/uF] * p8 * exp(p9 * cell.V)
     in [mS/uF]
-beta_xr2 = 1 [mS/uF] * exp(p10)
+beta_xr2 = 1 [mS/uF] * p10
     in [mS/uF]
-beta_xr3 = 1 [mS/uF] * exp(p11 + p12 * cell.V)
+beta_xr3 = 1 [mS/uF] * p11 * exp(p12 * cell.V)
     in [mS/uF]
-beta_xr4 = 1 [mS/uF] * exp(p13 + p14 * cell.V)
+beta_xr4 = 1 [mS/uF] * p13 * exp(p14 * cell.V)
     in [mS/uF]
 
-p1 = -1.579 [1]
+p1 = 0.20618 [1]
     in [1]
 p2 = 0.0112 [mV^-1]
     in [mV^-1]
-p3 = -3.168 [1]
+p3 = 0.04209 [1]
     in [1]
-p4 = -3.816 [1]
+p4 = 0.02202 [1]
     in [1]
 p5 = 0.0365 [mV^-1]
     in [mV^-1]
-p6 = -0.872 [1]
+p6 = 0.41811 [1]
     in [1]
 p7 = 0.0223 [mV^-1]
     in [mV^-1]
-p8 = -2.019 [1]
+p8 = 0.13279 [1]
     in [1]
 p9 = -0.0603 [mV^-1]
     in [mV^-1]
-p10 = -2.514 [1]
+p10 = 0.08094 [1]
     in [1]
-p11 = -8.394 [1]
+p11 = 0.0002262 [1]
     in [1]
 p12 = -0.0399 [mV^-1]
     in [mV^-1]
-p13 = -3.182 [1]
+p13 = 0.04150 [1]
     in [1]
 p14 = -0.0312 [mV^-1]
     in [mV^-1]
