@@ -1,0 +1,199 @@
+[[model]]
+name: Beattie-2017-IKr
+author: Michael Clerx
+# Initial values
+ikur.ua = 4.96e-3
+ikur.ui = 0.999
+
+#
+# Simulation engine variables
+#
+[engine]
+time = 0 [ms] bind time
+    in [ms]
+pace = 0 [mV] bind pace
+    in [mV]
+
+#
+# Membrane potential
+#
+[membrane]
+V = engine.pace
+    desc: membane potential
+    in [mV]
+EK = R*T/F*log(Ko/Ki)
+    in [mV]
+Ko = 5 [mmol]
+    in [mmol]
+Ki = ikur.p25
+    in [mmol]
+F =  9.6485e4 [C/mol]
+    in [C/mol]
+R = 8314.472 [mJ/mol/K]
+    in [mJ/mol/K]
+T = 295 [K] #22C (from 20C-25C)
+    in [K]
+
+[ikur]
+use membrane.V
+IKur = gkur * ua^3 * ui * (V - membrane.EK)
+    in [A/F]
+gkur = gkur1 + gkur2/(1+exp((V+gkur3)/gkur4))
+dot(ua) = (inf - ua) / tau
+    inf = 1 / (1 + exp((V+uam1)/uam2)) in [1]
+    tau = 1 [ms*mV] / ((alphaua + betaua)*uakq10) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaua = uaa1/(exp((V+uaa2)/uaa3)+exp((V+uaa4)/uaa5)) in [mV]
+    betaua = 0.65 [1]/(uab1+exp((V+uab2)/uab3)) in [mV]
+dot(ui) = (inf - ui) / tau
+    inf = 1 / (1 + exp((V+uim1)/uim2)) in [1]
+    tau = 1 [ms*mV] / ((alphaui + betaui)*uikq10) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaui = uia1/(uia2+exp((V+uia3)/uia4)) in [mV]
+    betaui = exp((V+uib1)/uib2) in [mV]
+p1 = 0.65 [1]
+    in [1]
+uaa1 = p1
+    in [1]
+p2 = 10 [mV]
+    in [mV]
+uaa2 = p2
+    in [mV]
+p3 = 8.5 [mV]
+    in [mV]
+uaa3 = -p3
+    in [mV]
+p4 = 30 [mV]
+    in [mV]
+uaa4 = -p4
+    in [mV]
+p5 = 59 [mV]
+    in [mV]
+uaa5 = -p5
+    in [mV]
+p6 = 2.5 [1]
+    in [1]
+uab1 = p6
+    in [1]
+p7 = 82 [mV]
+    in [mV]
+uab2 = p7
+    in [mV]
+p8 = 17 [mV]
+    in [mV]
+uab3 = p8
+    in [mV]
+p9 = 30.3 [mV]
+    in [mV]
+uam1 = p9
+    in [mV]
+p10 = 9.6 [mV]
+    in [mV]
+uam2 = -p10
+    in [mV]
+p11 = 3 [1]
+    in [1]
+uakq10 = p11
+    in [1]
+p12 = 1 [1]
+    in [1]
+uia1 = p12
+    in [1]
+p13 = 21 [1]
+    in [1]
+uia2 = p13
+    in [1]
+p14 = 185 [mV]
+    in [mV]
+uia3 = -p14
+    in [mV]
+p15 = 28 [mV]
+    in [mV]
+uia4 = -p15
+    in [mV]
+p16 = 158 [mV]
+    in [mV]
+uib1 = -p16
+    in [mV]
+p17 = 16 [mV]
+    in [mV]
+uib2 = -p17
+    in [mV]
+p18 = 99.45 [mV]
+    in [mV]
+uim1 = -p18
+    in [mV]
+p19 = 27.48 [mV]
+    in [mV]
+uim2 = p19
+    in [mV]
+p20 = 3 [1]
+    in [1]
+uikq10 = p20
+    in [1]
+p21 = 0.005 [nS/pF]
+    in [nS/pF]
+gkur1 = p21
+    in [nS/pF]
+p22 = 0.05 [nS/pF]
+    in [nS/pF]
+gkur2 = p22
+    in [nS/pF]
+p23 = 15 [mV]
+    in [mV]
+gkur3 = -p23
+    in [mV]
+p24 = 13 [mV]
+    in [mV]
+gkur4 = -p24
+    in [mV]
+p25 = 138.994 [mmol]
+    in [mmol]
+
+[[script]]
+import myokit
+import myokit.pacing as pacing
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as pl
+
+#
+# Simple IKr test script
+#
+
+# Get model
+m = get_model()
+
+# Create pacing protocol
+v = np.arange(-100, 50 + 10, 10)
+p = pacing.steptrain(
+        vsteps=v,
+        vhold=-80,
+        tpre=2000,
+        tstep=5000,
+        tpost=3000)
+
+d = [
+    'engine.time',
+    'membrane.V',
+    'ikr.IKr',
+    ]
+
+# Run simulation
+s = myokit.Simulation(m, p)
+d = s.run(p.characteristic_time(), log=d)
+
+# Create colormap for plotting
+cmap = matplotlib.cm.get_cmap('viridis')
+norm = matplotlib.colors.Normalize(0, len(v))
+
+# Plot data as overlapping steps
+d2 = d.npview()
+d2 = d2.regularize(0.1)
+d2 = d2.fold(10000)
+pl.figure()
+for k in xrange(len(v)):
+    pl.subplot(2,1,1)
+    pl.plot(d2.time(), d2['membrane.V', k], color=cmap(norm(k)))
+    pl.subplot(2,1,2)
+    pl.plot(d2.time(), d2['ikr.IKr', k], color=cmap(norm(k)))
+pl.show()
+
