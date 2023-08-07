@@ -85,21 +85,18 @@ class Benchmarker():
         # Reset the simulation
         self.sim.reset()
         
-        if any(p<0 for p in parameters):
-            return [np.inf]*len(times)
-        
         self.setParams(parameters)
         
         # Run a simulation
         self._solveCount += 1
         if continueOnError:
             try:
-                log = self.sim.run(self.tmax, log_times = times, log = [self._outputName])
+                log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
                 return log[self._outputName]
             except:
                 return [np.inf]*len(times)
         else:
-            log = self.sim.run(self.tmax, log_times = times, log = [self._outputName])
+            log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
             return log[self._outputName]
     
     def evaluate(self, parameters):

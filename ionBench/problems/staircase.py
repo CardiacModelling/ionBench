@@ -45,7 +45,7 @@ def generateData(modelType):
     trueParams = np.random.uniform(0.5,1.5,bm.n_parameters())
     out = bm.simulate(trueParams, np.arange(bm.tmax), continueOnError = False)
     out = out + np.random.normal(0, np.mean(np.abs(out))*0.05, len(out))
-    with open(os.path.join(ionBench.DATA_DIR, 'stiarcase', 'data'+modelType+'.csv'), 'w', newline = '') as csvfile:
+    with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+modelType+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))
     with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'trueParams'+modelType+'.csv'), 'w', newline = '') as csvfile:
