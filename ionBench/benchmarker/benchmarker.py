@@ -13,6 +13,7 @@ class Benchmarker():
     def __init__(self):
         self._solveCount = 0
         self._bounded = False
+        self._logTransformParams = [False]*self.n_parameters()
         self.plotter = True
         self._costs = []
         self._paramRMSE = []
@@ -36,6 +37,11 @@ class Benchmarker():
         self.lb = bounds[0]
         self.ub = bounds[1]
         self._bounded = True
+    
+    def logTransform(self, whichParams = []):
+        if whichParams == []:
+            whichParams = [True]*self.n_parameters()
+        self._logTransformParams = whichParams
         
     def n_parameters(self):
         return len(self.defaultParams)
@@ -81,8 +87,11 @@ class Benchmarker():
     
     def setParams(self, parameters):
         # Update the parameters
-        for i in range(len(self.defaultParams)):
-            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*np.exp(parameters[i]))
+            else:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
             
     def simulate(self, parameters, times, continueOnError = True):
         #Add parameter error to list

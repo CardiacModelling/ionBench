@@ -22,6 +22,14 @@ class ina(ionBench.benchmarker.Benchmarker):
             params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
         return params
     
+    def setParams(self, parameters):
+        # Update the parameters
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), np.exp(parameters[i]))
+            else:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+    
     def simulate(self, parameters, times):
         #Add parameter error to list
         self._paramRMSE.append(np.sqrt(np.mean((parameters-self._trueParams)**2)))

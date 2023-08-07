@@ -26,10 +26,13 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
         else:
             return params
     
-    def setParams(self,parameters):
+    def setParams(self, parameters):
         # Update the parameters
-        for i in range(len(self.defaultParams)):
-            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), np.exp(parameters[i]))
+            else:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
 
 class ikr(loewe2016_Benchmarker):
     def __init__(self):
