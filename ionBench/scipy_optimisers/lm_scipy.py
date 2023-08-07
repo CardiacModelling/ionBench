@@ -1,16 +1,12 @@
-import numpy as np
-from ionBench import benchmarker
+import ionBench.problems.staircase
 import scipy.optimize
 
-try: bm
-except NameError:
-    print('No benchmarker loaded. Creating a new one')
-    bm = benchmarker.HH_Benchmarker()
-else: bm.reset()
+def run(bm, x0, diff_step = 1e-3):
+    out = scipy.optimize.least_squares(bm.signedError, x0, method='lm', diff_step=diff_step, verbose=1)
+    
+    bm.evaluate(out.x)
+    return out.x
 
-x0 = np.ones(bm.n_parameters())
-
-out = scipy.optimize.least_squares(bm.signedError, x0, method='lm', diff_step=1e-3, verbose=1)
-
-bm.evaluate(out.x)
-
+if __name__ == '__main__':
+    bm = ionBench.problems.staircase.HH_Benchmarker()
+    run(bm = bm, x0 = bm.defaultParams)
