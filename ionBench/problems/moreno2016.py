@@ -30,8 +30,10 @@ class ina(ionBench.benchmarker.Benchmarker):
         # Reset the simulation
         self.sim.reset()
         
-        if any(p<0 for p in parameters):
-            return [np.inf]*len(times)
+        if self._bounded:
+            if any(parameters[i]<self.lb[i] or parameters[i]>self.ub[i] for i in range(self.n_parameters())):
+                return [np.inf]*len(times)
+        self.setParams(parameters)
         
         self.setParams(parameters)
         measurementWindows = []

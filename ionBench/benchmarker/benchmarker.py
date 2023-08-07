@@ -12,6 +12,7 @@ import warnings
 class Benchmarker():
     def __init__(self):
         self._solveCount = 0
+        self._bounded = False
         self.plotter = True
         self._costs = []
         self._paramRMSE = []
@@ -29,6 +30,12 @@ class Benchmarker():
         self.sim.set_protocol(protocol)
         self.tmax = self._log.time()[-1]
         self.sim.pre(500) #Prepace for 500ms
+    
+    def addBounds(self, bounds):
+        #Bounds checked against parameters in the inputted format, ie bounds on scaling factors, or bounds on log-transformed parameters, failing strict bounds does not increment cost counter
+        self.lb = bounds[0]
+        self.ub = bounds[1]
+        self._bounded = True
         
     def n_parameters(self):
         return len(self.defaultParams)
@@ -85,6 +92,9 @@ class Benchmarker():
         # Reset the simulation
         self.sim.reset()
         
+        if self._bounded:
+            if any(parameters[i]<self.lb[i] or parameters[i]>self.ub[i] for i in range(self.n_parameters())):
+                return [np.inf]*len(times)
         self.setParams(parameters)
         
         # Run a simulation
