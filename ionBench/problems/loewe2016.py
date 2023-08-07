@@ -39,6 +39,7 @@ class ikr(loewe2016_Benchmarker):
         self._paramContainer = 'ikr'
         self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
+        self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         super().__init__()
         print('Benchmarker initialised')
 
@@ -50,15 +51,17 @@ class ikur(loewe2016_Benchmarker):
         self._paramContainer = 'ikur'
         self.defaultParams = np.array([0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05, 15, 13, 138.994])
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
+        self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__()
         print('Benchmarker initialised')
 
 def generateData(modelType):
-    if modelType.lower() == 'ikr':
+    modelType = modelType.lower()
+    if modelType == 'ikr':
         bm = ikr()
-    elif modelType.lower() == 'ikur':
+    elif modelType == 'ikur':
         bm = ikur()
-    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax))
+    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionBench.DATA_DIR, 'loewe2016', modelType.lower()+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))

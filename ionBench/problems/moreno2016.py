@@ -92,7 +92,7 @@ class ina(ionBench.benchmarker.Benchmarker):
 
 def generateData():
     bm = ina()
-    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax))
+    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))

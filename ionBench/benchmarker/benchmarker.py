@@ -56,26 +56,28 @@ class Benchmarker():
         self._costs.append(np.sqrt(np.mean((testOutput-self.data)**2)))
         return (testOutput-self.data)**2
     
-    def loadData(self, modelType):
-        tmp=[]
-        with open(os.path.join(ionBench.DATA_DIR, 'data'+modelType+'.csv'), newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                tmp.append(float(row[0]))
-        self.data = np.array(tmp)
-        tmp=[]
-        with open(os.path.join(ionBench.DATA_DIR, 'trueParams'+modelType+'.csv'), newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                tmp.append(float(row[0]))
-        self._trueParams = np.array(tmp)
+    def loadData(self, dataPath = '', paramPath = ''):
+        if not dataPath == '':
+            tmp=[]
+            with open(dataPath, newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    tmp.append(float(row[0]))
+            self.data = np.array(tmp)
+        if not paramPath == '':
+            tmp=[]
+            with open(paramPath, newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    tmp.append(float(row[0]))
+            self._trueParams = np.array(tmp)
     
     def setParams(self, parameters):
         # Update the parameters
         for i in range(len(self.defaultParams)):
             self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
             
-    def simulate(self, parameters, times):
+    def simulate(self, parameters, times, continueOnError = True):
         #Add parameter error to list
         self._paramRMSE.append(np.sqrt(np.mean((parameters-self._trueParams)**2)))
         self._paramIdentifiedCount.append(np.sum(np.abs(parameters-self._trueParams)<0.05))
@@ -90,11 +92,15 @@ class Benchmarker():
         
         # Run a simulation
         self._solveCount += 1
-        try:
+        if continueOnError:
+            try:
+                log = self.sim.run(self.tmax, log_times = times, log = [self._outputName])
+                return log[self._outputName]
+            except:
+                return [np.inf]*len(times)
+        else:
             log = self.sim.run(self.tmax, log_times = times, log = [self._outputName])
             return log[self._outputName]
-        except:
-            return [np.inf]*len(times)
     
     def evaluate(self, parameters):
         print('')
