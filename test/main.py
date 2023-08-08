@@ -40,9 +40,13 @@ for i in range(len(bm)):
     print(problemNames[i])
     print('Check log transforms don\'t cause errors')
     try:
+        bm[i]._bounded=False
         b = bm[i]
         b.logTransform(whichParams = [True]*b.n_parameters())
-        b.evaluate(b.defaultParams)
+        if i<2:#HH and MM
+            b.evaluate([0]*b.n_parameters())
+        else:
+            b.evaluate(np.log(b.defaultParams))
     except Exception as e:
         print(e)
 
