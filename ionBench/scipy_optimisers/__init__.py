@@ -1,0 +1,4 @@
+from ionBench.scipy_optimisers import lm_scipy
+from ionBench.scipy_optimisers import nelderMead_scipy
+from ionBench.scipy_optimisers import powell_scipy
+from ionBench.scipy_optimisers import trustRegionReflective_scipy
