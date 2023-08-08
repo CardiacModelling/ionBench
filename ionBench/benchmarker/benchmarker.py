@@ -124,9 +124,9 @@ class Benchmarker():
         print('===    Evaluating Final Parameters    ===')
         print('=========================================')
         print('')
+        solveCount = self._solveCount
         print('Number of cost evaluations:      '+str(self._solveCount))
         cost =  self.cost(parameters)
-        self._solveCount -= 1
         print('Final cost:                      {0:.6f}'.format(cost))
         parameters = np.array(parameters)
         rmse = np.sqrt(np.mean((parameters-self._trueParams)**2))
@@ -148,3 +148,4 @@ class Benchmarker():
             plt.scatter(range(len(self._paramIdentifiedCount)),self._paramIdentifiedCount, c="k", marker=".")
             plt.xlabel('Cost function calls')
             plt.ylabel('Number of parameters identified')
+        self._solveCount = solveCount
