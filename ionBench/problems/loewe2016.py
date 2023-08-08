@@ -56,6 +56,7 @@ class ikur(loewe2016_Benchmarker):
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__()
+        self.sim.set_tolerance(1e-8,1e-8)
         print('Benchmarker initialised')
 
 def generateData(modelType):
