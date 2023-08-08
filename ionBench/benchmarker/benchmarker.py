@@ -88,13 +88,13 @@ class Benchmarker():
     def setParams(self, parameters):
         # Update the parameters
         for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*np.exp(parameters[i]))
-            else:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
+            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
             
     def simulate(self, parameters, times, continueOnError = True):
         #Add parameter error to list
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                parameters[i] = np.exp(parameters[i])
         self._paramRMSE.append(np.sqrt(np.mean((parameters-self._trueParams)**2)))
         self._paramIdentifiedCount.append(np.sum(np.abs(parameters-self._trueParams)<0.05))
         #Simulate the model and find the current
@@ -125,14 +125,13 @@ class Benchmarker():
         print('=========================================')
         print('')
         solveCount = self._solveCount
+        paramRMSE = self._paramRMSE[:]
+        paramIdentifiedCount = self._paramIdentifiedCount[:]
         print('Number of cost evaluations:      '+str(self._solveCount))
         cost =  self.cost(parameters)
         print('Final cost:                      {0:.6f}'.format(cost))
-        parameters = np.array(parameters)
-        rmse = np.sqrt(np.mean((parameters-self._trueParams)**2))
-        identifiedCount = np.sum(np.abs(parameters-self._trueParams)<0.05)
-        print('Parameter RMSE:                  {0:.6f}'.format(rmse))
-        print('Number of identified parameters: '+str(identifiedCount))
+        print('Parameter RMSE:                  {0:.6f}'.format(self._paramRMSE[-1]))
+        print('Number of identified parameters: '+str(self._paramIdentifiedCount[-1]))
         print('Total number of parameters:      '+str(self.n_parameters()))
         print('')
         if self.plotter:
@@ -149,3 +148,5 @@ class Benchmarker():
             plt.xlabel('Cost function calls')
             plt.ylabel('Number of parameters identified')
         self._solveCount = solveCount
+        self._paramRMSE = paramRMSE
+        self._paramIdentifiedCount = paramIdentifiedCount
