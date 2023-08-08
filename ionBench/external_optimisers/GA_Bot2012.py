@@ -16,17 +16,10 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
         def findCost(self):
             self.cost = costFunc(tuple(self.x))
     
-    bm = staircase.HH_Benchmarker()
-    
     @cache
     def costFunc(x):
         return bm.cost(x)
     
-    nGens = 50
-    debug = True
-    eta_cross = 10
-    eta_mut = 20
-    popSize = 50
     pop = [None]*popSize
     for i in range(popSize):
         pop[i] = individual()
