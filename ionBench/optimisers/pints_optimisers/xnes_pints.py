@@ -1,7 +1,7 @@
 import pints
 from ionBench.problems import staircase
 import numpy as np
-from ionBench.pints_optimisers import classes_pints
+from ionBench.optimisers.pints_optimisers import classes_pints
 
 def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
     parameters = np.ones(bm.n_parameters())
@@ -14,7 +14,7 @@ def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
     for i in range(iterCount):
         x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
         # Create an optimisation controller
-        opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.SNES)
+        opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.XNES)
         opt.set_max_iterations(maxIter)
         # Run the optimisation
         x, f = opt.run()

@@ -59,7 +59,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.scipy_optimisers.lm_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.lm_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -69,7 +69,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.scipy_optimisers.nelderMead_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -79,7 +79,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.scipy_optimisers.powell_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.powell_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -89,7 +89,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.scipy_optimisers.trustRegionReflective_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -104,35 +104,35 @@ localBounds = [[0,1e-7,1e3], [1,1e-7,0.4], [2,1e-7,1e3], [3,1e-7,0.4], [4,1e-7,1
 iterCount = 2
 maxIter = 50
 try:
-    ionBench.pints_optimisers.cmaes_pints.run(bm, kCombinations, localBounds = localBounds, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.cmaes_pints.run(bm, kCombinations, localBounds = localBounds, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("nelderMead-pints")
 try:
-    ionBench.pints_optimisers.nelderMead_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.nelderMead_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("pso-pints")
 try:
-    ionBench.pints_optimisers.pso_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.pso_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("snes-pints")
 try:
-    ionBench.pints_optimisers.snes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.snes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
     
 print("++++++++++++++++++++++++")
 print("xnes-pints")
 try:
-    ionBench.pints_optimisers.xnes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.xnes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
@@ -145,7 +145,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
+        ionBench.optimisers.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
     except Exception as e:
         print(e)
 
@@ -155,7 +155,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
+        ionBench.optimisers.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
     except Exception as e:
         print(e)
 
@@ -165,7 +165,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.external_optimisers.patternSearch_Kohjitani2022.run(bm[i], maxfev = 100, debug = True)
+        ionBench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm[i], maxfev = 100, debug = True)
     except Exception as e:
         print(e)
 
@@ -176,7 +176,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.external_optimisers.ppso_chen2012.run(bm[i], groups= groups, debug = True)
+        ionBench.optimisers.external_optimisers.ppso_chen2012.run(bm[i], groups= groups, debug = True)
     except Exception as e:
         print(e)
 
@@ -186,7 +186,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.spsa_spsa.run(bm[i], x0=bm[i].defaultParams,maxiter=50)
+        ionBench.optimisers.spsa_spsa.run(bm[i], x0=bm[i].defaultParams,maxiter=50)
     except Exception as e:
         print(e)
 

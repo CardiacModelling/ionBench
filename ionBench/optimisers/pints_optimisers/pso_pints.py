@@ -1,7 +1,7 @@
 import pints
 from ionBench.problems import staircase
 import numpy as np
-from ionBench.pints_optimisers import classes_pints
+from ionBench.optimisers.pints_optimisers import classes_pints
 
 def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
     parameters = np.ones(bm.n_parameters())
