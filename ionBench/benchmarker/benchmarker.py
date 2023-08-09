@@ -48,6 +48,9 @@ class Benchmarker():
     
     def reset(self):
         self._solveCount = 0
+        self._costs = []
+        self._paramRMSE = []
+        self._paramIdentifiedCount = []
         self.sim.reset()
     
     def cost(self, parameters):
