@@ -104,35 +104,35 @@ localBounds = [[0,1e-7,1e3], [1,1e-7,0.4], [2,1e-7,1e3], [3,1e-7,0.4], [4,1e-7,1
 iterCount = 2
 maxIter = 50
 try:
-    ionBench.optimisers.pints_optimisers.cmaes_pints.run(bm, kCombinations, localBounds = localBounds, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.cmaes_pints.run(bm[0], kCombinations, localBounds = localBounds, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("nelderMead-pints")
 try:
-    ionBench.optimisers.pints_optimisers.nelderMead_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.nelderMead_pints.run(bm[0], logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("pso-pints")
 try:
-    ionBench.optimisers.pints_optimisers.pso_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.pso_pints.run(bm[0], logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
 print("++++++++++++++++++++++++")
 print("snes-pints")
 try:
-    ionBench.optimisers.pints_optimisers.snes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.snes_pints.run(bm[0], logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
     
 print("++++++++++++++++++++++++")
 print("xnes-pints")
 try:
-    ionBench.optimisers.pints_optimisers.xnes_pints.run(bm, logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
+    ionBench.optimisers.pints_optimisers.xnes_pints.run(bm[0], logTransforms = logTransforms, iterCount=iterCount, maxIter=maxIter)
 except Exception as e:
     print(e)
 
