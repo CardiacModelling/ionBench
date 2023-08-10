@@ -6,7 +6,7 @@ def run(bm, x0, diff_step = 1e-3, bounds = [], maxfev = 20000):
     if bounds == []:
         out = scipy.optimize.least_squares(bm.signedError, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev)
     else:
-        out = scipy.optimize.least_squares(bm.signedError, x0, method='trf', diff_step=diff_step, verbose=2, bounds = bounds)
+        out = scipy.optimize.least_squares(bm.signedError, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev, bounds = bounds)
     
     bm.evaluate(out.x)
     return out.x
