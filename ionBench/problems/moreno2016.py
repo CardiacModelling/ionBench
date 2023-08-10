@@ -11,6 +11,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         self._outputName = 'ina.INa'
         self._paramContainer = 'ina'
         self.defaultParams = np.array([7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771, 2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
+        self._useScaleFactors = False
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'protocol.csv'))
         self._trueParams = self.defaultParams
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'))
@@ -22,11 +23,6 @@ class ina(ionBench.benchmarker.Benchmarker):
         for j in range(self.n_parameters()):
             params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
         return params
-    
-    def setParams(self, parameters):
-        # Update the parameters
-        for i in range(self.n_parameters()):
-            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
     
     def solveModel(self, parameters, times, continueOnError = True):
         if continueOnError:

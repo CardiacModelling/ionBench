@@ -122,7 +122,10 @@ class Benchmarker():
     def setParams(self, parameters):
         # Update the parameters
         for i in range(self.n_parameters()):
-            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
+            if self._useScaleFactors:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
+            else:
+                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
     
     def solveModel(self, parameters, times, continueOnError = True):
         if continueOnError:

@@ -7,6 +7,7 @@ import ionBench
 class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
     def __init__(self):
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
+        self._useScaleFactors = True
         super().__init__()
         try:
             self.loadData(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'), os.path.join(ionBench.DATA_DIR, 'staircase', 'trueParams'+self._modelType+'.csv'))

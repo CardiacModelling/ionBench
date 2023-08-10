@@ -9,6 +9,7 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'loewe2016', 'protocol.csv'))
         self._trueParams = self.defaultParams
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
+        self._useScaleFactors = False
         super().__init__()
     
     def sample(self, n=1):
@@ -25,11 +26,6 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
             return params[0]
         else:
             return params
-    
-    def setParams(self, parameters):
-        # Update the parameters
-        for i in range(self.n_parameters()):
-            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
 
 class ikr(loewe2016_Benchmarker):
     def __init__(self):
