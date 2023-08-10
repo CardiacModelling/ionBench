@@ -26,25 +26,18 @@ class ina(ionBench.benchmarker.Benchmarker):
     def setParams(self, parameters):
         # Update the parameters
         for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), np.exp(parameters[i]))
-            else:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
     
-    def simulate(self, parameters, times):
-        #Add parameter error to list
-        self._paramRMSE.append(np.sqrt(np.mean((parameters-self._trueParams)**2)))
-        self._paramIdentifiedCount.append(np.sum(np.abs(parameters-self._trueParams)<0.05))
-        #Simulate the model and find the current
-        # Reset the simulation
-        self.sim.reset()
-        
-        if self._bounded:
-            if any(parameters[i]<self.lb[i] or parameters[i]>self.ub[i] for i in range(self.n_parameters())):
-                return [np.inf]*len(times)
-        self.setParams(parameters)
-        
-        self.setParams(parameters)
+    def solveModel(self, parameters, times, continueOnError = True):
+        if continueOnError:
+            try:
+                return self.runMoreno()
+            except:
+                return [np.inf]*59
+        else:
+            return self.runMoreno()
+    
+    def runMoreno(self):
         measurementWindows = []
         #SSI/SSA measurements
         for i in range(9):
@@ -71,7 +64,6 @@ class ina(ionBench.benchmarker.Benchmarker):
                 logTimes += i
         
         # Run a simulation
-        self._solveCount += 1
         log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
         #log = self.sim.run(self.tmax+1, log_times = logTimes)
         inaOut = log[self._outputName]
