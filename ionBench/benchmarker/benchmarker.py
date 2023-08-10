@@ -14,8 +14,10 @@ class Tracker():
         self.solveCount = 0
     
     def update(self, trueParams, estimatedParams, cost = np.inf, incrementSolveCounter = True):
-        self.paramRMSRE.append(np.sqrt(np.mean((estimatedParams-trueParams)**2)))
-        self.paramIdentifiedCount.append(np.sum(np.abs(estimatedParams-trueParams)<0.05))
+        trueParams = np.array(trueParams)
+        estimatedParams = np.array(estimatedParams)
+        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams-trueParams)/trueParams)**2)))
+        self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams-trueParams)/trueParams)<0.05))
         self.costs.append(cost)
         if incrementSolveCounter:
             self.solveCount += 1
