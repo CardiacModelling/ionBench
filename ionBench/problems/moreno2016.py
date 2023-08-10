@@ -5,6 +5,13 @@ import numpy as np
 import csv
 
 class ina(ionBench.benchmarker.Benchmarker):
+    """
+    The Moreno 2016 INa benchmarker. 
+    
+    The benchmarker uses the model from Moreno et al 2016 with a step protocol used to calculated summary curves which are then used for fitting. 
+    
+    Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    """
     def __init__(self):
         print('Initialising Moreno 2016 INa benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
@@ -19,12 +26,43 @@ class ina(ionBench.benchmarker.Benchmarker):
         print('Benchmarker initialised')
     
     def sample(self, width=5):
+        """
+        Sample parameters for the Loewe 2016 problems. By default the sampling using the narrow parameter space but this can be changed by setting benchmarker.paramSpaceWidth = 2 to use the wide parameter space.
+
+        Parameters
+        ----------
+        width : float, optional
+            The width of the perturbation interval for sampling. The values used in Moerno et al 2016 are 5, 10, and 25. The default is 5.
+
+        Returns
+        -------
+        params : list
+            The sampled vector of parameters.
+
+        """
         params = [None]*self.n_parameters()
         for j in range(self.n_parameters()):
             params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
         return params
     
-    def solveModel(self, parameters, times, continueOnError = True):
+    def solveModel(self, times, continueOnError = True):
+        """
+        Replaces the Benchmarker solve model to call a special Moreno 2016 method (runMoreno()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
+
+        Parameters
+        ----------
+        times : list or numpy array
+            Unneccessary for Moreno 2016. Only kept in since it will be passed in as an input by the main Benchmarker methods.
+        continueOnError : bool, optional
+            If continueOnError is True, any errors that occur during solving the model will be ignored and an infinite output will be given. The default is True.
+
+        Returns
+        -------
+        modelOutput : list
+            A vector of points on summary curves.
+
+        """
+        
         if continueOnError:
             try:
                 return self.runMoreno()
@@ -34,6 +72,15 @@ class ina(ionBench.benchmarker.Benchmarker):
             return self.runMoreno()
     
     def runMoreno(self):
+        """
+        Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
+
+        Returns
+        -------
+        modelOutput : list
+            A vector of points on summary curves.
+
+        """
         measurementWindows = []
         #SSI/SSA measurements
         for i in range(9):
@@ -90,6 +137,19 @@ class ina(ionBench.benchmarker.Benchmarker):
         return ssi+act+rfi+tau
 
 def generateData():
+    """
+    Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
+
+    Parameters
+    ----------
+    modelType : string
+        'ikr' to generate the data for the IKr benchmark problem. 'ikur' to generate the data for the IKur benchmark problem.
+
+    Returns
+    -------
+    None.
+
+    """
     bm = ina()
     out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline = '') as csvfile:

@@ -13,6 +13,20 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
         super().__init__()
     
     def sample(self, n=1):
+        """
+        Sample parameters for the Loewe 2016 problems. By default the sampling using the narrow parameter space but this can be changed by setting benchmarker.paramSpaceWidth = 2 to use the wide parameter space.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of parameter vectors to sample. The default is 1.
+
+        Returns
+        -------
+        params : list
+            If n=1, then params is the vector of parameters. Otherwise, params is a list containing n parameter vectors.
+
+        """
         params = [None]*n
         for i in range(n):
             param = [None]*self.n_parameters()
@@ -28,6 +42,13 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
             return params
 
 class ikr(loewe2016_Benchmarker):
+    """
+    The Loewe 2016 IKr benchmarker. 
+    
+    The benchmarker uses the Courtemanche 1998 IKr model with a simple step protocol. 
+    
+    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    """
     def __init__(self):
         print('Initialising Loewe 2016 IKr benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
@@ -40,6 +61,13 @@ class ikr(loewe2016_Benchmarker):
         print('Benchmarker initialised')
 
 class ikur(loewe2016_Benchmarker):
+    """
+    The Loewe 2016 IKur benchmarker. 
+    
+    The benchmarker uses the Courtemanche 1998 IKur model with a simple step protocol. 
+    
+    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    """
     def __init__(self):
         print('Initialising Loewe 2016 IKur benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
@@ -53,6 +81,19 @@ class ikur(loewe2016_Benchmarker):
         print('Benchmarker initialised')
 
 def generateData(modelType):
+    """
+    Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
+
+    Parameters
+    ----------
+    modelType : string
+        'ikr' to generate the data for the IKr benchmark problem. 'ikur' to generate the data for the IKur benchmark problem.
+
+    Returns
+    -------
+    None.
+
+    """
     modelType = modelType.lower()
     if modelType == 'ikr':
         bm = ikr()

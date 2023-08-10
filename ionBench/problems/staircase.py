@@ -16,6 +16,20 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
             self._trueParams = None
     
     def sample(self, n=1):
+        """
+        Sample parameters for the staircase problems.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of parameter vectors to sample. The default is 1.
+
+        Returns
+        -------
+        params : list
+            If n=1, then params is the vector of parameters. Otherwise, params is a list containing n parameter vectors.
+
+        """
         params = [None]*n
         for i in range(n):
             params[i] = np.random.uniform(0.5,1.5,self.n_parameters())
@@ -25,6 +39,13 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
             return params
         
 class HH_Benchmarker(Staircase_Benchmarker):
+    """
+    The Hodgkin-Huxley IKr Staircase benchmarker. 
+    
+    The benchmarker uses the Beattie et al 2017 IKr Hodgkin-Huxley model using the staircase protocol. 
+    
+    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
+    """
     def __init__(self):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
@@ -36,6 +57,13 @@ class HH_Benchmarker(Staircase_Benchmarker):
         print('Benchmarker initialised')
 
 class MM_Benchmarker(Staircase_Benchmarker):
+    """
+    The Markov IKr Staircase benchmarker. 
+    
+    The benchmarker uses the Fink et al 2008 IKr Markov model using the staircase protocol. 
+    
+    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
+    """
     def __init__(self):
         print('Initialising Markov Model IKr benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
@@ -47,6 +75,19 @@ class MM_Benchmarker(Staircase_Benchmarker):
         print('Benchmarker initialised')
 
 def generateData(modelType):
+    """
+    Generate the data files for the staircase benchmarker problems.
+
+    Parameters
+    ----------
+    modelType : string
+        'HH' to generate the data for the Hodgkin-Huxley benchmark problem. 'MM' to generate the data for the Markov model benchmark problem.
+
+    Returns
+    -------
+    None.
+
+    """
     modelType = modelType.upper()
     if modelType == 'HH':
         bm = HH_Benchmarker()
