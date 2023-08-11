@@ -203,7 +203,7 @@ class Benchmarker():
     
     def applyTransform(self, parameters):
         """
-        Convert parameters back to the original parameter space.
+        Undo any log-transformed parameters.
 
         Parameters
         ----------
@@ -217,9 +217,35 @@ class Benchmarker():
 
         """
         #Untransform any parameters
+        newParameters = []
         for i in range(self.n_parameters()):
             if self._logTransformParams[i]:
-                parameters[i] = np.exp(parameters[i])
+                newParameters.append(np.exp(parameters[i]))
+            else:
+                newParameters.append(parameters[i])
+        return newParameters
+    
+    def originalParameterSpace(self, parameters):
+        """
+        Maps parameters from input space to the original parameter space. Removing any log transforms or scaling factors.
+
+        Parameters
+        ----------
+        parameters : list
+            Parameter vector in input space.
+
+        Returns
+        -------
+        parameters : list
+            Parameter vector mapped to the original parameter space.
+
+        """
+        parameters = self.applyTransform(parameters) #Reverse any log transforms
+        
+        if self._useScaleFactors:
+            for i in range(self.n_parameters()):
+                parameters[i] = self.defaultParams[i]*parameters[i]
+        
         return parameters
     
     def inBounds(self, parameters):
@@ -321,7 +347,7 @@ class Benchmarker():
     
     def setParams(self, parameters):
         """
-        Set the parameters in the simulation object. If self._useScaleFactors=True (the case for the staircase problems), the inputted parameters are used to scale the default parameters.
+        Set the parameters in the simulation object. Inputted parameters should be in the original parameter space.
 
         Parameters
         ----------
@@ -335,10 +361,7 @@ class Benchmarker():
         """
         # Update the parameters
         for i in range(self.n_parameters()):
-            if self._useScaleFactors:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), self.defaultParams[i]*parameters[i])
-            else:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+            self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
     
     def solveModel(self, times, continueOnError = True):
         """
@@ -389,7 +412,7 @@ class Benchmarker():
 
         """
         #Return the parameters to the original parameter space
-        parameters = self.applyTransform(parameters)
+        parameters = self.originalParameterSpace(parameters)
         
         # Reset the simulation
         self.sim.reset()

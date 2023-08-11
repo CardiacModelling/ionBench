@@ -19,7 +19,7 @@ class AdvancedBoundaries(pints.Boundaries):
     """
     Pints boundaries to apply to the parameters and the rates. Currently the rates are hard-coded to correspond to the Hodgkin-Huxley IKr staircase benchmarker.
     """
-    def __init__(self, paramCount, localBounds, kCombinations, bm, vHigh = 40, vLow = -120):
+    def __init__(self, bm, vHigh = 40, vLow = -120):
         """
         Build a Pints boundary object to apply parameter and rate bounds.
 
@@ -43,31 +43,17 @@ class AdvancedBoundaries(pints.Boundaries):
         None.
 
         """
-        # localBounds = [[0,1e-7,1e3],[3,1e-3,1e5]] sets the bounds for parameter index 0 to be [1e-7,1e3] and index 3 to be [1e-3,1e5]
-        # kCombinations = [[0,1],[4,5]] means param[0]*exp(param[1]*V) and param[4]*exp(param[5]*V) satisfy bounds
-        # self.a_min = 1e-7
-        # self.a_max = 1e3
-        # self.b_min = 1e-7
-        # self.b_max = 0.4
         self.bm = bm
         self.km_min = 1.67e-5
         self.km_max = 1e3
         self.vLow = vLow
         self.vHigh = vHigh
-        self.paramCount = paramCount
-        self.kCombinations = kCombinations
-        
-        self.lowerBounds = [-np.inf for i in range(paramCount)]
-        self.upperBounds = [np.inf for i in range(paramCount)]
-        for bound in localBounds:
-            self.lowerBounds[bound[0]] = bound[1]
-            self.upperBounds[bound[0]] = bound[2]
     
     def n_parameters(self):
         """
         Returns the number of parameters in the model.
         """
-        return self.paramCount
+        return self.bm.n_parameters()
     
     def check(self, parameters):
         """
@@ -76,7 +62,7 @@ class AdvancedBoundaries(pints.Boundaries):
         Parameters
         ----------
         parameters : list
-            Inputted parameter to check.
+            Inputted parameter to check, in their original parameter space.
 
         Returns
         -------
@@ -84,52 +70,30 @@ class AdvancedBoundaries(pints.Boundaries):
             True if the parameters are inside the bound. False if the parameters are outside of the bounds.
 
         """
-        parameters = np.array(parameters)*self.bm.defaultParams
+        parameters = self.bm.originalParameterSpace(parameters)
         
         # Check parameter boundaries
-        if np.any(parameters <= self.lowerBounds) or np.any(parameters >= self.upperBounds):
+        if np.any(parameters <= self.bm.lb) or np.any(parameters >= self.bm.ub):
             return False
         
-        for comb in self.kCombinations:
-            kLow = parameters[comb[0]] * np.exp(parameters[comb[1]] * self.vLow)
-            kHigh = parameters[comb[0]] * np.exp(parameters[comb[1]] * self.vHigh)
-            if comb[1] in [1,4]:
-                if kHigh < self.km_min or kHigh > self.km_max:
-                    return False
+        #Check rate boundaries
+        for rateTuple in self.bm._rateFunctions:
+            rateFunc = rateTuple[0]
+            rateType = rateTuple[1]
+            if rateType == 'positive':
+                #check kHigh is in bounds
+                k = rateFunc(parameters, self.vHigh)
+            elif rateType == 'negative':
+                #check kLow is in bounds
+                k = rateFunc(parameters, self.vLow)
+            elif rateType == 'independent':
+                #check rate in bounds
+                k = rateFunc(parameters, 0) #Voltge doesn't matter
             else:
-                if kLow < self.km_min or kLow > self.km_max:
-                    return False
+                print("Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in atleast one position. Check for typos.")
+                k=0
+            if k < self.km_min or k > self.km_max:
+                return False
         
         # All tests passed!
         return True
-
-def logTransforms(logTransforms, nParams):
-    """
-    Build a Pints transformation object to log transform some parameters.
-
-    Parameters
-    ----------
-    logTransforms : list
-        List of parameter indices to log transforms.
-    nParams : int
-        Number of parameters in the model.
-
-    Returns
-    -------
-    transformation : Pints Transformation
-        A pints transformation featuring log transforms on the indices specified by logTransforms and identify transforms (no transform) on the remaining paramters.
-
-    """
-    for i in range(nParams):
-        if i == 0:
-            if i in logTransforms:
-                transformation = pints.LogTransformation(n_parameters=1)
-            else:
-                transformation = pints.IdentityTransformation(n_parameters=1)
-        else:
-            if i in logTransforms:
-                transformation = pints.ComposedTransformation(transformation, pints.LogTransformation(n_parameters=1))
-            else:
-                transformation = pints.ComposedTransformation(transformation, pints.IdentityTransformation(n_parameters=1))
-    
-    return transformation

@@ -3,7 +3,7 @@ from ionBench.problems import staircase
 import numpy as np
 from ionBench.optimisers.pints_optimisers import classes_pints
 
-def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, maxIter=1000):
+def run(bm, x0 = [], iterCount=1, maxIter=1000):
     """
     Runs CMA-ES from Pints using a benchmarker. 
 
@@ -11,12 +11,8 @@ def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, ma
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
-    kCombinations : list
-        kCombinations = [[0,1],[4,5]] means param[0]*exp(param[1]*V) and param[4]*exp(param[5]*V) satisfy bounds.
-    localBounds : list, optional
-        Bounds on the parameters are specified in localBounds. For example, localBounds = [[0,1e-7,1e3],[3,1e-3,1e5]] sets the bounds for parameter index 0 to be [1e-7,1e3] and index 3 to be [1e-3,1e5]. The default is [], so no bounds on parameters.
-    logTransforms : list, optional
-        List of parameter indices to log transforms. The default is [], so no parameters should be log-transformed.
+    x0 : list, optional
+        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     iterCount : int, optional
         Number of times to repeat the algorithm. The default is 1.
     maxIter : int, optional
@@ -28,14 +24,18 @@ def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, ma
         The best parameters identified by CMA-ES.
 
     """
-    parameters = np.ones(bm.n_parameters())
+    if x0 == []:
+        parameters = bm.sample()
+    else:
+        parameters = x0
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
-    transformation = classes_pints.logTransforms(logTransforms, len(parameters))
-    boundaries = classes_pints.AdvancedBoundaries(paramCount = model.n_parameters(), localBounds = localBounds, kCombinations = kCombinations, bm = model.bm)
+    if bm._bounded:
+        boundaries = classes_pints.AdvancedBoundaries(bm)
     
     fbest = np.inf
+    xbest = parameters
     for i in range(iterCount):
         x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
         counter = 1
@@ -46,7 +46,10 @@ def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, ma
             print("Struggled to find parameters in bounds")
             print("Required "+str(counter)+" iterations")
         # Create an optimisation controller
-        opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.CMAES, boundaries = boundaries)
+        if bm._bounded:
+            opt = pints.OptimisationController(error, x0, method=pints.CMAES, boundaries = boundaries)
+        else:
+            opt = pints.OptimisationController(error, x0, method=pints.CMAES)
         opt.set_max_iterations(maxIter)
         # Run the optimisation
         x, f = opt.run()
@@ -58,10 +61,7 @@ def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, ma
     return xbest
 
 if __name__ == '__main__':
-    iterCount = 1
-    maxIter = 1000
     bm = staircase.HH_Benchmarker()
-    logTransforms = [0, 2, 4, 6]
-    localBounds = [[0,1e-7,1e3], [1,1e-7,0.4], [2,1e-7,1e3], [3,1e-7,0.4], [4,1e-7,1e3], [5,1e-7,0.4], [6,1e-7,1e3], [7,1e-7,0.4]]
-    kCombinations = [[0,1], [2,3], [4,5], [6,7]]
-    run(bm = bm, kCombinations = kCombinations, localBounds = localBounds, logTransforms = logTransforms, iterCount = iterCount, maxIter = maxIter)
+    bm.logTransform([True, False]*4+[False])
+    bm.addBounds([[1e-7]*8+[-np.inf], [1e3,0.4]*4+[np.inf]])
+    run(bm)

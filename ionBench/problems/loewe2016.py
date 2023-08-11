@@ -56,6 +56,7 @@ class ikr(loewe2016_Benchmarker):
         self._paramContainer = 'ikr'
         self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
+        self._rateFunctions = [(lambda p,V:p[0]*(V+p[1])/(1-np.exp((V+p[1])/(-p[2]))), 'positive'), (lambda p,V:7.3898e-5*(V+p[3])/(np.exp((V+p[3])/p[4])-1), 'negative')] #Used for rate bounds
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         super().__init__()
         print('Benchmarker initialised')
@@ -75,6 +76,7 @@ class ikur(loewe2016_Benchmarker):
         self._paramContainer = 'ikur'
         self.defaultParams = np.array([0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05, 15, 13, 138.994])
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
+        self._rateFunctions = [(lambda p,V: p[0]/(np.exp((V+p[1])/-p[2])+np.exp((V-p[3])/-p[4])), 'positive'), (lambda p,V: 0.65/(p[5]+np.exp((V+p[6])/p[7])), 'negative'), (lambda p,V: p[11]/(p[12]+np.exp((V-p[13])/-p[14])), 'positive'), (lambda p,V: np.exp((V-p[15])/-p[16]), 'negative')] #Used for rate bounds
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__()
         self.sim.set_tolerance(1e-12,1e-12)
