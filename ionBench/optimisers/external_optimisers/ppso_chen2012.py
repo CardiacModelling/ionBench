@@ -18,6 +18,38 @@ class particle:
             self.bestPosition = self.position
 
 def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
+    """
+    Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012.
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    groups : list
+        Groupings of parameters to use in the algorithm. 
+    n : int, optional
+        Number of particles. The default is 20.
+    c1 : float, optional
+        Scale of the acceleration towards a particles best positions. The default is 1.4.
+    c2 : float, optional
+        Scale of the acceleration towards the best point seen across all particles. The default is 1.4.
+    qmax : int, optional
+        Maximum number of iterations without improvement before perturbations. The default is 5.
+    lmax : int, optional
+        Maximum number of iterations. The default is 200.
+    gmin : float, optional
+        Target cost. Once the cost is reduced below gmin, the optimisation terminates. The default is 0.05.
+    w : float, optional
+        Initial value for the inertia of the particles. The default is 0.6.
+    debug : bool, optional
+        If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified.
+
+    """
     q = 0 #Number of generations without improvement
     #Generate patterns
     patterns = [] #All combinations of groups

@@ -9,6 +9,30 @@ from pymoo.operators.mutation.pm import PolynomialMutation
 from pymoo.core.population import Population
 
 def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = False):
+    """
+    Runs the genetic algorithm from Bot et al 2012.
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    nGens : int, optional
+        The number of generations to run the optimisation algorithm for. The default is 50.
+    eta_cross : float, optional
+        Crossover parameter. The default is 10.
+    eta_mut : float, optional
+        Mutation parameter. The default is 20.
+    popSize : int, optional
+        The size of the population in each generation. The default is 50.
+    debug : bool, optional
+        If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified.
+
+    """
     class individual():
         def __init__(self):
             self.x = np.random.rand(bm.n_parameters())*2

@@ -10,7 +10,33 @@ from pymoo.operators.crossover.sbx import SBX
 #Todo:
 #Seems to devolve into many individuals giving infinite cost (likely negative parameters)
 
-def run(bm, nGens = 50, eta_cross = 10, elitePercentage = 0.066, eta_mut = 20, popSize = 50, debug = False):
+def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, popSize = 50, debug = False):
+    """
+    Runs the genetic algorithm from Smirnov et al 2020.
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    nGens : int, optional
+        The number of generations to run the optimisation algorithm for. The default is 50.
+    eta_cross : float, optional
+        Crossover parameter. The default is 10.
+    eta_mut : float, optional
+        Mutation parameter. The default is 20.
+    elitePercentage : float, optional
+        The percentage of the population that are considered elites to move into the next generation. This will be multiplied by popSize and then rounded to the nearest integer. The default is 0.066.
+    popSize : int, optional
+        The size of the population in each generation. The default is 50.
+    debug : bool, optional
+        If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified.
+
+    """
     class individual():
         def __init__(self):
             self.x = np.random.rand(bm.n_parameters())*2

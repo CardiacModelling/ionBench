@@ -1,7 +1,31 @@
 from ionBench.problems import staircase
 from functools import cache
 
-def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug=False):
+def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = False):
+    """
+    Runs the pattern search algorithm from Kohjitani et al 2022.
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    CrtStp : float, optional
+        The minimum step size. If there are no improvements within CrtStp, the optimisation terminates. The default is 2e-5.
+    Stp : float, optional
+        Initial step size. The default is 1/100.
+    RedFct : float, optional
+        The reduction factor. If the center point is better than its neighbours, the step size is scaled by this reduction factor. The default is 1/4.
+    maxfev : int, optional
+        Maximum number of cost function evaluations. The default is 100000.
+    debug : bool, optional
+        If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified.
+
+    """
     @cache
     def costFunc(x):
         return bm.cost(x)
