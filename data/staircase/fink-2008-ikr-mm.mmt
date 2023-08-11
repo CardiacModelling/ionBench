@@ -101,27 +101,3 @@ p13 = 0.04150 [1]
     in [1]
 p14 = -0.0312 [mV^-1]
     in [mV^-1]
-
-[[protocol]]
-# Level  Start    Length   Period   Multiplier
-1.0      100.0    0.5      1000.0   0
-
-[[script]]
-import matplotlib.pyplot as plt
-import myokit
-
-# Get model and protocol, create simulation
-m = get_model()
-p = get_protocol()
-s = myokit.Simulation(m, p)
-
-# Run simulation
-d = s.run(1000)
-
-# Display the results
-var = 'Environment.time'
-plt.figure()
-plt.plot(d.time(), d[var])
-plt.title(var)
-plt.show()
-
