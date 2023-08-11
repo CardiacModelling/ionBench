@@ -3,7 +3,7 @@ from ionBench.problems import staircase
 import numpy as np
 from ionBench.optimisers.pints_optimisers import classes_pints
 
-def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
+def run(bm, x0 = [], iterCount=1, maxIter=1000):
     """
     Runs Nelder Mead from Pints using a benchmarker. 
 
@@ -11,8 +11,8 @@ def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
-    logTransforms : list, optional
-        List of parameter indices to log transforms. The default is [], so no parameters should be log-transformed.
+    x0 : list, optional
+        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     iterCount : int, optional
         Number of times to repeat the algorithm. The default is 1.
     maxIter : int, optional
@@ -24,17 +24,19 @@ def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
         The best parameters identified by Nelder-Mead.
 
     """
-    parameters = np.ones(bm.n_parameters())
+    if x0 == []:
+        parameters = bm.sample()
+    else:
+        parameters = x0
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
-    transformation = classes_pints.logTransforms(logTransforms, len(parameters))
     
     fbest = np.inf
     for i in range(iterCount):
         x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
         # Create an optimisation controller
-        opt = pints.OptimisationController(error, x0, transformation=transformation, method=pints.NelderMead)
+        opt = pints.OptimisationController(error, x0, method=pints.NelderMead)
         opt.set_max_iterations(maxIter)
         # Run the optimisation
         x, f = opt.run()
@@ -46,8 +48,6 @@ def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
     return xbest
 
 if __name__ == '__main__':
-    iterCount = 1
-    maxIter = 1000
     bm = staircase.HH_Benchmarker()
-    logTransforms = [0, 2, 4, 6]
-    run(bm = bm, logTransforms = logTransforms, iterCount = iterCount, maxIter = maxIter)
+    bm.logTransform([True, False]*4+[False])
+    run(bm)
