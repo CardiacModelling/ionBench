@@ -19,7 +19,7 @@ class particle:
 
 def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
     """
-    Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012.
+    Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
     Parameters
     ----------
@@ -50,6 +50,16 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
         The best parameters identified.
 
     """
+    
+    def costFunc(x):
+        if bm._bounded:
+            x = bm.lb + x*(bm.ub-bm.lb) #Map x to [lb,ub]
+        else:
+            x = x*2 #Map x from [0,1] to [0,2]
+            if not bm._useScaleFactors:
+                x = x*bm.defaultParams #Map to [0,2*default]
+        return bm.cost(x)
+    
     q = 0 #Number of generations without improvement
     #Generate patterns
     patterns = [] #All combinations of groups
@@ -81,7 +91,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
         
         foundImprovement = False
         for p in particleList:
-            cost = bm.cost(p.position*2)
+            cost = costFunc(p.position)
             p.setCost(cost)
             if cost < Gcost[l]:
                 Gcost[l] = cost
@@ -133,7 +143,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                     newParticle.position[j] *= 1+(np.random.rand()-0.5)/40
                     if newParticle.position[j] > 1:
                         newParticle.position[j] = 1
-                cost = bm.cost(newParticle.position*2)
+                cost = costFunc(newParticle.position)
                 newParticle.setCost(cost)
                 if cost<bestNewCost:
                     bestNewCost = cost

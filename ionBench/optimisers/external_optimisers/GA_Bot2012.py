@@ -35,7 +35,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
     """
     class individual():
         def __init__(self):
-            self.x = np.random.rand(bm.n_parameters())*2
+            self.x = bm.sample()
             self.cost = None
         def findCost(self):
             self.cost = costFunc(tuple(self.x))

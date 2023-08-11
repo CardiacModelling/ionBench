@@ -52,10 +52,9 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
                 NP[i] = home#Restore center point
         return foundImprovement, NP
 
-    BP = [1]*bm.n_parameters() #Set initial base point
+    BP = bm.sample() #Set initial base point
     MSE = costFunc(tuple(BP)) #Evaluate cost function
     funcCounter += 1
-    MIN = MSE #Best cost so far
     while Stp > CrtStp: #Stop when step size is sufficiently small
         #Explore neighbouring points
         if debug:
