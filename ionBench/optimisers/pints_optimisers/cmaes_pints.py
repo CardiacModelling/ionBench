@@ -4,6 +4,30 @@ import numpy as np
 from ionBench.optimisers.pints_optimisers import classes_pints
 
 def run(bm, kCombinations, localBounds = [], logTransforms = [], iterCount=1, maxIter=1000):
+    """
+    Runs CMA-ES from Pints using a benchmarker. 
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    kCombinations : list
+        kCombinations = [[0,1],[4,5]] means param[0]*exp(param[1]*V) and param[4]*exp(param[5]*V) satisfy bounds.
+    localBounds : list, optional
+        Bounds on the parameters are specified in localBounds. For example, localBounds = [[0,1e-7,1e3],[3,1e-3,1e5]] sets the bounds for parameter index 0 to be [1e-7,1e3] and index 3 to be [1e-3,1e5]. The default is [], so no bounds on parameters.
+    logTransforms : list, optional
+        List of parameter indices to log transforms. The default is [], so no parameters should be log-transformed.
+    iterCount : int, optional
+        Number of times to repeat the algorithm. The default is 1.
+    maxIter : int, optional
+        Number of iterations of CMA-ES to run per repeat. The default is 1000.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified by CMA-ES.
+
+    """
     parameters = np.ones(bm.n_parameters())
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)

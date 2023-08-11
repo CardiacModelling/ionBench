@@ -4,6 +4,26 @@ import numpy as np
 from ionBench.optimisers.pints_optimisers import classes_pints
 
 def run(bm, logTransforms = [], iterCount=1, maxIter=1000):
+    """
+    Runs Nelder Mead from Pints using a benchmarker. 
+
+    Parameters
+    ----------
+    bm : Benchmarker
+        A benchmarker to evaluate the performance of the optimisation algorithm.
+    logTransforms : list, optional
+        List of parameter indices to log transforms. The default is [], so no parameters should be log-transformed.
+    iterCount : int, optional
+        Number of times to repeat the algorithm. The default is 1.
+    maxIter : int, optional
+        Number of iterations of CMA-ES to run per repeat. The default is 1000.
+
+    Returns
+    -------
+    xbest : list
+        The best parameters identified by Nelder-Mead.
+
+    """
     parameters = np.ones(bm.n_parameters())
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
