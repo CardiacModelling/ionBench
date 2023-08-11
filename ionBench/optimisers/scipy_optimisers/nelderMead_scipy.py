@@ -1,7 +1,8 @@
 import ionBench.problems.staircase
 import scipy.optimize
+import nupmy as np
 
-def run(bm, x0, xatol = 1e-4, fatol = 1e-4, maxiter = 5000, maxfev = 20000, bounds = []):
+def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
     """
     Runs Nelder-Mead optimiser from Scipy.
 
@@ -11,16 +12,14 @@ def run(bm, x0, xatol = 1e-4, fatol = 1e-4, maxiter = 5000, maxfev = 20000, boun
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list
         Initial parameter vector from which to start optimisation.
-    xatol : float, optional
+    xtol : float, optional
         Tolerance in parameters. Used as a termination criterion. The default is 1e-4.
-    fatol : float, optional
+    ftol : float, optional
         Tolerance in cost. Used as a termination criterion. The default is 1e-4.
     maxiter : int, optional
         Maximum number of iterations of Nelder-Mead to use. The default is 5000.
     maxfev : int, optional
         Maximum number of cost function evaluations. The default is 20000.
-    bounds : list, optional
-        Bounds to be passed into Nelder-Mead. A list of tuples containing upper and lower bounds on parameters. Use None to specify no bound. The default is [].
 
     Returns
     -------
@@ -28,10 +27,11 @@ def run(bm, x0, xatol = 1e-4, fatol = 1e-4, maxiter = 5000, maxfev = 20000, boun
         The best parameters identified by Nelder-Mead.
 
     """
-    if bounds == []:
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xatol, 'fatol': fatol, 'maxiter': maxiter, 'maxfev': maxfev})
+    if bm._bounded:
+        bounds = (bm.lb,bm.ub)
+        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds = bounds)
     else:
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xatol, 'fatol': fatol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds = bounds)
+        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev})
     
     bm.evaluate(out.x)
     return out.x
