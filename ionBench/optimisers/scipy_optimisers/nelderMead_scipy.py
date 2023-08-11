@@ -1,8 +1,8 @@
 import ionBench.problems.staircase
 import scipy.optimize
-import nupmy as np
+import numpy as np
 
-def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
+def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
     """
     Runs Nelder-Mead optimiser from Scipy.
 
@@ -10,8 +10,8 @@ def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
-    x0 : list
-        Initial parameter vector from which to start optimisation.
+    x0 : list, optional
+        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     xtol : float, optional
         Tolerance in parameters. Used as a termination criterion. The default is 1e-4.
     ftol : float, optional
@@ -27,8 +27,19 @@ def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
         The best parameters identified by Nelder-Mead.
 
     """
+    if x0 == []:
+        x0 = bm.sample()
+    
     if bm._bounded:
+        lb = bm.lb[:]
+        ub = bm.ub[:]
+        for i in range(bm.n_parameters()):
+            if lb[i] == np.inf:
+                lb[i] = None
+            if ub[i] == np.inf:
+                ub[i] = None
         bounds = (bm.lb,bm.ub)
+        
         out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds = bounds)
     else:
         out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev})
@@ -38,5 +49,4 @@ def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
 
 if __name__ == '__main__':
     bm = ionBench.problems.staircase.HH_Benchmarker()
-    bounds = [(0,None)]*bm.n_parameters()
-    run(bm = bm, x0 = bm.sample(), bounds = bounds)
+    run(bm)
