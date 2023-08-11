@@ -144,8 +144,19 @@ Finally, we have an implementation of SPSA (Simultaneous Perturbation Stochastic
 ```
 import ionBench
 bm = ionBench.problems.staircase.HH_Benchmarker()
-x0 = bm.defaultParams
+x0 = bm.sample()
 ionBench.optimisers.spsa_spsa.run(bm, x0)
+```
+
+## Workflow
+The intended workflow for using the benchmarker is to generate a benchmarker object, make any changes such as log transforms or bounds (either on parameters or on rates), and pass it into an optimisation algorithm to evaluate. There should be minimal differences between the inputs for the optimisation algortithms, particularly in required inputs.
+```
+import numpy as np
+import ionBench
+bm = ionBench.problems.staircase.MM_Benchmarker()
+bm.addBounds([[0]*bm.n_parameters(),[np.inf]*bm.n_parameters()])
+bm.logTransform([0,2,3,57,9,10,12])
+optimisedParameters = ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm)
 ```
 
 ## Future Features
