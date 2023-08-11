@@ -16,9 +16,10 @@ for i in range(len(bm)):
     print(problemNames[i])
     print('Check evaluate increments exactly once when called default rates')
     try:
-        bm[i].evaluate(bm[i].defaultParams)
-        bm[i].simulate(bm[i].defaultParams, times = np.arange(bm[i].tmax), continueOnError = False)
-        bm[i].evaluate(bm[i].defaultParams)
+        params = bm[i].sample()
+        bm[i].evaluate(params)
+        bm[i].simulate(params, times = np.arange(bm[i].tmax), continueOnError = False)
+        bm[i].evaluate(params)
     except Exception as e:
         print(e)
 
@@ -31,7 +32,7 @@ for i in range(len(bm)):
         b = bm[i]
         bounds = [[0]*b.n_parameters(),[np.inf]*b.n_parameters()]
         b.addBounds(bounds)
-        b.evaluate(b.defaultParams)
+        b.evaluate(b.sample())
     except Exception as e:
         print(e)
     
@@ -44,9 +45,9 @@ for i in range(len(bm)):
         b = bm[i]
         b.logTransform(whichParams = [True]*b.n_parameters())
         if i<2:#HH and MM
-            b.evaluate([0]*b.n_parameters())
+            b.evaluate(b.sample())
         else:
-            b.evaluate(np.log(b.defaultParams))
+            b.evaluate(b.sample())
     except Exception as e:
         print(e)
 
@@ -59,7 +60,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.optimisers.scipy_optimisers.lm_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.lm_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -69,7 +70,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -79,7 +80,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.optimisers.scipy_optimisers.powell_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.powell_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -89,7 +90,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run(bm[i],bm[i].defaultParams, maxfev = 100)
+        ionBench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
 
@@ -186,7 +187,6 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionBench.optimisers.spsa_spsa.run(bm[i], x0=bm[i].defaultParams,maxiter=50)
+        ionBench.optimisers.spsa_spsa.run(bm[i], x0=bm[i].sample(),maxiter=50)
     except Exception as e:
         print(e)
-

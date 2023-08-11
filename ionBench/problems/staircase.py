@@ -93,7 +93,7 @@ def generateData(modelType):
         bm = HH_Benchmarker()
     elif modelType == 'MM':
         bm = MM_Benchmarker()
-    trueParams = np.random.uniform(0.5,1.5,bm.n_parameters())
+    trueParams = bm.sample()
     out = bm.simulate(trueParams, np.arange(bm.tmax), continueOnError = False)
     out = out + np.random.normal(0, np.mean(np.abs(out))*0.05, len(out))
     with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+modelType+'.csv'), 'w', newline = '') as csvfile:

@@ -39,4 +39,4 @@ def run(bm, x0, xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000, bounds
 if __name__ == '__main__':
     bm = ionBench.problems.staircase.HH_Benchmarker()
     bounds = [(0,None)]*bm.n_parameters()
-    run(bm = bm, x0 = bm.defaultParams, bounds = bounds)
+    run(bm = bm, x0 = bm.sample(), bounds = bounds)

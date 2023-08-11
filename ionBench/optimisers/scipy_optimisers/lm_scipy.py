@@ -29,4 +29,4 @@ def run(bm, x0, diff_step = 1e-3, maxfev = 20000):
 
 if __name__ == '__main__':
     bm = ionBench.problems.staircase.HH_Benchmarker()
-    run(bm = bm, x0 = bm.defaultParams)
+    run(bm = bm, x0 = bm.sample())

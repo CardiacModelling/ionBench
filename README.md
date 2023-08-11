@@ -121,7 +121,7 @@ Nelder-Mead can be run using the following code:
 import ionBench
 bm = ionBench.problems.staircase.HH_Benchmarker()
 bounds = [(0,None)]*bm.n_parameters()
-optimisedParameters = ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm = bm, x0 = bm.defaultParams, bounds = bounds)
+optimisedParameters = ionBench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm = bm, x0 = bm.sample(), bounds = bounds)
 ```
 
 The other Scipy optimisers all work similiarly, however lm does not include bounds as an option and the form of the bounds varies between the algorithms (matching the form passed into scipy).
