@@ -26,7 +26,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         super().__init__()
         print('Benchmarker initialised')
     
-    def sample(self, width=5):
+    def sample(self, n=1, width=5):
         """
         Sample parameters for the Loewe 2016 problems. By default the sampling using the narrow parameter space but this can be changed by setting benchmarker.paramSpaceWidth = 2 to use the wide parameter space.
 
@@ -38,13 +38,19 @@ class ina(ionBench.benchmarker.Benchmarker):
         Returns
         -------
         params : list
-            The sampled vector of parameters.
+            If n=1, then params is the vector of parameters. Otherwise, params is a list containing n parameter vectors.
 
         """
-        params = [None]*self.n_parameters()
-        for j in range(self.n_parameters()):
-            params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
-        return self.inputParameterSpace(params)
+        params = [None]*n
+        for i in range(n):
+            param = [None]*self.n_parameters()
+            for j in range(self.n_parameters()):
+                param[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
+            params[i] = self.inputParameterSpace(param)
+        if n==1:
+            return params[0]
+        else:
+            return params
     
     def solveModel(self, times, continueOnError = True):
         """
