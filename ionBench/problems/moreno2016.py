@@ -44,7 +44,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         params = [None]*self.n_parameters()
         for j in range(self.n_parameters()):
             params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
-        return params
+        return self.inputParameterSpace(params)
     
     def solveModel(self, times, continueOnError = True):
         """

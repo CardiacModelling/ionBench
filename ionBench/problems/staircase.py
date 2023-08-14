@@ -32,7 +32,7 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
         """
         params = [None]*n
         for i in range(n):
-            params[i] = np.random.uniform(0.5,1.5,self.n_parameters())
+            params[i] = self.inputParameterSpace(self.defaultParams*np.random.uniform(0.5,1.5,self.n_parameters()))
         if n==1:
             return params[0]
         else:

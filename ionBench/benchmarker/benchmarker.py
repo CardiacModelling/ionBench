@@ -201,29 +201,28 @@ class Benchmarker():
             whichParams = [True]*self.n_parameters()
         self._logTransformParams = whichParams
     
-    def applyTransform(self, parameters):
+    def inputParameterSpace(self, parameters):
         """
-        Undo any log-transformed parameters.
+        Maps parameters from the original parameter space to the input space. Incorporating any log transforms or scaling factors.
 
         Parameters
         ----------
-        parameters : list or numpy array
-            Vector of parameters, some of which may be in a log-transformed space.
+        parameters : list
+            Parameter vector in the original parameter space.
 
         Returns
         -------
-        parameters : list or numpy array
-            Vector of parameters in the original parameter space.
+        parameters : list
+            Parameter vector mapped to input space.
 
         """
-        #Untransform any parameters
-        newParameters = []
         for i in range(self.n_parameters()):
+            if self._useScaleFactors:
+                parameters[i] = parameters[i]/self.defaultParams[i]
             if self._logTransformParams[i]:
-                newParameters.append(np.exp(parameters[i]))
-            else:
-                newParameters.append(parameters[i])
-        return newParameters
+                parameters[i] = np.log(parameters[i])
+        
+        return parameters
     
     def originalParameterSpace(self, parameters):
         """
@@ -240,11 +239,11 @@ class Benchmarker():
             Parameter vector mapped to the original parameter space.
 
         """
-        parameters = self.applyTransform(parameters) #Reverse any log transforms
-        
-        if self._useScaleFactors:
-            for i in range(self.n_parameters()):
-                parameters[i] = self.defaultParams[i]*parameters[i]
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                parameters[i] = np.exp(parameters[i])
+            if self._useScaleFactors:
+                parameters[i] = parameters[i]*self.defaultParams[i]
         
         return parameters
     
@@ -255,7 +254,7 @@ class Benchmarker():
         Parameters
         ----------
         parameters : list or numpy array
-            Vector of parameters to check against the bounds.
+            Vector of parameters (in original parameter space) to check against the bounds.
 
         Returns
         -------

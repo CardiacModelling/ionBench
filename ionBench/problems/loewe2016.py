@@ -35,7 +35,7 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
                     param[j] = self.defaultParams[j] + np.random.uniform(-60*self.paramSpaceWidth,60*self.paramSpaceWidth)
                 else:
                     param[j] = self.defaultParams[j]*10**np.random.uniform(-1*self.paramSpaceWidth,1*self.paramSpaceWidth) #Log uniform distribution
-            params[i] = param
+            params[i] = self.inputParameterSpace(param)
         if n==1:
             return params[0]
         else:
