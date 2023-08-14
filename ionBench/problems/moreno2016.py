@@ -117,20 +117,20 @@ class ina(ionBench.benchmarker.Benchmarker):
         log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
         #log = self.sim.run(self.tmax+1, log_times = logTimes)
         inaOut = log[self._outputName]
-        ssi = [None]*9
+        ssi = [-1]*9
         for i in range(len(ssi)):
             ssi[i] = max(inaOut[i*100:(i+1)*100])
         ssi = [a/max(ssi) for a in ssi]
-        act = [None]*20
+        act = [-1]*20
         for i in range(len(act)):
             act[i] = inaOut[900+i]
         act = [a/max(act) for a in act]
-        rfi = [None]*21
+        rfi = [-1]*21
         for i in range(len(rfi)):
             firstPulse = max(inaOut[920+i*200:1020+i*200])
             secondPulse = max(inaOut[1020+i*200:1120+i*200])
             rfi[i] = secondPulse/firstPulse
-        tau = [None]*9
+        tau = [-1]*9
         for i in range(len(tau)):
             peak = max(inaOut[5120+i*100:5120+(i+1)*100])
             reachedPeak = False
