@@ -161,7 +161,7 @@ class Benchmarker():
                     tmp.append(float(row[0]))
             self._trueParams = np.array(tmp)
     
-    def addBounds(self, bounds):
+    def addBounds(self, bounds, parameterSpace = 'original'):
         """
         Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
         
@@ -171,14 +171,20 @@ class Benchmarker():
         ----------
         bounds : list
             A list of bounds. The list should contain two elements, the first is a list of lower bounds, the same length as a parameter vector and the second a similar list of upper bounds. Use -np.inf or np.inf to not include bounds on particular parameters.
+        parameterSpace : string
+            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if self._useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  self._useScaleFactors=True. The default is 'original'.
 
         Returns
         -------
         None.
 
         """
-        self.lb = bounds[0]
-        self.ub = bounds[1]
+        if parameterSpace.lower() == 'input':
+            self.lb = self.originalParameterSpace(bounds[0])
+            self.ub = self.originalParameterSpace(bounds[1])
+        elif parameterSpace.lower() == 'original':
+            self.lb = bounds[0]
+            self.ub = bounds[1]
         self._bounded = True
     
     def logTransform(self, whichParams = []):
