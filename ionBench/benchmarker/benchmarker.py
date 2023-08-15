@@ -20,9 +20,9 @@ class Tracker():
     
     This class contains two methods: update(), and plot(). 
     
-    update is called everytime a parameter vector is evaluated in the benchmarker and updates the performance metric vectors.
+    update is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.simulate) and updates the performance metric vectors.
     
-    plot is called during the benchmarkers evaluate function. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
+    plot is called during the benchmarkers evaluate method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
     def __init__(self):
         self.costs = []
@@ -194,6 +194,7 @@ class Benchmarker():
             Parameter vector mapped to input space.
 
         """
+        parameters = np.array(parameters)
         for i in range(self.n_parameters()):
             if self._useScaleFactors:
                 parameters[i] = parameters[i]/self.defaultParams[i]
@@ -217,6 +218,7 @@ class Benchmarker():
             Parameter vector mapped to the original parameter space.
 
         """
+        parameters = np.array(parameters)
         for i in range(self.n_parameters()):
             if self._logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])
@@ -429,7 +431,9 @@ class Benchmarker():
         print('=========================================')
         print('')
         print('Number of cost evaluations:      '+str(self.tracker.solveCount))
+        print(parameters)
         cost =  self.cost(parameters, incrementSolveCounter = False)
+        print(parameters)
         print('Final cost:                      {0:.6f}'.format(cost))
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: '+str(self.tracker.paramIdentifiedCount[-1]))
@@ -437,4 +441,5 @@ class Benchmarker():
         print('')
         if self.plotter:
             self.tracker.plot()
+            
         

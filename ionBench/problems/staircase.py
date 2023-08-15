@@ -110,4 +110,4 @@ def generateData(modelType):
         writer.writerows(map(lambda x: [x], out))
     with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'trueParams'+modelType+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
-        writer.writerows(map(lambda x: [x], trueParams))
+        writer.writerows(map(lambda x: [x], bm.originalParameterSpace(trueParams))) #Staircase problems use scaling factors by default so needs mapping from input space to original parameter space
