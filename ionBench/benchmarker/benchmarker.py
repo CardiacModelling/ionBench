@@ -24,22 +24,22 @@ class Tracker():
     
     plot is called during the benchmarkers evaluate method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
-    def __init__(self):
+    def __init__(self, trueParams):
         self.costs = []
         self.paramRMSRE = []
         self.paramIdentifiedCount = []
         self.solveCount = 0
         self.firstParams = []
+        self.modelSolves = []
+        self._trueParams = trueParams
     
-    def update(self, trueParams, estimatedParams, cost = np.inf, incrementSolveCounter = True):
+    def update(self, estimatedParams, cost = np.inf, incrementSolveCounter = True):
         """
         This method updates the performance metric tracking vectors with new values. It should only be called by a benchmarker class.
         
         Parameters
         ----------
         
-        trueParams : arraylike
-            The vector of true parameters that generated the data set that is being used for fitting.
         estimatedParams : arraylike
             The vector of parameters that are being evaluated, after any transformations to return them to the original parameter space have been applied.
         cost : float, optional
@@ -55,7 +55,7 @@ class Tracker():
         if self.firstParams == []:
             self.firstParams = estimatedParams[:]
         #Cast to numpy arrays
-        trueParams = np.array(trueParams)
+        trueParams = np.array(self._trueParams)
         estimatedParams = np.array(estimatedParams)
         #Update performance metrics
         self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams-trueParams)/trueParams)**2)))
@@ -63,6 +63,7 @@ class Tracker():
         self.costs.append(cost)
         if incrementSolveCounter:
             self.solveCount += 1
+        self.modelSolves.append(self.solveCount)
     
     def plot(self):
         """
@@ -94,6 +95,18 @@ class Tracker():
         plt.ylabel('Number of parameters identified')
         plt.title('Number of parameters identified')
     
+    def reportConvergence(self):
+        finalParamId = self.paramIdentifiedCount[-1]
+        ifEqualFinalParamId = self.paramIdentifiedCount == finalParamId
+        ind = [i for i, x in enumerate(ifEqualFinalParamId) if x] #Indexes where number of parameters identified is equal to the final count
+        for i in ind:
+            if all(ifEqualFinalParamId[i:]):
+                #All future points remain with this many parameters identified, therefore it is considered converged
+                print('Model solves until convergence:  '+str(self.modelSolves[i]))
+                print('Cost at convergence:             '+str(self.costs[i]))
+                print('Parameter RMSRE at convergence:  '+str(self.paramRMSRE[i]))
+                break
+    
 class Benchmarker():
     """
     The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. This class should not need to be called directly and is instead used as a parent class for the benchmarker problems. 
@@ -104,7 +117,7 @@ class Benchmarker():
         self._bounded = False #Should the parameters be bounded
         self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
-        self.tracker = Tracker() #Tracks the performance metrics
+        self.tracker = Tracker(self._trueParams) #Tracks the performance metrics
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-8,1e-8)
         
@@ -404,7 +417,7 @@ class Benchmarker():
         
         # Abort solving if the parameters are out of bounds
         if not self.inBounds(parameters):
-            self.tracker.update(self._trueParams, parameters, incrementSolveCounter = False)
+            self.tracker.update(parameters, incrementSolveCounter = False)
             return [np.inf]*len(times)
         
         # Set the parameters in the simulation object
@@ -412,7 +425,7 @@ class Benchmarker():
         
         # Run the simulation and track the performance
         out = self.solveModel(times, continueOnError = continueOnError)
-        self.tracker.update(self._trueParams, parameters, cost = np.sqrt(np.mean((out-self.data)**2)), incrementSolveCounter = incrementSolveCounter)
+        self.tracker.update(parameters, cost = np.sqrt(np.mean((out-self.data)**2)), incrementSolveCounter = incrementSolveCounter)
         return out
     
     def evaluate(self, parameters):
@@ -442,6 +455,7 @@ class Benchmarker():
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: '+str(self.tracker.paramIdentifiedCount[-1]))
         print('Total number of parameters:      '+str(self.n_parameters()))
+        self.tracker.reportConvergence()
         print('')
         if self.plotter:
             self.tracker.plot()
