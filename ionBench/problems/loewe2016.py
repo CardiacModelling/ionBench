@@ -40,6 +40,20 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
             return params[0]
         else:
             return params
+        
+    def addProtocol(self):
+        p = myokit.Protocol()
+        vsteps = []
+        for i in range(13):
+            vsteps.append(-80)
+            vsteps.append(50-i*10)
+            vsteps.append(-110)
+        durations = [20,400,400]*13
+        for i in range(len(vsteps)):
+            p.add_step(vsteps[i],durations[i])
+        self.sim.set_protocol(p)
+        self.tmax = sum(durations)
+        self.sim.pre(500) #Prepace for 500ms
 
 class ikr(loewe2016_Benchmarker):
     """
@@ -59,6 +73,7 @@ class ikr(loewe2016_Benchmarker):
         self._rateFunctions = [(lambda p,V:p[0]*(V+p[1])/(1-np.exp((V+p[1])/(-p[2]))), 'positive'), (lambda p,V:7.3898e-5*(V+p[3])/(np.exp((V+p[3])/p[4])-1), 'negative')] #Used for rate bounds
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         super().__init__()
+        self.addProtocol()
         print('Benchmarker initialised')
 
 class ikur(loewe2016_Benchmarker):

@@ -14,6 +14,7 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
         except FileNotFoundError:
             self.data = None
             self._trueParams = None
+        self.addProtocol()
     
     def sample(self, n=1):
         """
@@ -37,6 +38,12 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
             return params[0]
         else:
             return params
+    
+    def addProtocol(self):
+        protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
+        self.sim.set_protocol(protocol)
+        self.tmax = self._log.time()[-1]
+        self.sim.pre(500) #Prepace for 500ms
         
 class HH_Benchmarker(Staircase_Benchmarker):
     """

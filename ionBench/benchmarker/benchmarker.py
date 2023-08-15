@@ -90,9 +90,7 @@ class Tracker():
     
 class Benchmarker():
     """
-    The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. Generally, this class does not need to be called directly and is instead used as a parent class for the benchmarker problems. 
-    
-    A custom benchmarker can be built by first creating an instance of this class. Then calling the addModel() method with a Myokit model object and a Myokit log. Then a .csv data file can be added using the loadData() method.
+    The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. This class should not need to be called directly and is instead used as a parent class for the benchmarker problems. 
     
     The main methods to use from this class are n_parameters(), cost(), reset(), and evaluate().
     """
@@ -101,34 +99,8 @@ class Benchmarker():
         self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker() #Tracks the performance metrics
-        try:
-            self.addModel(self.model, self._log) #Compile the Myokit model into a Myokit Simulation
-        except:
-            warnings.warn("No model or protocol has been defined for this benchmark. Please use the addModel function on this benchmarker object along with a Myokit model object and log to add the desired voltage protocol.")
-    
-    def addModel(self, model, log):
-        """
-        Adds a model and protocol to the benchmarker and compiles them. It also assigns self.tmax (the last timepoint in the protocol) and prepaces the simulation for 500ms.
-
-        Parameters
-        ----------
-        model : Myokit Model
-            A Myokit Model to compile and use to evaluate the parameters.
-        log : Myokit Log
-            A Myokit Log containing the voltage protocol under the name 'voltage'.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.model = model
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-8,1e-8)
-        protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
-        self.sim.set_protocol(protocol)
-        self.tmax = self._log.time()[-1]
-        self.sim.pre(500) #Prepace for 500ms
         
     def loadData(self, dataPath = '', paramPath = ''):
         """

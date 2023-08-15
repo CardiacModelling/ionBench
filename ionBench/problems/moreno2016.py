@@ -24,6 +24,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         self._trueParams = self.defaultParams
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'))
         super().__init__()
+        self.addProtocol()
         print('Benchmarker initialised')
     
     def sample(self, n=1, width=5):
@@ -51,6 +52,12 @@ class ina(ionBench.benchmarker.Benchmarker):
             return params[0]
         else:
             return params
+    
+    def addProtocol(self):
+        protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
+        self.sim.set_protocol(protocol)
+        self.tmax = self._log.time()[-1]
+        self.sim.pre(500) #Prepace for 500ms
     
     def solveModel(self, times, continueOnError = True):
         """
