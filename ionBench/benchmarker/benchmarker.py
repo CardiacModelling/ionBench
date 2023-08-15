@@ -29,6 +29,7 @@ class Tracker():
         self.paramRMSRE = []
         self.paramIdentifiedCount = []
         self.solveCount = 0
+        self.firstParams = []
     
     def update(self, trueParams, estimatedParams, cost = np.inf, incrementSolveCounter = True):
         """
@@ -51,6 +52,8 @@ class Tracker():
         None.
 
         """
+        if self.firstParams == []:
+            self.firstParams = estimatedParams[:]
         #Cast to numpy arrays
         trueParams = np.array(trueParams)
         estimatedParams = np.array(estimatedParams)
@@ -75,18 +78,21 @@ class Tracker():
         plt.scatter(range(len(self.costs)),self.costs, c="k", marker=".")
         plt.xlabel('Cost function calls')
         plt.ylabel('RMSE cost')
+        plt.title('Data error')
         
         #Parameter RMSRE plot
         plt.figure()
         plt.scatter(range(len(self.paramRMSRE)),self.paramRMSRE, c="k", marker=".")
         plt.xlabel('Cost function calls')
         plt.ylabel('Parameter RMSRE')
+        plt.title('Parameter error')
         
         #Number of identified parameters plot
         plt.figure()
         plt.scatter(range(len(self.paramIdentifiedCount)),self.paramIdentifiedCount, c="k", marker=".")
         plt.xlabel('Cost function calls')
         plt.ylabel('Number of parameters identified')
+        plt.title('Number of parameters identified')
     
 class Benchmarker():
     """
@@ -431,9 +437,7 @@ class Benchmarker():
         print('=========================================')
         print('')
         print('Number of cost evaluations:      '+str(self.tracker.solveCount))
-        print(parameters)
         cost =  self.cost(parameters, incrementSolveCounter = False)
-        print(parameters)
         print('Final cost:                      {0:.6f}'.format(cost))
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: '+str(self.tracker.paramIdentifiedCount[-1]))
@@ -441,5 +445,19 @@ class Benchmarker():
         print('')
         if self.plotter:
             self.tracker.plot()
+            self.sim.reset()
+            self.setParams(self.tracker.firstParams)
+            firstOut = self.solveModel(np.arange(self.tmax), continueOnError = True)
+            self.sim.reset()
+            self.setParams(self.originalParameterSpace(parameters))
+            lastOut = self.solveModel(np.arange(self.tmax), continueOnError = True)
+            plt.figure()
+            plt.plot(np.arange(self.tmax),self.data)
+            plt.plot(np.arange(self.tmax),firstOut)
+            plt.plot(np.arange(self.tmax),lastOut)
+            plt.legend(['Data','First Parameters','Final Parameters'])
+            plt.ylabel('Current')
+            plt.xlabel('Time (ms)')
+            plt.title('Improvement after fitting')
+            plt.show()
             
-        
