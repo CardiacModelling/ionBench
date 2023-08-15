@@ -431,7 +431,7 @@ class Benchmarker():
         print('Number of cost evaluations:      '+str(self.tracker.solveCount))
         cost =  self.cost(parameters, incrementSolveCounter = False)
         print('Final cost:                      {0:.6f}'.format(cost))
-        print('Parameter RMSRE:                  {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
+        print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: '+str(self.tracker.paramIdentifiedCount[-1]))
         print('Total number of parameters:      '+str(self.n_parameters()))
         print('')
