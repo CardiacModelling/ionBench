@@ -52,7 +52,7 @@ class Tracker():
         None.
 
         """
-        if self.firstParams == []:
+        if len(self.firstParams)==0:
             self.firstParams = estimatedParams[:]
         #Cast to numpy arrays
         trueParams = np.array(self._trueParams)
