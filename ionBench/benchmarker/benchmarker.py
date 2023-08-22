@@ -282,7 +282,7 @@ class Benchmarker():
 
         """
         self.sim.reset()
-        self.tracker = Tracker()
+        self.tracker = Tracker(self._trueParams)
     
     def cost(self, parameters, incrementSolveCounter = True):
         """

@@ -38,13 +38,14 @@ def run(bm, x0 = [], iterCount=1, maxIter=1000):
     xbest = parameters
     for i in range(iterCount):
         x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
-        counter = 1
-        while not boundaries.check(x0):
-            x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
-            counter += 1
-        if counter > 10:
-            print("Struggled to find parameters in bounds")
-            print("Required "+str(counter)+" iterations")
+        if bm._bounded:
+            counter = 1
+            while not boundaries.check(x0):
+                x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
+                counter += 1
+            if counter > 10:
+                print("Struggled to find parameters in bounds")
+                print("Required "+str(counter)+" iterations")
         # Create an optimisation controller
         if bm._bounded:
             opt = pints.OptimisationController(error, x0, method=pints.CMAES, boundaries = boundaries)

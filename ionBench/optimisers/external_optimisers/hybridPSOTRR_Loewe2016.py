@@ -2,20 +2,6 @@ import numpy as np
 import scipy
 from ionBench.problems import staircase
 
-class particle:
-    def __init__(self, n_param):
-        self.velocity = np.zeros(bm.n_parameters())
-        self.position = np.random.rand(n_param)
-        self.bestCost = np.inf #Best cost of this particle
-        self.bestPosition = np.copy(self.position) #Position of best cost for this particle
-        self.currentCost = None
-    
-    def setCost(self, cost):
-        self.currentCost = cost
-        if cost < self.bestCost:
-            self.bestCost = cost
-            self.bestPosition = np.copy(self.position)
-
 def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
     """
     Runs the hybrid particle swarm optimisation - trust region reflective algorithm from Loewe et al 2016. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
@@ -47,6 +33,20 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
         The best parameters identified.
 
     """
+    
+    class particle:
+        def __init__(self, n_param):
+            self.velocity = np.zeros(bm.n_parameters())
+            self.position = np.random.rand(n_param)
+            self.bestCost = np.inf #Best cost of this particle
+            self.bestPosition = np.copy(self.position) #Position of best cost for this particle
+            self.currentCost = None
+        
+        def setCost(self, cost):
+            self.currentCost = cost
+            if cost < self.bestCost:
+                self.bestCost = cost
+                self.bestPosition = np.copy(self.position)
     
     def costFunc(x):
         return bm.cost(transform(x))
@@ -121,6 +121,8 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
                     p.position[i] = 1-np.random.rand()/4
         
         #Iterations of TRR
+        if debug:
+            print("Begginning TRR")
         bounds = ([0]*bm.n_parameters(),[1]*bm.n_parameters())
         for p in particleList:
             out = scipy.optimize.least_squares(signedError, p.position, method='trf', diff_step=1e-3, max_nfev = 2*K, bounds = bounds, verbose=verbose)
