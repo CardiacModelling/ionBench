@@ -1,4 +1,7 @@
 .spyproject
 *.pyc
 todo.txt
-data/moreno2016/protocol.xlsx
+ionBench/data/moreno2016/protocol.xlsx
+build*
+dist*
+ionBench.egg*
