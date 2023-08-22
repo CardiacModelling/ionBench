@@ -3,154 +3,336 @@ import myokit
 import os
 import numpy as np
 import csv
+import matplotlib.pyplot as plt
 
 class ina(ionBench.benchmarker.Benchmarker):
+    """
+    The Moreno 2016 INa benchmarker. 
+    
+    The benchmarker uses the model from Moreno et al 2016 with a step protocol used to calculated summary curves which are then used for fitting. 
+    
+    Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    """
     def __init__(self):
         print('Initialising Moreno 2016 INa benchmark')
         self.model = myokit.load_model(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._outputName = 'ina.INa'
         self._paramContainer = 'ina'
         self.defaultParams = np.array([7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771, 2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
+        self._rateFunctions = [(lambda p,V: 1/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[2]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: 1/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[6]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[7]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[8]*np.exp(-V/p[9]), 'negative'), (lambda p,V: p[10]*np.exp(V/p[11]), 'positive'), (lambda p,V: p[12]*np.exp(V/p[13]), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1]))*p[12]*np.exp(V/p[13])*p[8]*np.exp(-V/p[9])/(p[7]/(p[4]*np.exp(V/p[5]))*p[10]*np.exp(V/p[11])), 'positive'), (lambda p,V: p[14]*p[12]*np.exp(V/p[13]), 'positive'), (lambda p,V: p[15]*p[8]*np.exp(-V/p[9]), 'negative')] #Used for rate bounds
+        self._useScaleFactors = False
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'protocol.csv'))
         self._trueParams = self.defaultParams
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'))
         super().__init__()
-        self.sim.set_tolerance(1e-14,1e-14)
+        #self.addProtocol()
         print('Benchmarker initialised')
     
-    def sample(self, width=5):
-        params = [None]*self.n_parameters()
-        for j in range(self.n_parameters()):
-            params[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
-        return params
+    def addModel(self, model, log):
+        self.model = model
+        self.sim = myokit.Simulation(self.model)
+        self.sim.set_tolerance(1e-8,1e-8)
+        self._protocol = self.addProtocol()
+        self.sim.set_protocol(self._protocol)
+        self.tmax = self._protocol.characteristic_time()
+        self.sim.pre(500) #Prepace for 500ms
     
-    def setParams(self, parameters):
-        # Update the parameters
-        for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), np.exp(parameters[i]))
-            else:
-                self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+    def sample(self, n=1, width=5):
+        """
+        Sample parameters for the Moreno 2016 problems. 
+
+        Parameters
+        ----------
+        width : float, optional
+            The width of the perturbation interval for sampling. The values used in Moerno et al 2016 are 5, 10, and 25. The default is 5.
+
+        Returns
+        -------
+        params : list
+            If n=1, then params is the vector of parameters. Otherwise, params is a list containing n parameter vectors.
+
+        """
+        params = [None]*n
+        for i in range(n):
+            param = [None]*self.n_parameters()
+            for j in range(self.n_parameters()):
+                param[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
+            params[i] = self.inputParameterSpace(param)
+        if n==1:
+            return params[0]
+        else:
+            return params
     
-    def simulate(self, parameters, times, continueOnError = True):
-        #Add parameter error to list
-        for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
-                parameters[i] = np.exp(parameters[i])
-        self._paramRMSE.append(np.sqrt(np.mean((parameters-self._trueParams)**2)))
-        self._paramIdentifiedCount.append(np.sum(np.abs(parameters-self._trueParams)<0.05))
-        #Simulate the model and find the current
-        # Reset the simulation
-        self.sim.reset()
-        
-        if self._bounded:
-            if any(parameters[i]<self.lb[i] or parameters[i]>self.ub[i] for i in range(self.n_parameters())):
-                return [np.inf]*len(times)
-        self.setParams(parameters)
-        
+    def addProtocol(self):
+        #Setup
         measurementWindows = []
-        #SSI/SSA measurements
-        for i in range(9):
-            measurementWindows.append([5000+i*10000, 5010+i*10000]) #Assumes peak falls in first 5ms
-        #SSA/ACT measurement
-        for i in range(20):
-            measurementWindows.append([(i+10)*10000])
-        #RFI measurements
+        windowSize = 1
+        gap = 5000
+        newProtocol = myokit.Protocol()
+        
+        #Protocol 1 - Measure peak current at -10mV after holding at voltages between -120mV and -40mV
+        #Track start times
+        protocolStartTimes = [0]
+        #Create protocol
+        protocol = myokit.pacing.steptrain_linear(vstart=-120, vend=-30, dv=10, vhold=-10, tpre=0, tstep=gap, tpost=gap)
+        #Plot protocol
+        log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.plot(log['time'], log['pace'])
+        plt.title("From (-120 to -40) step to -10")
+        plt.show()
+        #Add windows to measure at
+        for e in protocol.events():
+            if e.level()==-10:
+                measurementWindows.append([e.start(),e.start()+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+        #Add protocol to full protocol
+        for e in protocol.events():
+            newProtocol.schedule(level=e.level(), start=e.start(), duration=e.duration())
+        #Add barrier to separate effects from different protocols
+        newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        
+        #Protocol 2 - Measure steady state current at varying voltages between -75mV and 20mV
+        #Track start times
+        protocolStartTimes.append(newProtocol.characteristic_time())
+        #Create protocol
+        protocol = myokit.pacing.steptrain_linear(vstart=-75, vend=25, dv=5, vhold=-100, tpre=gap, tstep=gap, tpost=0)
+        #Plot protocol
+        log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.plot(log['time'], log['pace'])
+        plt.title("From -100 step to (-75 to 20)")
+        plt.show()
+        #Add windows to measure at
+        offset = newProtocol.characteristic_time()
+        for e in protocol.events():
+            if e.level()!=-100:
+                measurementWindows.append([e.stop()+offset-0.01]) #Just before transition
+        #Add protocol to full protocol
+        for e in protocol.events():
+            newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
+        #Add barrier to separate effects from different protocols
+        newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        
+        #Protocol 3 - Ratio of max current at steps to -10mV with varying length gaps between
+        #Track start times
+        protocolStartTimes.append(newProtocol.characteristic_time())
+        #Create protocol
         dt = [0.1, 0.5, 1, 3, 6, 9, 12, 15, 21, 30, 60, 90, 120, 210, 300, 450, 600, 900, 1500, 3000, 6000]
-        for i in range(21):
-            #Add first pulse
-            measurementWindows.append([i*5000+295000,i*5000+295000+5]) #Assumes the peak falls in the first 5 ms
-            #Add second pulse
-            measurementWindows.append([i*5000+295100+dt[i],i*5000+295100+dt[i]+5]) #Assumes the peak falls in the first 5 ms
-        #TAU measurements
-        for i in range(9):
-            measurementWindows.append([i*5000+410000,i*5000+410005]) #Assume peak and 50% of peak happen in first 5ms
-        #RDUB measurements
-        startTimes = [500000, 507630.48, 515000, 522779.98, 530000, 538377.98, 545000, 555171.98, 565000, 581450.98, 590000, 624390.98, 630000, 727180.98, 735000, 1011580.98, 1020000, 1924480.98, 1935000, 4633480.98]
-        for i in startTimes:
-            measurementWindows.append([i,i+25])
+        vsteps = [-100, -10, -100, -10]*len(dt)+[-100]
+        times = []
+        for i in range(len(dt)):
+            times.append(gap)
+            times.append(100)
+            times.append(dt[i])
+            times.append(25)
+        times.append(gap)
+        protocol = myokit.Protocol()
+        for i in range(len(times)):
+            protocol.add_step(vsteps[i],times[i])
+        #Plot protocol
+        log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.plot(log['time'], log['pace'])
+        plt.title("Holding at -100, steps to -10 of 100ms and 25ms. Gaps between steps of (0.1 to 6000)")
+        plt.show()
+        #Add windows to measure at
+        offset = newProtocol.characteristic_time()
+        for e in protocol.events():
+            if e.level()==-10:
+                measurementWindows.append([e.start()+offset,e.start()+offset+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+        #Add protocol to full protocol
+        for e in protocol.events():
+            newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
+        #Add barrier to separate effects from different protocols
+        newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        
+        # #Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
+        # #Track start times
+        # protocolStartTimes.append(newProtocol.characteristic_time())
+        # #Create protocol
+        # dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
+        # vsteps = []
+        # times = []
+        # for i in range(len(dt)):
+        #     vsteps.append(-100)
+        #     times.append(gap)
+        #     vsteps += [-10, -100]*300
+        #     times += [25,dt[i]]*300
+        # times.append(gap)
+        # vsteps.append(-100)
+        # protocol = myokit.Protocol()
+        # for i in range(len(times)):
+        #     protocol.add_step(vsteps[i],times[i])
+        # #Plot protocol
+        # log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        # plt.plot(log['time'], log['pace'])
+        # plt.title("Holding at -100, 300 steps to -10 of 25ms. Gaps of (0.5 to 9000)")
+        # plt.show()
+        # #Add windows to measure at
+        # offset = newProtocol.characteristic_time()
+        # tmpOffset = offset
+        # for i in range(len(dt)):
+        #     measurementWindows.append([tmpOffset+gap,tmpOffset+gap+25])
+        #     measurementWindows.append([tmpOffset+gap+(25+dt[i])*300,tmpOffset+gap+(25+dt[i])*300+25])
+        #     tmpOffset = tmpOffset+gap+(25+dt[i])*300+25
+        # #Add protocol to full protocol
+        # for e in protocol.events():
+        #     newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
+        # #Add barrier to separate effects from different protocols
+        # newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        
+        #Protocol 5 - Time to 50% of max current after step to between -20mV and 20mV
+        #Track start times
+        protocolStartTimes.append(newProtocol.characteristic_time())
+        #Create protocol
+        protocol = myokit.pacing.steptrain_linear(vstart=-20, vend=25, dv=5, vhold=-100, tpre=gap, tstep=gap, tpost=0)
+        #Plot protocol
+        log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.plot(log['time'], log['pace'])
+        plt.title("From -100 step to (-20 to 20)")
+        plt.show()
+        #Add windows to measure at
+        offset = newProtocol.characteristic_time()
+        for e in protocol.events():
+            if e.level()!=-100:
+                measurementWindows.append([e.start()+offset,e.start()+offset+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+        #Add protocol to full protocol
+        for e in protocol.events():
+            newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
+        
+        #Track total time
+        protocolStartTimes.append(newProtocol.characteristic_time())
+        
+        #Store measurement windows
+        self._measurementWindows = measurementWindows
+        #self.sim.set_protocol(protocol)
+        #self.tmax = self._log.time()[-1]
+        #self.sim.pre(500) #Prepace for 500ms
+        
+        print(protocolStartTimes)
+        
+        return newProtocol
+    
+    def solveModel(self, times, continueOnError = True):
+        """
+        Replaces the Benchmarker solveModel to call a special Moreno 2016 method (runMoreno()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
+
+        Parameters
+        ----------
+        times : list or numpy array
+            Unneccessary for Moreno 2016. Only kept in since it will be passed in as an input by the main Benchmarker methods.
+        continueOnError : bool, optional
+            If continueOnError is True, any errors that occur during solving the model will be ignored and an infinite output will be given. The default is True.
+
+        Returns
+        -------
+        modelOutput : list
+            A vector of points on summary curves.
+
+        """
+        
+        if continueOnError:
+            try:
+                return self.runMoreno()
+            except:
+                return [np.inf]*59
+        else:
+            return self.runMoreno()
+    
+    def runMoreno(self):
+        """
+        Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
+
+        Returns
+        -------
+        modelOutput : list
+            A vector of points on summary curves.
+
+        """
+        measurementWindows = self._measurementWindows
+        print("Measurement windows")
+        print(measurementWindows)
         logTimes = []
-        windowRes = 100000
         for i in measurementWindows:
             if len(i)==2:
-                logTimes += list(np.linspace(i[0],i[1],num=windowRes)) #100 points per windows
+                logTimes += list(np.linspace(i[0],i[1],num=100)) #100 points per ms to resolve peaks
             else:
                 #SSA/ACT protocol
                 logTimes += i
         
         # Run a simulation
-        self._solveCount += 1
-        log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
-        #log = self.sim.run(self.tmax+1, log_times = logTimes)
-        inaOut = log[self._outputName]
-        inaOut = [-1*a for a in inaOut]
+        #log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
+        log = self.sim.run(self.tmax+1, log_times = logTimes)
+        inaOut = -np.array(log[self._outputName])
+        #return log
+        
         ssi = [-1]*9
-        print("")
-        print("----ssi----")
         for i in range(len(ssi)):
-            ssi[i] = max(inaOut[i*windowRes:(i+1)*windowRes])
-            print(i)
-            print(ssi[i])
+            ssi[i] = max(inaOut[i*100:(i+1)*100-1])
+            plt.figure()
+            plt.plot(inaOut[i*100:(i+1)*100-1])
+            plt.title("SSI"+str(i))
+            plt.xlabel(str(log.time()[i*100])+", "+str(log.time()[(i+1)*100-1]))
+            plt.show()
+        print("SSI")
+        print(ssi)
         ssi = [a/max(ssi) for a in ssi]
         act = [-1]*20
-        offset = len(ssi)*100
-        print("")
-        print("---act----")
         for i in range(len(act)):
-            act[i] = inaOut[offset+i]
-            print(i)
-            print(act[i])
+            act[i] = inaOut[900+i]
+        print("ACT")
+        print(act)
         act = [a/max(act) for a in act]
         rfi = [-1]*21
-        offset = len(ssi)*windowRes+len(act)
-        print("")
-        print("----rfi----")
         for i in range(len(rfi)):
-            firstPulse = max(inaOut[offset+i*200: offset+100+i*200])
-            secondPulse = max(inaOut[offset+100+i*200: offset+200+i*200])
+            firstPulse = max(inaOut[920+i*200:1020+i*200-1])
+            plt.figure()
+            plt.plot(inaOut[920+i*200:1020+i*200-1])
+            plt.ylabel("First peak")
+            plt.title("RFI"+str(i))
+            plt.xlabel(str(log.time()[920+i*200])+", "+str(log.time()[1020+i*200-1]))
+            plt.show()
+            secondPulse = max(inaOut[1020+i*200:1120+i*200-1])
+            plt.figure()
+            plt.plot(inaOut[1020+i*200:1120+i*200-1])
+            plt.ylabel("Second peak")
+            plt.title("RFI"+str(i))
+            plt.xlabel(str(log.time()[1020+i*200])+", "+str(log.time()[1120+i*200-1]))
+            plt.show()
             rfi[i] = secondPulse/firstPulse
-            print(i)
-            print(dt[i])
-            print(firstPulse)
-            print(secondPulse)
-            print(rfi[i])
+        print("RFI")
+        print(rfi)
         tau = [-1]*9
-        offset = (len(ssi)+len(rfi)*2)*windowRes+len(act)
-        print("")
-        print("----tau----")
         for i in range(len(tau)):
-            peak = max(inaOut[offset+i*100:offset+(i+1)*100])
-            print(i)
-            print(peak)
+            peak = max(inaOut[5120+i*100:5120+(i+1)*100-1])
+            plt.figure()
+            plt.plot(inaOut[5120+i*100:5120+(i+1)*100-1])
+            plt.title("TAU"+str(i))
+            plt.xlabel(str(log.time()[5120+i*100])+", "+str(log.time()[5120+(i+1)*100-1]))
             reachedPeak = False
             for j in range(100):
-                current = inaOut[offset+i*100+j]
+                current = inaOut[5120+i*100+j]
                 if current == peak:
                     reachedPeak = True
-                    print("reached peak at j:"+str(j))
                 if reachedPeak and abs(current)<=abs(peak/2):
-                    tau[i] = logTimes[offset+i*100+j]-logTimes[offset+i*100]
-                    print("Reached 50\%")
-                    print(tau[i])
+                    tau[i] = logTimes[5120+i*100+j]-logTimes[5120+i*100]
                     break
-            print("Final current")
-            print(current)
-        rdub = [-1]*(len(startTimes)//2)
-        offset = (len(ssi)+len(rfi)*2+len(tau))*windowRes+len(act)
-        print("")
-        print("----rdub----")
-        for i in range(len(startTimes)//2):
-            firstPulse = max(inaOut[offset+i*200:offset+i*200+100])
-            lastPulse = max(inaOut[offset+i*200+100:offset+i*200+200])
-            rdub[i] = lastPulse/firstPulse
-            print(i)
-            print(firstPulse)
-            print(secondPulse)
-            print(rdub[i])
-        return ssi+act+rfi+tau+rdub
-    #Cost function should be weighted by the number in each group
+        print("TAU")
+        print(tau)
+        return log
+        return [ssi,act,rfi,tau]
 
 def generateData():
+    """
+    Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
+
+    Parameters
+    ----------
+    modelType : string
+        'ikr' to generate the data for the IKr benchmark problem. 'ikur' to generate the data for the IKur benchmark problem.
+
+    Returns
+    -------
+    None.
+
+    """
     bm = ina()
     out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline = '') as csvfile:
