@@ -217,6 +217,28 @@ class ina(ionBench.benchmarker.Benchmarker):
         else:
             return self.runMoreno()
     
+    def cost(self, parameters, incrementSolveCounter = True):
+        """
+        Find the RMSE cost between the model solved using the inputted parameters and the data.
+
+        Parameters
+        ----------
+        parameters : list or numpy array
+            Vector of parameters to solve the model.
+        incrementSolveCounter : bool, optional
+            If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
+
+        Returns
+        -------
+        cost : float
+            The RMSE cost of the parameters.
+        
+        """
+        weights = [1/9]*9+[1/20]*20+[1/21]*21+[1/10]*10+[1/9]*9
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax), incrementSolveCounter = incrementSolveCounter))
+        cost = np.sqrt(np.average((testOutput-self.data)**2, weights=weights))
+        return cost
+    
     def runMoreno(self):
         """
         Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
@@ -266,7 +288,7 @@ class ina(ionBench.benchmarker.Benchmarker):
                 if reachedPeak and abs(current)<=abs(peak/2):
                     tau[i] = self._logTimes[self._tauBounds[i][0]+j]-timeToPeak
                     break
-        return ssi+act+rfi+rudb+tau #Weighted cost
+        return ssi+act+rfi+rudb+tau
 
 def generateData():
     """
