@@ -17,7 +17,7 @@ ina.is = 0
 [engine]
 time = 0 [ms] bind time
     in [ms]
-pace = 0 [mV] bind pace
+pace = -80 [mV] bind pace
     in [mV]
 
 #
@@ -47,12 +47,12 @@ INa = gNa * o * (V - membrane.ENa)
 dot(ic3) = -ic3*(alpha11+alpha3) + beta3*c3 + beta11*ic2
 dot(ic2) = -ic2*(beta11+alpha3+alpha12) + alpha11*ic3 + beta3*c2 + beta12*if
 dot(if) = -if*(beta12+alpha3+beta2) + alpha12*ic2 + beta3*c1 + alpha2*o
-dot(c3) = -c3*(beta3+alpha11) + beta11*c2 + alpha3*ic2
+dot(c3) = -c3*(beta3+alpha11) + beta11*c2 + alpha3*ic3
 dot(c2) = -c2*(beta11+beta3+alpha12) + alpha11*c3 + alpha3*ic2 + beta12*c1
 dot(c1) = -c1*(beta12+beta3+alpha13) + alpha12*c2 + alpha3*if + beta13*o
 dot(o) = -o*(beta13+alpha2+alphax) + alpha13*c1 + beta2*if + betax*is
 dot(is) = -betax*is + alphax*o
-
+total = ic3+ic2+if+c3+c2+c1+o+is
 alpha11 = 1/(a11v1*exp(-V/a11v2))
     in [1/ms]
 alpha12 = a12*alpha11
