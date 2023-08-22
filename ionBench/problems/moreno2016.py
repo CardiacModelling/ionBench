@@ -176,10 +176,33 @@ class ina(ionBench.benchmarker.Benchmarker):
         protocolStartTimes.append(newProtocol.characteristic_time())
         
         #Store measurement windows
-        self._measurementWindows = measurementWindows
-        #self.sim.set_protocol(protocol)
-        #self.tmax = self._log.time()[-1]
-        #self.sim.pre(500) #Prepace for 500ms
+        self.sim.set_protocol(protocol)
+        self.tmax = self._log.time()[-1]
+        self.sim.pre(500) #Prepace for 500ms
+        
+        self._logTimes = []
+        self._ssiBounds = []
+        self._actBounds = []
+        self._rfiBounds = []
+        self._rudbBounds = []
+        self._tauBounds = []
+        
+        for i in measurementWindows:
+            if i[-1] == 'act':
+                self._logTimes.append(i[0])
+                self._actBounds.append(len(self._logTimes))
+            else:
+                lb = len(self._logTimes)
+                self._logTimes += list(np.arange(i[0],i[1],0.005))
+                ub = len(self._logTimes)
+                if i[-1] == 'ssi':
+                    self._ssiBounds.append([lb,ub])
+                elif i[-1] == 'rfi':
+                    self._rfiBounds.append([lb,ub])
+                elif i[-1] == 'rudb':
+                    self._rudbBounds.append([lb,ub])
+                elif i[-1] == 'tau':
+                    self._tauBounds.append([lb,ub])
         
         return newProtocol
     
@@ -219,67 +242,44 @@ class ina(ionBench.benchmarker.Benchmarker):
             A vector of points on summary curves.
 
         """
-        measurementWindows = self._measurementWindows
-        logTimes = []
-        ssiBounds = []
-        actBounds = []
-        rfiBounds = []
-        rudbBounds = []
-        tauBounds = []
-        
-        for i in measurementWindows:
-            if i[-1] == 'act':
-                logTimes.append(i[0])
-                actBounds.append(len(logTimes))
-            else:
-                lb = len(logTimes)
-                logTimes += list(np.arange(i[0],i[1],0.005))
-                ub = len(logTimes)
-                if i[-1] == 'ssi':
-                    ssiBounds.append([lb,ub])
-                elif i[-1] == 'rfi':
-                    rfiBounds.append([lb,ub])
-                elif i[-1] == 'rudb':
-                    rudbBounds.append([lb,ub])
-                elif i[-1] == 'tau':
-                    tauBounds.append([lb,ub])
         
         # Run a simulation
-        log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
+        log = self.sim.run(self.tmax+1, log_times = self._logTimes, log = [self._outputName])
         inaOut = -np.array(log[self._outputName])
         
         ssi = [-1]*9
         for i in range(len(ssi)):
-            ssi[i] = max(inaOut[ssiBounds[i][0]:ssiBounds[i][1]])
+            ssi[i] = max(inaOut[self._ssiBounds[i][0]:self._ssiBounds[i][1]])
         ssi = [a/max(ssi) for a in ssi]
         
         act = [-1]*20
         for i in range(len(act)):
-            act[i] = inaOut[actBounds[i]]
+            act[i] = inaOut[self._actBounds[i]]
         act = [a/max(act) for a in act]
         
         rfi = [-1]*21
         for i in range(len(rfi)):
-            firstPulse = max(inaOut[rfiBounds[2*i][0]:rfiBounds[2*i][1]])
-            secondPulse = max(inaOut[rfiBounds[2*i+1][0]:rfiBounds[2*i+1][1]])
+            firstPulse = max(inaOut[self._rfiBounds[2*i][0]:self._rfiBounds[2*i][1]])
+            secondPulse = max(inaOut[self._rfiBounds[2*i+1][0]:self._rfiBounds[2*i+1][1]])
             rfi[i] = secondPulse/firstPulse
         
         rudb = [-1]*10
         for i in range(len(rudb)):
-            firstPulse = max(inaOut[rudbBounds[2*i][0]:rudbBounds[2*i][1]])
-            lastPulse = max(inaOut[rudbBounds[2*i+1][0]:rudbBounds[2*i+1][1]])
+            firstPulse = max(inaOut[self._rudbBounds[2*i][0]:self._rudbBounds[2*i][1]])
+            lastPulse = max(inaOut[self._rudbBounds[2*i+1][0]:self._rudbBounds[2*i+1][1]])
             rudb[i] = lastPulse/firstPulse
         
         tau = [-1]*9
         for i in range(len(tau)):
-            peak = max(inaOut[tauBounds[i][0]:tauBounds[i][1]])
+            peak = max(inaOut[self._tauBounds[i][0]:self._tauBounds[i][1]])
             reachedPeak = False
             for j in range(100):
-                current = inaOut[tauBounds[i][0]+j]
+                current = inaOut[self._tauBounds[i][0]+j]
                 if current == peak:
                     reachedPeak = True
+                    timeToPeak = self._logTimes[self._tauBounds[i][0]+j]
                 if reachedPeak and abs(current)<=abs(peak/2):
-                    tau[i] = logTimes[tauBounds[i][0]+j]-logTimes[tauBounds[i][0]] #I think this should be substracting the time to peak not start time
+                    tau[i] = self._logTimes[self._tauBounds[i][0]+j]-timeToPeak
                     break
         return [ssi,act,rfi,rudb,tau] #Weighted cost
 
