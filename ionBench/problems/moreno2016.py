@@ -66,7 +66,7 @@ class ina(ionBench.benchmarker.Benchmarker):
     def addProtocol(self):
         #Setup
         measurementWindows = []
-        windowSize = 1
+        #windowSize = 1
         gap = 5000
         newProtocol = myokit.Protocol()
         
@@ -83,7 +83,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         #Add windows to measure at
         for e in protocol.events():
             if e.level()==-10:
-                measurementWindows.append([e.start(),e.start()+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+                measurementWindows.append([e.start(),e.stop(),'ssi']) #Only 20ms here for now!!!!!!!!!!!!!!!
         #Add protocol to full protocol
         for e in protocol.events():
             newProtocol.schedule(level=e.level(), start=e.start(), duration=e.duration())
@@ -104,7 +104,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         offset = newProtocol.characteristic_time()
         for e in protocol.events():
             if e.level()!=-100:
-                measurementWindows.append([e.stop()+offset-0.01]) #Just before transition
+                measurementWindows.append([e.stop()+offset-0.01,'act']) #Just before transition
         #Add protocol to full protocol
         for e in protocol.events():
             newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
@@ -136,47 +136,56 @@ class ina(ionBench.benchmarker.Benchmarker):
         offset = newProtocol.characteristic_time()
         for e in protocol.events():
             if e.level()==-10:
-                measurementWindows.append([e.start()+offset,e.start()+offset+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+                measurementWindows.append([e.start()+offset,e.stop()+offset,'rfi']) #Only 20ms here for now!!!!!!!!!!!!!!!
         #Add protocol to full protocol
         for e in protocol.events():
             newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
         #Add barrier to separate effects from different protocols
         newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
         
-        # #Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
-        # #Track start times
-        # protocolStartTimes.append(newProtocol.characteristic_time())
-        # #Create protocol
-        # dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
-        # vsteps = []
-        # times = []
-        # for i in range(len(dt)):
-        #     vsteps.append(-100)
-        #     times.append(gap)
-        #     vsteps += [-10, -100]*300
-        #     times += [25,dt[i]]*300
-        # times.append(gap)
-        # vsteps.append(-100)
-        # protocol = myokit.Protocol()
-        # for i in range(len(times)):
-        #     protocol.add_step(vsteps[i],times[i])
-        # #Plot protocol
-        # log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
-        # plt.plot(log['time'], log['pace'])
-        # plt.title("Holding at -100, 300 steps to -10 of 25ms. Gaps of (0.5 to 9000)")
-        # plt.show()
-        # #Add windows to measure at
-        # offset = newProtocol.characteristic_time()
-        # tmpOffset = offset
-        # for i in range(len(dt)):
-        #     measurementWindows.append([tmpOffset+gap,tmpOffset+gap+25])
-        #     measurementWindows.append([tmpOffset+gap+(25+dt[i])*300,tmpOffset+gap+(25+dt[i])*300+25])
-        #     tmpOffset = tmpOffset+gap+(25+dt[i])*300+25
-        # #Add protocol to full protocol
-        # for e in protocol.events():
-        #     newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
-        # #Add barrier to separate effects from different protocols
-        # newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        #Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
+        #Track start times
+        protocolStartTimes.append(newProtocol.characteristic_time())
+        #Create protocol
+        dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
+        vsteps = []
+        times = []
+        for i in range(len(dt)):
+            vsteps.append(-100)
+            times.append(gap)
+            vsteps += [-10, -100]*300
+            times += [25,dt[i]]*300
+        times.append(gap)
+        vsteps.append(-100)
+        protocol = myokit.Protocol()
+        for i in range(len(times)):
+            protocol.add_step(vsteps[i],times[i])
+        #Plot protocol
+        log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.plot(log['time'], log['pace'])
+        plt.title("Holding at -100, 300 steps to -10 of 25ms. Gaps of (0.5 to 9000)")
+        plt.show()
+        #Add windows to measure at
+        offset = newProtocol.characteristic_time()
+        tmpOffset = offset
+        plotWidth = 1
+        for i in range(len(dt)):
+            measurementWindows.append([tmpOffset+gap,tmpOffset+gap+25,'rudb'])
+            measurementWindows.append([tmpOffset+gap+(25+dt[i])*299,tmpOffset+gap+(25+dt[i])*299+25,'rudb'])
+            plt.figure()
+            plt.plot(log['time'], log['pace'])
+            plt.xlim([tmpOffset+gap-offset-plotWidth,tmpOffset+gap+25-offset+plotWidth])
+            plt.show()
+            plt.figure()
+            plt.plot(log['time'], log['pace'])
+            plt.xlim([tmpOffset+gap+(25+dt[i])*299-offset-plotWidth,tmpOffset+gap+(25+dt[i])*299+25-offset+plotWidth])
+            plt.show()
+            tmpOffset = tmpOffset+gap+(25+dt[i])*300
+        #Add protocol to full protocol
+        for e in protocol.events():
+            newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
+        #Add barrier to separate effects from different protocols
+        newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
         
         #Protocol 5 - Time to 50% of max current after step to between -20mV and 20mV
         #Track start times
@@ -185,6 +194,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         protocol = myokit.pacing.steptrain_linear(vstart=-20, vend=25, dv=5, vhold=-100, tpre=gap, tstep=gap, tpost=0)
         #Plot protocol
         log = protocol.log_for_interval(0, protocol.characteristic_time()+1000, for_drawing=True)
+        plt.figure()
         plt.plot(log['time'], log['pace'])
         plt.title("From -100 step to (-20 to 20)")
         plt.show()
@@ -192,7 +202,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         offset = newProtocol.characteristic_time()
         for e in protocol.events():
             if e.level()!=-100:
-                measurementWindows.append([e.start()+offset,e.start()+offset+windowSize]) #Only 20ms here for now!!!!!!!!!!!!!!!
+                measurementWindows.append([e.start()+offset,e.stop()+offset,'tau']) #Only 20ms here for now!!!!!!!!!!!!!!!
         #Add protocol to full protocol
         for e in protocol.events():
             newProtocol.schedule(level=e.level(), start=offset+e.start(), duration=e.duration())
@@ -250,74 +260,113 @@ class ina(ionBench.benchmarker.Benchmarker):
         print("Measurement windows")
         print(measurementWindows)
         logTimes = []
+        ssiBounds = []
+        actBounds = []
+        rfiBounds = []
+        rudbBounds = []
+        tauBounds = []
+        
         for i in measurementWindows:
-            if len(i)==2:
-                logTimes += list(np.linspace(i[0],i[1],num=100)) #100 points per ms to resolve peaks
+            if i[-1] == 'act':
+                logTimes.append(i[0])
+                actBounds.append(len(logTimes))
             else:
-                #SSA/ACT protocol
-                logTimes += i
+                lb = len(logTimes)
+                logTimes += list(np.arange(i[0],i[1],0.005))
+                ub = len(logTimes)
+                if i[-1] == 'ssi':
+                    ssiBounds.append([lb,ub])
+                elif i[-1] == 'rfi':
+                    rfiBounds.append([lb,ub])
+                elif i[-1] == 'rudb':
+                    rudbBounds.append([lb,ub])
+                elif i[-1] == 'tau':
+                    tauBounds.append([lb,ub])
         
         # Run a simulation
-        #log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
-        log = self.sim.run(self.tmax+1, log_times = logTimes)
+        log = self.sim.run(self.tmax+1, log_times = logTimes, log = [self._outputName])
+        #log = self.sim.run(self.tmax+1, log_times = logTimes)
         inaOut = -np.array(log[self._outputName])
         #return log
         
         ssi = [-1]*9
         for i in range(len(ssi)):
-            ssi[i] = max(inaOut[i*100:(i+1)*100-1])
+            ssi[i] = max(inaOut[ssiBounds[i][0]:ssiBounds[i][1]])
             plt.figure()
-            plt.plot(inaOut[i*100:(i+1)*100-1])
+            plt.plot(inaOut[ssiBounds[i][0]:ssiBounds[i][1]])
             plt.title("SSI"+str(i))
-            plt.xlabel(str(log.time()[i*100])+", "+str(log.time()[(i+1)*100-1]))
+            plt.xlabel(str(log.time()[ssiBounds[i][0]])+", "+str(log.time()[ssiBounds[i][1]-1]))
             plt.show()
         print("SSI")
         print(ssi)
         ssi = [a/max(ssi) for a in ssi]
+        
         act = [-1]*20
         for i in range(len(act)):
-            act[i] = inaOut[900+i]
+            act[i] = inaOut[actBounds[i]]
         print("ACT")
         print(act)
         act = [a/max(act) for a in act]
+        
         rfi = [-1]*21
         for i in range(len(rfi)):
-            firstPulse = max(inaOut[920+i*200:1020+i*200-1])
+            firstPulse = max(inaOut[rfiBounds[2*i][0]:rfiBounds[2*i][1]])
             plt.figure()
-            plt.plot(inaOut[920+i*200:1020+i*200-1])
+            plt.plot(inaOut[rfiBounds[2*i][0]:rfiBounds[2*i][1]])
             plt.ylabel("First peak")
             plt.title("RFI"+str(i))
-            plt.xlabel(str(log.time()[920+i*200])+", "+str(log.time()[1020+i*200-1]))
+            plt.xlabel(str(log.time()[rfiBounds[2*i][0]])+", "+str(log.time()[rfiBounds[2*i][1]-1]))
             plt.show()
-            secondPulse = max(inaOut[1020+i*200:1120+i*200-1])
+            secondPulse = max(inaOut[rfiBounds[2*i+1][0]:rfiBounds[2*i+1][1]])
             plt.figure()
-            plt.plot(inaOut[1020+i*200:1120+i*200-1])
+            plt.plot(inaOut[rfiBounds[2*i+1][0]:rfiBounds[2*i+1][1]])
             plt.ylabel("Second peak")
             plt.title("RFI"+str(i))
-            plt.xlabel(str(log.time()[1020+i*200])+", "+str(log.time()[1120+i*200-1]))
+            plt.xlabel(str(log.time()[rfiBounds[2*i+1][0]])+", "+str(log.time()[rfiBounds[2*i+1][1]-1]))
             plt.show()
             rfi[i] = secondPulse/firstPulse
         print("RFI")
         print(rfi)
+        
+        rudb = [-1]*10
+        for i in range(len(rudb)):
+            firstPulse = max(inaOut[rudbBounds[2*i][0]:rudbBounds[2*i][1]])
+            plt.figure()
+            plt.plot(inaOut[rudbBounds[2*i][0]:rudbBounds[2*i][1]])
+            plt.ylabel("First peak")
+            plt.title("RUDB"+str(i))
+            plt.xlabel(str(log.time()[rudbBounds[2*i][0]])+", "+str(log.time()[rudbBounds[2*i][1]-1]))
+            plt.show()
+            lastPulse = max(inaOut[rudbBounds[2*i+1][0]:rudbBounds[2*i+1][1]])
+            plt.figure()
+            plt.plot(inaOut[rudbBounds[2*i+1][0]:rudbBounds[2*i+1][1]])
+            plt.ylabel("Second peak")
+            plt.title("RUDB"+str(i))
+            plt.xlabel(str(log.time()[rudbBounds[2*i+1][0]])+", "+str(log.time()[rudbBounds[2*i+1][1]-1]))
+            plt.show()
+            rudb[i] = lastPulse/firstPulse
+        print("RUDB")
+        print(rudb)
+        
         tau = [-1]*9
         for i in range(len(tau)):
-            peak = max(inaOut[5120+i*100:5120+(i+1)*100-1])
+            peak = max(inaOut[tauBounds[i][0]:tauBounds[i][1]])
             plt.figure()
-            plt.plot(inaOut[5120+i*100:5120+(i+1)*100-1])
+            plt.plot(inaOut[tauBounds[i][0]:tauBounds[i][1]])
             plt.title("TAU"+str(i))
-            plt.xlabel(str(log.time()[5120+i*100])+", "+str(log.time()[5120+(i+1)*100-1]))
+            plt.xlabel(str(log.time()[tauBounds[i][0]])+", "+str(log.time()[tauBounds[i][1]-1]))
             reachedPeak = False
             for j in range(100):
-                current = inaOut[5120+i*100+j]
+                current = inaOut[tauBounds[i][0]+j]
                 if current == peak:
                     reachedPeak = True
                 if reachedPeak and abs(current)<=abs(peak/2):
-                    tau[i] = logTimes[5120+i*100+j]-logTimes[5120+i*100]
+                    tau[i] = logTimes[tauBounds[i][0]+j]-logTimes[tauBounds[i][0]] #I think this should be substracting the time to peak not start time
                     break
         print("TAU")
         print(tau)
         return log
-        return [ssi,act,rfi,tau]
+        return [ssi,act,rfi,rudb,tau] #Weighted cost
 
 def generateData():
     """
