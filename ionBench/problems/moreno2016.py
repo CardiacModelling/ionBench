@@ -20,21 +20,11 @@ class ina(ionBench.benchmarker.Benchmarker):
         self.defaultParams = np.array([7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771, 2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
         self._rateFunctions = [(lambda p,V: 1/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[2]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: 1/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[6]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[7]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[8]*np.exp(-V/p[9]), 'negative'), (lambda p,V: p[10]*np.exp(V/p[11]), 'positive'), (lambda p,V: p[12]*np.exp(V/p[13]), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1]))*p[12]*np.exp(V/p[13])*p[8]*np.exp(-V/p[9])/(p[7]/(p[4]*np.exp(V/p[5]))*p[10]*np.exp(V/p[11])), 'positive'), (lambda p,V: p[14]*p[12]*np.exp(V/p[13]), 'positive'), (lambda p,V: p[15]*p[8]*np.exp(-V/p[9]), 'negative')] #Used for rate bounds
         self._useScaleFactors = False
-        self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'protocol.csv'))
         self._trueParams = self.defaultParams
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'))
         super().__init__()
         self.addProtocol()
         print('Benchmarker initialised')
-    
-    def addModel(self, model, log):
-        self.model = model
-        self.sim = myokit.Simulation(self.model)
-        self.sim.set_tolerance(1e-8,1e-8)
-        self._protocol = self.addProtocol()
-        self.sim.set_protocol(self._protocol)
-        self.tmax = self._protocol.characteristic_time()
-        self.sim.pre(500) #Prepace for 500ms
     
     def sample(self, n=1, width=5):
         """
@@ -174,8 +164,8 @@ class ina(ionBench.benchmarker.Benchmarker):
         protocolStartTimes.append(newProtocol.characteristic_time())
         
         #Store measurement windows
-        self.sim.set_protocol(protocol)
-        self.tmax = self._log.time()[-1]
+        self.sim.set_protocol(newProtocol)
+        self.tmax = newProtocol.characteristic_time()
         self.sim.pre(500) #Prepace for 500ms
         
         self._logTimes = []
@@ -201,8 +191,6 @@ class ina(ionBench.benchmarker.Benchmarker):
                     self._rudbBounds.append([lb,ub])
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb,ub])
-        
-        return newProtocol
     
     def solveModel(self, times, continueOnError = True):
         """
@@ -221,12 +209,11 @@ class ina(ionBench.benchmarker.Benchmarker):
             A vector of points on summary curves.
 
         """
-        
         if continueOnError:
             try:
                 return self.runMoreno()
             except:
-                return [np.inf]*59
+                return [np.inf]*69
         else:
             return self.runMoreno()
     
@@ -271,7 +258,7 @@ class ina(ionBench.benchmarker.Benchmarker):
         for i in range(len(tau)):
             peak = max(inaOut[self._tauBounds[i][0]:self._tauBounds[i][1]])
             reachedPeak = False
-            for j in range(100):
+            for j in range(1000000):
                 current = inaOut[self._tauBounds[i][0]+j]
                 if current == peak:
                     reachedPeak = True
@@ -279,7 +266,7 @@ class ina(ionBench.benchmarker.Benchmarker):
                 if reachedPeak and abs(current)<=abs(peak/2):
                     tau[i] = self._logTimes[self._tauBounds[i][0]+j]-timeToPeak
                     break
-        return [ssi,act,rfi,rudb,tau] #Weighted cost
+        return ssi+act+rfi+rudb+tau #Weighted cost
 
 def generateData():
     """
@@ -296,7 +283,7 @@ def generateData():
 
     """
     bm = ina()
-    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError = False)
+    out = bm.solveModel(np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionBench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))
