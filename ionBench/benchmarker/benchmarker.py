@@ -103,8 +103,8 @@ class Tracker():
             if all(ifEqualFinalParamId[i:]):
                 #All future points remain with this many parameters identified, therefore it is considered converged
                 print('Model solves until convergence:  '+str(self.modelSolves[i]))
-                print('Cost at convergence:             '+str(self.costs[i]))
-                print('Parameter RMSRE at convergence:  '+str(self.paramRMSRE[i]))
+                print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
+                print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
                 break
     
 class Benchmarker():
