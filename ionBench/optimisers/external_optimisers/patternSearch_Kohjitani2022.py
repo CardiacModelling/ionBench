@@ -1,5 +1,6 @@
 from ionBench.problems import staircase
 from functools import cache
+import numpy as np
 
 def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = False):
     """
@@ -29,10 +30,11 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
     @cache
     def costFunc(x):
         return bm.cost(x)
+    
     funcCounter = 0
     def explore(BP, Stp):
         foundImprovement = False
-        NP = BP
+        NP = np.copy(BP)
         MSE = costFunc(tuple(BP)) #No real computation cost from this thanks to the cache
         for i in range(bm.n_parameters()): 
             home = BP[i]
@@ -53,7 +55,6 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
         return foundImprovement, NP
 
     BP = bm.sample() #Set initial base point
-    MSE = costFunc(tuple(BP)) #Evaluate cost function
     funcCounter += 1
     while Stp > CrtStp: #Stop when step size is sufficiently small
         #Explore neighbouring points
@@ -66,7 +67,7 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
         while improvementFound:
             if debug:
                 print("Improvement Found? "+str(improvementFound))
-            BP = NP #Move to new improved point
+            BP = np.copy(NP) #Move to new improved point
             improvementFound, NP = explore(BP, Stp) #Explore neighbouring points
             funcCounter += 4
             if funcCounter > maxfev:

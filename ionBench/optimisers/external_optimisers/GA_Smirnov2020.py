@@ -2,13 +2,11 @@ import numpy as np
 import scipy
 from ionBench.problems import staircase
 from functools import cache
+import copy
 
 from pymoo.core.individual import Individual
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.sbx import SBX
-
-#Todo:
-#Seems to devolve into many individuals giving infinite cost (likely negative parameters)
 
 def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, popSize = 50, debug = False):
     """
@@ -61,7 +59,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
         eliteIndices = np.argsort(costVec)[:eliteCount]
         elites = [None]*eliteCount
         for i in range(eliteCount):
-            elites[i] = pop[eliteIndices[i]]
+            elites[i] = copy.deepcopy(pop[eliteIndices[i]])
         if debug:
             print("------------")
             print("Gen "+str(gen))
@@ -73,9 +71,9 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
             perm = np.random.permutation(popSize)
             for i in range(popSize//2):
                 if pop[perm[2*i]].cost > pop[perm[2*i+1]].cost:
-                    newPop.append(pop[perm[2*i]])
+                    newPop.append(copy.deepcopy(pop[perm[2*i]]))
                 else:
-                    newPop.append(pop[perm[2*i+1]])
+                    newPop.append(copy.deepcopy(pop[perm[2*i+1]]))
         pop = newPop #Population of parents
         #Crossover SBX
         newPop = []
@@ -109,7 +107,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
             costVec[i] = pop[i].cost
         eliteIndices = np.argsort(costVec)[-eliteCount:]
         for i in range(eliteCount):
-            pop[eliteIndices[i]] = elites[i]
+            pop[eliteIndices[i]] = copy.deepcopy(elites[i])
     
     minCost = np.inf
     for i in range(popSize):

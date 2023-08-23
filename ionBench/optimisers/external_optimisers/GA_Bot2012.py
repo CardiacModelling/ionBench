@@ -1,6 +1,7 @@
 import numpy as np
 from ionBench.problems import staircase
 from functools import cache
+import copy
 
 from pymoo.core.individual import Individual
 from pymoo.core.problem import Problem
@@ -54,7 +55,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
         for i in range(popSize):
             if pop[i].cost < minCost:
                 minCost = pop[i].cost
-                elite = pop[i]
+                elite = copy.deepcopy(pop[i])
         if debug:
             print("------------")
             print("Gen "+str(gen))
@@ -65,9 +66,9 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
             perm = np.random.permutation(popSize)
             for i in range(popSize//2):
                 if pop[perm[2*i]].cost > pop[perm[2*i+1]].cost:
-                    newPop.append(pop[perm[2*i]])
+                    newPop.append(copy.deepcopy(pop[perm[2*i]]))
                 else:
-                    newPop.append(pop[perm[2*i+1]])
+                    newPop.append(copy.deepcopy(pop[perm[2*i+1]]))
         pop = newPop #Population of parents
         #Crossover SBX
         newPop = []
@@ -81,7 +82,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
             newPop.append(individual())
             newPop[-1].x = Xp[0]
             newPop.append(individual())
-            newPop[-1].x = Xp[1] #Can this be done in one line
+            newPop[-1].x = Xp[1]
         pop = newPop
         #Mutation
         mutation = PolynomialMutation(prob=0.1*bm.n_parameters(), eta=eta_mut)
@@ -100,7 +101,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
             if pop[i].cost > maxCost:
                 maxCost = pop[i].cost
                 maxIndex = i
-        pop[maxIndex] = elite
+        pop[maxIndex] = copy.deepcopy(elite)
     
     minCost = np.inf
     for i in range(popSize):
