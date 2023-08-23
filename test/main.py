@@ -14,7 +14,7 @@ for i in range(len(bm)):
     bm[i].plotter = False
     print('===================')
     print(problemNames[i])
-    print('Check evaluate increments exactly once when called default rates')
+    print('Check evaluate increments exactly once when called')
     try:
         params = bm[i].sample()
         bm[i].evaluate(params)
@@ -42,11 +42,11 @@ for i in range(len(bm)):
     try:
         bm[i]._bounded=False
         b = bm[i]
-        b.logTransform(whichParams = [True]*b.n_parameters())
-        if i<2:#HH and MM
-            b.evaluate(b.sample())
+        if i in [2,3]: #Loewe problems
+            b.logTransform(whichParams = [not a for a in b.additiveParams])
         else:
-            b.evaluate(b.sample())
+            b.logTransform()
+        b.evaluate(b.sample())
     except Exception as e:
         print(e)
 
