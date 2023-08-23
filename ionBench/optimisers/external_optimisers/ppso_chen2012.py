@@ -3,20 +3,6 @@ from ionBench.problems import staircase
 import itertools
 #Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
-class particle:
-    def __init__(self, n_param):
-        self.velocity = 0.1*np.random.rand(n_param)
-        self.position = np.random.rand(n_param)
-        self.bestCost = np.inf #Best cost of this particle
-        self.bestPosition = self.position #Position of best cost for this particle
-        self.currentCost = None
-    
-    def setCost(self, cost):
-        self.currentCost = cost
-        if cost < self.bestCost:
-            self.bestCost = cost
-            self.bestPosition = self.position
-
 def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
@@ -51,14 +37,31 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
 
     """
     
+    class particle:
+        def __init__(self, n_param):
+            self.velocity = 0.1*np.random.rand(n_param)
+            self.position = np.random.rand(n_param)
+            self.bestCost = np.inf #Best cost of this particle
+            self.bestPosition = np.copy(self.position) #Position of best cost for this particle
+            self.currentCost = None
+        
+        def setCost(self, cost):
+            self.currentCost = cost
+            if cost < self.bestCost:
+                self.bestCost = cost
+                self.bestPosition = np.copy(self.position)
+    
     def costFunc(x):
+        return bm.cost(transform(x))
+    
+    def transform(x):
         if bm._bounded:
-            x = bm.lb + x*(bm.ub-bm.lb) #Map x to [lb,ub]
+            xTrans = bm.lb + x*(bm.ub-bm.lb) #Map x to [lb,ub]
         else:
-            x = x*2 #Map x from [0,1] to [0,2]
+            xTrans = x*2 #Map x from [0,1] to [0,2]
             if not bm._useScaleFactors:
-                x = x*bm.defaultParams #Map to [0,2*default]
-        return bm.cost(x)
+                xTrans = xTrans*bm.defaultParams #Map to [0,2*default]
+        return xTrans
     
     q = 0 #Number of generations without improvement
     #Generate patterns
@@ -95,7 +98,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
             p.setCost(cost)
             if cost < Gcost[l]:
                 Gcost[l] = cost
-                Gpos[l] = p.position
+                Gpos[l] = np.copy(p.position)
                 foundImprovement = True
         
         if foundImprovement:
@@ -138,7 +141,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
             bestNewPosition = None
             for i in range(N):
                 newParticle = particle(bm.n_parameters())
-                newParticle.position = Gpos[l]
+                newParticle.position = np.copy(Gpos[l])
                 for j in patterns[i]:
                     newParticle.position[j] *= 1+(np.random.rand()-0.5)/40
                     if newParticle.position[j] > 1:
@@ -147,7 +150,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                 newParticle.setCost(cost)
                 if cost<bestNewCost:
                     bestNewCost = cost
-                    bestNewPosition = newParticle.position
+                    bestNewPosition = np.copy(newParticle.position)
                 newParticleList.append(newParticle)
             if debug:
                 print("Perturbed particles")
@@ -160,7 +163,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                     print("New best cost: "+str(bestNewCost))
                 q = 0
                 Gcost[l] = bestNewCost
-                Gpos[l] = bestNewPosition
+                Gpos[l] = np.copy(bestNewPosition)
                 worstCost = -np.inf
                 worstPosition = None
                 for p in particleList:
@@ -177,7 +180,7 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                             print("Worst particle cost: "+str(worstCost))
                             print("Worst particle position: "+str(worstPosition))
                         p.bestCost = bestNewCost
-                        p.bestPosition = bestNewPosition
+                        p.bestPosition = np.copy(bestNewPosition)
                         if debug:
                             print("New best cost for worst particle: "+str(p.bestCost))
                             print("New best position for worst particle: "+str(p.bestPosition))
