@@ -21,7 +21,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name="ionBench",  # Required
+    name="ionbench",  # Required
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
@@ -57,7 +57,7 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url="https://github.com/CardiacModelling/ionBench",  # Optional
+    url="https://github.com/CardiacModelling/ionbench",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
     author="Matt J. Owen",  # Optional
@@ -97,7 +97,7 @@ setup(
     #keywords="sample, setuptools, development",  # Optional
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    #package_dir={"": "ionBench"},  # Optional
+    #package_dir={"": "ionbench"},  # Optional
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -107,7 +107,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages()+['ionBench.data', 'ionBench.data.staircase', 'ionBench.data.loewe2016', 'ionBench.data.moreno2016'],  # Required
+    packages=find_packages()+['ionbench.data', 'ionbench.data.staircase', 'ionbench.data.loewe2016', 'ionbench.data.moreno2016'],  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
@@ -142,9 +142,9 @@ setup(
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     package_data={  # Optional
-        "ionBench.data.staircase": ["*.mmt","*.csv"],
-        "ionBench.data.moreno2016": ["*.mmt","*.csv"],
-        "ionBench.data.loewe2016": ["*.mmt","*.csv"],
+        "ionbench.data.staircase": ["*.mmt","*.csv"],
+        "ionbench.data.moreno2016": ["*.mmt","*.csv"],
+        "ionbench.data.loewe2016": ["*.mmt","*.csv"],
     },
     # Entry points. The following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
@@ -163,7 +163,7 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        "Bug Reports": "https://github.com/CardiacModelling/ionBench/issues",
-        "Source": "https://github.com/CardiacModelling/ionBench",
+        "Bug Reports": "https://github.com/CardiacModelling/ionbench/issues",
+        "Source": "https://github.com/CardiacModelling/ionbench",
     },
 )

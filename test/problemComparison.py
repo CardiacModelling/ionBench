@@ -1,9 +1,9 @@
-import ionBench
+import ionbench
 import numpy as np
 
 #Michael's approach
-bmHH = ionBench.problems.staircase.HH_Benchmarker()
-bmLoewe = ionBench.problems.loewe2016.ikr()
+bmHH = ionbench.problems.staircase.HH_Benchmarker()
+bmLoewe = ionbench.problems.loewe2016.ikr()
 
 #Log transform applicable rates
 bmHH.logTransform([True,False]*4+[False])
@@ -33,16 +33,16 @@ bmHH.addBounds([lb,ub])
 #CMA-ES run
 for i in range(5):
     bmHH.reset()
-    ionBench.optimisers.pints_optimisers.cmaes_pints.run(bmHH)
+    ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmHH)
 
 for i in range(5):
     bmLoewe.reset()
-    ionBench.optimisers.pints_optimisers.cmaes_pints.run(bmLoewe, maxIter=3000)
+    ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmLoewe, maxIter=3000)
 
 
 #Loewe et al 2016 approach
-bmHH = ionBench.problems.staircase.HH_Benchmarker()
-bmLoewe = ionBench.problems.loewe2016.ikr()
+bmHH = ionbench.problems.staircase.HH_Benchmarker()
+bmLoewe = ionbench.problems.loewe2016.ikr()
 
 #Bounds on parameters
 lb = []
@@ -62,5 +62,5 @@ ub = np.array(bmHH.defaultParams)*1.5
 bmHH.addBounds([lb,ub])
 
 #Hybrid PSO TRR run
-ionBench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bmHH, debug = True)
-ionBench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bmLoewe,debug = True)
+ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bmHH, debug = True)
+ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bmLoewe,debug = True)
