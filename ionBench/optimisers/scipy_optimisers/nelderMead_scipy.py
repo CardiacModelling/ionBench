@@ -31,14 +31,14 @@ def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
         x0 = bm.sample()
     
     if bm._bounded:
-        lb = bm.lb[:]
-        ub = bm.ub[:]
+        lb = bm.lb[:] #Generate copy
+        ub = bm.ub[:] #Generate copy
         for i in range(bm.n_parameters()):
             if lb[i] == np.inf:
                 lb[i] = None
             if ub[i] == np.inf:
                 ub[i] = None
-        bounds = (bm.lb,bm.ub)
+        bounds = (lb,ub)
         
         out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds = bounds)
     else:
