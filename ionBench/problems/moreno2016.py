@@ -213,8 +213,8 @@ class ina(ionBench.benchmarker.Benchmarker):
         if continueOnError:
             try:
                 return self.runMoreno()
-            except Exception as e:
-                warnings.warn("Failed to solve model with the following error: "+e+"    Will report infinite output in the hope of continuing the run.")
+            except:
+                warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return [np.inf]*69
         else:
             return self.runMoreno()

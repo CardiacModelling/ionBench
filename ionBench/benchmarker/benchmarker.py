@@ -382,8 +382,8 @@ class Benchmarker():
             try:
                 log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
                 return log[self._outputName]
-            except Exception as e:
-                warnings.warn("Failed to solve model with the following error: "+e+"    Will report infinite output in the hope of continuing the run.")
+            except:
+                warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return [np.inf]*len(times)
         else:
             log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
