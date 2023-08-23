@@ -13,10 +13,8 @@ def run(bm, x0 = [], iterCount=1, maxIter=1000):
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
         Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
-    iterCount : int, optional
-        Number of times to repeat the algorithm. The default is 1.
     maxIter : int, optional
-        Number of iterations of XNES to run per repeat. The default is 1000.
+        Number of iterations of XNES to run. The default is 1000.
 
     Returns
     -------
@@ -25,27 +23,19 @@ def run(bm, x0 = [], iterCount=1, maxIter=1000):
 
     """
     if x0 == []:
-        parameters = bm.sample()
-    else:
-        parameters = x0
+        x0 = bm.sample()
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
     
-    fbest = np.inf
-    for i in range(iterCount):
-        x0 = parameters * 2**np.random.normal(0, 0.5, len(parameters))
-        # Create an optimisation controller
-        opt = pints.OptimisationController(error, x0, method=pints.XNES)
-        opt.set_max_iterations(maxIter)
-        # Run the optimisation
-        x, f = opt.run()
-        if f<fbest:
-            fbest = f
-            xbest = x
+    # Create an optimisation controller
+    opt = pints.OptimisationController(error, x0, method=pints.XNES)
+    opt.set_max_iterations(maxIter)
+    # Run the optimisation
+    x, f = opt.run()
     
-    model.bm.evaluate(xbest)
-    return xbest
+    model.bm.evaluate(x)
+    return x
 
 if __name__ == '__main__':
     bm = staircase.HH_Benchmarker()
