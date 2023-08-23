@@ -53,7 +53,7 @@ class Tracker():
 
         """
         if len(self.firstParams)==0:
-            self.firstParams = estimatedParams[:]
+            self.firstParams = np.copy(estimatedParams)
         #Cast to numpy arrays
         trueParams = np.array(self._trueParams)
         estimatedParams = np.array(estimatedParams)
@@ -411,7 +411,7 @@ class Benchmarker():
 
         """
         #Return the parameters to the original parameter space
-        parameters = self.originalParameterSpace(parameters)
+        parameters = self.originalParameterSpace(parameters) #Creates a copy of the parameter vector
         
         # Reset the simulation
         self.sim.reset()

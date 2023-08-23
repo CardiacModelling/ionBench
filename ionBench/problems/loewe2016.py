@@ -7,7 +7,7 @@ import csv
 class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
     def __init__(self):
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'loewe2016', 'protocol.csv'))
-        self._trueParams = self.defaultParams
+        self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
         self._useScaleFactors = False
         super().__init__()
@@ -35,7 +35,7 @@ class loewe2016_Benchmarker(ionBench.benchmarker.Benchmarker):
                     param[j] = self.defaultParams[j] + np.random.uniform(-60*self.paramSpaceWidth,60*self.paramSpaceWidth)
                 else:
                     param[j] = self.defaultParams[j]*10**np.random.uniform(-1*self.paramSpaceWidth,1*self.paramSpaceWidth) #Log uniform distribution
-            params[i] = self.inputParameterSpace(param)
+            params[i] = self.inputParameterSpace(param) #Generates a copy
         if n==1:
             return params[0]
         else:
@@ -120,4 +120,3 @@ def generateData(modelType):
     with open(os.path.join(ionBench.DATA_DIR, 'loewe2016', modelType.lower()+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))
-
