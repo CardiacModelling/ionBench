@@ -3,6 +3,7 @@ import myokit
 import os
 import numpy as np
 import csv
+import warnings
 
 class ina(ionBench.benchmarker.Benchmarker):
     """
@@ -212,7 +213,8 @@ class ina(ionBench.benchmarker.Benchmarker):
         if continueOnError:
             try:
                 return self.runMoreno()
-            except:
+            except Exception as e:
+                warnings.warn("Failed to solve model with the following error: "+e+"    Will report infinite output in the hope of continuing the run.")
                 return [np.inf]*69
         else:
             return self.runMoreno()
