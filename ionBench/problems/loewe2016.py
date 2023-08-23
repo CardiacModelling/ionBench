@@ -94,7 +94,7 @@ class ikur(loewe2016_Benchmarker):
         self._rateFunctions = [(lambda p,V: p[0]/(np.exp((V+p[1])/-p[2])+np.exp((V-p[3])/-p[4])), 'positive'), (lambda p,V: 0.65/(p[5]+np.exp((V+p[6])/p[7])), 'negative'), (lambda p,V: p[11]/(p[12]+np.exp((V-p[13])/-p[14])), 'positive'), (lambda p,V: np.exp((V-p[15])/-p[16]), 'negative')] #Used for rate bounds
         self.loadData(dataPath = os.path.join(ionBench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__()
-        self.sim.set_tolerance(1e-12,1e-12)
+        self.addProtocol()
         print('Benchmarker initialised')
 
 def generateData(modelType):
