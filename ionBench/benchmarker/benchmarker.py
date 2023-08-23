@@ -416,9 +416,10 @@ class Benchmarker():
         self.sim.reset()
         
         # Abort solving if the parameters are out of bounds
-        if not self.inBounds(parameters):
-            self.tracker.update(parameters, incrementSolveCounter = False)
-            return [np.inf]*len(times)
+        if self._bounded:
+            if not self.inBounds(parameters):
+                self.tracker.update(parameters, incrementSolveCounter = False)
+                return [np.inf]*len(times)
         
         # Set the parameters in the simulation object
         self.setParams(parameters)
