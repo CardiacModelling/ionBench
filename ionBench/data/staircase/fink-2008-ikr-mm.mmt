@@ -64,13 +64,13 @@ alpha_xr3 = 1 [mS/uF] * p4 * exp(p5 * cell.V)
     in [mS/uF]
 alpha_xr4 = 1 [mS/uF] * p6 * exp(p7 * cell.V) * (5.4 [mM] / Environment.K_o)^0.4
     in [mS/uF]
-beta_xr1 = 1 [mS/uF] * p8 * exp(p9 * cell.V)
+beta_xr1 = 1 [mS/uF] * p8 * exp(-p9 * cell.V)
     in [mS/uF]
 beta_xr2 = 1 [mS/uF] * p10
     in [mS/uF]
-beta_xr3 = 1 [mS/uF] * p11 * exp(p12 * cell.V)
+beta_xr3 = 1 [mS/uF] * p11 * exp(-p12 * cell.V)
     in [mS/uF]
-beta_xr4 = 1 [mS/uF] * p13 * exp(p14 * cell.V)
+beta_xr4 = 1 [mS/uF] * p13 * exp(-p14 * cell.V)
     in [mS/uF]
 
 p1 = 0.20618 [1]
@@ -89,15 +89,15 @@ p7 = 0.0223 [mV^-1]
     in [mV^-1]
 p8 = 0.13279 [1]
     in [1]
-p9 = -0.0603 [mV^-1]
+p9 = 0.0603 [mV^-1]
     in [mV^-1]
 p10 = 0.08094 [1]
     in [1]
 p11 = 0.0002262 [1]
     in [1]
-p12 = -0.0399 [mV^-1]
+p12 = 0.0399 [mV^-1]
     in [mV^-1]
 p13 = 0.04150 [1]
     in [1]
-p14 = -0.0312 [mV^-1]
+p14 = 0.0312 [mV^-1]
     in [mV^-1]

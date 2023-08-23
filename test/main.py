@@ -27,7 +27,6 @@ for i in range(len(bm)):
     print('===================')
     print(problemNames[i])
     print('Check bounds don\'t cause errors')
-    print('There should be an infinite cost for MM only')
     try:
         b = bm[i]
         bounds = [[0]*b.n_parameters(),[np.inf]*b.n_parameters()]
