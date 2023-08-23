@@ -213,7 +213,7 @@ class Benchmarker():
             Parameter vector mapped to input space.
 
         """
-        parameters = np.array(parameters)
+        parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
             if self._useScaleFactors:
                 parameters[i] = parameters[i]/self.defaultParams[i]
@@ -237,7 +237,7 @@ class Benchmarker():
             Parameter vector mapped to the original parameter space.
 
         """
-        parameters = np.array(parameters)
+        parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
             if self._logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])

@@ -8,11 +8,11 @@ class Staircase_Benchmarker(ionBench.benchmarker.Benchmarker):
     def __init__(self):
         self._log = myokit.DataLog.load_csv(os.path.join(ionBench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
         self._useScaleFactors = True
+        self._trueParams = self.defaultParams
         try:
-            self.loadData(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'), os.path.join(ionBench.DATA_DIR, 'staircase', 'trueParams'+self._modelType+'.csv'))
+            self.loadData(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
         except FileNotFoundError:
             self.data = None
-            self._trueParams = None
         super().__init__()
         self.addProtocol()
     
@@ -102,12 +102,11 @@ def generateData(modelType):
         bm = HH_Benchmarker()
     elif modelType == 'MM':
         bm = MM_Benchmarker()
-    trueParams = bm.sample()
-    out = bm.simulate(trueParams, np.arange(bm.tmax), continueOnError = False)
+    out = bm.simulate(bm._trueParams, np.arange(bm.tmax), continueOnError = False)
     out = out + np.random.normal(0, np.mean(np.abs(out))*0.05, len(out))
     with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'data'+modelType+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))
     with open(os.path.join(ionBench.DATA_DIR, 'staircase', 'trueParams'+modelType+'.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
-        writer.writerows(map(lambda x: [x], bm.originalParameterSpace(trueParams))) #Staircase problems use scaling factors by default so needs mapping from input space to original parameter space
+        writer.writerows(map(lambda x: [x], bm._trueParams))
