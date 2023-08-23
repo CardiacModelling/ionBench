@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 from ionbench.problems import staircase
 
-def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
+def run(bm, n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
     """
     Runs the hybrid particle swarm optimisation - trust region reflective algorithm from Loewe et al 2016. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
     
@@ -18,7 +18,7 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
         Number of particles. The default is 96.
     K : int, optional
         Number of function calls allowed in TRR. Note that this uses the function calls reported by scipy, similar in scale to the number of iterations of TRR used in Loewe et al 2016. This is not the true number of function calls to the benchmarker as this appears to not include finite difference gradient calculations. The default is 5.
-    lmax : int, optional
+    Lmax : int, optional
         Maximum number of iterations. The default is 250.
     phi1 : float, optional
         Scale of the acceleration towards a particles best positions. The default is 2.05.
@@ -42,17 +42,17 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
             self.bestPosition = np.copy(self.position) #Position of best cost for this particle
             self.currentCost = None
         
-        def setCost(self, cost):
+        def set_cost(self, cost):
             self.currentCost = cost
             if cost < self.bestCost:
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
     
-    def costFunc(x):
+    def cost_func(x):
         return bm.cost(transform(x))
     
-    def signedError(x):
-        return bm.signedError(transform(x))
+    def signed_error(x):
+        return bm.signed_error(transform(x))
     
     def evaluate(x):
         return bm.evaluate(transform(x))
@@ -82,31 +82,31 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
     for i in range(n):
         particleList.append(particle(bm.n_parameters()))
     
-    Gcost = [np.inf]*L #Best cost ever
-    Gpos = [None]*L #Position of best cost ever
-    for l in range(L):
-        if l > 0:
-            Gcost[l] = Gcost[l-1]
-            Gpos[l] = Gpos[l-1]
+    Gcost = [np.inf]*Lmax #Best cost ever
+    Gpos = [None]*Lmax #Position of best cost ever
+    for L in range(Lmax):
+        if L > 0:
+            Gcost[L] = Gcost[L-1]
+            Gpos[L] = Gpos[L-1]
         
         if debug:
             print('-------------')
-            print("Begginning population: "+str(l))
-            print("Best cost so far: "+str(Gcost[l]))
-            print("Found at position: "+str(Gpos[l]))
+            print("Begginning population: "+str(L))
+            print("Best cost so far: "+str(Gcost[L]))
+            print("Found at position: "+str(Gpos[L]))
         
         #Find best positions, both globally and locally
         for p in particleList:
-            cost = costFunc(p.position)
-            p.setCost(cost)
-            if cost < Gcost[l]:
-                Gcost[l] = cost
-                Gpos[l] = np.copy(p.position)
+            cost = cost_func(p.position)
+            p.set_cost(cost)
+            if cost < Gcost[L]:
+                Gcost[L] = cost
+                Gpos[L] = np.copy(p.position)
         
         #Update velocities
         for p in particleList:
             localAcc = phi1*np.random.rand()*(p.bestPosition-p.position)
-            globalAcc = phi2*np.random.rand()*(Gpos[l]-p.position)
+            globalAcc = phi2*np.random.rand()*(Gpos[L]-p.position)
             p.velocity = constFactor*(p.velocity + localAcc + globalAcc)
         if debug:
             print("Velocities renewed")
@@ -125,18 +125,18 @@ def run(bm, n=96, K=5, L=250, phi1=2.05, phi2=2.05, debug=False):
             print("Begginning TRR")
         bounds = ([0]*bm.n_parameters(),[1]*bm.n_parameters())
         for p in particleList:
-            out = scipy.optimize.least_squares(signedError, p.position, method='trf', diff_step=1e-3, max_nfev = 2*K, bounds = bounds, verbose=verbose)
+            out = scipy.optimize.least_squares(signed_error, p.position, method='trf', diff_step=1e-3, max_nfev = 2*K, bounds = bounds, verbose=verbose)
             p.velocity = out.x - p.position
             p.position = out.x
             
         if debug:
             print("Positions renewed")
-            print("Finished population: "+str(l))
-            print("Best cost so far: "+str(Gcost[l]))
-            print("Found at position: "+str(Gpos[l]))
+            print("Finished population: "+str(L))
+            print("Best cost so far: "+str(Gcost[L]))
+            print("Found at position: "+str(Gpos[L]))
 
-    evaluate(Gpos[l])
-    return Gpos[l]
+    evaluate(Gpos[L])
+    return Gpos[L]
 
 if __name__ == '__main__':
     bm = staircase.HH_Benchmarker()

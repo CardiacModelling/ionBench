@@ -45,13 +45,13 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
             self.bestPosition = np.copy(self.position) #Position of best cost for this particle
             self.currentCost = None
         
-        def setCost(self, cost):
+        def set_cost(self, cost):
             self.currentCost = cost
             if cost < self.bestCost:
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
     
-    def costFunc(x):
+    def cost_func(x):
         return bm.cost(transform(x))
     
     def transform(x):
@@ -81,53 +81,53 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
     Gcost = [np.inf]*lmax #Best cost ever
     Gpos = [None]*lmax #Position of best cost ever
     alpha = [None]*lmax
-    for l in range(lmax):
-        if l > 0:
-            Gcost[l] = Gcost[l-1]
-            Gpos[l] = Gpos[l-1]
+    for L in range(lmax):
+        if L > 0:
+            Gcost[L] = Gcost[L-1]
+            Gpos[L] = Gpos[L-1]
         
         if debug:
             print('-------------')
-            print("Begginning population: "+str(l))
-            print("Best cost so far: "+str(Gcost[l]))
-            print("Found at position: "+str(Gpos[l]))
+            print("Begginning population: "+str(L))
+            print("Best cost so far: "+str(Gcost[L]))
+            print("Found at position: "+str(Gpos[L]))
         
         foundImprovement = False
         for p in particleList:
-            cost = costFunc(p.position)
-            p.setCost(cost)
-            if cost < Gcost[l]:
-                Gcost[l] = cost
-                Gpos[l] = np.copy(p.position)
+            cost = cost_func(p.position)
+            p.set_cost(cost)
+            if cost < Gcost[L]:
+                Gcost[L] = cost
+                Gpos[L] = np.copy(p.position)
                 foundImprovement = True
         
         if foundImprovement:
             q = 0
             if debug:
                 print("Found improvement")
-                print("Best cost is now: "+str(Gcost[l]))
-                print("Found at position: "+str(Gpos[l]))
+                print("Best cost is now: "+str(Gcost[L]))
+                print("Found at position: "+str(Gpos[L]))
         else:
             q += 1
             if debug:
                 print("Didn't find an improvement")
                 print("Current value of q: "+str(q))
         
-        if Gcost[l] < gmin:
+        if Gcost[L] < gmin:
             print("Cost successfully minimised")
             print("Final cost of:")
-            print(Gcost[l])
+            print(Gcost[L])
             print("found at:")
-            print(Gpos[l])
+            print(Gpos[L])
             break
         
         if q>5*qmax:
             #Abort
             print("Too many iterations without improvement")
             print("Final cost of:")
-            print(Gcost[l])
+            print(Gcost[L])
             print("found at:")
-            print(Gpos[l])
+            print(Gpos[L])
             break
         
         if q>=qmax:
@@ -141,13 +141,13 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
             bestNewPosition = None
             for i in range(N):
                 newParticle = particle(bm.n_parameters())
-                newParticle.position = np.copy(Gpos[l])
+                newParticle.position = np.copy(Gpos[L])
                 for j in patterns[i]:
                     newParticle.position[j] *= 1+(np.random.rand()-0.5)/40
                     if newParticle.position[j] > 1:
                         newParticle.position[j] = 1
-                cost = costFunc(newParticle.position)
-                newParticle.setCost(cost)
+                cost = cost_func(newParticle.position)
+                newParticle.set_cost(cost)
                 if cost<bestNewCost:
                     bestNewCost = cost
                     bestNewPosition = np.copy(newParticle.position)
@@ -156,14 +156,14 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                 print("Perturbed particles")
                 print("Best new cost is: "+str(bestNewCost))
                 print("Found at: "+str(bestNewPosition))
-            if bestNewCost <= Gcost[l]:
+            if bestNewCost <= Gcost[L]:
                 if debug:
                     print("Cost improved by perturbing")
-                    print("Original best cost: "+str(Gcost[l]))
+                    print("Original best cost: "+str(Gcost[L]))
                     print("New best cost: "+str(bestNewCost))
                 q = 0
-                Gcost[l] = bestNewCost
-                Gpos[l] = np.copy(bestNewPosition)
+                Gcost[L] = bestNewCost
+                Gpos[L] = np.copy(bestNewPosition)
                 worstCost = -np.inf
                 worstPosition = None
                 for p in particleList:
@@ -189,19 +189,19 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
                     print("Cost wasn't improved by perturbing")
         
         #Step 6
-        alpha[l] = 1/n*np.sum(np.abs([p.currentCost-Gcost[l] for p in particleList]))
-        if l>=2:
+        alpha[L] = 1/n*np.sum(np.abs([p.currentCost-Gcost[L] for p in particleList]))
+        if L>=2:
             #Adapt inertia weight w from (17)
-            w = np.exp(-alpha[l-1]/alpha[l-2])
+            w = np.exp(-alpha[L-1]/alpha[L-2])
         if debug:
             print("Updating inertia")
             print("w: "+str(w))
-            print("alpha: "+str(alpha[l]))
+            print("alpha: "+str(alpha[L]))
         
         #Renew velocities according to (16)
         for p in particleList:
             localAcc = c1*np.random.rand()*(p.bestPosition-p.position)
-            globalAcc = c2*np.random.rand()*(Gpos[l]-p.position)
+            globalAcc = c2*np.random.rand()*(Gpos[L]-p.position)
             p.velocity = w*p.velocity + localAcc + globalAcc
         if debug:
             print("Velocities renewed")
@@ -216,12 +216,12 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
         
         if debug:
             print("Positions renewed")
-            print("Finished population: "+str(l))
-            print("Best cost so far: "+str(Gcost[l]))
-            print("Found at position: "+str(Gpos[l]))
+            print("Finished population: "+str(L))
+            print("Best cost so far: "+str(Gcost[L]))
+            print("Found at position: "+str(Gpos[L]))
 
-    bm.evaluate(Gpos[l]*2)
-    return Gpos[l]*2
+    bm.evaluate(Gpos[L]*2)
+    return Gpos[L]*2
 
 if __name__ == '__main__':
     groups = [[0,2,4,6],[1,3,5,7],[8]]

@@ -28,20 +28,20 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
 
     """
     @cache
-    def costFunc(x):
+    def cost_func(x):
         return bm.cost(x)
     
     funcCounter = 0
     def explore(BP, Stp):
         foundImprovement = False
         NP = np.copy(BP)
-        MSE = costFunc(tuple(BP)) #No real computation cost from this thanks to the cache
+        MSE = cost_func(tuple(BP)) #No real computation cost from this thanks to the cache
         for i in range(bm.n_parameters()): 
             home = BP[i]
             NP[i] = home + Stp#Positive Step
-            MSEp = costFunc(tuple(NP))#Positive MSE
+            MSEp = cost_func(tuple(NP))#Positive MSE
             NP[i] = home - Stp#Negative Step
-            MSEn = costFunc(tuple(NP))#Negative MSE
+            MSEn = cost_func(tuple(NP))#Negative MSE
             minMSE = min(MSEp, MSEn)#MSE in best direction (postive or negative Stp)
             if minMSE < MSE: #If improvement found
                 if MSEp < MSEn: #If positive step is better
@@ -61,7 +61,7 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
         if debug:
             print("------------")
             print("Current step size:"+str(Stp))
-            print("Cost: "+str(costFunc(tuple(BP))))
+            print("Cost: "+str(cost_func(tuple(BP))))
         improvementFound, NP = explore(BP, Stp) #Explore neighbouring points
         funcCounter += 4
         while improvementFound:

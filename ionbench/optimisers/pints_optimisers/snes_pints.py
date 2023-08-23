@@ -39,5 +39,5 @@ def run(bm, x0 = [], maxIter=1000):
 
 if __name__ == '__main__':
     bm = staircase.HH_Benchmarker()
-    bm.logTransform([True, False]*4+[False])
+    bm.log_transform([True, False]*4+[False])
     run(bm)

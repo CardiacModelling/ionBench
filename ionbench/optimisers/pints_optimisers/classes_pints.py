@@ -70,7 +70,7 @@ class AdvancedBoundaries(pints.Boundaries):
             True if the parameters are inside the bound. False if the parameters are outside of the bounds.
 
         """
-        parameters = self.bm.originalParameterSpace(parameters)
+        parameters = self.bm.original_parameter_space(parameters)
         
         # Check parameter boundaries
         if np.any(parameters <= self.bm.lb) or np.any(parameters >= self.bm.ub):

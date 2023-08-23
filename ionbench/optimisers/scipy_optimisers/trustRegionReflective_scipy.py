@@ -27,9 +27,9 @@ def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
     
     if bm._bounded:
         bounds = (bm.lb,bm.ub)
-        out = scipy.optimize.least_squares(bm.signedError, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev, bounds = bounds)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev, bounds = bounds)
     else:
-        out = scipy.optimize.least_squares(bm.signedError, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev)
     
     bm.evaluate(out.x)
     return out.x

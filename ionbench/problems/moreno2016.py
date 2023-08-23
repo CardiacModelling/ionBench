@@ -22,9 +22,9 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._rateFunctions = [(lambda p,V: 1/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[2]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1])), 'negative'), (lambda p,V: 1/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[6]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[7]/(p[4]*np.exp(V/p[5])), 'positive'), (lambda p,V: p[8]*np.exp(-V/p[9]), 'negative'), (lambda p,V: p[10]*np.exp(V/p[11]), 'positive'), (lambda p,V: p[12]*np.exp(V/p[13]), 'negative'), (lambda p,V: p[3]/(p[0]*np.exp(-V/p[1]))*p[12]*np.exp(V/p[13])*p[8]*np.exp(-V/p[9])/(p[7]/(p[4]*np.exp(V/p[5]))*p[10]*np.exp(V/p[11])), 'positive'), (lambda p,V: p[14]*p[12]*np.exp(V/p[13]), 'positive'), (lambda p,V: p[15]*p[8]*np.exp(-V/p[9]), 'negative')] #Used for rate bounds
         self._useScaleFactors = False
         self._trueParams = np.copy(self.defaultParams)
-        self.loadData(dataPath = os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
+        self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         super().__init__()
-        self.addProtocol()
+        self.add_protocol()
         print('Benchmarker initialised')
     
     def sample(self, n=1, width=5):
@@ -47,13 +47,13 @@ class ina(ionbench.benchmarker.Benchmarker):
             param = [None]*self.n_parameters()
             for j in range(self.n_parameters()):
                 param[j] = self.defaultParams[j] * np.random.uniform(1-width/100,1+width/100)
-            params[i] = self.inputParameterSpace(param)
+            params[i] = self.input_parameter_space(param)
         if n==1:
             return params[0]
         else:
             return params
     
-    def addProtocol(self):
+    def add_protocol(self):
         #Setup
         measurementWindows = []
         gap = 5000
@@ -193,9 +193,9 @@ class ina(ionbench.benchmarker.Benchmarker):
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb,ub])
     
-    def solveModel(self, times, continueOnError = True):
+    def solve_model(self, times, continueOnError = True):
         """
-        Replaces the Benchmarker solveModel to call a special Moreno 2016 method (runMoreno()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
+        Replaces the Benchmarker solve_model to call a special Moreno 2016 method (run_moreno()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
 
         Parameters
         ----------
@@ -212,12 +212,12 @@ class ina(ionbench.benchmarker.Benchmarker):
         """
         if continueOnError:
             try:
-                return self.runMoreno()
+                return self.run_moreno()
             except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return [np.inf]*69
         else:
-            return self.runMoreno()
+            return self.run_moreno()
     
     def cost(self, parameters, incrementSolveCounter = True):
         """
@@ -241,7 +241,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         cost = np.sqrt(np.average((testOutput-self.data)**2, weights=weights))
         return cost
     
-    def runMoreno(self):
+    def run_moreno(self):
         """
         Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
 
@@ -292,7 +292,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                     break
         return ssi+act+rfi+rudb+tau
 
-def generateData():
+def generate_data():
     """
     Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
 
@@ -307,7 +307,7 @@ def generateData():
 
     """
     bm = ina()
-    out = bm.solveModel(np.arange(bm.tmax), continueOnError = False)
+    out = bm.solve_model(np.arange(bm.tmax), continueOnError = False)
     with open(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline = '') as csvfile:
         writer = csv.writer(csvfile, delimiter = ',')
         writer.writerows(map(lambda x: [x], out))

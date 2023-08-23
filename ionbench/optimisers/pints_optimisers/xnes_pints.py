@@ -3,7 +3,7 @@ from ionbench.problems import staircase
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
-def run(bm, x0 = [], iterCount=1, maxIter=1000):
+def run(bm, x0 = [], maxIter=1000):
     """
     Runs XNES (Exponential Natural Evolution Strategy) from Pints using a benchmarker. 
 
@@ -39,5 +39,5 @@ def run(bm, x0 = [], iterCount=1, maxIter=1000):
 
 if __name__ == '__main__':
     bm = staircase.HH_Benchmarker()
-    bm.logTransform([True, False]*4+[False])
+    bm.log_transform([True, False]*4+[False])
     run(bm)

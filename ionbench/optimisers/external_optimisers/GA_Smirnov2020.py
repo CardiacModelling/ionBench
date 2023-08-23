@@ -39,18 +39,18 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
         def __init__(self):
             self.x = bm.sample()
             self.cost = None
-        def findCost(self):
-            self.cost = costFunc(tuple(self.x))
+        def find_cost(self):
+            self.cost = cost_func(tuple(self.x))
     
     @cache
-    def costFunc(x):
+    def cost_func(x):
         return bm.cost(x)
     
     eliteCount = int(np.round(popSize*elitePercentage))
     pop = [None]*popSize
     for i in range(popSize):
         pop[i] = individual()
-        pop[i].findCost()
+        pop[i].find_cost()
     
     for gen in range(nGens):
         costVec = [0]*popSize
@@ -100,7 +100,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
             print("Finishing gen "+str(gen))
         #Find costs
         for i in range(popSize):
-            pop[i].findCost()
+            pop[i].find_cost()
         #Elitism
         costVec = [0]*popSize
         for i in range(popSize):

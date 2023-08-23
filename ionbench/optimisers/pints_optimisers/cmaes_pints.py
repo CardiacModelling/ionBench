@@ -52,6 +52,6 @@ def run(bm, x0 = [], maxIter=1000):
 
 if __name__ == '__main__':
     bm = staircase.HH_Benchmarker()
-    bm.logTransform([True, False]*4+[False])
-    bm.addBounds([[1e-7]*8+[-np.inf], [1e3,0.4]*4+[np.inf]])
+    bm.log_transform([True, False]*4+[False])
+    bm.add_bounds([[1e-7]*8+[-np.inf], [1e3,0.4]*4+[np.inf]])
     run(bm)

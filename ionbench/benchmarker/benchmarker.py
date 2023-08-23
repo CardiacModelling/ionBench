@@ -95,7 +95,7 @@ class Tracker():
         plt.ylabel('Number of parameters identified')
         plt.title('Number of parameters identified')
     
-    def reportConvergence(self):
+    def report_convergence(self):
         finalParamId = self.paramIdentifiedCount[-1]
         ifEqualFinalParamId = self.paramIdentifiedCount == finalParamId
         ind = [i for i, x in enumerate(ifEqualFinalParamId) if x] #Indexes where number of parameters identified is equal to the final count
@@ -115,21 +115,21 @@ class Benchmarker():
     """
     def __init__(self):
         self._bounded = False #Should the parameters be bounded
-        self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
+        self._log_transformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._trueParams) #Tracks the performance metrics
         self.sim = myokit.Simulation(self.model)
         self.sim.set_tolerance(1e-8,1e-8)
         
-    def loadData(self, dataPath = '', paramPath = ''):
+    def load_data(self, dataPath = '', paramPath = ''):
         """
         Loads output data to use in fitting.
 
         Parameters
         ----------
-        dataPath : TYPE, optional
+        dataPath : string, optional
             An absolute filepath to the .csv data file. The default is '', in which case no file will be loaded.
-        paramPath : TYPE, optional
+        paramPath : string, optional
             An absolute filepath to the .csv file containing the true parameters. The default is '', in which case no file will be loaded.
 
         Returns
@@ -152,7 +152,7 @@ class Benchmarker():
                     tmp.append(float(row[0]))
             self._trueParams = np.array(tmp)
     
-    def addBounds(self, bounds, parameterSpace = 'original'):
+    def add_bounds(self, bounds, parameterSpace = 'original'):
         """
         Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
         
@@ -171,14 +171,14 @@ class Benchmarker():
 
         """
         if parameterSpace.lower() == 'input':
-            self.lb = self.originalParameterSpace(bounds[0])
-            self.ub = self.originalParameterSpace(bounds[1])
+            self.lb = self.original_parameter_space(bounds[0])
+            self.ub = self.original_parameter_space(bounds[1])
         elif parameterSpace.lower() == 'original':
             self.lb = bounds[0]
             self.ub = bounds[1]
         self._bounded = True
     
-    def logTransform(self, whichParams = []):
+    def log_transform(self, whichParams = []):
         """
         Fit some parameters in a log-transformed space. 
         
@@ -196,9 +196,9 @@ class Benchmarker():
         """
         if whichParams == []: #Log-transform all parameters
             whichParams = [True]*self.n_parameters()
-        self._logTransformParams = whichParams
+        self._log_transformParams = whichParams
     
-    def inputParameterSpace(self, parameters):
+    def input_parameter_space(self, parameters):
         """
         Maps parameters from the original parameter space to the input space. Incorporating any log transforms or scaling factors.
 
@@ -217,12 +217,12 @@ class Benchmarker():
         for i in range(self.n_parameters()):
             if self._useScaleFactors:
                 parameters[i] = parameters[i]/self.defaultParams[i]
-            if self._logTransformParams[i]:
+            if self._log_transformParams[i]:
                 parameters[i] = np.log(parameters[i])
         
         return parameters
     
-    def originalParameterSpace(self, parameters):
+    def original_parameter_space(self, parameters):
         """
         Maps parameters from input space to the original parameter space. Removing any log transforms or scaling factors.
 
@@ -239,14 +239,14 @@ class Benchmarker():
         """
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
+            if self._log_transformParams[i]:
                 parameters[i] = np.exp(parameters[i])
             if self._useScaleFactors:
                 parameters[i] = parameters[i]*self.defaultParams[i]
         
         return parameters
     
-    def inBounds(self, parameters):
+    def in_bounds(self, parameters):
         """
         Checks if parameters are inside any bounds. If self._bounded = False, then it always returns True.
 
@@ -305,7 +305,7 @@ class Benchmarker():
         cost = np.sqrt(np.mean((testOutput-self.data)**2))
         return cost
     
-    def signedError(self, parameters):
+    def signed_error(self, parameters):
         """
         Similar to the cost method, but instead returns the vector of residuals/errors in the model output.
 
@@ -316,7 +316,7 @@ class Benchmarker():
 
         Returns
         -------
-        signedError : numpy array
+        signed_error : numpy array
             The vector of model errors/residuals.
 
         """
@@ -324,7 +324,7 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput-self.data)
     
-    def squaredError(self, parameters):
+    def squared_error(self, parameters):
         """
         Similar to the cost method, but instead returns the vector of squared residuals/errors in the model output.
 
@@ -335,7 +335,7 @@ class Benchmarker():
 
         Returns
         -------
-        signedError : numpy array
+        signed_error : numpy array
             The vector of model squared errors/residuals.
         
         """
@@ -343,7 +343,7 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput-self.data)**2
     
-    def setParams(self, parameters):
+    def set_params(self, parameters):
         """
         Set the parameters in the simulation object. Inputted parameters should be in the original parameter space.
 
@@ -361,7 +361,7 @@ class Benchmarker():
         for i in range(self.n_parameters()):
             self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
     
-    def solveModel(self, times, continueOnError = True):
+    def solve_model(self, times, continueOnError = True):
         """
         Solve the model at the inputted times and return the current trace.
 
@@ -411,22 +411,22 @@ class Benchmarker():
 
         """
         #Return the parameters to the original parameter space
-        parameters = self.originalParameterSpace(parameters) #Creates a copy of the parameter vector
+        parameters = self.original_parameter_space(parameters) #Creates a copy of the parameter vector
         
         # Reset the simulation
         self.sim.reset()
         
         # Abort solving if the parameters are out of bounds
         if self._bounded:
-            if not self.inBounds(parameters):
+            if not self.in_bounds(parameters):
                 self.tracker.update(parameters, incrementSolveCounter = False)
                 return [np.inf]*len(times)
         
         # Set the parameters in the simulation object
-        self.setParams(parameters)
+        self.set_params(parameters)
         
         # Run the simulation and track the performance
-        out = self.solveModel(times, continueOnError = continueOnError)
+        out = self.solve_model(times, continueOnError = continueOnError)
         self.tracker.update(parameters, cost = np.sqrt(np.mean((out-self.data)**2)), incrementSolveCounter = incrementSolveCounter)
         return out
     
@@ -457,16 +457,16 @@ class Benchmarker():
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: '+str(self.tracker.paramIdentifiedCount[-1]))
         print('Total number of parameters:      '+str(self.n_parameters()))
-        self.tracker.reportConvergence()
+        self.tracker.report_convergence()
         print('')
         if self.plotter:
             self.tracker.plot()
             self.sim.reset()
-            self.setParams(self.tracker.firstParams)
-            firstOut = self.solveModel(np.arange(self.tmax), continueOnError = True)
+            self.set_params(self.tracker.firstParams)
+            firstOut = self.solve_model(np.arange(self.tmax), continueOnError = True)
             self.sim.reset()
-            self.setParams(self.originalParameterSpace(parameters))
-            lastOut = self.solveModel(np.arange(self.tmax), continueOnError = True)
+            self.set_params(self.original_parameter_space(parameters))
+            lastOut = self.solve_model(np.arange(self.tmax), continueOnError = True)
             plt.figure()
             plt.plot(np.arange(self.tmax),self.data)
             plt.plot(np.arange(self.tmax),firstOut)

@@ -10,11 +10,11 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
         self._useScaleFactors = True
         self._trueParams = np.copy(self.defaultParams)
         try:
-            self.loadData(os.path.join(ionbench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
+            self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
         except FileNotFoundError:
             self.data = None
         super().__init__()
-        self.addProtocol()
+        self.add_protocol()
     
     def sample(self, n=1):
         """
@@ -33,13 +33,13 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
         """
         params = [None]*n
         for i in range(n):
-            params[i] = self.inputParameterSpace(self.defaultParams*np.random.uniform(0.5,1.5,self.n_parameters()))
+            params[i] = self.input_parameter_space(self.defaultParams*np.random.uniform(0.5,1.5,self.n_parameters()))
         if n==1:
             return params[0]
         else:
             return params
     
-    def addProtocol(self):
+    def add_protocol(self):
         protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
         self.sim.set_protocol(protocol)
         self.tmax = self._log.time()[-1]
@@ -83,7 +83,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
         super().__init__()
         print('Benchmarker initialised')
 
-def generateData(modelType):
+def generate_data(modelType):
     """
     Generate the data files for the staircase benchmarker problems.
 

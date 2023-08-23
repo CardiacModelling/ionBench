@@ -35,13 +35,13 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
                     param[j] = self.defaultParams[j] + np.random.uniform(-60*self.paramSpaceWidth,60*self.paramSpaceWidth)
                 else:
                     param[j] = self.defaultParams[j]*10**np.random.uniform(-1*self.paramSpaceWidth,1*self.paramSpaceWidth) #Log uniform distribution
-            params[i] = self.inputParameterSpace(param) #Generates a copy
+            params[i] = self.input_parameter_space(param) #Generates a copy
         if n==1:
             return params[0]
         else:
             return params
         
-    def addProtocol(self):
+    def add_protocol(self):
         p = myokit.Protocol()
         vsteps = []
         for i in range(13):
@@ -71,9 +71,9 @@ class ikr(loewe2016_Benchmarker):
         self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self._rateFunctions = [(lambda p,V:p[0]*(V+p[1])/(1-np.exp((V+p[1])/(-p[2]))), 'positive'), (lambda p,V:7.3898e-5*(V+p[3])/(np.exp((V+p[3])/p[4])-1), 'negative')] #Used for rate bounds
-        self.loadData(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
+        self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         super().__init__()
-        self.addProtocol()
+        self.add_protocol()
         print('Benchmarker initialised')
 
 class ikur(loewe2016_Benchmarker):
@@ -92,12 +92,12 @@ class ikur(loewe2016_Benchmarker):
         self.defaultParams = np.array([0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05, 15, 13, 138.994])
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
         self._rateFunctions = [(lambda p,V: p[0]/(np.exp((V+p[1])/-p[2])+np.exp((V-p[3])/-p[4])), 'positive'), (lambda p,V: 0.65/(p[5]+np.exp((V+p[6])/p[7])), 'negative'), (lambda p,V: p[11]/(p[12]+np.exp((V-p[13])/-p[14])), 'positive'), (lambda p,V: np.exp((V-p[15])/-p[16]), 'negative')] #Used for rate bounds
-        self.loadData(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
+        self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__()
-        self.addProtocol()
+        self.add_protocol()
         print('Benchmarker initialised')
 
-def generateData(modelType):
+def generate_data(modelType):
     """
     Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
 
