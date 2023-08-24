@@ -1,5 +1,6 @@
 import ionbench
 import myokit
+import myokit.lib.markov as markov
 import os
 import numpy as np
 import csv
@@ -23,8 +24,10 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._useScaleFactors = False
         self._trueParams = np.copy(self.defaultParams)
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
+        self._analyticalModel = markov.LinearModel(model = self.model, states = ['ina.'+s for s in ['ic3','ic2','if','c3','c2','c1','o','is']], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
+        self.sim = markov.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+        self.sim.pre(500) #Prepace for 500ms
         super().__init__()
-        self.add_protocol()
         print('Benchmarker initialised')
     
     def sample(self, n=1, width=5):
@@ -165,9 +168,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         protocolStartTimes.append(newProtocol.characteristic_time())
         
         #Store measurement windows
-        self.sim.set_protocol(newProtocol)
         self.tmax = newProtocol.characteristic_time()
-        self.sim.pre(500) #Prepace for 500ms
         
         self._logTimes = []
         self._ssiBounds = []
@@ -192,6 +193,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                     self._rudbBounds.append([lb,ub])
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb,ub])
+        return newProtocol
     
     def solve_model(self, times, continueOnError = True):
         """

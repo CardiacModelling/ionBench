@@ -13,8 +13,10 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
         except FileNotFoundError:
             self.data = None
-        super().__init__()
+        self.sim = myokit.Simulation(self.model)
+        self.sim.set_tolerance(1e-8,1e-8)
         self.add_protocol()
+        super().__init__()
     
     def sample(self, n=1):
         """

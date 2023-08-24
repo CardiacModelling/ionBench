@@ -1,5 +1,6 @@
 import ionbench
 import myokit
+import myokit.lib.hh as hh
 import os
 import numpy as np
 import csv
@@ -51,9 +52,9 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         durations = [20,400,400]*13
         for i in range(len(vsteps)):
             p.add_step(vsteps[i],durations[i])
-        self.sim.set_protocol(p)
         self.tmax = sum(durations)
-        self.sim.pre(500) #Prepace for 500ms
+        return p
+        
 
 class ikr(loewe2016_Benchmarker):
     """
@@ -72,8 +73,10 @@ class ikr(loewe2016_Benchmarker):
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self._rateFunctions = [(lambda p,V:p[0]*(V+p[1])/(1-np.exp((V+p[1])/(-p[2]))), 'positive'), (lambda p,V:7.3898e-5*(V+p[3])/(np.exp((V+p[3])/p[4])-1), 'negative')] #Used for rate bounds
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
+        self._analyticalModel = hh.HHModel(model = self.model, states = ['ikr.xr'], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
+        self.sim = hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+        self.sim.pre(500) #Prepace for 500ms
         super().__init__()
-        self.add_protocol()
         print('Benchmarker initialised')
 
 class ikur(loewe2016_Benchmarker):
@@ -93,8 +96,10 @@ class ikur(loewe2016_Benchmarker):
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
         self._rateFunctions = [(lambda p,V: p[0]/(np.exp((V+p[1])/-p[2])+np.exp((V-p[3])/-p[4])), 'positive'), (lambda p,V: 0.65/(p[5]+np.exp((V+p[6])/p[7])), 'negative'), (lambda p,V: p[11]/(p[12]+np.exp((V-p[13])/-p[14])), 'positive'), (lambda p,V: np.exp((V-p[15])/-p[16]), 'negative')] #Used for rate bounds
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
+        self._analyticalModel = myokit.lib.hh.HHModel(model = self.model, states = ['ikur.ua', 'ikur.ui'], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
+        self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+        self.sim.pre(500) #Prepace for 500ms
         super().__init__()
-        self.add_protocol()
         print('Benchmarker initialised')
 
 def generate_data(modelType):

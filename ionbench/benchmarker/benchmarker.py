@@ -118,8 +118,6 @@ class Benchmarker():
         self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._trueParams) #Tracks the performance metrics
-        self.sim = myokit.Simulation(self.model)
-        self.sim.set_tolerance(1e-8,1e-8)
         
     def load_data(self, dataPath = '', paramPath = ''):
         """
@@ -380,13 +378,13 @@ class Benchmarker():
         """
         if continueOnError:
             try:
-                log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
+                log = self.sim.run(self.tmax+1, log_times = times)
                 return log[self._outputName]
             except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return [np.inf]*len(times)
         else:
-            log = self.sim.run(self.tmax+1, log_times = times, log = [self._outputName])
+            log = self.sim.run(self.tmax+1, log_times = times)
             return log[self._outputName]
     
     def simulate(self, parameters, times, continueOnError = True, incrementSolveCounter = True):
