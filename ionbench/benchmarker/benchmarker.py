@@ -115,7 +115,7 @@ class Benchmarker():
     """
     def __init__(self):
         self._bounded = False #Should the parameters be bounded
-        self._log_transformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
+        self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._trueParams) #Tracks the performance metrics
         self.sim = myokit.Simulation(self.model)
@@ -196,7 +196,7 @@ class Benchmarker():
         """
         if whichParams == []: #Log-transform all parameters
             whichParams = [True]*self.n_parameters()
-        self._log_transformParams = whichParams
+        self._logTransformParams = whichParams
     
     def input_parameter_space(self, parameters):
         """
@@ -217,7 +217,7 @@ class Benchmarker():
         for i in range(self.n_parameters()):
             if self._useScaleFactors:
                 parameters[i] = parameters[i]/self.defaultParams[i]
-            if self._log_transformParams[i]:
+            if self._logTransformParams[i]:
                 parameters[i] = np.log(parameters[i])
         
         return parameters
@@ -239,7 +239,7 @@ class Benchmarker():
         """
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
-            if self._log_transformParams[i]:
+            if self._logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])
             if self._useScaleFactors:
                 parameters[i] = parameters[i]*self.defaultParams[i]
