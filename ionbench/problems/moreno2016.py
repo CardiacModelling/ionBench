@@ -193,6 +193,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                     self._rudbBounds.append([lb,ub])
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb,ub])
+        self._logTimes = np.array(self._logTimes)
         return newProtocol
     
     def solve_model(self, times, continueOnError = True):
