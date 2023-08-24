@@ -28,14 +28,14 @@ The __ionbench__ directory contains the majority of the code, including the benc
 
 * The __benchmarker__ subdirectory contains the main __Benchmarker__ class that the test problems all inherit from and defines the core features of the benchmarkers. It also contains the __Tracker__ class which contains the functions to take performance metrics over time.
     
-* The __optimisers__ subdirectory contains all of the optimisation algorithms that are currently implemented. These are then further subdivided into three directories, containing the optimisers from pints, from scipy, and other optimisation algorithms used in fitting ion channel models that have been implemented specifically for *ionBench*. In addition to these, there is also an implementation of SPSA.
+* The __optimisers__ subdirectory contains all of the optimisation algorithms that are currently implemented. These are then further subdivided into three directories, containing the optimisers from ***pints***, from ***scipy***, and other optimisation algorithms used in fitting ion channel models that have been implemented specifically for ***ionBench***. In addition to these, there is also an implementation of SPSA.
     
 * Finally the __problems__ directory contains the classes for the available benchmarking problems. This features the problems from Loewe et al 2016 and Moreno et al 2016. In addition to these previously defined problems, we have introduced two further test problems, a Hodgkin-Huxley IKr model from Beattie et al 2017 and a Markov IKr model from Fink et al 2008. 
     
 Finally, the __test__ directory contains scripts for debugging and ensuring changes do not break previous functionality.
 
 ## Performance metrics
-There are currently four optimisation algorithm performance metrics in *ionBench*. 
+There are currently four optimisation algorithm performance metrics in ***ionBench***. 
 
 The first of these is the cost function. A good algorithm should result in a model which reproduces the data it was fitted to. This is tested by calculating the RMSE (Root Mean Squared Error) between the model predictions and the data. This is also typically the function that is minimised by these algorithms. 
 
@@ -58,7 +58,7 @@ Log transforms can also be specified in the benchmarker using `benchmarker.log_t
 
 When working with log transforms (or equivalenty scale factor transforms using `benchmarker._useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
 
-Parameter upper and lower bounds can be included by using `benchmarker.add_bounds([lb,ub])` where `lb` and `ub` are lists of lower and upper bounds. This will result in `benchmarker.cost()` returning `inf` if any of the bounds are violated. Additionally, the number of solves will not be incremented (since the time taken to compare against bounds is negligible compared with the time to solve the model) but the trackers for cost, RMSE in parameter space, and number of identified parameters will include this point. Bounds on the actual model rates are implemented in the pints optimisers but not currently in the __Benchmarker__ class. Interior point style bounds (using a barrier function to have continuous and differentiable bounds) will also be impletented in future so bounds can be used with gradient-based methods.
+Parameter upper and lower bounds can be included by using `benchmarker.add_bounds([lb,ub])` where `lb` and `ub` are lists of lower and upper bounds. This will result in `benchmarker.cost()` returning `inf` if any of the bounds are violated. Additionally, the number of solves will not be incremented (since the time taken to compare against bounds is negligible compared with the time to solve the model) but the trackers for cost, RMSE in parameter space, and number of identified parameters will include this point. Bounds on the actual model rates are implemented in the ***pints*** optimisers but not currently in the __Benchmarker__ class. Interior point style bounds (using a barrier function to have continuous and differentiable bounds) will also be impletented in future so bounds can be used with gradient-based methods.
 
 Other useful functions include:
 
@@ -82,7 +82,7 @@ The `benchmarker.sample()` method randomly perturbs the true parameters by +-50%
 The Staircase problems are also the only problems in the benchmarker to use noisy data for fitting.
 
 ### Loewe 2016
-Four of the problems from Loewe et al 2016 are implemented in *ionBench*. These are IKr and IKur (defined in the paper as "easy" and "hard", respectively), both with the narrow and wide parameter spaces. For these test problems, the models are run using a step protocol (-80mV followed by a varying step height between +50mV and -70mV for 400ms and a step down to -110mV) and the models are fitted to the resulting current trace. These benchmarkers can be instantiated as given below:
+Four of the problems from Loewe et al 2016 are implemented in ***ionBench***. These are IKr and IKur (defined in the paper as "easy" and "hard", respectively), both with the narrow and wide parameter spaces. For these test problems, the models are run using a step protocol (-80mV followed by a varying step height between +50mV and -70mV for 400ms and a step down to -110mV) and the models are fitted to the resulting current trace. These benchmarkers can be instantiated as given below:
 ```
 import ionbench
 bm1 = ionbench.problems.loewe2016.ikr()
@@ -110,7 +110,7 @@ Initial points can be specified in the optimisation algorithms, but if none are 
 ### Pints
 The Pints optimisers currently available are CMA-ES, Nelder-Mead, PSO, SNES, and XNES. 
 
-CMA-ES features bounds on both the rates and the parameters, defined in the pints_optimisers.classes_pints.AdvancedBoundaries, and log transforms on the rates (defined through Pints rather than *ionBench*). The upper and lower bounds on the parameters and which parameters should be log-transformed are both customisable but the bounds on the transition rates are currently hard-coded. The maximum number of iterations in CMA-ES can be defined by setting the variable `maxIter`. Example code to run CMA-ES is given below:
+CMA-ES features bounds on both the rates and the parameters, defined in the __ionbench.optimisers.pints_optimisers.classes_pints.AdvancedBoundaries__, and log transforms on the rates (defined through ***pints*** rather than ***ionBench***). The upper and lower bounds on the parameters and which parameters should be log-transformed are both customisable but the bounds on the transition rates are currently hard-coded. The maximum number of iterations in CMA-ES can be defined by setting the variable `maxIter`. Example code to run CMA-ES is given below:
 ```
 import ionbench
 bm = ionbench.problems.staircase.HH_Benchmarker()
@@ -132,7 +132,7 @@ bm.add_bounds([[0]*9, [np.inf]*9])
 optimisedParameters = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm)
 ```
 
-The other Scipy optimisers all work similiarly, however lm does not include bounds as an option and the form of the bounds varies between the algorithms (matching the form passed into scipy).
+The other Scipy optimisers all work similiarly, however lm does not include bounds as an option and the form of the bounds varies between the algorithms (matching the form passed into ***scipy***).
 
 ### External Optimisers
 We currently have five optimisers defined from other papers for ion channel fitting. Two of these are the genetic algorithms from Bot et al 2012 (GA_Bot2012) and Smirnov et al 2020 (GA_Smirnov2020), one is the pattern search algorithm defined in Kohjitani et al 2022 (patternSearch_Kohjitani2022), the perturbed particle swarm optimisation defined in Chen et al 2012 (ppso_Chen2012), and the hybrid PSO+TRR algorithm from Loewe et al 2016.
@@ -148,7 +148,7 @@ optimisedParameters_loewe = ionbench.optimisers.external_optimisers.hybridPSOTRR
 ```
 
 ### SPSA
-Finally, we have an implementation of SPSA (Simultaneous Perturbation Stochastic Approximation) using the *spsa* python package. This currently converges very slowly so either needs tuning in the hyper-parameters or a new version needs to be written. It can be run with the following code:
+Finally, we have an implementation of SPSA (Simultaneous Perturbation Stochastic Approximation) using the ***spsa*** python package. This currently converges very slowly so either needs tuning in the hyper-parameters or a new version needs to be written. It can be run with the following code:
 ```
 import ionbench
 bm = ionbench.problems.staircase.HH_Benchmarker()
@@ -169,7 +169,7 @@ optimisedParameters = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(
 ## Future Features
 * Bounds - Current only bounds on the parameters can be included in the benchmarker but it would be nice to have bounds on the rates. Additionally, it would be good to include barrier function style bounds to allow them to work nicely with gradient based methods.
 
-* Additional optimisation algorithms - There are still some scipy optimisers to add, some of the pints optimisers require derivatives and it would be nice to add a function for this into the benchmarker so it is simpler for the user to include similar algorithms. Additionally, there are still lots of different algorithms from various papers for fitting ion channel models to include (Current plans to include a further 19 external optimisers). 
+* Additional optimisation algorithms - There are still some ***scipy*** optimisers to add, some of the ***pints*** optimisers require derivatives and it would be nice to add a function for this into the benchmarker so it is simpler for the user to include similar algorithms. Additionally, there are still lots of different algorithms from various papers for fitting ion channel models to include (Current plans to include a further 19 external optimisers). 
 
 * Parallelisation - Its not clear yet how well the benchmarker would handle being run in parallel (specifically for the tracker) but it is something that would be worth looking into.
 
