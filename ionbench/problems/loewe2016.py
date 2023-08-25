@@ -11,6 +11,7 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
         self._useScaleFactors = False
+        self.standardLogTransform = [not i for i in self.additiveParams]
         super().__init__()
     
     def sample(self, n=1):
@@ -66,6 +67,7 @@ class ikr(loewe2016_Benchmarker):
     """
     def __init__(self):
         print('Initialising Loewe 2016 IKr benchmark')
+        self._name = "loewe2016.ikr"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
@@ -89,6 +91,7 @@ class ikur(loewe2016_Benchmarker):
     """
     def __init__(self):
         print('Initialising Loewe 2016 IKur benchmark')
+        self._name = "loewe2016.ikur"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._outputName = 'ikur.IKur'
         self._paramContainer = 'ikur'

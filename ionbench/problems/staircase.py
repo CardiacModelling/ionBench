@@ -7,7 +7,6 @@ import ionbench
 class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
-        self._useScaleFactors = True
         self._trueParams = np.copy(self.defaultParams)
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
@@ -57,12 +56,14 @@ class HH_Benchmarker(Staircase_Benchmarker):
     """
     def __init__(self):
         print('Initialising Hodgkin-Huxley IKr benchmark')
+        self._name = "staircase.hh"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
         self._rateFunctions = [(lambda p,V:p[0]*np.exp(p[1]*V), 'positive'), (lambda p,V:p[2]*np.exp(-p[3]*V), 'negative'), (lambda p,V:p[4]*np.exp(p[5]*V), 'positive'), (lambda p,V:p[6]*np.exp(-p[7]*V), 'negative')] #Used for rate bounds
+        self.standardLogTransform = [True, False]*4+[False]
         super().__init__()
         print('Benchmarker initialised')
 
@@ -76,12 +77,14 @@ class MM_Benchmarker(Staircase_Benchmarker):
     """
     def __init__(self):
         print('Initialising Markov Model IKr benchmark')
+        self._name = "staircase.mm"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
         self.defaultParams = np.array([0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399, 0.04150, 0.0312])
         self._rateFunctions = [(lambda p,V:p[0]*np.exp(p[1]*V), 'positive'), (lambda p,V:p[2], 'independent'), (lambda p,V:p[3]*np.exp(p[4]*V), 'positive'), (lambda p,V:p[5]*np.exp(p[6]*V), 'positive'), (lambda p,V:p[7]*np.exp(-p[8]*V), 'negative'), (lambda p,V:p[9], 'independent'), (lambda p,V:p[10]*np.exp(-p[11]*V), 'negative'), (lambda p,V:p[12]*np.exp(-p[13]*V), 'negative')] #Used for rate bounds
+        self.standardLogTransform = [True, False, True]*2+[False, True]*2+[True,False]*2
         super().__init__()
         print('Benchmarker initialised')
 

@@ -474,4 +474,3 @@ class Benchmarker():
             plt.xlabel('Time (ms)')
             plt.title('Improvement after fitting')
             plt.show()
-            

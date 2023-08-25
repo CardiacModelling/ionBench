@@ -2,6 +2,7 @@ import os
 from ionbench import benchmarker
 from ionbench import problems
 from ionbench import optimisers
+from ionbench import approach
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
