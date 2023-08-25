@@ -60,6 +60,15 @@ class ina(ionbench.benchmarker.Benchmarker):
             return params
     
     def add_protocol(self):
+        """
+        Add the protocol from Moreno et al 2016. This is a series of steps, used for forming the summary statistic curves. This also sets the timepoints that need to be recorded to evaluate these summary statistics.
+
+        Returns
+        -------
+        p : myokit.protocol
+            A myokit.protocol for the voltage clamp protocol from Loewe et al 2016.
+
+        """
         #Setup
         measurementWindows = []
         gap = 5000
@@ -227,7 +236,7 @@ class ina(ionbench.benchmarker.Benchmarker):
     
     def cost(self, parameters, incrementSolveCounter = True):
         """
-        Find the RMSE cost between the model solved using the inputted parameters and the data.
+        Find the RMSE cost between the model solved using the inputted parameters and the data. For Moreno, this method weights the contributions of the summary curves by the reciprical of the number of points in each summary curve. 
 
         Parameters
         ----------
@@ -300,12 +309,11 @@ class ina(ionbench.benchmarker.Benchmarker):
 
 def generate_data():
     """
-    Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
+    Generate the data files for the Moreno 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
 
     Parameters
     ----------
-    modelType : string
-        'ikr' to generate the data for the IKr benchmark problem. 'ikur' to generate the data for the IKur benchmark problem.
+    None.
 
     Returns
     -------

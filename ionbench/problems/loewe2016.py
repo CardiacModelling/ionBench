@@ -44,6 +44,15 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
             return params
         
     def add_protocol(self):
+        """
+        Add the protocol from Loewe et al 2016. This protocol consists of 20ms at -80mV, a variable height step between 50mV and -70mV (in steps of 10mV) for 400ms and then 400ms at -110mV before repeating with a new height for the central step (in order of decreasing voltage).
+
+        Returns
+        -------
+        p : myokit.protocol
+            A myokit.protocol for the voltage clamp protocol from Loewe et al 2016.
+
+        """
         p = myokit.Protocol()
         vsteps = []
         for i in range(13):

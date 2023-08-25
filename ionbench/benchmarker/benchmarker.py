@@ -10,7 +10,7 @@ class Tracker():
     """
     This class records the various performance metrics used to evaluate the optimisation algorithms. 
     
-    It records the number of times the model is solved (stored as self.solveCount), not including the times that parameters were out of bounds.
+    It records the number of times the model is solved (stored as tracker.solveCount), not including the times that parameters were out of bounds.
     
     It records the RMSE (Root Mean Squared Error) cost each time a parameter vector is evaluated, using np.inf if parameters are out of bounds.
     
@@ -20,9 +20,9 @@ class Tracker():
     
     This class contains two methods: update(), and plot(). 
     
-    update is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.simulate) and updates the performance metric vectors.
+    update() is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.cost) and updates the performance metric vectors.
     
-    plot is called during the benchmarkers evaluate method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
+    plot() is called during the benchmarkers .evaluate() method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
     def __init__(self, trueParams):
         self.costs = []
@@ -35,7 +35,7 @@ class Tracker():
     
     def update(self, estimatedParams, cost = np.inf, incrementSolveCounter = True):
         """
-        This method updates the performance metric tracking vectors with new values. It should only be called by a benchmarker class.
+        This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class.
         
         Parameters
         ----------
@@ -96,6 +96,14 @@ class Tracker():
         plt.title('Number of parameters identified')
     
     def report_convergence(self):
+        """
+        Reports the performance metrics at the point of convergence, defined as the first point where there is an unbroken chain in the number of correctly identified parameters.
+
+        Returns
+        -------
+        None.
+
+        """
         finalParamId = self.paramIdentifiedCount[-1]
         ifEqualFinalParamId = self.paramIdentifiedCount == finalParamId
         ind = [i for i, x in enumerate(ifEqualFinalParamId) if x] #Indexes where number of parameters identified is equal to the final count
@@ -161,7 +169,7 @@ class Benchmarker():
         bounds : list
             A list of bounds. The list should contain two elements, the first is a list of lower bounds, the same length as a parameter vector and the second a similar list of upper bounds. Use -np.inf or np.inf to not include bounds on particular parameters.
         parameterSpace : string
-            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if self._useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  self._useScaleFactors=True. The default is 'original'.
+            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if benchmarker._useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  benchmarker._useScaleFactors=True. The default is 'original'.
 
         Returns
         -------
@@ -185,7 +193,7 @@ class Benchmarker():
         Parameters
         ----------
         whichParams : list, optional
-            Which parameters should be log-transformed. The default is [], in which case all parameters will be log-transformed.
+            Which parameters should be log-transformed, in the form of a list of bools, the same length as the number of parameters, where True is a parameter to be log-transformed. The default is [], in which case all parameters will be log-transformed.
 
         Returns
         -------
@@ -246,7 +254,7 @@ class Benchmarker():
     
     def in_bounds(self, parameters):
         """
-        Checks if parameters are inside any bounds. If self._bounded = False, then it always returns True.
+        Checks if parameters are inside any bounds. If benchmarker._bounded = False, then it always returns True.
 
         Parameters
         ----------
@@ -415,10 +423,9 @@ class Benchmarker():
         self.sim.reset()
         
         # Abort solving if the parameters are out of bounds
-        if self._bounded:
-            if not self.in_bounds(parameters):
-                self.tracker.update(parameters, incrementSolveCounter = False)
-                return [np.inf]*len(times)
+        if not self.in_bounds(parameters):
+            self.tracker.update(parameters, incrementSolveCounter = False)
+            return [np.inf]*len(times)
         
         # Set the parameters in the simulation object
         self.set_params(parameters)
@@ -432,7 +439,7 @@ class Benchmarker():
         """
         Evaluates a final set of parameters. 
         
-        This method reports the performance metrics for this parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If self.plotter = True, then it also plots the performance metrics over the course of the optimisation.
+        This method reports the performance metrics for this parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If benchmarker.plotter = True, then it also plots the performance metrics over the course of the optimisation.
 
         Parameters
         ----------

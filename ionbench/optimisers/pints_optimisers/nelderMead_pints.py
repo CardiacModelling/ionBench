@@ -3,7 +3,7 @@ from ionbench.problems import staircase
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
-def run(bm, x0 = [], iterCount=1, maxIter=1000):
+def run(bm, x0 = [], maxIter=1000):
     """
     Runs Nelder Mead from Pints using a benchmarker. 
 

@@ -4,7 +4,7 @@ import numpy as np
 
 def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
     """
-    Runs Nelder-Mead optimiser from Scipy.
+    Runs Nelder-Mead optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
     Parameters
     ----------

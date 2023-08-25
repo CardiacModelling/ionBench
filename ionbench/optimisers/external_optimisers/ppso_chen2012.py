@@ -3,7 +3,7 @@ from ionbench.problems import staircase
 import itertools
 #Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
-def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
+def run(bm, groups = [], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
@@ -11,8 +11,8 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
-    groups : list
-        Groupings of parameters to use in the algorithm. 
+    groups : list, optional
+        Groupings of parameters to use in the algorithm. Default is [], in which case every parameter will be in its own group.
     n : int, optional
         Number of particles. The default is 20.
     c1 : float, optional
@@ -62,6 +62,9 @@ def run(bm, groups, n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, de
             if not bm._useScaleFactors:
                 xTrans = xTrans*bm.defaultParams #Map to [0,2*default]
         return xTrans
+    
+    if len(groups) == 0:
+        groups = list(range(bm.n_parameters()))
     
     q = 0 #Number of generations without improvement
     #Generate patterns

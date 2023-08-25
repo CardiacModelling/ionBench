@@ -3,7 +3,7 @@ import spsa
 #To do:
 #Convergence needs to massively improve. An implementation of the original Spall 1992 algorithm might actually help
 
-def run(bm, x0, printFrequency=100, maxiter = 1000):
+def run(bm, x0 = [], printFrequency=100, maxiter = 1000):
     """
     Runs SPSA (Simultaneous Perturbation Stochastic Approximation) from Pints using a benchmarker. 
 
@@ -11,8 +11,8 @@ def run(bm, x0, printFrequency=100, maxiter = 1000):
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
-    x0 : list
-        Initial parameter vector from which to start optimisation.
+    x0 : list, optional
+        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     printFrequency : int, optional
         Number of iterations to wait between printing output
     maxIter : int, optional
@@ -24,6 +24,9 @@ def run(bm, x0, printFrequency=100, maxiter = 1000):
         The best parameters identified by SPSA.
 
     """
+    if len(x0) == 0:
+        x0 = bm.sample()
+    
     counter = 0
     for variables in spsa.iterator.minimize(spsa.with_input_noise(bm.cost, shape=bm.n_parameters(), noise = 0.01), x0, adam=False):
         if counter % printFrequency == 0:

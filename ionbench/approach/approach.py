@@ -32,11 +32,39 @@ class Approach():
         self.customBounds = customBounds
     
     def apply(self, bm):
+        """
+        Applies the settings in this approach to the inputted benchmarker. This will override any previous settings assigned to the benchmarker.
+
+        Parameters
+        ----------
+        bm : benchmarker
+            A benchmarker problem to apply this approach.
+
+        Returns
+        -------
+        None.
+
+        """
         self.apply_log_transforms(self.dict['log transform'], bm)
         self.apply_bounds(self.dict['bounds'], bm)
         self.apply_scale_factors(self.dict['scale factors'], bm)
     
     def apply_log_transforms(self, setting, bm):
+        """
+        Apply the log transform setting to a benchmarker.
+
+        Parameters
+        ----------
+        setting : string
+            Setting for log transforms. Options are 'None' (default, none of the parameters will be log transformed), 'Standard' (a problem specific set of parameters will be log transformed), 'Full' (all parameters will be log transformed), and 'Custom' (Log transformed parameters specified by the customLogTransform input will be log transformed, only usable if customLogTransform was set during the creation of this approach, or approach.customLogTransform is set).
+        bm : benchmarker
+            A benchmarker problem to apply this approach.
+
+        Returns
+        -------
+        None.
+
+        """
         if setting.lower() == 'none':
             #Disable log transforms
             bm.log_transform([False]*bm.n_parameters())
@@ -52,6 +80,21 @@ class Approach():
             print("'"+setting+"' is not a valid option for log transforms. Please use either 'None', 'Standard', 'Full', or 'Custom'.")
     
     def apply_bounds(self, setting, bm):
+        """
+        Apply the bound setting to a benchmarker.
+
+        Parameters
+        ----------
+        setting : string
+            Setting for parameter bounds. Options are 'None' (default, none of the parameters will be bounds), 'Positive' (all parameters will have a lower bound of 0 and no upper bound), 'Sampler' (problem specific bounds using the range in the benchmarkers sampler will be used), and 'Custom' (Bounds on parameters specified by the customBounds input will be used). The default is 'None'.
+        bm : benchmarker
+            A benchmarker problem to apply this approach.
+
+        Returns
+        -------
+        None.
+
+        """
         if setting.lower() == 'none':
             bm.add_bounds([[-np.inf]*bm.n_parameters(),[np.inf]*bm.n_parameters()])
             bm._bounded = False
@@ -81,6 +124,21 @@ class Approach():
             print("'"+setting+"' is not a valid option for bounds. Please use either 'None', 'Positive', 'Sampler', or 'Custom'.")
     
     def apply_scale_factors(self, setting, bm):
+        """
+        Apply the scale factor setting to a benchmarker.
+
+        Parameters
+        ----------
+        setting : string
+            Setting for scale factors. Options are 'off' (default, scale factors won't be used), and 'on' (scale factors will be used, with the default parameters representing 1).
+        bm : benchmarker
+            A benchmarker problem to apply this approach.
+
+        Returns
+        -------
+        None.
+
+        """
         if setting.lower() == 'on':
             #Set use scale factors
             bm._useScaleFactors = True
@@ -91,6 +149,9 @@ class Approach():
             print("'"+setting+"' is not a valid option for scale factors. Please use either 'on' or 'off'.")
 
 class Clerx2019(Approach):
+    """
+    The approach from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
+    """
     def __init__(self):
         logTransform = 'Standard'
         bounds = 'Sampler'
@@ -98,6 +159,9 @@ class Clerx2019(Approach):
         super().__init__(logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
 class Loewe2016(Approach):
+    """
+    The approach from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    """
     def __init__(self):
         logTransform = 'None'
         bounds = 'Sampler'

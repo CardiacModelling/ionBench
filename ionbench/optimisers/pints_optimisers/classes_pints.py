@@ -6,18 +6,56 @@ class Model(pints.ForwardModel):
     A Pints forwards model containing a benchmarker class.
     """
     def __init__(self, bm):
+        """
+        Initialise a Pints forward model with a benchmarker, linking up the n_parameters() and simulate() methods.
+
+        Parameters
+        ----------
+        bm : benchmarker
+            A test problem benchmarker.
+
+        Returns
+        -------
+        None.
+
+        """
         self.bm = bm
         
     def n_parameters(self):
+        """
+        Returns the number of parameters in the model
+
+        Returns
+        -------
+        n_parameters : int
+            Number of parameters in the model.
+
+        """
         return self.bm.n_parameters()
     
     def simulate(self, parameters, times):
+        """
+        Simulates the model and returns the model output.
+
+        Parameters
+        ----------
+        parameters : list
+            A list of parameter values, length n_parameters().
+        times : list
+            A list of times at which to return model output.
+
+        Returns
+        -------
+        out : list
+            Model output, typically a current trace.
+
+        """
         # Reset the simulation
         return self.bm.simulate(parameters, times)
 
 class AdvancedBoundaries(pints.Boundaries):
     """
-    Pints boundaries to apply to the parameters and the rates. Currently the rates are hard-coded to correspond to the Hodgkin-Huxley IKr staircase benchmarker.
+    Pints boundaries to apply to the parameters and the rates. 
     """
     def __init__(self, bm, vHigh = 40, vLow = -120):
         """
@@ -25,13 +63,7 @@ class AdvancedBoundaries(pints.Boundaries):
 
         Parameters
         ----------
-        paramCount : int
-            Number of parameters in the model.
-        localBounds : list
-            Bounds on the parameters are specified in localBounds. For example, localBounds = [[0,1e-7,1e3],[3,1e-3,1e5]] sets the bounds for parameter index 0 to be [1e-7,1e3] and index 3 to be [1e-3,1e5].
-        kCombinations : list
-            kCombinations = [[0,1],[4,5]] means param[0]*exp(param[1]*V) and param[4]*exp(param[5]*V) satisfy bounds.
-        bm : Benchmarker
+        bm : benchmarker
             A test problem benchmarker.
         vHigh : float, optional
             The high voltage to use for the rate bounds. The default is 40.
@@ -62,7 +94,7 @@ class AdvancedBoundaries(pints.Boundaries):
         Parameters
         ----------
         parameters : list
-            Inputted parameter to check, in their original parameter space.
+            Inputted parameter to check, in the input parameter space.
 
         Returns
         -------
