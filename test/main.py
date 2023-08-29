@@ -62,6 +62,7 @@ for i in range(len(bm)):
         ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("nelderMead_scipy")
@@ -72,6 +73,7 @@ for i in range(len(bm)):
         ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("powell_scipy")
@@ -82,6 +84,7 @@ for i in range(len(bm)):
         ionbench.optimisers.scipy_optimisers.powell_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("trf_scipy")
@@ -92,6 +95,7 @@ for i in range(len(bm)):
         ionbench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run(bm[i],bm[i].sample(), maxfev = 100)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 #%% Pints algorithms
 print("========================")
@@ -103,6 +107,7 @@ try:
     ionbench.optimisers.pints_optimisers.cmaes_pints.run(bm[0], maxIter=maxIter)
 except Exception as e:
     print(e)
+bm[0].reset()
 
 print("++++++++++++++++++++++++")
 print("nelderMead-pints")
@@ -110,6 +115,7 @@ try:
     ionbench.optimisers.pints_optimisers.nelderMead_pints.run(bm[0], maxIter=maxIter)
 except Exception as e:
     print(e)
+bm[0].reset()
 
 print("++++++++++++++++++++++++")
 print("pso-pints")
@@ -117,6 +123,7 @@ try:
     ionbench.optimisers.pints_optimisers.pso_pints.run(bm[0], maxIter=maxIter)
 except Exception as e:
     print(e)
+bm[0].reset()
 
 print("++++++++++++++++++++++++")
 print("snes-pints")
@@ -124,6 +131,7 @@ try:
     ionbench.optimisers.pints_optimisers.snes_pints.run(bm[0], maxIter=maxIter)
 except Exception as e:
     print(e)
+bm[0].reset()
     
 print("++++++++++++++++++++++++")
 print("xnes-pints")
@@ -131,6 +139,7 @@ try:
     ionbench.optimisers.pints_optimisers.xnes_pints.run(bm[0], maxIter=maxIter)
 except Exception as e:
     print(e)
+bm[0].reset()
 
 #%% External optimisers
 print("========================")
@@ -144,6 +153,7 @@ for i in range(len(bm)):
         ionbench.optimisers.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("GA Smirnov 2020")
@@ -154,6 +164,7 @@ for i in range(len(bm)):
         ionbench.optimisers.external_optimisers.GA_Bot2012.run(bm[i], nGens = 5, popSize = 10, debug = True)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("PatternSearch Kohjitani 2020")
@@ -164,6 +175,18 @@ for i in range(len(bm)):
         ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm[i], maxfev = 100, debug = True)
     except Exception as e:
         print(e)
+    bm[i].reset()
+
+print("++++++++++++++++++++++++")
+print("Hybrid PSO TRR Loewe 2016")
+for i in range(len(bm)):
+    print("-------------------")
+    print(problemNames[i])
+    try:
+        ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bm[i], n=10, K=3, Lmax=20, debug = True)
+    except Exception as e:
+        print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("PPSO Chen 2012")
@@ -175,6 +198,7 @@ for i in range(len(bm)):
         ionbench.optimisers.external_optimisers.ppso_Chen2012.run(bm[i], groups= groups, debug = True)
     except Exception as e:
         print(e)
+    bm[i].reset()
 
 print("++++++++++++++++++++++++")
 print("SPSA")
@@ -185,3 +209,4 @@ for i in range(len(bm)):
         ionbench.optimisers.spsa_spsa.run(bm[i], x0=bm[i].sample(),maxiter=50)
     except Exception as e:
         print(e)
+    bm[i].reset()
