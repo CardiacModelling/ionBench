@@ -9,7 +9,6 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
-        self._useScaleFactors = False
         self.standardLogTransform = [not i for i in self.additiveParams]
         super().__init__()
     

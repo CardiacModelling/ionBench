@@ -122,6 +122,7 @@ class Benchmarker():
     The main methods to use from this class are n_parameters(), cost(), reset(), and evaluate().
     """
     def __init__(self):
+        self._useScaleFactors = False
         self._bounded = False #Should the parameters be bounded
         self._logTransformParams = [False]*self.n_parameters() #Are any of the parameter log-transformed
         self.plotter = True #Should the performance metrics be plotted when evaluate() is called
