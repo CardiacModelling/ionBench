@@ -172,7 +172,7 @@ for i in range(len(bm)):
     print("-------------------")
     print(problemNames[i])
     try:
-        ionbench.optimisers.external_optimisers.ppso_chen2012.run(bm[i], groups= groups, debug = True)
+        ionbench.optimisers.external_optimisers.ppso_Chen2012.run(bm[i], groups= groups, debug = True)
     except Exception as e:
         print(e)
 
