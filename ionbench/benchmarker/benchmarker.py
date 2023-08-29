@@ -388,13 +388,13 @@ class Benchmarker():
         if continueOnError:
             try:
                 log = self.sim.run(self.tmax+1, log_times = times)
-                return log[self._outputName]
+                return np.array(log[self._outputName])
             except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
-                return [np.inf]*len(times)
+                return np.array([np.inf]*len(times))
         else:
             log = self.sim.run(self.tmax+1, log_times = times)
-            return log[self._outputName]
+            return np.array(log[self._outputName])
     
     def simulate(self, parameters, times, continueOnError = True, incrementSolveCounter = True):
         """

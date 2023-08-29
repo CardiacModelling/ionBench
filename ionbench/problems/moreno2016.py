@@ -229,7 +229,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                 return self.run_moreno()
             except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
-                return [np.inf]*69
+                return np.array([np.inf]*69)
         else:
             return self.run_moreno()
     
@@ -304,7 +304,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                 if reachedPeak and abs(current)<=abs(peak/2):
                     tau[i] = self._logTimes[self._tauBounds[i][0]+j]-timeToPeak
                     break
-        return ssi+act+rfi+rudb+tau
+        return np.array(ssi+act+rfi+rudb+tau)
 
 def generate_data():
     """
