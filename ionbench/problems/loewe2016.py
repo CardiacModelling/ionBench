@@ -7,7 +7,6 @@ import csv
 
 class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
-        self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'protocol.csv'))
         self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
         self._useScaleFactors = False
