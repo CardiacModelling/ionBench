@@ -42,8 +42,8 @@ for i in range(len(bm)):
     try:
         bm[i]._bounded=False
         b = bm[i]
-        if i in [2,3]: #Loewe problems
-            b.log_transform(whichParams = [not a for a in b.additiveParams])
+        if "loewe" in b._name:
+            b.log_transform(whichParams = b.standardLogTransform)
         else:
             b.log_transform()
         b.evaluate(b.sample())
