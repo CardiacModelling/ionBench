@@ -1,8 +1,7 @@
 [[model]]
-author: Myokit CellML 1 API
+author: Matt Owen
 name: fink_noble_giles_model_2008
 # Initial values
-cell.V                        = -86.45
 iKr_Markov.Cr1                = 0.9786
 iKr_Markov.Cr2                = 0.0031
 iKr_Markov.Cr3                = 0.0029
@@ -24,28 +23,17 @@ time = 0 [ms] bind time
     in [ms]
 E_K = R * T / F * log(K_o / K_i)
     in [mV]
+V = 0 [mV] bind pace
+    in [mV]
 
 [IKr]
 g_Kr_0 = 0.024 [mS/uF]
     in [mS/uF]
-i_Kr = g_Kr_0 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (cell.V - Environment.E_K)
+i_Kr = g_Kr_0 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (Environment.V - Environment.E_K)
     in [A/F]
-
-[cell]
-Cm = 0.115 [nF]
-    in [nF]
-dot(V) = -i_tot
-    in [mV]
-Vol_c = 0.016404 [nL]
-    in [nL]
-i_Stim = piecewise(Environment.time - floor(Environment.time / stim_Period) * stim_Period >= 100 [ms] and Environment.time - floor(Environment.time / stim_Period) * stim_Period <= 103 [ms], -12 [A/F], 0 [A/F])
-    in [A/F]
-i_tot = IKr.i_Kr + i_Stim
-    in [A/F]
-stim_Period = 1000 [ms]
-    in [ms]
 
 [iKr_Markov]
+use Environment.V
 dot(Cr1) = beta_xr1 * Cr2 - alpha_xr1 * Cr1
     in [1]
 dot(Cr2) = alpha_xr1 * Cr1 + beta_xr2 * Cr3 - (alpha_xr2 + beta_xr1) * Cr2
@@ -56,21 +44,21 @@ dot(Ir5) = alpha_xr4 * Or4 - beta_xr4 * Ir5
     in [1]
 dot(Or4) = alpha_xr3 * Cr3 + beta_xr4 * Ir5 - (alpha_xr4 + beta_xr3) * Or4
     in [1]
-alpha_xr1 = 1 [mS/uF] * p1 * exp(p2 * cell.V)
+alpha_xr1 = 1 [mS/uF] * p1 * exp(p2 * V)
     in [mS/uF]
 alpha_xr2 = 1 [mS/uF] * p3
     in [mS/uF]
-alpha_xr3 = 1 [mS/uF] * p4 * exp(p5 * cell.V)
+alpha_xr3 = 1 [mS/uF] * p4 * exp(p5 * V)
     in [mS/uF]
-alpha_xr4 = 1 [mS/uF] * p6 * exp(p7 * cell.V) * (5.4 [mM] / Environment.K_o)^0.4
+alpha_xr4 = 1 [mS/uF] * p6 * exp(p7 * V) * (5.4 [mM] / Environment.K_o)^0.4
     in [mS/uF]
-beta_xr1 = 1 [mS/uF] * p8 * exp(-p9 * cell.V)
+beta_xr1 = 1 [mS/uF] * p8 * exp(-p9 * V)
     in [mS/uF]
 beta_xr2 = 1 [mS/uF] * p10
     in [mS/uF]
-beta_xr3 = 1 [mS/uF] * p11 * exp(-p12 * cell.V)
+beta_xr3 = 1 [mS/uF] * p11 * exp(-p12 * V)
     in [mS/uF]
-beta_xr4 = 1 [mS/uF] * p13 * exp(-p14 * cell.V)
+beta_xr4 = 1 [mS/uF] * p13 * exp(-p14 * V)
     in [mS/uF]
 
 p1 = 0.20618 [1]
@@ -101,3 +89,4 @@ p13 = 0.04150 [1]
     in [1]
 p14 = 0.0312 [mV^-1]
     in [mV^-1]
+
