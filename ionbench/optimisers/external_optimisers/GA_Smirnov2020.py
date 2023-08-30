@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from ionbench.problems import staircase
+import ionbench
 from functools import cache
 import copy
 
@@ -119,5 +119,18 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, p
 
 
 if __name__ == '__main__':
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug=True)
+
+def get_approach():
+    """
+    No approach settings given in Smirnov et al 2020. Will use an empty approach
+
+    Returns
+    -------
+    app : approach
+        Empty approach
+
+    """
+    app = ionbench.approach.Empty(name = 'Smirnov2020')
+    return app

@@ -1,5 +1,5 @@
 import numpy as np
-from ionbench.problems import staircase
+import ionbench
 import itertools
 #Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
@@ -228,5 +228,18 @@ def run(bm, groups = [], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.
 
 if __name__ == '__main__':
     groups = [[0,2,4,6],[1,3,5,7],[8]]
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm,groups,debug=True)
+
+def get_approach():
+    """
+    The approach in Chen et al 2012 uses bounds. The method also uses scale factors in such a way that the range of parameters is bounded between 0 and 1, however, this is done automatically in the optimisers for bounded benchmarkers.
+
+    Returns
+    -------
+    app : approach
+        The approach used in Chen et al 2012.
+
+    """
+    app = ionbench.approach.Chen2012()
+    return app

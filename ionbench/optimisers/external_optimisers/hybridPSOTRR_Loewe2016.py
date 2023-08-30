@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from ionbench.problems import staircase
+import ionbench
 
 def run(bm, n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
     """
@@ -139,5 +139,18 @@ def run(bm, n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
     return Gpos[L]
 
 if __name__ == '__main__':
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm,debug=True)
+
+def get_approach():
+    """
+    The approach in Loewe et al uses a bounded search space with no transforms. The bounds are the same as for the sampler.
+
+    Returns
+    -------
+    app : approach
+        The approach used in Loewe et al 2016.
+
+    """
+    app = ionbench.approach.Loewe2016()
+    return app

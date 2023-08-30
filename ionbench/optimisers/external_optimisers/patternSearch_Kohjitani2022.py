@@ -1,4 +1,4 @@
-from ionbench.problems import staircase
+import ionbench
 from functools import cache
 import numpy as np
 
@@ -81,5 +81,18 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
     return NP
 
 if __name__ == '__main__':
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug = True)
+
+def get_approach():
+    """
+    The approach in Kojitani et al 2022 uses scaling factors. They have bounds on the sampling but I don't think they use these in the optimisation.
+
+    Returns
+    -------
+    app : approach
+        The approach used in Kohjitani et al 2022.
+
+    """
+    app = ionbench.approach.Kohjitani2022()
+    return app

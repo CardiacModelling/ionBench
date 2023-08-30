@@ -5,16 +5,18 @@ class Approach():
     """
     Approaches provide a way to store some benchmarker settings and apply them to a range of benchmarkers. These settings include log-transforms, parameter bounds, and the use of scale factors. A single approach can be generated, and then applied to a range of benchmarkers. Once a Approach object is instantiated, its transforms and bounds can be applied to a benchmarker, bm, by calling approach.apply(bm)
     """
-    def __init__(self, logTransform = 'None', bounds = 'None', scaleFactors = 'off', customLogTransform = None, customBounds = None):
+    def __init__(self, name = "", logTransform = 'None', bounds = 'None', scaleFactors = 'off', customLogTransform = None, customBounds = None):
         """
         Initialise an Approach object. Once an Approach is built, its setting can be applied to any benchmarker, bm, by calling approach.apply(bm)
 
         Parameters
         ----------
+        name : string, optional
+            A name for the approach. Useful for logging. The default is "".
         logTransform : string, optional
             Setting for log transforms. Options are 'None' (default, none of the parameters will be log transformed), 'Standard' (a problem specific set of parameters will be log transformed), 'Full' (all parameters will be log transformed), and 'Custom' (Log transformed parameters specified by the customLogTransform input will be log transformed).
         bounds : string, optional
-            Setting for parameter bounds. Options are 'None' (default, none of the parameters will be bounds), 'Positive' (all parameters will have a lower bound of 0 and no upper bound), 'Sampler' (problem specific bounds using the range in the benchmarkers sampler will be used), and 'Custom' (Bounds on parameters specified by the customBounds input will be used). The default is 'None'.
+            Setting for parameter bounds. Options are 'None' (default, none of the parameters will be bounds), 'Positive' (all parameters will have a lower bound of 0 and no upper bound), 'Sampler' (problem specific bounds using the range in the benchmarkers sampler will be used), and 'Custom' (Bounds on parameters specified by the customBounds input will be used).
         scaleFactors : string, optional
             Setting for scale factors. Options are 'off' (default, scale factors won't be used), and 'on' (scale factors will be used, with the default parameters representing 1).
         customLogTransform : list, optional
@@ -30,6 +32,7 @@ class Approach():
         self.dict = {'log transform':logTransform, 'bounds':bounds, 'scale factors':scaleFactors}
         self.customLogTransform = customLogTransform
         self.customBounds = customBounds
+        self._name = None
     
     def apply(self, bm):
         """
@@ -156,7 +159,8 @@ class Clerx2019(Approach):
         logTransform = 'Standard'
         bounds = 'Sampler'
         scaleFactors = 'off'
-        super().__init__(logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+        name = 'Clerx2019'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
 class Loewe2016(Approach):
     """
@@ -166,4 +170,48 @@ class Loewe2016(Approach):
         logTransform = 'None'
         bounds = 'Sampler'
         scaleFactors = 'off'
-        super().__init__(logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+        name = 'Loewe2012'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Bot2012(Approach):
+    """
+    The approach from Bot et al 2012. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    """
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Bot2012'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Kohjitani2022(Approach):
+    """
+    The approach from Kohjitani et al 2022. Uses scaling factors only.
+    """
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'on'
+        name = 'Kohjitani2022'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Chen2012(Approach):
+    """
+    The approach from Chen et al 2012. Uses sampler bounds only.
+    """
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Chen2012'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Empty(Approach):
+    """
+    An approach with default settings.
+    """
+    def __init__(self, name):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)

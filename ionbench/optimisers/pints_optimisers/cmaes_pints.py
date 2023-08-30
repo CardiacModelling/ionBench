@@ -1,5 +1,5 @@
 import pints
-from ionbench.problems import staircase
+import ionbench
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
@@ -51,7 +51,20 @@ def run(bm, x0 = [], maxIter=1000):
     return x
 
 if __name__ == '__main__':
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     bm.log_transform([True, False]*4+[False])
     bm.add_bounds([[1e-7]*8+[-np.inf], [1e3,0.4]*4+[np.inf]])
     run(bm)
+
+def get_approach():
+    """
+    The approach in Clerx et al 2019. Uses log transforms, and bounds (technically they are bounds on rates here. We just use sampler bounds for now).
+
+    Returns
+    -------
+    app : approach
+        The approach used in Clerx et al 2019.
+
+    """
+    app = ionbench.approach.Clerx2019()
+    return app
