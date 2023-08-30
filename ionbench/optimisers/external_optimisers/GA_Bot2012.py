@@ -1,6 +1,6 @@
 import numpy as np
 import ionbench
-from functools import cache
+from functools import lru_cache
 import copy
 
 from pymoo.core.individual import Individual
@@ -41,7 +41,7 @@ def run(bm, nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = Fals
         def find_cost(self):
             self.cost = cost_func(tuple(self.x))
     
-    @cache
+    @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(x)
     
