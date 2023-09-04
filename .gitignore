@@ -5,3 +5,4 @@ ionBench/data/moreno2016/protocol.xlsx
 build/*
 dist/*
 ionBench.egg-info/*
+tracker_*

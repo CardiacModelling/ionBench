@@ -5,6 +5,7 @@ import os
 import ionbench
 import matplotlib.pyplot as plt
 import warnings
+import pickle
 
 class Tracker():
     """
@@ -94,6 +95,42 @@ class Tracker():
         plt.xlabel('Cost function calls')
         plt.ylabel('Number of parameters identified')
         plt.title('Number of parameters identified')
+    
+    def save(self, filename):
+        """
+        Saves the tracked variables. Useful to store results to plot later.
+
+        Parameters
+        ----------
+        filename : string
+            Filename for storing the tracked variables (solveCount, costs, modelSolves, paramRMSRE, paramIdentifiedCount). Variables will be pickled and stored in working directory.
+
+        Returns
+        -------
+        None.
+
+        """
+        data = (self.solveCount, self.costs, self.modelSolves, self.paramRMSRE, self.paramIdentifiedCount)
+        with open(filename, 'wb') as f:
+            pickle.dump(data,f)
+    
+    def load(self, filename):
+        """
+        Loads the tracked variables. Useful to store results to plot later.
+
+        Parameters
+        ----------
+        filename : string
+            Filename to load the stored tracked variables (solveCount, costs, modelSolves, paramRMSRE, paramIdentifiedCount). Variables will be read for the working directory. Must be saved using the .save() method associated with a tracker.
+
+        Returns
+        -------
+        None.
+
+        """
+        with open(filename, 'rb') as f:
+            data = pickle.load(f)
+        self.solveCount, self.costs, self.modelSolves, self.paramRMSRE, self.paramIdentifiedCount = data
     
     def report_convergence(self):
         """

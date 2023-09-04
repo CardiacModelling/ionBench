@@ -23,5 +23,5 @@ for st in opts:
     app.apply(bm)
     out = opt.run(bm)
     print(out)
+    bm.tracker.save('tracker_'+st+'.pickle')
     bm.reset()
-    
