@@ -1,5 +1,5 @@
 import pints
-from ionbench.problems import staircase
+import ionbench
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
@@ -38,6 +38,19 @@ def run(bm, x0 = [], maxIter=1000):
     return x
 
 if __name__ == '__main__':
-    bm = staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     bm.log_transform([True, False]*4+[False])
     run(bm)
+
+def get_approach():
+    """
+    No approach specified. Will use an empty approach
+
+    Returns
+    -------
+    app : approach
+        Empty approach
+
+    """
+    app = ionbench.approach.Empty(name = 'xnes_pints')
+    return app

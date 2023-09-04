@@ -33,3 +33,16 @@ def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
+
+def get_approach():
+    """
+    No approach specified. Will use an empty approach
+
+    Returns
+    -------
+    app : approach
+        Empty approach
+
+    """
+    app = ionbench.approach.Empty(name = 'lm_scipy')
+    return app

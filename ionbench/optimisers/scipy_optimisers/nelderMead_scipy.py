@@ -50,3 +50,16 @@ def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
+
+def get_approach():
+    """
+    No approach specified. Will use an empty approach
+
+    Returns
+    -------
+    app : approach
+        Empty approach
+
+    """
+    app = ionbench.approach.Empty(name = 'nelderMead_scipy')
+    return app
