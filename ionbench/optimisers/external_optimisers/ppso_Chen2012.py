@@ -64,7 +64,7 @@ def run(bm, groups = [], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.
         return xTrans
     
     if len(groups) == 0:
-        groups = list(range(bm.n_parameters()))
+        groups = [[i] for i in range(bm.n_parameters())]
     
     q = 0 #Number of generations without improvement
     #Generate patterns
