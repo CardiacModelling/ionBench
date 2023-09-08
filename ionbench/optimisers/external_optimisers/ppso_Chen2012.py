@@ -223,8 +223,8 @@ def run(bm, groups = [], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.
             print("Best cost so far: "+str(Gcost[L]))
             print("Found at position: "+str(Gpos[L]))
 
-    bm.evaluate(Gpos[L]*2)
-    return Gpos[L]*2
+    bm.evaluate(transform(Gpos[L]))
+    return transform(Gpos[L])
 
 if __name__ == '__main__':
     groups = [[0,2,4,6],[1,3,5,7],[8]]

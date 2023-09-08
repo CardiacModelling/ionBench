@@ -135,8 +135,8 @@ def run(bm, n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
             print("Best cost so far: "+str(Gcost[L]))
             print("Found at position: "+str(Gpos[L]))
 
-    evaluate(Gpos[L])
-    return Gpos[L]
+    bm.evaluate(transform(Gpos[L]))
+    return transform(Gpos[L])
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
