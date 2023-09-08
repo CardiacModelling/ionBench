@@ -3,6 +3,7 @@ import ionbench
 import itertools
 import copy
 import matplotlib.pyplot as plt
+import pickle
 
 def secondDeriv(bm, i, j, step = 1e-4, buffer = 1e-4):
     """
@@ -88,7 +89,7 @@ def sse(bm, params):
     cost = bm.cost(params)
     return -cost**2*len(bm.data) #Sum of squared errors
 
-def fim(bm, sigma = 1, preoptimise = True, ftol = 3e-6, step = 1e-4, buffer = 1e-4):
+def run(bm, sigma = 1, preoptimise = True, ftol = 3e-6, step = 1e-4, buffer = 1e-4):
     """
     Calculate the Fisher's Information Matrix for a benchmarker problem. Also plots the eigenspectrum of the FIM.
 
@@ -133,6 +134,10 @@ def fim(bm, sigma = 1, preoptimise = True, ftol = 3e-6, step = 1e-4, buffer = 1e
     plt.eventplot(-eigs, orientation='vertical')
     plt.yscale('log')
     plt.xticks(ticks=[])
+    plt.title('FIM Eigenspectrum: '+bm._name)
+    data = (eigs, mat)
+    with open(bm._name+'_fim.pickle', 'wb') as f:
+        pickle.dump(data,f)
     return mat
 
 def explore_solver_noise(bm):
@@ -156,6 +161,8 @@ def explore_solver_noise(bm):
         params[i][0] = 0.9999999**i
     #print(params)
     sses = [sse(bm,a) for a in params]
+    plt.figure()
     plt.plot(sses)
+    plt.show()
     print('STD: '+str(np.std(sses)))
     print('Range: '+str(max(sses)-min(sses)))

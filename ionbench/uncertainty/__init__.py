@@ -1,2 +1,2 @@
-from ionbench.uncertainty.profile_likelihood import *
-from ionbench.uncertainty.fim import *
+from ionbench.uncertainty import profile_likelihood
+from ionbench.uncertainty import fim

@@ -64,7 +64,7 @@ class ProfileManager():
         """
         pass
 
-def profile_likelihood(bm, variations, plot = True, filename = ''):
+def run(bm, variations, plot = True, filename = ''):
     """
     Generate a profile likelihood style plot, reporting the fitted cost as a function of each fixed parameter.
 
@@ -91,7 +91,7 @@ def profile_likelihood(bm, variations, plot = True, filename = ''):
         for j in range(len(variations[i])):
             bm.reset()
             var = variations[i][j]
-            pm = ProfileManager(bm, i, bm._trueParams[i]*var, bm._trueParams)
+            pm = ProfileManager(bm, i, bm._trueParams[i]*var)
             if var == 1:
                 costs[j] = bm.cost(bm._trueParams)
                 out = pm.sample()
@@ -125,33 +125,19 @@ def profile_likelihood(bm, variations, plot = True, filename = ''):
             plt.ylabel('Cost')
             plt.show()
         if not filename == '':
-            data = (variations, costs)
+            data = (variations[i], costs)
             with open(filename+'_param'+str(i)+'.pickle', 'wb') as f:
                 pickle.dump(data,f)
 
-def run_all():
-    """
-    Generate all of the profile likelihoods and save them to files to plot later.
-
-    Returns
-    -------
-    None.
-
-    """
-    var = lambda x:np.linspace(1-x,1+x,2)
-    variations = [var(0.2)]*4 + [var(0.4)]*4 + [var(0.2)] #aVar = 0.2, bVar = 0.4
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    profile_likelihood(bm, variations, filename = 'hh')
-    
-    #MM doesn't seem to change. Might be unidentifiable - worth checking eigenvalues to see how many parameters can be identified
-    variations = [var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8)]
-    bm = ionbench.problems.staircase.MM_Benchmarker()
-    profile_likelihood(bm, variations, filename = 'mm')
-    
-    variations = [var(0.99), var(2), var(1.5), var(2), var(1.5), var(1.2), var(0.99), var(0.99), var(0.99), var(0.6), var(0.7), var(0.7)]
-    bm = ionbench.problems.loewe2016.ikr()
-    profile_likelihood(bm, variations, filename = 'ikr')
-    
-    variations = [var(0.99), var(2), var(0.99), var(2), var(0.99), var(2), var(2), var(0.99), var(2), var(0.99), var(0.99), var(0.99), var(2), var(2), var(0.99), var(2), var(2), var(2), var(0.99), var(0.99), var(2), var(0.99), var(2), var(0.99), var(0.99)]
-    bm = ionbench.problems.loewe2016.ikur()
-    profile_likelihood(bm, variations, filename = 'ikur')
+def plot_profile_likelihood(modelType, numberToPlot, ymax=0):
+    for i in range(numberToPlot):
+        with open(modelType+'_param'+str(i)+'.pickle', 'rb') as f:
+            variations, costs = pickle.load(f)
+        plt.figure()
+        plt.plot(variations[i], costs)
+        if not ymax == 0:
+            plt.ylim(0,ymax)
+        plt.title('Profile likelihood: '+modelType)
+        plt.xlabel('Factor for parameter '+str(i))
+        plt.ylabel('Cost')
+        plt.show()
