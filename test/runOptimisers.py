@@ -16,12 +16,12 @@ opts = [basePath + s for s in (scipyOpt + pintsOpt + extOpt)]
 print(opts)
 bm = ionbench.problems.staircase.HH_Benchmarker()
 
+initParams = bm.sample(n=5)
+
 for st in opts:
     print(st)
     opt = importlib.import_module(st)
     app = opt.get_approach()
     app.apply(bm)
-    out = opt.run(bm)
-    print(out)
-    bm.tracker.save('tracker_'+st+'.pickle')
+    ionbench.multistart(opt.run, bm, initParams, st)
     bm.reset()
