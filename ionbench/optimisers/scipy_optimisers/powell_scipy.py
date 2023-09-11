@@ -27,7 +27,7 @@ def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
         The best parameters identified by Powell's Simplex.
 
     """
-    if x0 == []:
+    if len(x0)==0:
         x0 = bm.sample()
     
     if bm._bounded:

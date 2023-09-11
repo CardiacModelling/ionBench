@@ -24,7 +24,7 @@ def run(bm, x0 = [], printFrequency=100, maxiter = 1000):
         The best parameters identified by SPSA.
 
     """
-    if len(x0) == 0:
+    if len(x0)==0:
         x0 = bm.sample()
     
     counter = 0

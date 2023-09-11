@@ -22,7 +22,7 @@ def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
         The best parameters identified by Trust Region Reflective.
 
     """
-    if x0 == []:
+    if len(x0)==0:
         x0 = bm.sample()
     
     if bm._bounded:
