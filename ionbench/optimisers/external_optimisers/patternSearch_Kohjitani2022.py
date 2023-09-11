@@ -2,7 +2,7 @@ import ionbench
 from functools import lru_cache
 import numpy as np
 
-def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = False):
+def run(bm, x0 = [], CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = False):
     """
     Runs the pattern search algorithm from Kohjitani et al 2022.
 
@@ -10,6 +10,8 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
     ----------
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
+    x0 : list, optional
+        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     CrtStp : float, optional
         The minimum step size. If there are no improvements within CrtStp, the optimisation terminates. The default is 2e-5.
     Stp : float, optional
@@ -53,8 +55,11 @@ def run(bm, CrtStp = 2e-5, Stp = 1/100, RedFct = 1/4, maxfev = 100000, debug = F
             else:#If no improvement
                 NP[i] = home#Restore center point
         return foundImprovement, NP
-
-    BP = bm.sample() #Set initial base point
+    
+    if len(x0)==0:
+        x0 = bm.sample()
+    
+    BP = x0 #Set initial base point
     funcCounter += 1
     while Stp > CrtStp: #Stop when step size is sufficiently small
         #Explore neighbouring points
