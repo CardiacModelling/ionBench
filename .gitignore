@@ -7,3 +7,4 @@ dist/*
 ionBench.egg-info/*
 *.pickle
 *.out
+*checkpoint.ipynb
