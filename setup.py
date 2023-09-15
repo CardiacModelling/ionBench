@@ -121,11 +121,11 @@ setup(
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=["numpy",
                       "scipy",
-                      "pints",
-                      "spsa",
-                      "myokit",
-                      "matplotlib",
-                      "pymoo"],  # Optional
+                      "pints>=0.4.1",
+                      "spsa>=0.1.2",
+                      "myokit>=1.34.0",
+                      "matplotlib>=3.7.1",
+                      "pymoo>=0.6.0.1"],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
