@@ -45,8 +45,10 @@ The __test__ directory contains scripts for debugging and ensuring changes do no
 
 ## Installation
 ***ionBench*** can be installed using pip.
-`pip install ionbench`
-Note that ***ionBench*** using ***myokit*** to do its simulations, which relies on CVODES (from Sundials). For Linux and Mac OS users a working installation of CVODES is required. For Windows users, CVODES should be automatically installed with ***myokit***.
+
+```pip install ionbench```
+
+Note that ***ionBench*** uses ***myokit*** to do its simulations, which relies on CVODES (from Sundials). For Linux and Mac OS users a working installation of CVODES is required. For Windows users, CVODES should be automatically installed with ***myokit***.
 
 ## Getting Started
 If you want to use ***ionBench***, check out the __introduction__ and __tutorial__ in the __docs__ directory.
