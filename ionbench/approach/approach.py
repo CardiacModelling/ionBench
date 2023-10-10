@@ -210,7 +210,7 @@ class Empty(Approach):
     """
     An approach with default settings.
     """
-    def __init__(self, name):
+    def __init__(self, name = ""):
         logTransform = 'None'
         bounds = 'None'
         scaleFactors = 'off'
