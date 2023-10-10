@@ -463,7 +463,10 @@ class Benchmarker():
         # Abort solving if the parameters are out of bounds
         if not self.in_bounds(parameters):
             self.tracker.update(parameters, incrementSolveCounter = False)
-            return [np.inf]*len(times)
+            if 'moreno' in self._name:
+                return [np.inf]*69
+            else:
+                return [np.inf]*len(times)
         
         # Set the parameters in the simulation object
         self.set_params(parameters)
