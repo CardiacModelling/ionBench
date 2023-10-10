@@ -8,3 +8,4 @@ ionBench.egg-info/*
 *.pickle
 *.out
 *checkpoint.ipynb
+.coverage
