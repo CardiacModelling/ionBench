@@ -2,6 +2,7 @@ import pytest
 import ionbench
 import numpy as np
 import copy
+import matplotlib.pyplot as plt
 
 class Problem():
     def test_cost(self):
@@ -24,7 +25,8 @@ class Problem():
         assert hasattr(self.bm, "plotter")
         assert hasattr(self.bm, "tracker")
     
-    def test_plotter(self):
+    def test_plotter(self, monkeypatch):
+        monkeypatch.setattr(plt, 'show', lambda: None)
         self.bm.plotter = True
         self.bm.evaluate(self.bm.defaultParams)
         self.bm.plotter = False
