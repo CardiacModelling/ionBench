@@ -20,7 +20,7 @@ pace = 0 [mV] bind pace
 V = engine.pace
     desc: membane potential
     in [mV]
-EK = R*T/F*log(Ko/Ki)
+EK = if(Ki==0,1e100,R*T/F*log(Ko/Ki))
     in [mV]
 Ko = 5 [mmol]
     in [mmol]
@@ -35,13 +35,18 @@ T = 295 [K] #22C (from 20C-25C)
 
 [ikr]
 use membrane.V
-IKr = gkr * xr / (1 + exp((V+gkr1)/gkr2)) * (V - membrane.EK)
+IKr = if(gkr2==0, 0, gkr * xr / (1 + exp((V+gkr1)/gkr2)) * (V - membrane.EK))
     in [A/F]
 dot(xr) = (inf - xr) / tau
-    inf = 1 / (1 + exp((V+xrm1)/xrm2)) in [1]
-    tau = abs(1 [ms*mV] / ((alphaxr + betaxr)*xrkq10)) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
-    alphaxr = xra1*(V+xra2)/(1-exp((V+xra2)/xra3)) in [mV]
-    betaxr = 7.3898e-5 [1]*(V+xrb1)/(exp((V+xrb1)/xrb2)-1) in [mV]
+    inf = piecewise(xrm2==0,0,
+    1/(1+exp((V+xrm1)/xrm2))) in [1]
+    tau = if(xrkq10==0 or alphaxr==betaxr,1e100,
+    abs(1 [ms*mV] / ((alphaxr + betaxr)*xrkq10)))
+    in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaxr = if(xra3==0 or xra2==V,-xra1*xra3,
+    xra1*(V+xra2)/(1-exp((V+xra2)/xra3))) in [mV]
+    betaxr = piecewise(xrb2==0,0,xrb1==V,7.3898e-5[1]*xrb2,
+    7.3898e-5 [1]*(V+xrb1)/(exp((V+xrb1)/xrb2)-1)) in [mV]
 p1 = 3e-4 [1]
     in [1]
 xra1 = p1

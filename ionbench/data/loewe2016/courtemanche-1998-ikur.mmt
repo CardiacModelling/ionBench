@@ -21,7 +21,7 @@ pace = 0 [mV] bind pace
 V = engine.pace
     desc: membane potential
     in [mV]
-EK = R*T/F*log(Ko/Ki)
+EK = if(Ki==0,1e100,R*T/F*log(Ko/Ki))
     in [mV]
 Ko = 5 [mmol]
     in [mmol]
@@ -38,17 +38,18 @@ T = 295 [K] #22C (from 20C-25C)
 use membrane.V
 IKur = gkur * ua^3 * ui * (V - membrane.EK)
     in [A/F]
-gkur = gkur1 + gkur2/(1+exp((V+gkur3)/gkur4))
+gkur = if(gkur4==0,gkur1, gkur1+gkur2/(1+exp((V+gkur3)/gkur4)))
 dot(ua) = (inf - ua) / tau
-    inf = 1 / (1 + exp((V+uam1)/uam2)) in [1]
-    tau = abs(1 [ms*mV] / ((alphaua + betaua)*uakq10)) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
-    alphaua = uaa1/(exp((V+uaa2)/uaa3)+exp((V+uaa4)/uaa5)) in [mV]
-    betaua = 0.65 [1]/(uab1+exp((V+uab2)/uab3)) in [mV]
+    inf = if(uam2==0,0,1/(1+exp((V+uam1)/uam2))) in [1]
+    tau = if(uakq10==0,1e100,abs(1 [ms*mV] / ((alphaua + betaua)*uakq10))) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaua = piecewise(uaa5==0 or uaa3==0,0, uaa1/(exp((V+uaa2)/uaa3)+exp((V+uaa4)/uaa5))) in [mV]
+    betaua = piecewise(uab3==0,0, uab1+exp((V+uab2)/uab3)==0, 1e100, 0.65 [1]/(uab1+exp((V+uab2)/uab3))) in [mV]
 dot(ui) = (inf - ui) / tau
-    inf = 1 / (1 + exp((V+uim1)/uim2)) in [1]
-    tau = abs(1 [ms*mV] / ((alphaui + betaui)*uikq10)) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
-    alphaui = uia1/(uia2+exp((V+uia3)/uia4)) in [mV]
-    betaui = exp((V+uib1)/uib2) in [mV]
+    inf = if(uim2==0,0, 1/(1+exp((V+uim1)/uim2))) in [1]
+    tau = if(uikq10==0,1e100, abs(1 [ms*mV] / ((alphaui + betaui)*uikq10))) in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
+    alphaui = piecewise(uia4==0,0, uia2+exp((V+uia3)/uia4)==0,1e100,
+    uia1/(uia2+exp((V+uia3)/uia4))) in [mV]
+    betaui = if(uib2==0,1e100,exp((V+uib1)/uib2)) in [mV]
 p1 = 0.65 [1]
     in [1]
 uaa1 = p1
