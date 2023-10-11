@@ -2,6 +2,7 @@ import pytest
 import ionbench
 
 def test_multistart():
+    #Check multistart runs (using lm scipy optimiser) and improves cost in all cases
     numStarts = 3
     bm = ionbench.problems.staircase.HH_Benchmarker()
     bm.plotter = False

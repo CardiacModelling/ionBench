@@ -7,6 +7,7 @@ import numpy as np
 import copy
 
 class Test_scipy:
+    #Check all scipy optimisers run and improve cost compared to x0
     bm = ionbench.problems.loewe2016.ikr()
     bm.plotter = False
     optimisers = [scipy_opts.lm_scipy.run, scipy_opts.nelderMead_scipy.run, scipy_opts.powell_scipy.run, scipy_opts.trustRegionReflective_scipy.run]
@@ -21,6 +22,7 @@ class Test_scipy:
         assert cost_opt <= cost
 
 class Test_pints:
+    #Check all pints optimisers run and improve cost compared to x0
     bm = ionbench.problems.loewe2016.ikr()
     bm.plotter = False
     optimisers = [pints_opts.cmaes_pints.run, pints_opts.nelderMead_pints.run, pints_opts.pso_pints.run, pints_opts.snes_pints.run, pints_opts.xnes_pints.run]
@@ -35,6 +37,7 @@ class Test_pints:
         assert cost_opt <= cost
 
 class Test_external:
+    #Check all external optimisers run
     bm = ionbench.problems.loewe2016.ikr()
     bm._useScaleFactors = True
     bm.plotter = False

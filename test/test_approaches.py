@@ -6,6 +6,7 @@ import numpy as np
 class Test_Approaches:
     bm = ionbench.problems.staircase.HH_Benchmarker()
     def test_bounds(self):
+        #Check bounds are correctly applied for all settings
         #No bounds initially
         assert not self.bm._bounded
         #Positive
@@ -34,6 +35,7 @@ class Test_Approaches:
         assert not self.bm._bounded
     
     def test_log_transform(self):
+        #Check log transform is correctly applied for all settings
         #No log transform initially
         assert not any(self.bm._logTransformParams)
         #Standard log transform
@@ -58,6 +60,7 @@ class Test_Approaches:
         assert not any(self.bm._logTransformParams)
     
     def test_scale_factors(self):
+        #Check scale factors are correctly applied
         #No scale factors initially
         assert not self.bm._useScaleFactors
         #Turn on scale factors
@@ -70,6 +73,7 @@ class Test_Approaches:
         assert not self.bm._useScaleFactors
     
     def test_multiple_settings(self):
+        #Check multiple settings applied at once doesn't break anything and order in the .apply() method doesn't matter
         app = approach.Approach(logTransform='Full',bounds='positive',scaleFactors='On')
         app.apply_log_transforms(app.dict['log transform'], self.bm)
         app.apply_scale_factors(app.dict['scale factors'], self.bm)
@@ -93,6 +97,7 @@ class Test_Approaches:
         assert all(np.array(self.bm.ub) == np.array(ub))
     
     def test_other_problems(self):
+        #Basic check for another benchmarker
         app = approach.Approach(logTransform = 'standard', bounds = 'sampler', scaleFactors = 'On')
         newbm = ionbench.problems.loewe2016.ikr()
         app.apply(newbm)

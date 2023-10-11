@@ -6,9 +6,11 @@ import matplotlib.pyplot as plt
 
 class Problem():
     def test_cost(self):
+        #Check cost of default params is sufficiently low (0 for loewe)
         assert self.bm.cost(self.bm.defaultParams) <= self.costBound
     
     def test_hasattr(self):
+        #Check all neccessary variables in problems are defined
         assert hasattr(self.bm, "_name")
         assert hasattr(self.bm, "model")
         assert hasattr(self.bm, "_outputName")
@@ -26,12 +28,14 @@ class Problem():
         assert hasattr(self.bm, "tracker")
     
     def test_plotter(self, monkeypatch):
-        monkeypatch.setattr(plt, 'show', lambda: None)
+        #Test plotting functionality runs for evaluate
+        monkeypatch.setattr(plt, 'show', lambda: None) #Disables plots from being shown
         self.bm.plotter = True
         self.bm.evaluate(self.bm.defaultParams)
         self.bm.plotter = False
     
     def test_bounds(self):
+        #Check bounds give infinite cost outside and solve inside bounds
         self.bm.add_bounds([0.99*self.bm.defaultParams,[np.inf]*self.bm.n_parameters()])
         #Check bounds give infinite cost outside of bounds
         p = copy.copy(self.bm.defaultParams)
@@ -46,6 +50,7 @@ class Problem():
         assert self.bm.cost(p) < np.inf
     
     def test_tracker(self):
+        #Check solve count works with bounds and evaluate
         self.bm.reset()
         #Solve count is 0 after reset
         assert self.bm.tracker.solveCount == 0
@@ -67,6 +72,7 @@ class Problem():
 
 class Staircase(Problem):
     def test_sampler(self):
+        #Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Sampler in bounds
         assert sampler_bounds(self.bm, 0.5*self.bm.defaultParams, 1.5*self.bm.defaultParams)
         # Sampled different to default
@@ -90,6 +96,7 @@ class Staircase(Problem):
         self.bm._useScaleFactors = False
     
     def test_transforms(self):
+        #Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform()
         assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.log(self.bm.defaultParams))
@@ -109,6 +116,7 @@ class Staircase(Problem):
 
 class Loewe(Problem):
     def test_sampler(self):
+        #Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         #Get bounds from an approach
         app = ionbench.approach.Approach(bounds='Sampler')
         app.apply(self.bm)
@@ -138,6 +146,7 @@ class Loewe(Problem):
         self.bm._useScaleFactors = False
     
     def test_transforms(self):
+        #Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform([not i for i in self.bm.additiveParams])
         logDefault = [np.log(self.bm.defaultParams[i]) if self.bm.standardLogTransform[i] else self.bm.defaultParams[i] for i in range(self.bm.n_parameters())]
@@ -162,6 +171,7 @@ class Test_Moreno(Problem):
     costBound = 1e-4
     
     def test_sampler(self):
+        #Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Sampler in bounds
         assert sampler_bounds(self.bm, 0.95*self.bm.defaultParams, 1.05*self.bm.defaultParams)
         # Sampled different to default
@@ -191,6 +201,7 @@ class Test_Moreno(Problem):
         self.bm._useScaleFactors = False
     
     def test_transforms(self):
+        #Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform()
         assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.log(self.bm.defaultParams))
@@ -211,12 +222,12 @@ class Test_Moreno(Problem):
 class Test_HH(Staircase):
     bm = ionbench.problems.staircase.HH_Benchmarker()
     bm.plotter = False
-    costBound = 0.04
+    costBound = 0.04 #Accounts for noise
 
 class Test_MM(Staircase):
     bm = ionbench.problems.staircase.MM_Benchmarker()
     bm.plotter = False
-    costBound = 0.02
+    costBound = 0.02 #Accounts for noise
 
 class Test_Loewe_IKr(Loewe):
     bm = ionbench.problems.loewe2016.ikr()
