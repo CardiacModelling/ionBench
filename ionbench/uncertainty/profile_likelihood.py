@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 class ProfileManager():
-    def __init__(self, bm, fixedParam, fixedValue):
+    def __init__(self, bm, fixedParam, fixedValue, x0):
         """
         A middle-man for handling profile likelihood plots. This class acts as a wrapper for the benchmarker, such that the benchmarker always sees the full parameter vector, while the optimiser sees a reduced vector with one parameter missing.
 
@@ -16,6 +16,8 @@ class ProfileManager():
             The index of the parameter to be fixed.
         fixedValue : float
             The value at which to fix the parameter.
+        x0 : list
+            Initial parameter vector (including the fixed parameter) to begin optimisation
 
         Returns
         -------
@@ -25,7 +27,7 @@ class ProfileManager():
         self.bm = bm
         self.fixedParam = fixedParam
         self.fixedValue = fixedValue
-        self.MLE = bm._trueParams
+        self.MLE = x0
         self._bounded = False
     
     def n_parameters(self):
@@ -91,21 +93,25 @@ def run(bm, variations, plot = True, filename = ''):
         for j in range(len(variations[i])):
             bm.reset()
             var = variations[i][j]
-            pm = ProfileManager(bm, i, bm._trueParams[i]*var)
+            if j==0:
+                pm = ProfileManager(bm, i, bm._trueParams[i]*var, bm.defaultParams)
+            else:
+                pm = ProfileManager(bm, i, bm._trueParams[i]*var, out)
             if var == 1:
                 costs[j] = bm.cost(bm._trueParams)
-                out = pm.sample()
+                out = pm.set_params(pm.sample())
             else:
                 try:
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                 except:
                     out = pm.sample()
                 costs[j] = pm.cost(out)
+                out = pm.set_params(out)
             print('Variation: '+str(var))
             print('Cost found: '+str(costs[j]))
-            if j==0 or j==len(variations[i])-1 and plot:
+            if (j==0 or j==len(variations[i])-1) and plot:
                 bm.sim.reset()
-                bm.set_params(pm.set_params(out))
+                bm.set_params(out)
                 curr1 = bm.solve_model(np.arange(bm.tmax), continueOnError = True)
                 bm.sim.reset()
                 bm.set_params(bm._trueParams)
