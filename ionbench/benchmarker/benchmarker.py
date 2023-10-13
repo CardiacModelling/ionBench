@@ -387,6 +387,71 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput-self.data)**2
     
+    def grad(self, parameters, centreCost = None, incrementSolveCounter = True):
+        """
+        Find the gradient of the RMSE cost at the inputted parameters through finite difference. If the problem is bounded, it will attempt to only evaluate parameters inside the bounds.
+
+        Parameters
+        ----------
+        parameters : list or numpy array
+            Vector of parameters to solve the model.
+        centreCost : int, optional
+            The cost evaluated at parameters. If this has already been calculated, it can be passed in as an input to avoid recalculating (reducing the solveCount). Default is None, in which case it will be automatically calculated.
+        incrementSolveCounter : bool, optional
+            If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
+
+        Returns
+        -------
+        grad : array
+            The gradient of the RMSE cost, evalauted around the inputted parameters.
+        
+        """
+        def take_step(parameter, stepSize):
+            # Takes a step in parameter space. If the parameter is 0, the step size is given by stepSize, otherwise the step size is stepSize*parameter. Returns the perturbed parameter
+            if parameter == 0:
+                return stepSize
+            else:
+                return parameter*(1+stepSize)
+        #If inputted centre parameter vector is out of bounds, turn off bounds to avoid infinite costs
+        boundsTurnedOff = False
+        if not self.in_bounds(parameters):
+            warnings.warn("Parameters at the centre of the gradient calculator were out of bounds. Bounds will be turned off to avoid an infinite cost being used in the finite difference calculation.")
+            self._bounded = False
+            boundsTurnedOff = True
+        #If no centreCost was inputted, then calculate it
+        if centreCost == None:
+            centreCost = self.cost(parameters, incrementSolveCounter=incrementSolveCounter)
+        #Find step sizes that ensure the parameters are always inside the bounds
+        perturbationVector = np.zeros(self.n_parameters())
+        for i in range(self.n_parameters()):
+            stepSize = 1e-3 #Initial step size
+            perturbedPoint = np.copy(parameters)
+            perturbedPoint[i] = take_step(parameters[i],stepSize)
+            #If the current step size results in out of bounds parameters, reduce and flip the step direction
+            while not self.in_bounds(perturbedPoint):
+                if np.abs(stepSize) < 1e-6:
+                    #Avoid infinite loops
+                    warnings.warn("Failed to find a perturbed parameter vector that respects the bounds. Bounds will be turned off to avoid an infinite cost being used in the finite difference calculation.")
+                    self._bounded = False
+                    boundsTurnedOff = True
+                    break
+                stepSize = stepSize/(-2) #Flip side and shrink step size
+                perturbedPoint[i] = take_step(parameters[i],stepSize)
+            #Save the working step size
+            perturbationVector[i] = stepSize
+        #Calculate gradient by finite differences
+        grad = np.zeros(self.n_parameters())
+        for i in range(self.n_parameters()):
+            perturbedPoint = np.copy(parameters)
+            perturbedPoint[i] = take_step(parameters[i],perturbationVector[i])
+            perturbedCost = self.cost(perturbedPoint, incrementSolveCounter=incrementSolveCounter)
+            #Calculate by finite difference
+            grad[i] = (perturbedCost - centreCost)/(take_step(parameters[i],perturbationVector[i])-parameters[i])
+        #If the bounds had to be turned off to calculate the gradient, turn them back on now that it has been calculated
+        if boundsTurnedOff:
+            self._bounded = True
+        return grad
+    
     def set_params(self, parameters):
         """
         Set the parameters in the simulation object. Inputted parameters should be in the original parameter space.
