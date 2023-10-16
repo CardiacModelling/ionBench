@@ -69,6 +69,41 @@ class Problem():
         #returns to 0 after resetting
         self.bm.reset()
         assert self.bm.tracker.solveCount == 0
+        self.bm._bounded = False
+    
+    def test_grad(self):
+        threshold = 0.1
+        assert not self.bm._bounded
+        params = self.bm.sample()
+        self.bm.reset()
+        assert self.bm.tracker.solveCount == 0
+        self.bm.grad(params)
+        assert self.bm.tracker.solveCount == self.bm.n_parameters()+1
+        centreCost = self.bm.cost(params)
+        self.bm.reset()
+        self.bm.grad(params, centreCost)
+        assert self.bm.tracker.solveCount == self.bm.n_parameters()
+        self.bm.reset()
+        g = self.bm.grad(params, incrementSolveCounter = False)
+        assert self.bm.tracker.solveCount == 0
+        #Check bounds properties
+        #Bounds force step in other direction using bounds
+        self.bm.add_bounds([[-np.inf]*self.bm.n_parameters(),params])
+        assert self.bm.in_bounds(params)
+        g2 = self.bm.grad(params, centreCost)
+        assert all(np.logical_or(g != g2, g == 0)) #Since direction and step size has changed
+        assert all(np.abs(g-g2)<=threshold*np.abs(g)) #All should be close
+        #Bounds will be ignored if it cant find good nearby points in bounds
+        self.bm.add_bounds([params,params])
+        g2 = self.bm.grad(params, centreCost)
+        assert all(np.logical_or(g != g2, g == 0)) #Since step size will still be decreased
+        assert all(np.abs(g-g2)<=threshold*np.abs(g)) #All should be close
+        self.bm._bounded = False
+        #If centre is out of bounds, the bounds will be completely ignored
+        g = self.bm.grad(params*1.01, centreCost)
+        self.bm._bounded = True
+        g2 = self.bm.grad(params*1.01, centreCost)
+        assert all(g == g2)
 
 class Staircase(Problem):
     def test_sampler(self):

@@ -410,8 +410,11 @@ class Benchmarker():
             # Takes a step in parameter space. If the parameter is 0, the step size is given by stepSize, otherwise the step size is stepSize*parameter. Returns the perturbed parameter
             if parameter == 0:
                 return stepSize
-            else:
+            #Dont change direction depending on the sign of parameter (it makes it too confusing to test and think about)
+            elif parameter > 0:
                 return parameter*(1+stepSize)
+            else:
+                return parameter*(1-stepSize)
         #If inputted centre parameter vector is out of bounds, turn off bounds to avoid infinite costs
         boundsTurnedOff = False
         if not self.in_bounds(parameters):
@@ -424,21 +427,23 @@ class Benchmarker():
         #Find step sizes that ensure the parameters are always inside the bounds
         perturbationVector = np.zeros(self.n_parameters())
         for i in range(self.n_parameters()):
-            stepSize = 1e-3 #Initial step size
+            stepSize = 0.0004 #Initial step size, magic number balencing all problems
             perturbedPoint = np.copy(parameters)
             perturbedPoint[i] = take_step(parameters[i],stepSize)
             #If the current step size results in out of bounds parameters, reduce and flip the step direction
-            while not self.in_bounds(perturbedPoint):
-                if np.abs(stepSize) < 1e-6:
-                    #Avoid infinite loops
-                    warnings.warn("Failed to find a perturbed parameter vector that respects the bounds. Bounds will be turned off to avoid an infinite cost being used in the finite difference calculation.")
-                    self._bounded = False
-                    boundsTurnedOff = True
-                    break
-                stepSize = stepSize/(-2) #Flip side and shrink step size
+            if not self.in_bounds(perturbedPoint):
+                stepSize = stepSize*-1 #Flip perturbation direction
                 perturbedPoint[i] = take_step(parameters[i],stepSize)
+                #Avoid infinite loops
+                if not self.in_bounds(perturbedPoint):
+                    warnings.warn("Failed to find a perturbed parameter vector in one of the directions that respects the bounds. Bounds will be turned off before cost function is called to avoid an infinite cost being used in the finite difference calculation.")
+                    boundsTurnedOff = True
+                    #Bounds turned off is delayed to ensure first parameter isn't treated differently to others
             #Save the working step size
             perturbationVector[i] = stepSize
+        #Ensure bounds are off if they would be violated
+        if boundsTurnedOff:
+            self._bounded = False
         #Calculate gradient by finite differences
         grad = np.zeros(self.n_parameters())
         for i in range(self.n_parameters()):
