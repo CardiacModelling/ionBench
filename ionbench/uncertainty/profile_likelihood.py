@@ -103,6 +103,9 @@ def run(bm, variations, plot = True, filename = ''):
             else:
                 try:
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+                    if pm.cost(out) == np.inf:
+                        pm.MLE = bm.defaultParams
+                        out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                 except:
                     out = pm.sample()
                 costs[j] = pm.cost(out)
