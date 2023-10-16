@@ -71,6 +71,7 @@ class Problem():
         assert self.bm.tracker.solveCount == 0
         self.bm._bounded = False
     
+    @pytest.mark.filterwarnings("ignore:Parameters:UserWarning", "ignore:Failed:UserWarning")
     def test_grad(self):
         threshold = 0.1
         assert not self.bm._bounded
