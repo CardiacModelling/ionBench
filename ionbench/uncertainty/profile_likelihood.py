@@ -140,7 +140,7 @@ def plot_profile_likelihood(modelType, numberToPlot, ymax=0):
         with open(modelType+'_param'+str(i)+'.pickle', 'rb') as f:
             variations, costs = pickle.load(f)
         plt.figure()
-        plt.plot(variations[i], costs)
+        plt.plot(variations, costs)
         if not ymax == 0:
             plt.ylim(0,ymax)
         plt.title('Profile likelihood: '+modelType)
