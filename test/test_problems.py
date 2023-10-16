@@ -254,6 +254,10 @@ class Test_Moreno(Problem):
         assert param_equal(self.bm.original_parameter_space(np.zeros(self.bm.n_parameters())), self.bm.defaultParams)
         self.bm.log_transform([False]*self.bm.n_parameters())
         self.bm._useScaleFactors = False
+    
+    def test_grad(self):
+        #Ignore grad test for Moreno. Model is too expensive to solve that many times.
+        pass
 
 class Test_HH(Staircase):
     bm = ionbench.problems.staircase.HH_Benchmarker()
