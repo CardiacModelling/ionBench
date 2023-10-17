@@ -56,15 +56,15 @@ if __name__ == '__main__':
     bm.add_bounds([[1e-7]*8+[-np.inf], [1e3,0.4]*4+[np.inf]])
     run(bm)
 
-def get_approach():
+def get_modification():
     """
-    The approach in Clerx et al 2019. Uses log transforms, and bounds (technically they are bounds on rates here. We just use sampler bounds for now).
+    The modification in Clerx et al 2019. Uses log transforms, and bounds (technically they are bounds on rates here. We just use sampler bounds for now).
 
     Returns
     -------
-    app : approach
-        The approach used in Clerx et al 2019.
+    mod : modification
+        The modification used in Clerx et al 2019.
 
     """
-    app = ionbench.approach.Clerx2019()
-    return app
+    mod = ionbench.modification.Clerx2019()
+    return mod

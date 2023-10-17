@@ -120,15 +120,15 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug=True)
 
-def get_approach():
+def get_modification():
     """
-    The approach in Bot et al uses a bounded search space for fitting conductances. The bounds are specified as a window around the true values, such as +-90%, +-10%, or -90% to +200% (although these may just be sampling starting points). This is closest to matching the 'sampler' bounds setting. There is no mention of scaling factor or log transforms.
+    The modification in Bot et al uses a bounded search space for fitting conductances. The bounds are specified as a window around the true values, such as +-90%, +-10%, or -90% to +200% (although these may just be sampling starting points). This is closest to matching the 'sampler' bounds setting. There is no mention of scaling factor or log transforms.
 
     Returns
     -------
-    app : approach
-        The approach used in Bot et al 2012.
+    mod : modification
+        The modification used in Bot et al 2012.
 
     """
-    app = ionbench.approach.Bot2012()
-    return app
+    mod = ionbench.modification.Bot2012()
+    return mod

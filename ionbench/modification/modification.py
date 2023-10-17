@@ -1,18 +1,18 @@
 import ionbench
 import numpy as np
 
-class Approach():
+class Modification():
     """
-    Approaches provide a way to store some benchmarker settings and apply them to a range of benchmarkers. These settings include log-transforms, parameter bounds, and the use of scale factors. A single approach can be generated, and then applied to a range of benchmarkers. Once a Approach object is instantiated, its transforms and bounds can be applied to a benchmarker, bm, by calling approach.apply(bm)
+    Modifications provide a way to store some benchmarker settings and apply them to a range of benchmarkers. These settings include log-transforms, parameter bounds, and the use of scale factors. A single modification can be generated, and then applied to a range of benchmarkers. Once a Modification object is instantiated, its transforms and bounds can be applied to a benchmarker, bm, by calling modification.apply(bm)
     """
     def __init__(self, name = "", logTransform = 'None', bounds = 'None', scaleFactors = 'off', customLogTransform = None, customBounds = None):
         """
-        Initialise an Approach object. Once an Approach is built, its setting can be applied to any benchmarker, bm, by calling approach.apply(bm)
+        Initialise an Modification object. Once an Modification is built, its setting can be applied to any benchmarker, bm, by calling modification.apply(bm)
 
         Parameters
         ----------
         name : string, optional
-            A name for the approach. Useful for logging. The default is "".
+            A name for the modification. Useful for logging. The default is "".
         logTransform : string, optional
             Setting for log transforms. Options are 'None' (default, none of the parameters will be log transformed), 'Standard' (a problem specific set of parameters will be log transformed), 'Full' (all parameters will be log transformed), and 'Custom' (Log transformed parameters specified by the customLogTransform input will be log transformed).
         bounds : string, optional
@@ -36,12 +36,12 @@ class Approach():
     
     def apply(self, bm):
         """
-        Applies the settings in this approach to the inputted benchmarker. This will override any previous settings assigned to the benchmarker.
+        Applies the settings in this modification to the inputted benchmarker. This will override any previous settings assigned to the benchmarker.
 
         Parameters
         ----------
         bm : benchmarker
-            A benchmarker problem to apply this approach.
+            A benchmarker problem to apply this modification.
 
         Returns
         -------
@@ -59,9 +59,9 @@ class Approach():
         Parameters
         ----------
         setting : string
-            Setting for log transforms. Options are 'None' (default, none of the parameters will be log transformed), 'Standard' (a problem specific set of parameters will be log transformed), 'Full' (all parameters will be log transformed), and 'Custom' (Log transformed parameters specified by the customLogTransform input will be log transformed, only usable if customLogTransform was set during the creation of this approach, or approach.customLogTransform is set).
+            Setting for log transforms. Options are 'None' (default, none of the parameters will be log transformed), 'Standard' (a problem specific set of parameters will be log transformed), 'Full' (all parameters will be log transformed), and 'Custom' (Log transformed parameters specified by the customLogTransform input will be log transformed, only usable if customLogTransform was set during the creation of this modification, or modification.customLogTransform is set).
         bm : benchmarker
-            A benchmarker problem to apply this approach.
+            A benchmarker problem to apply this modification.
 
         Returns
         -------
@@ -91,7 +91,7 @@ class Approach():
         setting : string
             Setting for parameter bounds. Options are 'None' (default, none of the parameters will be bounds), 'Positive' (all parameters will have a lower bound of 0 and no upper bound), 'Sampler' (problem specific bounds using the range in the benchmarkers sampler will be used), and 'Custom' (Bounds on parameters specified by the customBounds input will be used). The default is 'None'.
         bm : benchmarker
-            A benchmarker problem to apply this approach.
+            A benchmarker problem to apply this modification.
 
         Returns
         -------
@@ -135,7 +135,7 @@ class Approach():
         setting : string
             Setting for scale factors. Options are 'off' (default, scale factors won't be used), and 'on' (scale factors will be used, with the default parameters representing 1).
         bm : benchmarker
-            A benchmarker problem to apply this approach.
+            A benchmarker problem to apply this modification.
 
         Returns
         -------
@@ -151,9 +151,9 @@ class Approach():
         else:
             print("'"+setting+"' is not a valid option for scale factors. Please use either 'on' or 'off'.")
 
-class Clerx2019(Approach):
+class Clerx2019(Modification):
     """
-    The approach from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
+    The modification from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
     """
     def __init__(self):
         logTransform = 'Standard'
@@ -162,9 +162,9 @@ class Clerx2019(Approach):
         name = 'Clerx2019'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Loewe2016(Approach):
+class Loewe2016(Modification):
     """
-    The approach from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    The modification from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
     """
     def __init__(self):
         logTransform = 'None'
@@ -173,9 +173,9 @@ class Loewe2016(Approach):
         name = 'Loewe2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Bot2012(Approach):
+class Bot2012(Modification):
     """
-    The approach from Bot et al 2012. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    The modification from Bot et al 2012. Uses no log transforms, bounds defined by the sampler, and no scale factors.
     """
     def __init__(self):
         logTransform = 'None'
@@ -184,9 +184,9 @@ class Bot2012(Approach):
         name = 'Bot2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Kohjitani2022(Approach):
+class Kohjitani2022(Modification):
     """
-    The approach from Kohjitani et al 2022. Uses scaling factors only.
+    The modification from Kohjitani et al 2022. Uses scaling factors only.
     """
     def __init__(self):
         logTransform = 'None'
@@ -195,9 +195,9 @@ class Kohjitani2022(Approach):
         name = 'Kohjitani2022'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Chen2012(Approach):
+class Chen2012(Modification):
     """
-    The approach from Chen et al 2012. Uses sampler bounds only.
+    The modification from Chen et al 2012. Uses sampler bounds only.
     """
     def __init__(self):
         logTransform = 'None'
@@ -206,9 +206,9 @@ class Chen2012(Approach):
         name = 'Chen2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Empty(Approach):
+class Empty(Modification):
     """
-    An approach with default settings.
+    An modification with default settings.
     """
     def __init__(self, name = ""):
         logTransform = 'None'

@@ -2,7 +2,7 @@ import os
 from ionbench import benchmarker
 from ionbench import problems
 from ionbench import optimisers
-from ionbench import approach
+from ionbench import modification
 from ionbench import uncertainty
 from ionbench.multistart import *
 

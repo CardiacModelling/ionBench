@@ -1,6 +1,5 @@
 import pytest
 import ionbench
-from ionbench import approach
 import numpy as np
 import matplotlib.pyplot as plt
 

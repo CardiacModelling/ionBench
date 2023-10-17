@@ -162,15 +162,15 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm,debug=True)
 
-def get_approach():
+def get_modification():
     """
-    The approach in Loewe et al uses a bounded search space with no transforms. The bounds are the same as for the sampler.
+    The modification in Loewe et al uses a bounded search space with no transforms. The bounds are the same as for the sampler.
 
     Returns
     -------
-    app : approach
-        The approach used in Loewe et al 2016.
+    mod : modification
+        The modification used in Loewe et al 2016.
 
     """
-    app = ionbench.approach.Loewe2016()
-    return app
+    mod = ionbench.modification.Loewe2016()
+    return mod

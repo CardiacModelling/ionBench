@@ -1,10 +1,10 @@
 import ionbench
 import numpy as np
 
-#Load approaches with all settings
-empty = ionbench.approach.Approach()
-full = ionbench.approach.Approach(logTransform='Full',bounds='positive',scaleFactors='on')
-problemSpecific = ionbench.approach.Approach(logTransform='standard',bounds='Sampler',scaleFactors='On')
+#Load modifications with all settings
+empty = ionbench.modification.Modification()
+full = ionbench.modification.Modification(logTransform='Full',bounds='positive',scaleFactors='on')
+problemSpecific = ionbench.modification.Modification(logTransform='standard',bounds='Sampler',scaleFactors='On')
 
 bmHH = ionbench.problems.staircase.HH_Benchmarker()
 bmMM = ionbench.problems.staircase.MM_Benchmarker()
@@ -35,9 +35,9 @@ for i in range(len(bm)):
     bm[i].cost(bm[i].sample())
 
 
-#Custom approach
+#Custom modification
 bmHH = ionbench.problems.staircase.HH_Benchmarker()
-custom = ionbench.approach.Approach(logTransform='custom', bounds='custom', scaleFactors='off', customLogTransform = [True, True, False]*3, customBounds = [[-1]*3+[0]*3+[-np.inf]*3, [1]*3+[100]*3+[np.inf]*3])
+custom = ionbench.modification.Modification(logTransform='custom', bounds='custom', scaleFactors='off', customLogTransform = [True, True, False]*3, customBounds = [[-1]*3+[0]*3+[-np.inf]*3, [1]*3+[100]*3+[np.inf]*3])
 custom.apply(bmHH)
 print(bmHH._bounded)
 print(any(bmHH._logTransformParams) and not all(bmHH._logTransformParams))

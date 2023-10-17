@@ -51,15 +51,15 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
 
-def get_approach():
+def get_modification():
     """
-    No approach specified. Will use an empty approach
+    No modification specified. Will use an empty modification
 
     Returns
     -------
-    app : approach
-        Empty approach
+    mod : modification
+        Empty modification
 
     """
-    app = ionbench.approach.Empty(name = 'nelderMead_scipy')
-    return app
+    mod = ionbench.modification.Empty(name = 'nelderMead_scipy')
+    return mod

@@ -42,15 +42,15 @@ if __name__ == '__main__':
     bm.log_transform([True, False]*4+[False])
     run(bm)
 
-def get_approach():
+def get_modification():
     """
-    No approach specified. Will use an empty approach
+    No modification specified. Will use an empty modification
 
     Returns
     -------
-    app : approach
-        Empty approach
+    mod : modification
+        Empty modification
 
     """
-    app = ionbench.approach.Empty(name = 'xnes_pints')
-    return app
+    mod = ionbench.modification.Empty(name = 'xnes_pints')
+    return mod

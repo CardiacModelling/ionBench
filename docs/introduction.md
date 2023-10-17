@@ -82,12 +82,12 @@ We currently have five optimisers defined from other papers for ion channel fitt
 ### SPSA
 Finally, we have an implementation of SPSA (Simultaneous Perturbation Stochastic Approximation) using the ***spsa*** python package. This currently converges very slowly so either needs tuning in the hyper-parameters or a new version needs to be written. 
 
-## Approaches
-Some optimisation algorithms come with recommendations for other characteristics such as log-transforms or bounds to be applied to the parameters. These are implemented in ***ionBench*** through the use of approaches. Approaches store benchmarker settings, such as to log-transform parameters, add bounds, or use scale factors, that can then be applied to any benchmarker problem object. 
+## Modifications
+Some optimisation algorithms come with recommendations for other characteristics such as log-transforms or bounds to be applied to the parameters. These are implemented in ***ionBench*** through the use of modifications. Modifications store benchmarker settings, such as to log-transform parameters, add bounds, or use scale factors, that can then be applied to any benchmarker problem object. 
 
-They can be particularly useful if you want to apply problem-specific settings, such as bounds determined by the problem-specific sampling function. In addition to constructing a new approach, standard approach defined by different papers can also be loaded.
+They can be particularly useful if you want to apply problem-specific settings, such as bounds determined by the problem-specific sampling function. In addition to constructing a new modification, standard modifications defined by different papers can also be loaded.
 
-Each optimiser has a `.get_approach()` function which will get the recommended approach for that particular optimiser.
+Each optimiser has a `.get_modification()` function which will get the recommended modification for that particular optimiser.
 
 ## Uncertainty
 There are two uncertainty and unindentifiability tools built into ***ionBench***. The first is a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem. The second is a Fisher's Information Matrix calculator. This uses the curvature of the likelihood to find the FIM but it will likely be switched over to a MCMC approach at some point so its a bit more reliable. 

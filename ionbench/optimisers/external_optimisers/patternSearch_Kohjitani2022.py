@@ -89,15 +89,15 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug = True)
 
-def get_approach():
+def get_modification():
     """
-    The approach in Kojitani et al 2022 uses scaling factors. They have bounds on the sampling but I don't think they use these in the optimisation.
+    The modification in Kojitani et al 2022 uses scaling factors. They have bounds on the sampling but I don't think they use these in the optimisation.
 
     Returns
     -------
-    app : approach
-        The approach used in Kohjitani et al 2022.
+    mod : modification
+        The modification used in Kohjitani et al 2022.
 
     """
-    app = ionbench.approach.Kohjitani2022()
-    return app
+    mod = ionbench.modification.Kohjitani2022()
+    return mod

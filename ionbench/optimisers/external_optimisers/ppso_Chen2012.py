@@ -251,15 +251,15 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm,groups,debug=True)
 
-def get_approach():
+def get_modification():
     """
-    The approach in Chen et al 2012 uses bounds. The method also uses scale factors in such a way that the range of parameters is bounded between 0 and 1, however, this is done automatically in the optimisers for bounded benchmarkers.
+    The modification in Chen et al 2012 uses bounds. The method also uses scale factors in such a way that the range of parameters is bounded between 0 and 1, however, this is done automatically in the optimisers for bounded benchmarkers.
 
     Returns
     -------
-    app : approach
-        The approach used in Chen et al 2012.
+    mod : modification
+        The modification used in Chen et al 2012.
 
     """
-    app = ionbench.approach.Chen2012()
-    return app
+    mod = ionbench.modification.Chen2012()
+    return mod

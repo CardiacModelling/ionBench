@@ -162,9 +162,9 @@ class Staircase(Problem):
 class Loewe(Problem):
     def test_sampler(self):
         #Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
-        #Get bounds from an approach
-        app = ionbench.approach.Approach(bounds='Sampler')
-        app.apply(self.bm)
+        #Get bounds from a modification
+        mod = ionbench.modification.Modification(bounds='Sampler')
+        mod.apply(self.bm)
         lb = self.bm.lb
         ub = self.bm.ub
         self.bm._bounded = False

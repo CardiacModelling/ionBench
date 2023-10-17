@@ -6,7 +6,7 @@ The tree structure of this project is outlined below.
 ```
 ├───docs
 ├───ionbench
-│   ├───approach
+│   ├───modification
 │   ├───benchmarker
 │   ├───data
 │   │   ├───loewe2016
@@ -29,7 +29,7 @@ The __docs__ directory contains information and guides on how to use the benchma
 
 The __ionbench__ directory contains the majority of the code, including the benchmarker and problems classes and the different optimisation algorithms. This is what is installed using pip.
 
-* The __approach__ subdirectory contains the approach classes, generalised settings for handling transformations and bounds. 
+* The __modification__ subdirectory contains the modification classes, generalised settings for handling transformations and bounds. 
 
 * The __benchmarker__ subdirectory contains the main __Benchmarker__ class that the test problems all inherit from and defines the core features of the benchmarkers. It also contains the __Tracker__ class which contains the functions to take performance metrics over time.
     
@@ -54,12 +54,12 @@ Note that ***ionBench*** uses ***myokit*** to do its simulations, which relies o
 If you want to use ***ionBench***, check out the __introduction__ and __tutorial__ in the __docs__ directory.
 
 ## Workflow
-The intended workflow for using the benchmarker is to generate a benchmarker object, setup the optimisers approach and apply it to the benchmarker, and pass the benchmarker into the optimisation algorithm to evaluate. All optimisers should accept a single benchmarker as input with all other inputs being optional. 
+The intended workflow for using the benchmarker is to generate a benchmarker object, setup the optimisers modification and apply it to the benchmarker, and pass the benchmarker into the optimisation algorithm to evaluate. All optimisers should accept a single benchmarker as input with all other inputs being optional. 
 ```
 import ionbench
 bm = ionbench.problems.staircase.HH_Benchmarker()
-approach = ionbench.optimisers.pints_optimisers.cmaes_pints.get_approach()
-approach.apply(bm)
+modification = ionbench.optimisers.pints_optimisers.cmaes_pints.get_modification()
+modification.apply(bm)
 optimisedParameters = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm)
 ```
 
