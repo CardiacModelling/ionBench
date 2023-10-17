@@ -290,6 +290,30 @@ class Benchmarker():
         
         return parameters
     
+    def transform_jacobian(self, parameters):
+        """
+        Finds the jacobian for the current parameter transform for derivatives calculated in original parameter space to be mapped to the input paramete space. 
+
+        Parameters
+        ----------
+        parameters : array
+            Parameter vector at which the jacobian should be calculated. Given in input parameter space.
+
+        Returns
+        -------
+        derivs : array
+            Vector of transform derivaties. To map a derivative that was calculated in original parameter space to one calculated in input parameter space, it should be multiplied elementwise by derivs.
+
+        """
+        derivs = np.ones(self.n_parameters())
+        for i in range(self.n_parameters()):
+            if self._logTransformParams[i]:
+                derivs[i] *= np.exp(parameters[i])
+            if self._useScaleFactors:
+                derivs[i] *= self.defaultParams[i]
+        
+        return derivs
+    
     def in_bounds(self, parameters):
         """
         Checks if parameters are inside any bounds. If benchmarker._bounded = False, then it always returns True.
@@ -387,7 +411,7 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput-self.data)**2
     
-    def grad(self, parameters, centreCost = None, incrementSolveCounter = True):
+    def grad(self, parameters, centreCost = None, incrementSolveCounter = True, inInputSpace = True):
         """
         Find the gradient of the RMSE cost at the inputted parameters through finite difference. If the problem is bounded, it will attempt to only evaluate parameters inside the bounds.
 
@@ -399,6 +423,8 @@ class Benchmarker():
             The cost evaluated at parameters. If this has already been calculated, it can be passed in as an input to avoid recalculating (reducing the solveCount). Default is None, in which case it will be automatically calculated.
         incrementSolveCounter : bool, optional
             If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
+        inInputSpace : bool
+            Specifies whether the inputted parameters are in input space. If True, then the derivative will be calculated in input space as well. The default is True.
 
         Returns
         -------
@@ -415,6 +441,9 @@ class Benchmarker():
                 return parameter*(1+stepSize)
             else:
                 return parameter*(1-stepSize)
+        
+        if inInputSpace:
+            parameters = self.original_parameter_space(parameters) #Parameters stored in this function are always stored in original parameter space
         #If inputted centre parameter vector is out of bounds, turn off bounds to avoid infinite costs
         boundsTurnedOff = False
         if not self.in_bounds(parameters):
@@ -423,11 +452,11 @@ class Benchmarker():
             boundsTurnedOff = True
         #If no centreCost was inputted, then calculate it
         if centreCost == None:
-            centreCost = self.cost(parameters, incrementSolveCounter=incrementSolveCounter)
+            centreCost = self.cost(self.input_parameter_space(parameters), incrementSolveCounter=incrementSolveCounter)
         #Find step sizes that ensure the parameters are always inside the bounds
         perturbationVector = np.zeros(self.n_parameters())
         for i in range(self.n_parameters()):
-            stepSize = 0.0004 #Initial step size, magic number balencing all problems
+            stepSize = 0.0004 #Initial step size, magic number balancing all problems
             perturbedPoint = np.copy(parameters)
             perturbedPoint[i] = take_step(parameters[i],stepSize)
             #If the current step size results in out of bounds parameters, reduce and flip the step direction
@@ -449,9 +478,12 @@ class Benchmarker():
         for i in range(self.n_parameters()):
             perturbedPoint = np.copy(parameters)
             perturbedPoint[i] = take_step(parameters[i],perturbationVector[i])
-            perturbedCost = self.cost(perturbedPoint, incrementSolveCounter=incrementSolveCounter)
+            perturbedCost = self.cost(self.input_parameter_space(perturbedPoint), incrementSolveCounter=incrementSolveCounter)
             #Calculate by finite difference
-            grad[i] = (perturbedCost - centreCost)/(take_step(parameters[i],perturbationVector[i])-parameters[i])
+            grad[i] = (perturbedCost - centreCost)/(perturbedPoint[i]-parameters[i])
+        if inInputSpace:
+            derivs = self.transform_jacobian(self.input_parameter_space(parameters))
+            grad *= derivs
         #If the bounds had to be turned off to calculate the gradient, turn them back on now that it has been calculated
         if boundsTurnedOff:
             self._bounded = True

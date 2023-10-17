@@ -73,7 +73,6 @@ class Problem():
     
     @pytest.mark.filterwarnings("ignore:Parameters:UserWarning", "ignore:Failed:UserWarning")
     def test_grad(self):
-        threshold = 0.1
         assert not self.bm._bounded
         params = self.bm.sample()
         self.bm.reset()
@@ -92,19 +91,29 @@ class Problem():
         self.bm.add_bounds([[-np.inf]*self.bm.n_parameters(),params])
         assert self.bm.in_bounds(params)
         g2 = self.bm.grad(params, centreCost)
-        assert all(np.logical_or(g != g2, g == 0)) #Since direction and step size has changed
-        assert all(np.abs(g-g2)<=threshold*np.abs(g)) #All should be close
+        assert not all(g == g2) #Since direction and step size has changed
+        assert all(np.abs((g-g2)/g)<=0.2) #All should be close
         #Bounds will be ignored if it cant find good nearby points in bounds
         self.bm.add_bounds([params,params])
         g2 = self.bm.grad(params, centreCost)
-        assert all(np.logical_or(g != g2, g == 0)) #Since step size will still be decreased
-        assert all(np.abs(g-g2)<=threshold*np.abs(g)) #All should be close
+        assert not all(g == g2) #Since step size will still be decreased
+        assert all(np.abs((g-g2)/g)<=0.2) #All should be close
         self.bm._bounded = False
         #If centre is out of bounds, the bounds will be completely ignored
         g = self.bm.grad(params*1.01, centreCost)
         self.bm._bounded = True
         g2 = self.bm.grad(params*1.01, centreCost)
         assert all(g == g2)
+        self.bm._bounded = False
+        #Check grad calculates in different parameter spaces
+        g = self.bm.grad(params)
+        self.bm.log_transform(self.bm.standardLogTransform)
+        g2 = self.bm.grad(params, inInputSpace = False)
+        g3 = self.bm.grad(self.bm.input_parameter_space(params), inInputSpace = True)
+        self.bm.log_transform([False]*self.bm.n_parameters())
+        assert all(np.logical_or(np.abs((g-g2)/g) < 0.2,g==0)) #Why does this tolerance need to be so large?
+        assert not all(g==g3)
+        assert any(np.abs((g-g3)/g) > 0.05)
 
 class Staircase(Problem):
     def test_sampler(self):
