@@ -51,15 +51,28 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
 
-def get_modification():
+def get_modification(modNum = 1):
     """
-    No modification specified. Will use an empty modification
+    modNum = 1 -> Balser1990
+    modNum = 2 -> Davies2011
+    modNum = 3 -> Iozzia2014
+    modNum = 4 -> Moreno2016
 
     Returns
     -------
     mod : modification
-        Empty modification
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Balser1990.
 
     """
-    mod = ionbench.modification.Empty(name = 'nelderMead_scipy')
+    
+    if modNum == 1:
+        mod = ionbench.modification.Balser1990()
+    elif modNum == 2:
+        mod = ionbench.modification.Davies2011()
+    elif modNum == 3:
+        mod = ionbench.modification.Iozzia2014()
+    elif modNum == 4:
+        mod = ionbench.modification.Moreno2016()
+    else:
+        mod = ionbench.modification.Empty(name = 'nelderMead_scipy')
     return mod

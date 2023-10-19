@@ -151,26 +151,45 @@ class Modification():
         else:
             print("'"+setting+"' is not a valid option for scale factors. Please use either 'on' or 'off'.")
 
-class Clerx2019(Modification):
-    """
-    The modification from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
-    """
-    def __init__(self):
-        logTransform = 'Standard'
-        bounds = 'Sampler'
-        scaleFactors = 'off'
-        name = 'Clerx2019'
-        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Loewe2016(Modification):
-    """
-    The modification from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
-    """
+class Achard2006(Modification):
     def __init__(self):
         logTransform = 'None'
         bounds = 'Sampler'
         scaleFactors = 'off'
-        name = 'Loewe2012'
+        name = 'Archard2006'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Amrit2023(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Amrit2023'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Balser1990(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Balser1990'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Belletti2021(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'on'
+        name = 'Belletti2021'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class BenShalom2012(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'BenShalom2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
 class Bot2012(Modification):
@@ -180,19 +199,32 @@ class Bot2012(Modification):
     def __init__(self):
         logTransform = 'None'
         bounds = 'Sampler'
-        scaleFactors = 'off'
+        scaleFactors = 'on'
         name = 'Bot2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
-class Kohjitani2022(Modification):
-    """
-    The modification from Kohjitani et al 2022. Uses scaling factors only.
-    """
+class BuenoOrovio2008(Modification):
     def __init__(self):
         logTransform = 'None'
-        bounds = 'None'
-        scaleFactors = 'on'
-        name = 'Kohjitani2022'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'BuenoOrovio2008'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Cabo2022(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Cabo2022'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Cairns2017(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Cairns2017'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
 class Chen2012(Modification):
@@ -206,6 +238,303 @@ class Chen2012(Modification):
         name = 'Chen2012'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
 
+class Clancy1999(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Clancy1999'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Clausen2020(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler' #Bounds should actually change between PSO and Nelder Mead
+        scaleFactors = 'off'
+        name = 'Clausen2020'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Clerx2019(Modification):
+    """
+    The modification from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
+    """
+    def __init__(self):
+        logTransform = 'Standard'
+        bounds = 'Sampler' #Bounds should be on rates too
+        scaleFactors = 'off'
+        name = 'Clerx2019'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Davies2011(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Positive'
+        scaleFactors = 'on'
+        name = 'Davies2011'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Dokos2004(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler' #Technically upper and lower bounds are done through a custom transformation
+        scaleFactors = 'off'
+        name = 'Dokos2004'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Druckmann2007(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Druckmann2007'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Du2014(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler' #Only say constainted optimisation
+        scaleFactors = 'off'
+        name = 'Du2014'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Epstein2016(Modification):
+    def __init__(self):
+        logTransform = 'Full'
+        bounds = 'Sampler'
+        scaleFactors = 'on'
+        name = 'Epstein2016'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Groenendaal2015(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'on'
+        name = 'Groenendaal2015'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Guo2010(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Guo2010'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Gurkiewicz2007(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Gurkiewicz2007'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Hendrikson2011(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Hendrikson2011'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Houston2020(Modification):
+    def __init__(self):
+        logTransform = 'Standard'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Houston2020'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Iozzia2014(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Iozzia2014'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class JedrzejewskiSzmek2018(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'JedrzejewskiSzmek2018'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Kaur2014(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Kaur2014'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Kohjitani2022(Modification):
+    """
+    The modification from Kohjitani et al 2022. Uses scaling factors only.
+    """
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'on'
+        name = 'Kohjitani2022'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Liu2011(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Liu2011'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Loewe2016(Modification):
+    """
+    The modification from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    """
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Loewe2012'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Maryak1998(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Maryak1998'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Meliza2014(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Meliza2014'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Moreno2016(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Positive'
+        scaleFactors = 'off'
+        name = 'Moreno2016'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Munch2022(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Munch2022'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Nogaret2016(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Nogaret2016'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Nogaret2022(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Nogaret2022'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Sachse2003(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Sachse2003'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Seemann2009(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Seemann2009'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Smirnov2020(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'on'
+        name = 'Smirnov2020'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Syed2005(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Syed2005'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Taylor2020(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Taylor2020'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Vanier1999(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler' #Finite volume search space for one approach. Wasn't clear what this search space is
+        scaleFactors = 'on' #Its only actually on some parameter here
+        name = 'Vanier1999'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Vavoulis2012(Modification):
+    def __init__(self):
+        logTransform = 'Full'
+        bounds = 'Sampler'
+        scaleFactors = 'on'
+        name = 'Vavoulis2012'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Weber2008(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Weber2008'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Wilhelms2012a(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Wilhelms2012a'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Wilhelms2012b(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'
+        scaleFactors = 'off'
+        name = 'Wilhelms2012b'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
+class Zhou2009(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'None'
+        scaleFactors = 'off'
+        name = 'Zhou2009'
+        super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
 class Empty(Modification):
     """
     An modification with default settings.
@@ -215,3 +544,4 @@ class Empty(Modification):
         bounds = 'None'
         scaleFactors = 'off'
         super().__init__(name = name, logTransform = logTransform, bounds = bounds, scaleFactors = scaleFactors)
+
