@@ -14,11 +14,11 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         if self.sensitivityCalc:
             #ODE solver
             sens = ([self._outputName],parameters)
-            self.sim = myokit.Simulation(self.model, sensitivities=sens, protocol = self.add_protocol())
+            self.sim = myokit.Simulation(self.model, sensitivities=sens, protocol = self.protocol())
         else:
             #analytical model
             self._analyticalModel = myokit.lib.hh.HHModel(model = self.model, states = states, parameters = parameters, current = self._outputName, vm = 'membrane.V')
-            self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+            self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.sim.pre(500) #Prepace for 500ms
         super().__init__()
     
@@ -51,7 +51,7 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         else:
             return params
         
-    def add_protocol(self):
+    def protocol(self):
         """
         Add the protocol from Loewe et al 2016. This protocol consists of 20ms at -80mV, a variable height step between 50mV and -70mV (in steps of 10mV) for 400ms and then 400ms at -110mV before repeating with a new height for the central step (in order of decreasing voltage).
 

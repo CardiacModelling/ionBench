@@ -17,9 +17,9 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             sens = ([self._outputName],paramNames)
         else:
             sens = None
-        self.sim = myokit.Simulation(self.model, sensitivities=sens)
+        self.sim = myokit.Simulation(self.model, sensitivities=sens, protocol = self.protocol())
         self.sim.set_tolerance(1e-8,1e-8)
-        self.add_protocol()
+        self.sim.pre(500) #Prepace for 500ms
         super().__init__()
     
     def sample(self, n=1):
@@ -45,11 +45,10 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
         else:
             return params
     
-    def add_protocol(self):
+    def protocol(self):
         protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
-        self.sim.set_protocol(protocol)
         self.tmax = self._log.time()[-1]
-        self.sim.pre(500) #Prepace for 500ms
+        return protocol
         
 class HH_Benchmarker(Staircase_Benchmarker):
     """

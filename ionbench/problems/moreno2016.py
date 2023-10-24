@@ -27,7 +27,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._trueParams = np.copy(self.defaultParams)
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         self._analyticalModel = markov.LinearModel(model = self.model, states = ['ina.'+s for s in ['ic3','ic2','if','c3','c2','c1','o','is']], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
-        self.sim = myokit.Simulation(self.model, protocol=self.add_protocol())
+        self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.pre(500) #Prepace for 500ms
         self.sensitivityCalc = False #Moreno currently can't do sensitivities
         super().__init__()
@@ -59,7 +59,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         else:
             return params
     
-    def add_protocol(self):
+    def protocol(self):
         """
         Add the protocol from Moreno et al 2016. This is a series of steps, used for forming the summary statistic curves. This also sets the timepoints that need to be recorded to evaluate these summary statistics.
 

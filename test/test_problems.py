@@ -88,8 +88,6 @@ class Problem():
         self.bm.log_transform([False]*self.bm.n_parameters())
         assert grad_check(bm=self.bm, plotting = plotting)<0.01
         #Reset bm
-        if 'loewe' in self.bm._name:
-            self.bm.sim = myokit.lib.hh.AnalyticalSimulation(self.bm._analyticalModel, protocol=self.bm.add_protocol())
         self.bm._useScaleFactors = False
         self.bm.use_sensitivities(False)
 

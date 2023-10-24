@@ -427,18 +427,16 @@ class Benchmarker():
         """
         if sens == True:
             paramNames = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())]
-            self.sim = myokit.Simulation(self.model, sensitivities=([self._outputName],paramNames))
+            self.sim = myokit.Simulation(self.model, protocol=self.protocol(), sensitivities=([self._outputName],paramNames))
             self.sim.set_tolerance(1e-8,1e-8)
-            self.add_protocol()
             self.sensitivityCalc = True
         else:
             if 'loewe' in self._name:
-                self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+                self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
                 self.sensitivityCalc = False
             else:
-                self.sim = myokit.Simulation(self.model)
+                self.sim = myokit.Simulation(self.model, protocol=self.protocol())
                 self.sim.set_tolerance(1e-8,1e-8)
-                self.add_protocol()
                 self.sensitivityCalc = False
             
     def grad(self, parameters, incrementSolveCounter = True, inInputSpace = True):
