@@ -3,6 +3,7 @@ import ionbench
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+import myokit
 
 class Problem():
     def test_cost(self):
@@ -26,6 +27,7 @@ class Problem():
         assert hasattr(self.bm, "_logTransformParams")
         assert hasattr(self.bm, "plotter")
         assert hasattr(self.bm, "tracker")
+        assert hasattr(self.bm, "sensitivityCalc")
     
     def test_plotter(self, monkeypatch):
         #Test plotting functionality runs for evaluate
@@ -70,50 +72,26 @@ class Problem():
         self.bm.reset()
         assert self.bm.tracker.solveCount == 0
         self.bm._bounded = False
-    
-    @pytest.mark.filterwarnings("ignore:Parameters:UserWarning", "ignore:Failed:UserWarning")
-    def test_grad(self):
-        assert not self.bm._bounded
-        params = self.bm.sample()
-        self.bm.reset()
-        assert self.bm.tracker.solveCount == 0
-        self.bm.grad(params)
-        assert self.bm.tracker.solveCount == self.bm.n_parameters()+1
-        centreCost = self.bm.cost(params)
-        self.bm.reset()
-        self.bm.grad(params, centreCost)
-        assert self.bm.tracker.solveCount == self.bm.n_parameters()
-        self.bm.reset()
-        g = self.bm.grad(params, incrementSolveCounter = False)
-        assert self.bm.tracker.solveCount == 0
-        #Check bounds properties
-        #Bounds force step in other direction using bounds
-        self.bm.add_bounds([[-np.inf]*self.bm.n_parameters(),params])
-        assert self.bm.in_bounds(params)
-        g2 = self.bm.grad(params, centreCost)
-        assert not all(g == g2) #Since direction and step size has changed
-        assert all(np.abs((g-g2)/g)<=0.2) #All should be close
-        #Bounds will be ignored if it cant find good nearby points in bounds
-        self.bm.add_bounds([params,params])
-        g2 = self.bm.grad(params, centreCost)
-        assert not all(g == g2) #Since step size will still be decreased
-        assert all(np.abs((g-g2)/g)<=0.2) #All should be close
-        self.bm._bounded = False
-        #If centre is out of bounds, the bounds will be completely ignored
-        g = self.bm.grad(params*1.01, centreCost)
-        self.bm._bounded = True
-        g2 = self.bm.grad(params*1.01, centreCost)
-        assert all(g == g2)
-        self.bm._bounded = False
-        #Check grad calculates in different parameter spaces
-        g = self.bm.grad(params)
-        self.bm.log_transform(self.bm.standardLogTransform)
-        g2 = self.bm.grad(params, inInputSpace = False)
-        g3 = self.bm.grad(self.bm.input_parameter_space(params), inInputSpace = True)
+        
+    @pytest.mark.filterwarnings("ignore:Current:UserWarning")
+    def test_grad(self, plotting = False):
+        self.bm.use_sensitivities(True)
+        #Check gradient calculator is accurate
+        assert grad_check(bm=self.bm, plotting = plotting)<0.01  #Within 1% to account for solver noise
+        #Same under log transforms
+        self.bm.log_transform([True]+[False]*(self.bm.n_parameters()-1))
+        assert grad_check(bm=self.bm, plotting = plotting)<0.01
+        #Same under scale factor and log transforms
+        self.bm._useScaleFactors = True
+        assert grad_check(bm=self.bm, plotting = plotting)<0.01
+        #Same under scale factor only
         self.bm.log_transform([False]*self.bm.n_parameters())
-        assert all(np.logical_or(np.abs((g-g2)/g) < 0.2,g==0)) #Why does this tolerance need to be so large?
-        assert not all(g==g3)
-        assert any(np.abs((g-g3)/g) > 0.05)
+        assert grad_check(bm=self.bm, plotting = plotting)<0.01
+        #Reset bm
+        if 'loewe' in self.bm._name:
+            self.bm.sim = myokit.lib.hh.AnalyticalSimulation(self.bm._analyticalModel, protocol=self.bm.add_protocol())
+        self.bm._useScaleFactors = False
+        self.bm.use_sensitivities(False)
 
 class Staircase(Problem):
     def test_sampler(self):
@@ -265,7 +243,7 @@ class Test_Moreno(Problem):
         self.bm._useScaleFactors = False
     
     def test_grad(self):
-        #Ignore grad test for Moreno. Model is too expensive to solve that many times.
+        #Ignore grad test for Moreno. This problem cant use the grad yet.
         pass
 
 class Test_HH(Staircase):
@@ -308,3 +286,29 @@ def param_equal(p1, p2):
     Test function to check if two parameters are equal
     """
     return all(np.abs(p1 - p2)<1e-10)
+
+def grad_check(bm, plotting = False):
+    """
+    Test function for checking gradient matches perturbing the cost function
+    """
+    x0 = bm.sample()
+    if plotting:
+        paramVec = np.linspace(0.99*x0[0],1.01*x0[0],10)
+    else:
+        paramVec = [0.99*x0[0],1.01*x0[0]]
+    nPoints = len(paramVec)
+    costs = np.zeros(nPoints)
+    for i in range(nPoints):
+        p = np.copy(x0)
+        p[0] = paramVec[i]
+        costs[i] = bm.cost(p)
+    grad = bm.grad(x0)
+    
+    centreCost = bm.cost(x0)
+    if plotting:
+        plt.plot(paramVec, costs)
+        plt.plot(paramVec, centreCost+grad[0]*(paramVec-x0[0]))
+        plt.legend(['ODE cost','Grad'])
+        plt.show()
+    actualGrad = (costs[-1]-costs[0])/(paramVec[-1]-paramVec[0])
+    return (actualGrad-grad[0])**2/actualGrad

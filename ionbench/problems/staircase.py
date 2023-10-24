@@ -12,7 +12,12 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data'+self._modelType+'.csv'))
         except FileNotFoundError:
             self.data = None
-        self.sim = myokit.Simulation(self.model)
+        if self.sensitivityCalc:
+            paramNames = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())]
+            sens = ([self._outputName],paramNames)
+        else:
+            sens = None
+        self.sim = myokit.Simulation(self.model, sensitivities=sens)
         self.sim.set_tolerance(1e-8,1e-8)
         self.add_protocol()
         super().__init__()
@@ -54,7 +59,7 @@ class HH_Benchmarker(Staircase_Benchmarker):
     
     Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
     """
-    def __init__(self):
+    def __init__(self, sensitivities = False):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self._name = "staircase.hh"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
@@ -64,6 +69,7 @@ class HH_Benchmarker(Staircase_Benchmarker):
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
         self._rateFunctions = [(lambda p,V:p[0]*np.exp(p[1]*V), 'positive'), (lambda p,V:p[2]*np.exp(-p[3]*V), 'negative'), (lambda p,V:p[4]*np.exp(p[5]*V), 'positive'), (lambda p,V:p[6]*np.exp(-p[7]*V), 'negative')] #Used for rate bounds
         self.standardLogTransform = [True, False]*4+[False]
+        self.sensitivityCalc = sensitivities
         super().__init__()
         print('Benchmarker initialised')
 
@@ -75,7 +81,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
     
     Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
     """
-    def __init__(self):
+    def __init__(self, sensitivities = False):
         print('Initialising Markov Model IKr benchmark')
         self._name = "staircase.mm"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
@@ -85,6 +91,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
         self.defaultParams = np.array([0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399, 0.04150, 0.0312])
         self._rateFunctions = [(lambda p,V:p[0]*np.exp(p[1]*V), 'positive'), (lambda p,V:p[2], 'independent'), (lambda p,V:p[3]*np.exp(p[4]*V), 'positive'), (lambda p,V:p[5]*np.exp(p[6]*V), 'positive'), (lambda p,V:p[7]*np.exp(-p[8]*V), 'negative'), (lambda p,V:p[9], 'independent'), (lambda p,V:p[10]*np.exp(-p[11]*V), 'negative'), (lambda p,V:p[12]*np.exp(-p[13]*V), 'negative')] #Used for rate bounds
         self.standardLogTransform = [True, False, True]*2+[False, True]*2+[True,False]*2
+        self.sensitivityCalc = sensitivities
         super().__init__()
         print('Benchmarker initialised')
 

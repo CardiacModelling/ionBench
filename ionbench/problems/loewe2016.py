@@ -6,10 +6,20 @@ import numpy as np
 import csv
 
 class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
-    def __init__(self):
+    def __init__(self, states):
         self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1 #1 for narrow, 2 for wide
         self.standardLogTransform = [not i for i in self.additiveParams]
+        parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())]
+        if self.sensitivityCalc:
+            #ODE solver
+            sens = ([self._outputName],parameters)
+            self.sim = myokit.Simulation(self.model, sensitivities=sens, protocol = self.add_protocol())
+        else:
+            #analytical model
+            self._analyticalModel = myokit.lib.hh.HHModel(model = self.model, states = states, parameters = parameters, current = self._outputName, vm = 'membrane.V')
+            self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+        self.sim.pre(500) #Prepace for 500ms
         super().__init__()
     
     def sample(self, n=1):
@@ -72,7 +82,7 @@ class ikr(loewe2016_Benchmarker):
     
     Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
     """
-    def __init__(self):
+    def __init__(self, sensitivities = False):
         print('Initialising Loewe 2016 IKr benchmark')
         self._name = "loewe2016.ikr"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
@@ -82,10 +92,9 @@ class ikr(loewe2016_Benchmarker):
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self._rateFunctions = [(lambda p,V:p[0]*(V+p[1])/(1-np.exp((V+p[1])/(-p[2]))), 'positive'), (lambda p,V:7.3898e-5*(V+p[3])/(np.exp((V+p[3])/p[4])-1), 'negative')] #Used for rate bounds
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
-        self._analyticalModel = hh.HHModel(model = self.model, states = ['ikr.xr'], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
-        self.sim = hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
-        self.sim.pre(500) #Prepace for 500ms
-        super().__init__()
+        states = ['ikr.xr']
+        self.sensitivityCalc = sensitivities
+        super().__init__(states)
         print('Benchmarker initialised')
 
 class ikur(loewe2016_Benchmarker):
@@ -96,7 +105,7 @@ class ikur(loewe2016_Benchmarker):
     
     Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
     """
-    def __init__(self):
+    def __init__(self, sensitivities = False):
         print('Initialising Loewe 2016 IKur benchmark')
         self._name = "loewe2016.ikur"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
@@ -106,10 +115,9 @@ class ikur(loewe2016_Benchmarker):
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True, True, False, True, True, True, False, False, True, False, True, False, False]
         self._rateFunctions = [(lambda p,V: p[0]/(np.exp((V+p[1])/-p[2])+np.exp((V-p[3])/-p[4])), 'positive'), (lambda p,V: 0.65/(p[5]+np.exp((V+p[6])/p[7])), 'negative'), (lambda p,V: p[11]/(p[12]+np.exp((V-p[13])/-p[14])), 'positive'), (lambda p,V: np.exp((V-p[15])/-p[16]), 'negative')] #Used for rate bounds
         self.load_data(dataPath = os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
-        self._analyticalModel = myokit.lib.hh.HHModel(model = self.model, states = ['ikur.ua', 'ikur.ui'], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
-        self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
-        self.sim.pre(500) #Prepace for 500ms
-        super().__init__()
+        states = ['ikur.ua', 'ikur.ui']
+        self.sensitivityCalc = sensitivities
+        super().__init__(states)
         print('Benchmarker initialised')
 
 def generate_data(modelType):

@@ -29,6 +29,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._analyticalModel = markov.LinearModel(model = self.model, states = ['ina.'+s for s in ['ic3','ic2','if','c3','c2','c1','o','is']], parameters = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())], current = self._outputName, vm = 'membrane.V')
         self.sim = myokit.Simulation(self.model, protocol=self.add_protocol())
         self.sim.pre(500) #Prepace for 500ms
+        self.sensitivityCalc = False #Moreno currently can't do sensitivities
         super().__init__()
         print('Benchmarker initialised')
     

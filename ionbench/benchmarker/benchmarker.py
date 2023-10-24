@@ -411,82 +411,88 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput-self.data)**2
     
-    def grad(self, parameters, centreCost = None, incrementSolveCounter = True, inInputSpace = True):
+    def use_sensitivities(self, sens = True):
         """
-        Find the gradient of the RMSE cost at the inputted parameters through finite difference. If the problem is bounded, it will attempt to only evaluate parameters inside the bounds.
+        Set whether or not the simulation should use sensitivities. 
+
+        Parameters
+        ----------
+        sens : bool, optional
+            Whether or not to use sensitivities. If True, sensitivities will be used and the model must be solved with an ODE solver. If False, sensitivities will be turned off and an analytical solver will be used for the Loewe problems. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
+        if sens == True:
+            paramNames = [self._paramContainer+'.p'+str(i+1) for i in range(self.n_parameters())]
+            self.sim = myokit.Simulation(self.model, sensitivities=([self._outputName],paramNames))
+            self.sim.set_tolerance(1e-8,1e-8)
+            self.add_protocol()
+            self.sensitivityCalc = True
+        else:
+            if 'loewe' in self._name:
+                self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.add_protocol())
+                self.sensitivityCalc = False
+            else:
+                self.sim = myokit.Simulation(self.model)
+                self.sim.set_tolerance(1e-8,1e-8)
+                self.add_protocol()
+                self.sensitivityCalc = False
+            
+    def grad(self, parameters, incrementSolveCounter = True, inInputSpace = True):
+        """
+        Find the gradient of the RMSE cost at the inputted parameters. Gradient is calculated using Myokit sensitivities. 
 
         Parameters
         ----------
         parameters : list or numpy array
-            Vector of parameters to solve the model.
-        centreCost : int, optional
-            The cost evaluated at parameters. If this has already been calculated, it can be passed in as an input to avoid recalculating (reducing the solveCount). Default is None, in which case it will be automatically calculated.
+            Vector of parameters to find the derivatives about.
         incrementSolveCounter : bool, optional
             If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
         inInputSpace : bool
-            Specifies whether the inputted parameters are in input space. If True, then the derivative will be calculated in input space as well. The default is True.
+            Specifies whether the inputted parameters are in input space. If True, then the derivative will be transformed into input space as well. The default is True.
 
         Returns
         -------
         grad : array
-            The gradient of the RMSE cost, evalauted around the inputted parameters.
+            The gradient of the RMSE cost, evalauted at the inputted parameters.
         
         """
-        def take_step(parameter, stepSize):
-            # Takes a step in parameter space. If the parameter is 0, the step size is given by stepSize, otherwise the step size is stepSize*parameter. Returns the perturbed parameter
-            if parameter == 0:
-                return stepSize
-            #Dont change direction depending on the sign of parameter (it makes it too confusing to test and think about)
-            elif parameter > 0:
-                return parameter*(1+stepSize)
-            else:
-                return parameter*(1-stepSize)
-        
+        #Undo any transforms
         if inInputSpace:
-            parameters = self.original_parameter_space(parameters) #Parameters stored in this function are always stored in original parameter space
-        #If inputted centre parameter vector is out of bounds, turn off bounds to avoid infinite costs
-        boundsTurnedOff = False
-        if not self.in_bounds(parameters):
-            warnings.warn("Parameters at the centre of the gradient calculator were out of bounds. Bounds will be turned off to avoid an infinite cost being used in the finite difference calculation.")
-            self._bounded = False
-            boundsTurnedOff = True
-        #If no centreCost was inputted, then calculate it
-        if centreCost == None:
-            centreCost = self.cost(self.input_parameter_space(parameters), incrementSolveCounter=incrementSolveCounter)
-        #Find step sizes that ensure the parameters are always inside the bounds
-        perturbationVector = np.zeros(self.n_parameters())
+            parameters = self.original_parameter_space(parameters)
+        else:
+            parameters = np.copy(parameters)
+        
+        #Moreno uses summary statistics so cant use this gradient calculator
+        if 'moreno' in self._name:
+            raise NotImplementedError("Gradient calculator has not yet been implemented for the Moreno problem.")
+        
+        #Check model is setup to solve for sensitivities
+        if not self.sensitivityCalc:
+            warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
+            self.use_sensitivities(sens=True)
+        
+        #Get sensitivities
+        self.sim.reset()
+        self.set_params(parameters)
+        curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax), returnSens=True)
+        sens = np.array(sens)
+        
+        #Convert to cost derivative
+        grad = []
+        error = curr-self.data
+        cost = np.sqrt(np.mean(error**2))
         for i in range(self.n_parameters()):
-            stepSize = 0.0004 #Initial step size, magic number balancing all problems
-            perturbedPoint = np.copy(parameters)
-            perturbedPoint[i] = take_step(parameters[i],stepSize)
-            #If the current step size results in out of bounds parameters, reduce and flip the step direction
-            if not self.in_bounds(perturbedPoint):
-                stepSize = stepSize*-1 #Flip perturbation direction
-                perturbedPoint[i] = take_step(parameters[i],stepSize)
-                #Avoid infinite loops
-                if not self.in_bounds(perturbedPoint):
-                    warnings.warn("Failed to find a perturbed parameter vector in one of the directions that respects the bounds. Bounds will be turned off before cost function is called to avoid an infinite cost being used in the finite difference calculation.")
-                    boundsTurnedOff = True
-                    #Bounds turned off is delayed to ensure first parameter isn't treated differently to others
-            #Save the working step size
-            perturbationVector[i] = stepSize
-        #Ensure bounds are off if they would be violated
-        if boundsTurnedOff:
-            self._bounded = False
-        #Calculate gradient by finite differences
-        grad = np.zeros(self.n_parameters())
-        for i in range(self.n_parameters()):
-            perturbedPoint = np.copy(parameters)
-            perturbedPoint[i] = take_step(parameters[i],perturbationVector[i])
-            perturbedCost = self.cost(self.input_parameter_space(perturbedPoint), incrementSolveCounter=incrementSolveCounter)
-            #Calculate by finite difference
-            grad[i] = (perturbedCost - centreCost)/(perturbedPoint[i]-parameters[i])
+            grad.append(np.dot(error,sens[:,0,i])/(len(error)*cost))
+        
+        #Map derivatives to input space
         if inInputSpace:
             derivs = self.transform_jacobian(self.input_parameter_space(parameters))
             grad *= derivs
-        #If the bounds had to be turned off to calculate the gradient, turn them back on now that it has been calculated
-        if boundsTurnedOff:
-            self._bounded = True
+        
         return grad
     
     def set_params(self, parameters):
@@ -506,6 +512,13 @@ class Benchmarker():
         # Update the parameters
         for i in range(self.n_parameters()):
             self.sim.set_constant(self._paramContainer+'.p'+str(i+1), parameters[i])
+    
+    def solve_with_sensitivities(self, times, returnSens = False):
+        log, e = self.sim.run(self.tmax+1, log_times = times)
+        if returnSens:
+            return np.array(log[self._outputName]), e
+        else:
+            return np.array(log[self._outputName])
     
     def solve_model(self, times, continueOnError = True):
         """
@@ -527,13 +540,19 @@ class Benchmarker():
         if continueOnError:
             try:
                 log = self.sim.run(self.tmax+1, log_times = times)
-                return np.array(log[self._outputName])
+                if self.sensitivityCalc:
+                    return np.array(log[0][self._outputName])
+                else:
+                    return np.array(log[self._outputName])
             except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf]*len(times))
         else:
             log = self.sim.run(self.tmax+1, log_times = times)
-            return np.array(log[self._outputName])
+            if self.sensitivityCalc:
+                return np.array(log[0][self._outputName])
+            else:
+                return np.array(log[self._outputName])
     
     def simulate(self, parameters, times, continueOnError = True, incrementSolveCounter = True):
         """
