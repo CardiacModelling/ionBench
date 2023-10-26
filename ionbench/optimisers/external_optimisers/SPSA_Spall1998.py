@@ -12,9 +12,11 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=100, debug=False):
     x0 : list, optional
         Initial parameter guess. If x0=[] (the default), then the population will be sampled from the benchmarker problems .sample() method.
     a : float, optional
-        Hyperparameter to control the step size, ak. If none value is specified, an 'optimal' value will be approximated by finding a value of a which will produce step sizes of 0.1*geometric mean of x0.
-    A : float, optional
+        Hyperparameter to control the step size, ak. If no value is specified, an 'optimal' value will be approximated by finding a value of a which will produce step sizes of 0.1*geometric mean of x0.
+    A : int, optional
         Hyperparameter to control the step size, ak. A controls the rate at which the step size decreases, large values of A will ensure the step size is similar for a long time. If no value is specified, it will be set to 0.1*maxIter, rounded to the nearest integer.
+    alpha : float, optional
+        Hyperparameter to control the step size. If no value is specified, an 'optimal' value of 0.602 will be used, as described in Spall 1998.
     maxIter : int, optional
         Maximum number of iterations. The default is 100.
     debug : bool, optional
