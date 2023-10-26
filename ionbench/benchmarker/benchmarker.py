@@ -480,7 +480,7 @@ class Benchmarker():
             self.use_sensitivities(sens=True)
 
         if incrementSolveCounter:
-            self.tracker.modelSolves += self.n_parameters() + 1
+            self.tracker.solveCount += self.n_parameters() + 1
 
         # Get sensitivities
         self.sim.reset()
