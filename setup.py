@@ -122,7 +122,6 @@ setup(
     install_requires=["numpy",
                       "scipy",
                       "pints>=0.4.1",
-                      "spsa>=0.1.2",
                       "myokit>=1.34.0",
                       "matplotlib>=3.7.1",
                       "pymoo>=0.6.0.1"],  # Optional
