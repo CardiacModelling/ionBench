@@ -1,14 +1,15 @@
 import numpy as np
 import scipy
 import ionbench
-from functools import lru_cache
 import copy
+from functools import lru_cache
 
 from pymoo.core.individual import Individual
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.sbx import SBX
 
-def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage = 0.066, popSize = 50, debug = False):
+
+def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Smirnov et al 2020.
 
@@ -39,81 +40,82 @@ def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, elitePercentage =
     """
     class individual():
         def __init__(self):
-            if len(x0)==0:
+            if len(x0) == 0:
                 self.x = bm.sample()
             else:
-                self.x = x0*np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
+                self.x = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
             self.cost = None
+
         def find_cost(self):
             self.cost = cost_func(tuple(self.x))
-    
+
     @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(x)
-    
-    eliteCount = int(np.round(popSize*elitePercentage))
-    pop = [None]*popSize
+
+    eliteCount = int(np.round(popSize * elitePercentage))
+    pop = [None] * popSize
     for i in range(popSize):
         pop[i] = individual()
         pop[i].find_cost()
-    
+
     for gen in range(nGens):
-        costVec = [0]*popSize
+        costVec = [0] * popSize
         for i in range(popSize):
             costVec[i] = pop[i].cost
         eliteIndices = np.argsort(costVec)[:eliteCount]
-        elites = [None]*eliteCount
+        elites = [None] * eliteCount
         for i in range(eliteCount):
             elites[i] = copy.deepcopy(pop[eliteIndices[i]])
         if debug:
             print("------------")
-            print("Gen "+str(gen))
-            print("Best cost: "+str(min(costVec)))
-            print("Average cost: "+str(np.mean(costVec)))
-        #Tournement selection
+            print("Gen " + str(gen))
+            print("Best cost: " + str(min(costVec)))
+            print("Average cost: " + str(np.mean(costVec)))
+        # Tournement selection
         newPop = []
         for j in range(2):
             perm = np.random.permutation(popSize)
-            for i in range(popSize//2):
-                if pop[perm[2*i]].cost > pop[perm[2*i+1]].cost:
-                    newPop.append(copy.deepcopy(pop[perm[2*i]]))
+            for i in range(popSize // 2):
+                if pop[perm[2 * i]].cost > pop[perm[2 * i + 1]].cost:
+                    newPop.append(copy.deepcopy(pop[perm[2 * i]]))
                 else:
-                    newPop.append(copy.deepcopy(pop[perm[2*i+1]]))
-        pop = newPop #Population of parents
-        #Crossover SBX
+                    newPop.append(copy.deepcopy(pop[perm[2 * i + 1]]))
+        pop = newPop  # Population of parents
+        # Crossover SBX
         newPop = []
         problem = Problem(n_var=bm.n_parameters(), xl=0.0, xu=2.0)
-        for i in range(popSize//2):
-            a, b = Individual(X=np.array(pop[2*i].x)), Individual(X=np.array(pop[2*i+1].x))
-    
+        for i in range(popSize // 2):
+            a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
+
             parents = [[a, b]]
-            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents) #What is prob vs prob_var
+            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents)  # What is prob vs prob_var
             Xp = off.get("X")
             newPop.append(individual())
             newPop[-1].x = Xp[0]
             newPop.append(individual())
-            newPop[-1].x = Xp[1] #Can this be done in one line
+            newPop[-1].x = Xp[1]  # Can this be done in one line
         pop = newPop
-        #Mutation
+        # Mutation
         for i in range(popSize):
-            if np.random.rand()<0.9:
+            if np.random.rand() < 0.9:
                 direc = np.random.rand(bm.n_parameters())
-                direc = direc/np.linalg.norm(direc)
+                direc = direc / np.linalg.norm(direc)
                 mag = scipy.stats.cauchy.rvs(loc=0, scale=0.18)
-                pop[i].x += mag*direc
+                pop[i].x += mag * direc
         if debug:
-            print("Finishing gen "+str(gen))
-        #Find costs
+            print("Finishing gen " + str(gen))
+        # Find costs
         for i in range(popSize):
             pop[i].find_cost()
-        #Elitism
-        costVec = [0]*popSize
+        # Elitism
+        costVec = [0] * popSize
         for i in range(popSize):
             costVec[i] = pop[i].cost
         eliteIndices = np.argsort(costVec)[-eliteCount:]
         for i in range(eliteCount):
             pop[eliteIndices[i]] = copy.deepcopy(elites[i])
-    
+
     minCost = np.inf
     for i in range(popSize):
         if pop[i].cost < minCost:
@@ -127,6 +129,7 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug=True)
 
+
 def get_modification():
     """
     No modification settings given in Smirnov et al 2020. Will use an empty modification
@@ -137,5 +140,5 @@ def get_modification():
         Empty modification
 
     """
-    mod = ionbench.modification.Empty(name = 'Smirnov2020')
+    mod = ionbench.modification.Empty(name='Smirnov2020')
     return mod

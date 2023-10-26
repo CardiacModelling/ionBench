@@ -81,12 +81,12 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.
-        #"Programming Language :: Python :: 3",
-        #"Programming Language :: Python :: 3.7",
-        #"Programming Language :: Python :: 3.8",
-        #"Programming Language :: Python :: 3.9",
-        #"Programming Language :: Python :: 3.10",
-        #"Programming Language :: Python :: 3 :: Only",
+        # "Programming Language :: Python :: 3",
+        # "Programming Language :: Python :: 3.7",
+        # "Programming Language :: Python :: 3.8",
+        # "Programming Language :: Python :: 3.9",
+        # "Programming Language :: Python :: 3.10",
+        # "Programming Language :: Python :: 3 :: Only",
     ],
     # This field adds keywords for your project which will appear on the
     # project page. What does your project relate to?
@@ -94,10 +94,10 @@ setup(
     # Note that this is a list of additional keywords, separated
     # by commas, to be used to assist searching for the distribution in a
     # larger catalog.
-    #keywords="sample, setuptools, development",  # Optional
+    # keywords="sample, setuptools, development",  # Optional
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    #package_dir={"": "ionbench"},  # Optional
+    # package_dir={"": "ionbench"},  # Optional
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -107,7 +107,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages()+['ionbench.data', 'ionbench.data.staircase', 'ionbench.data.loewe2016', 'ionbench.data.moreno2016'],  # Required
+    packages=find_packages() + ['ionbench.data', 'ionbench.data.staircase', 'ionbench.data.loewe2016', 'ionbench.data.moreno2016'],  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
@@ -134,24 +134,24 @@ setup(
     #
     # Similar to `install_requires` above, these must be valid existing
     # projects.
-    #extras_require={  # Optional
+    # extras_require={  # Optional
     #    "dev": ["check-manifest"],
     #    "test": ["coverage"],
-    #},
+    # },
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     package_data={  # Optional
-        "ionbench.data.staircase": ["*.mmt","*.csv"],
-        "ionbench.data.moreno2016": ["*.mmt","*.csv"],
-        "ionbench.data.loewe2016": ["*.mmt","*.csv"],
+        "ionbench.data.staircase": ["*.mmt", "*.csv"],
+        "ionbench.data.moreno2016": ["*.mmt", "*.csv"],
+        "ionbench.data.loewe2016": ["*.mmt", "*.csv"],
     },
     # Entry points. The following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
-    #entry_points={  # Optional
+    # entry_points={  # Optional
     #    "console_scripts": [
     #        "sample=sample:main",
     #    ],
-    #},
+    # },
     # List additional URLs that are relevant to your project as a dict.
     #
     # This field corresponds to the "Project-URL" metadata fields:

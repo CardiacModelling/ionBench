@@ -2,7 +2,8 @@ import ionbench.problems.staircase
 import scipy.optimize
 import numpy as np
 
-def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
+
+def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=5000, maxfev=20000):
     """
     Runs Nelder-Mead optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -27,31 +28,33 @@ def run(bm, x0 = [], xtol = 1e-4, ftol = 1e-4, maxiter = 5000, maxfev = 20000):
         The best parameters identified by Nelder-Mead.
 
     """
-    if len(x0)==0:
+    if len(x0) == 0:
         x0 = bm.sample()
-    
+
     if bm._bounded:
-        lb = bm.lb[:] #Generate copy
-        ub = bm.ub[:] #Generate copy
+        lb = bm.lb[:]  # Generate copy
+        ub = bm.ub[:]  # Generate copy
         for i in range(bm.n_parameters()):
             if lb[i] == np.inf:
                 lb[i] = None
             if ub[i] == np.inf:
                 ub[i] = None
-        bounds = (lb,ub)
-        
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds = bounds)
+        bounds = (lb, ub)
+
+        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds=bounds)
     else:
         out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxiter, 'maxfev': maxfev})
-    
+
     bm.evaluate(out.x)
     return out.x
+
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
 
-def get_modification(modNum = 1):
+
+def get_modification(modNum=1):
     """
     modNum = 1 -> Balser1990
     modNum = 2 -> Davies2011
@@ -64,7 +67,7 @@ def get_modification(modNum = 1):
         Modification corresponding to inputted modNum. Default is modNum = 1, so Balser1990.
 
     """
-    
+
     if modNum == 1:
         mod = ionbench.modification.Balser1990()
     elif modNum == 2:
@@ -74,5 +77,5 @@ def get_modification(modNum = 1):
     elif modNum == 4:
         mod = ionbench.modification.Moreno2016()
     else:
-        mod = ionbench.modification.Empty(name = 'nelderMead_scipy')
+        mod = ionbench.modification.Empty(name='nelderMead_scipy')
     return mod

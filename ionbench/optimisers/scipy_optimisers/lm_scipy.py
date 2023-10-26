@@ -1,7 +1,8 @@
 import ionbench.problems.staircase
 import scipy.optimize
 
-def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
+
+def run(bm, x0=[], diff_step=1e-3, maxfev=20000):
     """
     Runs lm (Levenberg-Marquardt) least squares optimiser from Scipy.
 
@@ -22,19 +23,21 @@ def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
         The best parameters identified by LM.
 
     """
-    if len(x0)==0:
+    if len(x0) == 0:
         x0 = bm.sample()
-    
-    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=1, max_nfev = maxfev)
-    
+
+    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=1, max_nfev=maxfev)
+
     bm.evaluate(out.x)
     return out.x
+
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
 
-def get_modification(modNum = 1):
+
+def get_modification(modNum=1):
     """
     modNum = 1 -> Balser1990
     modNum = 2 -> Clancy1999
@@ -45,11 +48,11 @@ def get_modification(modNum = 1):
         Modification corresponding to inputted modNum. Default is modNum = 1, so Balser1990.
 
     """
-    
+
     if modNum == 1:
         mod = ionbench.modification.Balser1990()
     elif modNum == 2:
         mod = ionbench.modification.Clancy1999()
     else:
-        mod = ionbench.modification.Empty(name = 'lm_scipy')    
+        mod = ionbench.modification.Empty(name='lm_scipy')
     return mod

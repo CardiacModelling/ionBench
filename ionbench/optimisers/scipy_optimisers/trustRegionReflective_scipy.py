@@ -1,7 +1,8 @@
 import ionbench.problems.staircase
 import scipy.optimize
 
-def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
+
+def run(bm, x0=[], diff_step=1e-3, maxfev=20000):
     """
     Runs Trust Region Reflective optimiser from Scipy.
 
@@ -22,23 +23,25 @@ def run(bm, x0 = [], diff_step = 1e-3, maxfev = 20000):
         The best parameters identified by Trust Region Reflective.
 
     """
-    if len(x0)==0:
+    if len(x0) == 0:
         x0 = bm.sample()
-    
+
     if bm._bounded:
-        bounds = (bm.lb,bm.ub)
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev, bounds = bounds)
+        bounds = (bm.lb, bm.ub)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev=maxfev, bounds=bounds)
     else:
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev = maxfev)
-    
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev=maxfev)
+
     bm.evaluate(out.x)
     return out.x
+
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm)
 
-def get_modification(modNum = 1):
+
+def get_modification(modNum=1):
     """
     modNum = 1 -> Du2014
     modNum = 2 -> Loewe2016
@@ -50,7 +53,7 @@ def get_modification(modNum = 1):
         Modification corresponding to inputted modNum. Default is modNum = 1, so Du2014.
 
     """
-    
+
     if modNum == 1:
         mod = ionbench.modification.Du2014()()
     elif modNum == 2:
@@ -58,5 +61,5 @@ def get_modification(modNum = 1):
     elif modNum == 3:
         mod = ionbench.modification.Wilhelms2012b()
     else:
-        mod = ionbench.modification.Empty(name = 'trr_scipy')
+        mod = ionbench.modification.Empty(name='trr_scipy')
     return mod

@@ -1,7 +1,7 @@
 import numpy as np
 import ionbench
-from functools import lru_cache
 import copy
+from functools import lru_cache
 
 from pymoo.core.individual import Individual
 from pymoo.core.problem import Problem
@@ -9,7 +9,8 @@ from pymoo.operators.crossover.sbx import SBX
 from pymoo.operators.mutation.pm import PolynomialMutation
 from pymoo.core.population import Population
 
-def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, debug = False):
+
+def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Bot et al 2012.
 
@@ -38,23 +39,24 @@ def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, deb
     """
     class individual():
         def __init__(self):
-            if len(x0)==0:
+            if len(x0) == 0:
                 self.x = bm.sample()
             else:
-                self.x = x0*np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
+                self.x = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
             self.cost = None
+
         def find_cost(self):
             self.cost = cost_func(tuple(self.x))
-    
+
     @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(x)
-    
-    pop = [None]*popSize
+
+    pop = [None] * popSize
     for i in range(popSize):
         pop[i] = individual()
         pop[i].find_cost()
-    
+
     for gen in range(nGens):
         minCost = np.inf
         for i in range(popSize):
@@ -63,51 +65,51 @@ def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, deb
                 elite = copy.deepcopy(pop[i])
         if debug:
             print("------------")
-            print("Gen "+str(gen))
-            print("Best cost: "+str(minCost))
-        #Tournement selection
+            print("Gen " + str(gen))
+            print("Best cost: " + str(minCost))
+        # Tournement selection
         newPop = []
         for j in range(2):
             perm = np.random.permutation(popSize)
-            for i in range(popSize//2):
-                if pop[perm[2*i]].cost > pop[perm[2*i+1]].cost:
-                    newPop.append(copy.deepcopy(pop[perm[2*i]]))
+            for i in range(popSize // 2):
+                if pop[perm[2 * i]].cost > pop[perm[2 * i + 1]].cost:
+                    newPop.append(copy.deepcopy(pop[perm[2 * i]]))
                 else:
-                    newPop.append(copy.deepcopy(pop[perm[2*i+1]]))
-        pop = newPop #Population of parents
-        #Crossover SBX
+                    newPop.append(copy.deepcopy(pop[perm[2 * i + 1]]))
+        pop = newPop  # Population of parents
+        # Crossover SBX
         newPop = []
         problem = Problem(n_var=bm.n_parameters(), xl=0.0, xu=2.0)
-        for i in range(popSize//2):
-            a, b = Individual(X=np.array(pop[2*i].x)), Individual(X=np.array(pop[2*i+1].x))
-    
+        for i in range(popSize // 2):
+            a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
+
             parents = [[a, b]]
-            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents) #What is prob vs prob_var
+            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents)  # What is prob vs prob_var
             Xp = off.get("X")
             newPop.append(individual())
             newPop[-1].x = Xp[0]
             newPop.append(individual())
             newPop[-1].x = Xp[1]
         pop = newPop
-        #Mutation
-        mutation = PolynomialMutation(prob=0.1*bm.n_parameters(), eta=eta_mut)
+        # Mutation
+        mutation = PolynomialMutation(prob=0.1 * bm.n_parameters(), eta=eta_mut)
         for i in range(popSize):
             ind = Population.new(X=[pop[i].x])
             off = mutation(problem, ind)
             pop[i].x = off.get("X")[0]
         if debug:
-            print("Finishing gen "+str(gen))
-        #Find costs
+            print("Finishing gen " + str(gen))
+        # Find costs
         for i in range(popSize):
             pop[i].find_cost()
-        #Elitism
+        # Elitism
         maxCost = -np.inf
         for i in range(popSize):
             if pop[i].cost > maxCost:
                 maxCost = pop[i].cost
                 maxIndex = i
         pop[maxIndex] = copy.deepcopy(elite)
-    
+
     minCost = np.inf
     for i in range(popSize):
         if pop[i].cost < minCost:
@@ -116,9 +118,11 @@ def run(bm, x0 = [], nGens = 50, eta_cross = 10, eta_mut = 20, popSize = 50, deb
     bm.evaluate(elite.x)
     return elite.x
 
+
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     run(bm, debug=True)
+
 
 def get_modification():
     """
