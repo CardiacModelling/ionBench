@@ -439,7 +439,7 @@ class Benchmarker():
                 self.sim.set_tolerance(1e-8,1e-8)
                 self.sensitivityCalc = False
             
-    def grad(self, parameters, incrementSolveCounter = True, inInputSpace = True):
+    def grad(self, parameters, incrementSolveCounter = True, inInputSpace = True, returnCost = False):
         """
         Find the gradient of the RMSE cost at the inputted parameters. Gradient is calculated using Myokit sensitivities. 
 
@@ -449,9 +449,11 @@ class Benchmarker():
             Vector of parameters to find the derivatives about.
         incrementSolveCounter : bool, optional
             If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
-        inInputSpace : bool
+        inInputSpace : bool, optional
             Specifies whether the inputted parameters are in input space. If True, then the derivative will be transformed into input space as well. The default is True.
-
+        returnCost : bool, optional
+            Whether the function should return the cost at parameters, in addition to the gradient. If True, it will return a tuple (cost, grad). The default is False.
+        
         Returns
         -------
         grad : array
@@ -473,6 +475,9 @@ class Benchmarker():
             warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
             self.use_sensitivities(sens=True)
         
+        if incrementSolveCounter:
+            self.tracker.modelSolves += self.n_parameters()+1
+        
         #Get sensitivities
         self.sim.reset()
         self.set_params(parameters)
@@ -490,8 +495,10 @@ class Benchmarker():
         if inInputSpace:
             derivs = self.transform_jacobian(self.input_parameter_space(parameters))
             grad *= derivs
-        
-        return grad
+        if returnCost:
+            return (cost, grad)
+        else:
+            return grad
     
     def set_params(self, parameters):
         """

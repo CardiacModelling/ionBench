@@ -27,7 +27,7 @@ def run(bm, x0 = [], gtol = 0.001, maxiter = 5000):
         x0 = bm.sample()
     
     def fun(p):
-        return (bm.cost(p), bm.grad(p))
+        return bm.grad(p,returnCost=True)
     
     if bm._bounded:
         lb = bm.lb[:] #Generate copy
