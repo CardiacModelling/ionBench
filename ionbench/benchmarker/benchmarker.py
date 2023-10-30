@@ -443,7 +443,7 @@ class Benchmarker():
                 self.sim.set_tolerance(1e-8, 1e-8)
                 self.sensitivityCalc = False
 
-    def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False):
+    def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         """
         Find the gradient of the RMSE cost at the inputted parameters. Gradient is calculated using Myokit sensitivities. 
 
@@ -456,7 +456,9 @@ class Benchmarker():
         inInputSpace : bool, optional
             Specifies whether the inputted parameters are in input space. If True, then the derivative will be transformed into input space as well. The default is True.
         returnCost : bool, optional
-            Whether the function should return the cost at parameters, in addition to the gradient. If True, it will return a tuple (cost, grad). The default is False.
+            Whether the function should return the cost at parameters, in addition to the gradient. If True, it will return a tuple (cost, grad). If residuals is True, it will return (signed_error, grad). The default is False.
+        residuals : bool, optional
+            Whether the function should calculate the gradient of the cost, or the jacobian of the residual vector. If True, jacobian of residuals is returned instead of the gradient of the cost function. The default is False.
 
         Returns
         -------
@@ -488,21 +490,37 @@ class Benchmarker():
         curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax), returnSens=True)
         sens = np.array(sens)
 
-        # Convert to cost derivative
-        grad = []
+        # Convert to cost derivative or residual jacobian
         error = curr - self.data
         cost = np.sqrt(np.mean(error**2))
-        for i in range(self.n_parameters()):
-            grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
+        if residuals:
+            J = np.zeros((len(curr), self.n_parameters()))
+            for i in range(len(curr)):
+                for j in range(self.n_parameters()):
+                    J[i, j] = sens[i, 0, j]
+        else:
+            grad = []
+            for i in range(self.n_parameters()):
+                grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
 
         # Map derivatives to input space
         if inInputSpace:
             derivs = self.transform_jacobian(self.input_parameter_space(parameters))
-            grad *= derivs
+            if residuals:
+                J = J * derivs
+            else:
+                grad *= derivs
+
         if returnCost:
-            return (cost, grad)
+            if residuals:
+                return (error, J)
+            else:
+                return (cost, grad)
         else:
-            return grad
+            if residuals:
+                return J
+            else:
+                return grad
 
     def set_params(self, parameters):
         """
