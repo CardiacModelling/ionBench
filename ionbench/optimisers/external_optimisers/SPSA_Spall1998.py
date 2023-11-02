@@ -2,7 +2,7 @@ import numpy as np
 import ionbench
 
 
-def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=100, debug=False):
+def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     """
     Implementation of SPSA from Spall 1998. There are few details on implementation in Maryak 1998, the paper which uses SPSA. Maryak cites Spall 1992, however this paper does not give recommendations for hyper-parameters, in which case we use Spall 1998. The Maryak modifications do not use scaling factors or log transforms, which likely significantly hurts the SPSA algorithm which takes step sizes of identical magnitudes in all parameter directions.
     Parameters
@@ -18,7 +18,7 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=100, debug=False):
     alpha : float, optional
         Hyperparameter to control the step size. If no value is specified, an 'optimal' value of 0.602 will be used, as described in Spall 1998.
     maxIter : int, optional
-        Maximum number of iterations. The default is 100.
+        Maximum number of iterations. The default is 1000.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 

@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], gtol=0.001, maxiter=5000):
+def run(bm, x0=[], gtol=0.001, maxiter=1000):
     """
     Runs Conjugate Gradient Descent optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -16,7 +16,7 @@ def run(bm, x0=[], gtol=0.001, maxiter=5000):
     gtol : float, optional
         Tolerance in for the gradient. Gradient norm must be less than gtol before algorithm successfully terminates. The default is 0.001.
     maxiter : int, optional
-        Maximum number of iterations of Conjugate Gradient Descent to use. The default is 5000.
+        Maximum number of iterations of Conjugate Gradient Descent to use. The default is 1000.
 
     Returns
     -------

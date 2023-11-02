@@ -4,7 +4,7 @@ import itertools
 # Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 
-def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05, w=0.6, debug=False):
+def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0.05, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
@@ -24,8 +24,8 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05,
         Scale of the acceleration towards the best point seen across all particles. The default is 1.4.
     qmax : int, optional
         Maximum number of iterations without improvement before perturbations. The default is 5.
-    lmax : int, optional
-        Maximum number of iterations. The default is 200.
+    maxIter : int, optional
+        Maximum number of iterations. The default is 1000.
     gmin : float, optional
         Target cost. Once the cost is reduced below gmin, the optimisation terminates. The default is 0.05.
     w : float, optional
@@ -102,10 +102,10 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, lmax=200, gmin=0.05,
     for i in range(n):
         particleList.append(particle(bm.n_parameters()))
 
-    Gcost = [np.inf] * lmax  # Best cost ever
-    Gpos = [None] * lmax  # Position of best cost ever
-    alpha = [None] * lmax
-    for L in range(lmax):
+    Gcost = [np.inf] * maxIter  # Best cost ever
+    Gpos = [None] * maxIter  # Position of best cost ever
+    alpha = [None] * maxIter
+    for L in range(maxIter):
         if L > 0:
             Gcost[L] = Gcost[L - 1]
             Gpos[L] = Gpos[L - 1]

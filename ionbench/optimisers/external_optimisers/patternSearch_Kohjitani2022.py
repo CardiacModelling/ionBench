@@ -3,7 +3,7 @@ from functools import lru_cache
 import numpy as np
 
 
-def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=False):
+def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=20000, debug=False):
     """
     Runs the pattern search algorithm from Kohjitani et al 2022.
 
@@ -13,6 +13,8 @@ def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
         Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+    maxIter : int, optional
+        Maximum number of iterations before termination.
     CrtStp : float, optional
         The minimum step size. If there are no improvements within CrtStp, the optimisation terminates. The default is 2e-5.
     Stp : float, optional
@@ -20,7 +22,7 @@ def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=
     RedFct : float, optional
         The reduction factor. If the center point is better than its neighbours, the step size is scaled by this reduction factor. The default is 1/4.
     maxfev : int, optional
-        Maximum number of cost function evaluations. The default is 100000.
+        Maximum number of cost function evaluations. The default is 20000.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 
@@ -35,6 +37,7 @@ def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=
         return bm.cost(x)
 
     funcCounter = 0
+    iterCounter = 0
 
     def explore(BP, Stp):
         foundImprovement = False
@@ -72,6 +75,7 @@ def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=
         improvementFound, NP = explore(BP, Stp)  # Explore neighbouring points
         funcCounter += 4
         while improvementFound:
+            iterCounter += 1
             if debug:
                 print("Improvement Found? " + str(improvementFound))
             BP = np.copy(NP)  # Move to new improved point
@@ -79,6 +83,10 @@ def run(bm, x0=[], CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=100000, debug=
             funcCounter += 4
             if funcCounter > maxfev:
                 print("Exceeded maximum number of function evaluations.")
+                bm.evaluate(NP)
+                return NP
+            if iterCounter > maxIter:
+                print("Exceeded maximum number of iterations.")
                 bm.evaluate(NP)
                 return NP
 

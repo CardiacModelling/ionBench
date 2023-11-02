@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=5000, maxfev=20000):
+def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=1000, maxfev=20000):
     """
     Runs Nelder-Mead optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -18,7 +18,7 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=5000, maxfev=20000):
     ftol : float, optional
         Tolerance in cost. Used as a termination criterion. The default is 1e-4.
     maxiter : int, optional
-        Maximum number of iterations of Nelder-Mead to use. The default is 5000.
+        Maximum number of iterations of Nelder-Mead to use. The default is 1000.
     maxfev : int, optional
         Maximum number of cost function evaluations. The default is 20000.
 

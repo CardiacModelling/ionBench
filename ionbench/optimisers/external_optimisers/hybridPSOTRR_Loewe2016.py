@@ -3,7 +3,7 @@ import scipy
 import ionbench
 
 
-def run(bm, x0=[], n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
+def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     """
     Runs the hybrid particle swarm optimisation - trust region reflective algorithm from Loewe et al 2016. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
 
@@ -21,8 +21,8 @@ def run(bm, x0=[], n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
         Number of particles. The default is 96.
     K : int, optional
         Number of function calls allowed in TRR. Note that this uses the function calls reported by scipy, similar in scale to the number of iterations of TRR used in Loewe et al 2016. This is not the true number of function calls to the benchmarker as this appears to not include finite difference gradient calculations. The default is 5.
-    Lmax : int, optional
-        Maximum number of iterations. The default is 250.
+    maxIter : int, optional
+        Maximum number of iterations. The default is 1000.
     phi1 : float, optional
         Scale of the acceleration towards a particles best positions. The default is 2.05.
     phi2 : float, optional
@@ -103,9 +103,9 @@ def run(bm, x0=[], n=96, K=5, Lmax=250, phi1=2.05, phi2=2.05, debug=False):
     for i in range(n):
         particleList.append(particle(bm.n_parameters()))
 
-    Gcost = [np.inf] * Lmax  # Best cost ever
-    Gpos = [None] * Lmax  # Position of best cost ever
-    for L in range(Lmax):
+    Gcost = [np.inf] * maxIter  # Best cost ever
+    Gpos = [None] * maxIter  # Position of best cost ever
+    for L in range(maxIter):
         if L > 0:
             Gcost[L] = Gcost[L - 1]
             Gpos[L] = Gpos[L - 1]
