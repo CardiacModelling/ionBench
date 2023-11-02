@@ -7,9 +7,9 @@ import ionbench.optimisers.external_optimisers as ext_opts
 
 class Test_scipy:
     # Check all scipy optimisers run and improve cost compared to x0
-    bm = ionbench.problems.loewe2016.ikr()
+    bm = ionbench.problems.loewe2016.ikr(sensitivities=True)
     bm.plotter = False
-    optimisers = [scipy_opts.lm_scipy.run, scipy_opts.nelderMead_scipy.run, scipy_opts.powell_scipy.run, scipy_opts.trustRegionReflective_scipy.run]
+    optimisers = [scipy_opts.lm_scipy.run, scipy_opts.nelderMead_scipy.run, scipy_opts.powell_scipy.run, scipy_opts.trustRegionReflective_scipy.run, scipy_opts.conjugateGD_scipy.run]
 
     @pytest.mark.parametrize("run", optimisers)
     def test_cost_reduction(self, run):
@@ -44,7 +44,7 @@ class Test_external:
     bm = ionbench.problems.loewe2016.ikr()
     bm._useScaleFactors = True
     bm.plotter = False
-    optimisers = [(ext_opts.GA_Bot2012.run, {'nGens': 5}), (ext_opts.GA_Smirnov2020.run, {'nGens': 5}), (ext_opts.hybridPSOTRR_Loewe2016.run, {'n': 5, 'Lmax': 5}), (ext_opts.patternSearch_Kohjitani2022.run, {'maxfev': 50}), (ext_opts.ppso_Chen2012.run, {'n': 5, 'lmax': 5})]
+    optimisers = [(ext_opts.GA_Bot2012.run, {'nGens': 5}), (ext_opts.GA_Smirnov2020.run, {'nGens': 5}), (ext_opts.hybridPSOTRR_Loewe2016.run, {'n': 5, 'maxIter': 5}), (ext_opts.patternSearch_Kohjitani2022.run, {'maxfev': 50}), (ext_opts.ppso_Chen2012.run, {'n': 5, 'maxIter': 5}), (ext_opts.curvilinearGD_Dokos2004.run, {'maxIter': 20}), (ext_opts.SA_Vanier1999.run, {'maxIter': 10}), (ext_opts.SPSA_Spall1998.run, {'maxIter': 5})]
 
     @pytest.mark.parametrize("run", optimisers)
     def test_cost_reduction(self, run):
