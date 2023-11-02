@@ -157,7 +157,7 @@ class Tracker():
 
 class Benchmarker():
     """
-    The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. This class should not need to be called directly and is instead used as a parent class for the benchmarker problems. 
+    The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. This class should not need to be called directly and is instead used as a parent class for the benchmarker problems.
 
     The main methods to use from this class are n_parameters(), cost(), reset(), and evaluate().
     """
@@ -228,7 +228,7 @@ class Benchmarker():
 
     def log_transform(self, whichParams=[]):
         """
-        Fit some parameters in a log-transformed space. 
+        Fit some parameters in a log-transformed space.
 
         Inputted log-transformed parameters will be set to exp(inputted parameters) before solving the model.
 
@@ -296,7 +296,7 @@ class Benchmarker():
 
     def transform_jacobian(self, parameters):
         """
-        Finds the jacobian for the current parameter transform for derivatives calculated in original parameter space to be mapped to the input paramete space. 
+        Finds the jacobian for the current parameter transform for derivatives calculated in original parameter space to be mapped to the input paramete space.
 
         Parameters
         ----------
@@ -437,7 +437,7 @@ class Benchmarker():
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         """
-        Find the gradient of the RMSE cost at the inputted parameters. Gradient is calculated using Myokit sensitivities. 
+        Find the gradient of the RMSE cost at the inputted parameters. Gradient is calculated using Myokit sensitivities.
 
         Parameters
         ----------
@@ -611,7 +611,7 @@ class Benchmarker():
 
     def evaluate(self, parameters):
         """
-        Evaluates a final set of parameters. 
+        Evaluates a final set of parameters.
 
         This method reports the performance metrics for this parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If benchmarker.plotter = True, then it also plots the performance metrics over the course of the optimisation.
 
