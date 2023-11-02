@@ -32,6 +32,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.pre(500)  # Prepace for 500ms
         self.sensitivityCalc = False  # Moreno currently can't do sensitivities
+        self.simSens = None
         super().__init__()
         print('Benchmarker initialised')
 

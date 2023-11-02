@@ -15,11 +15,13 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         if self.sensitivityCalc:
             # ODE solver
             sens = ([self._outputName], parameters)
-            self.sim = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens.pre(500)  # Prepace for 500ms
         else:
-            # analytical model
-            self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=states, parameters=parameters, current=self._outputName, vm='membrane.V')
-            self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
+            self.simSens = None
+        # analytical model
+        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=states, parameters=parameters, current=self._outputName, vm='membrane.V')
+        self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.sim.pre(500)  # Prepace for 500ms
         super().__init__()
 

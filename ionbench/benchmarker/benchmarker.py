@@ -354,6 +354,8 @@ class Benchmarker():
 
         """
         self.sim.reset()
+        if self.sensitivityCalc:
+            self.simSens.reset()
         self.tracker = Tracker(self._trueParams)
 
     def cost(self, parameters, incrementSolveCounter=True):
@@ -415,33 +417,23 @@ class Benchmarker():
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
         return (testOutput - self.data)**2
 
-    def use_sensitivities(self, sens=True):
+    def use_sensitivities(self):
         """
-        Set whether or not the simulation should use sensitivities. 
+        Turn on sensitivities for a benchmarker. Also sets the parameter self.sensitivityCalc to True
 
         Parameters
         ----------
-        sens : bool, optional
-            Whether or not to use sensitivities. If True, sensitivities will be used and the model must be solved with an ODE solver. If False, sensitivities will be turned off and an analytical solver will be used for the Loewe problems. The default is True.
+        None.
 
         Returns
         -------
         None.
 
         """
-        if sens == True:
-            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-            self.sim = myokit.Simulation(self.model, protocol=self.protocol(), sensitivities=([self._outputName], paramNames))
-            self.sim.set_tolerance(1e-8, 1e-8)
-            self.sensitivityCalc = True
-        else:
-            if 'loewe' in self._name:
-                self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
-                self.sensitivityCalc = False
-            else:
-                self.sim = myokit.Simulation(self.model, protocol=self.protocol())
-                self.sim.set_tolerance(1e-8, 1e-8)
-                self.sensitivityCalc = False
+        paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        self.simSens = myokit.Simulation(self.model, protocol=self.protocol(), sensitivities=([self._outputName], paramNames))
+        self.simSens.set_tolerance(1e-8, 1e-8)
+        self.sensitivityCalc = True
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         """
@@ -479,15 +471,15 @@ class Benchmarker():
         # Check model is setup to solve for sensitivities
         if not self.sensitivityCalc:
             warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
-            self.use_sensitivities(sens=True)
+            self.use_sensitivities()
 
         if incrementSolveCounter:
             self.tracker.solveCount += self.n_parameters() + 1
 
         # Get sensitivities
-        self.sim.reset()
+        self.simSens.reset()
         self.set_params(parameters)
-        curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax), returnSens=True)
+        curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
         sens = np.array(sens)
 
         # Convert to cost derivative or residual jacobian
@@ -524,7 +516,7 @@ class Benchmarker():
 
     def set_params(self, parameters):
         """
-        Set the parameters in the simulation object. Inputted parameters should be in the original parameter space.
+        Set the parameters in the simulation object (both normal and sensitivity if needed). Inputted parameters should be in the original parameter space.
 
         Parameters
         ----------
@@ -539,13 +531,12 @@ class Benchmarker():
         # Update the parameters
         for i in range(self.n_parameters()):
             self.sim.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
+            if self.sensitivityCalc:
+                self.simSens.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
 
-    def solve_with_sensitivities(self, times, returnSens=False):
-        log, e = self.sim.run(self.tmax + 1, log_times=times)
-        if returnSens:
-            return np.array(log[self._outputName]), e
-        else:
-            return np.array(log[self._outputName])
+    def solve_with_sensitivities(self, times):
+        log, e = self.simSens.run(self.tmax + 1, log_times=times)
+        return np.array(log[self._outputName]), e
 
     def solve_model(self, times, continueOnError=True):
         """
@@ -567,19 +558,13 @@ class Benchmarker():
         if continueOnError:
             try:
                 log = self.sim.run(self.tmax + 1, log_times=times)
-                if self.sensitivityCalc:
-                    return np.array(log[0][self._outputName])
-                else:
-                    return np.array(log[self._outputName])
-            except:
+                return np.array(log[self._outputName])
+            except Exception:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
             log = self.sim.run(self.tmax + 1, log_times=times)
-            if self.sensitivityCalc:
-                return np.array(log[0][self._outputName])
-            else:
-                return np.array(log[self._outputName])
+            return np.array(log[self._outputName])
 
     def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
         """

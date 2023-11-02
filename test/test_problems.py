@@ -76,7 +76,7 @@ class Problem():
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad(self, plotting=False):
-        self.bm.use_sensitivities(True)
+        self.bm.use_sensitivities()
         # Check gradient calculator is accurate
         assert grad_check(bm=self.bm, plotting=plotting) < 0.01  # Within 1% to account for solver noise
         # Same under log transforms
@@ -90,7 +90,6 @@ class Problem():
         assert grad_check(bm=self.bm, plotting=plotting) < 0.01
         # Reset bm
         self.bm._useScaleFactors = False
-        self.bm.use_sensitivities(False)
 
 
 class Staircase(Problem):
