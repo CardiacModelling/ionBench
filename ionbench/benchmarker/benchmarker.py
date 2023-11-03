@@ -462,7 +462,7 @@ class Benchmarker():
             The gradient of the RMSE cost, evalauted at the inputted parameters.
 
         """
-
+        failed = False
         # Undo any transforms
         if inInputSpace:
             parameters = self.original_parameter_space(parameters)
@@ -478,29 +478,54 @@ class Benchmarker():
             warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
             self.use_sensitivities()
 
-        # Get sensitivities
-        self.simSens.reset()
-        self.set_params(parameters)
-        curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
-        sens = np.array(sens)
+        # Abort solving if the parameters are out of bounds
+        if not self.in_bounds(parameters):
+            failed = True
+            incrementSolveCounter = False
+            warnings.warn('Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
 
-        # Convert to cost derivative or residual jacobian
-        error = curr - self.data
-        cost = np.sqrt(np.mean(error**2))
-
-        if incrementSolveCounter:
-            self.tracker.gradSolveCount += 1
-        self.tracker.update(self.original_parameter_space(parameters), cost=cost, incrementSolveCounter=False)
-
-        if residuals:
-            J = np.zeros((len(curr), self.n_parameters()))
-            for i in range(len(curr)):
-                for j in range(self.n_parameters()):
-                    J[i, j] = sens[i, 0, j]
         else:
-            grad = []
-            for i in range(self.n_parameters()):
-                grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
+            # Get sensitivities
+            self.simSens.reset()
+            self.set_params(parameters)
+            try:
+                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
+                sens = np.array(sens)
+            except:
+                failed = True
+                warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+
+        if failed:
+            self.tracker.update(parameters, incrementSolveCounter=False)
+            if 'moreno' in self._name:
+                error = np.array([np.inf] * 69)
+            else:
+                error = np.array([np.inf] * len(np.arange(0, self.tmax)))
+            cost = np.inf
+            # use grad to point back to reasonable parameter space
+            grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
+            if residuals:
+                J = np.zeros((len(error), self.n_parameters()))
+                for i in range(len(error)):
+                    J[i, ] = grad
+        else:
+            # Convert to cost derivative or residual jacobian
+            error = curr - self.data
+            cost = np.sqrt(np.mean(error**2))
+
+            if incrementSolveCounter:
+                self.tracker.gradSolveCount += 1
+                self.tracker.update(self.original_parameter_space(parameters), cost=cost, incrementSolveCounter=False)
+
+            if residuals:
+                J = np.zeros((len(curr), self.n_parameters()))
+                for i in range(len(curr)):
+                    for j in range(self.n_parameters()):
+                        J[i, j] = sens[i, 0, j]
+            else:
+                grad = []
+                for i in range(self.n_parameters()):
+                    grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
 
         # Map derivatives to input space
         if inInputSpace:
