@@ -28,23 +28,10 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000):
         x0 = bm.sample()
 
     def fun(p):
+        print(p)
         return bm.grad(p, returnCost=True)
 
-    if bm._bounded:
-        lb = bm.lb[:]  # Generate copy
-        ub = bm.ub[:]  # Generate copy
-        for i in range(bm.n_parameters()):
-            if lb[i] == np.inf:
-                lb[i] = None
-            if ub[i] == np.inf:
-                ub[i] = None
-        bounds = (lb, ub)
-
-        out = scipy.optimize.minimize(fun, x0, jac=True, method='CG', options={
-                                      'disp': True, 'gtol': gtol, 'maxiter': maxIter}, bounds=bounds)
-    else:
-        out = scipy.optimize.minimize(fun, x0, jac=True, method='CG', options={
-                                      'disp': True, 'gtol': gtol, 'maxiter': maxIter})
+    out = scipy.optimize.minimize(fun, x0, jac=True, method='CG', options={'disp': True, 'gtol': gtol, 'maxiter': maxIter})
 
     bm.evaluate(out.x)
     return out.x
