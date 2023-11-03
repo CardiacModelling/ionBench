@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=1000, maxfev=20000):
+def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000):
     """
     Runs Powell's Simplex optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -17,7 +17,7 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=1000, maxfev=20000):
         Tolerance in parameters. Used as a termination criterion. The default is 1e-4.
     ftol : float, optional
         Tolerance in cost. Used as a termination criterion. The default is 1e-4.
-    maxiter : int, optional
+    maxIter : int, optional
         Maximum number of iterations of Powell's Simplex to use. The default is 1000.
     maxfev : int, optional
         Maximum number of cost function evaluations. The default is 20000.
@@ -41,9 +41,9 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxiter=1000, maxfev=20000):
                 ub[i] = None
         bounds = (lb, ub)
 
-        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': True, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxiter, 'maxfev': maxfev}, bounds=bounds)
+        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': True, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': True, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxiter, 'maxfev': maxfev})
+        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': True, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
 
     bm.evaluate(out.x)
     return out.x

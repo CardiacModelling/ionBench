@@ -16,7 +16,7 @@ class Test_scipy:
         x0 = self.bm.sample()
         cost = self.bm.cost(x0)
         # sample initial point, find its cost, optimise, find opt cost, assert reduction
-        x0_opt = run(self.bm, x0=x0, maxfev=50)
+        x0_opt = run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
         self.bm.reset()
         assert cost_opt <= cost

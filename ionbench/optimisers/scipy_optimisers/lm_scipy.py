@@ -2,7 +2,7 @@ import ionbench.problems.staircase
 import scipy.optimize
 
 
-def run(bm, x0=[], diff_step=1e-3, maxfev=20000):
+def run(bm, x0=[], diff_step=1e-3, maxIter=1000):
     """
     Runs lm (Levenberg-Marquardt) least squares optimiser from Scipy.
 
@@ -14,8 +14,8 @@ def run(bm, x0=[], diff_step=1e-3, maxfev=20000):
         Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     diff_step : float, optional
         Step size for finite difference calculation. The default is 1e-3.
-    maxfev : int, optional
-        Maximum number of cost function evaluations. The default is 20000.
+    maxIter : int, optional
+        Maximum number of cost function evaluations. The default is 1000.
 
     Returns
     -------
@@ -26,7 +26,7 @@ def run(bm, x0=[], diff_step=1e-3, maxfev=20000):
     if len(x0) == 0:
         x0 = bm.sample()
 
-    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=1, max_nfev=maxfev)
+    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=1, max_nfev=maxIter)
 
     bm.evaluate(out.x)
     return out.x
