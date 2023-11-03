@@ -47,8 +47,8 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
     # Set up transform functions to map between upper and lower bounds
     if not bm._bounded:
         bm.add_bounds([bm.defaultParams * 0, bm.defaultParams * 2])
-    ub = bm.ub
-    lb = bm.lb
+    ub = bm.input_parameter_space(bm.ub)
+    lb = bm.input_parameter_space(bm.lb)
 
     def fitting_params(p):
         x = np.zeros(len(p))
