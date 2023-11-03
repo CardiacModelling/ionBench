@@ -7,7 +7,8 @@ import ionbench.optimisers.external_optimisers as ext_opts
 
 class Test_scipy:
     # Check all scipy optimisers run and improve cost compared to x0
-    bm = ionbench.problems.loewe2016.ikr(sensitivities=True)
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    bm._useScaleFactors = True  # Helps the stability of conjugate GD (avoiding big steps which lead to parameters that result in failed model solves)
     bm.plotter = False
     optimisers = [scipy_opts.lm_scipy.run, scipy_opts.nelderMead_scipy.run, scipy_opts.powell_scipy.run, scipy_opts.trustRegionReflective_scipy.run, scipy_opts.conjugateGD_scipy.run]
 
@@ -24,7 +25,7 @@ class Test_scipy:
 
 class Test_pints:
     # Check all pints optimisers run and improve cost compared to x0
-    bm = ionbench.problems.loewe2016.ikr()
+    bm = ionbench.problems.staircase.HH_Benchmarker()
     bm.plotter = False
     optimisers = [pints_opts.cmaes_pints.run, pints_opts.nelderMead_pints.run, pints_opts.pso_pints.run, pints_opts.snes_pints.run, pints_opts.xnes_pints.run]
 
@@ -41,7 +42,7 @@ class Test_pints:
 
 class Test_external:
     # Check all external optimisers run
-    bm = ionbench.problems.loewe2016.ikr()
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
     bm._useScaleFactors = True
     bm.plotter = False
     optimisers = [(ext_opts.GA_Bot2012.run, {'nGens': 5}), (ext_opts.GA_Smirnov2020.run, {'nGens': 5}), (ext_opts.hybridPSOTRR_Loewe2016.run, {'n': 5, 'maxIter': 5}), (ext_opts.patternSearch_Kohjitani2022.run, {'maxfev': 50}), (ext_opts.ppso_Chen2012.run, {'n': 5, 'maxIter': 5}), (ext_opts.curvilinearGD_Dokos2004.run, {'maxIter': 20}), (ext_opts.SA_Vanier1999.run, {'maxIter': 10}), (ext_opts.SPSA_Spall1998.run, {'maxIter': 5})]
