@@ -34,12 +34,13 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000):
     if bm._bounded:
         lb = bm.lb[:]  # Generate copy
         ub = bm.ub[:]  # Generate copy
+        bounds = []
         for i in range(bm.n_parameters()):
             if lb[i] == np.inf:
                 lb[i] = None
             if ub[i] == np.inf:
                 ub[i] = None
-        bounds = (lb, ub)
+            bounds.append((lb[i], ub[i]))
 
         out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': True, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
