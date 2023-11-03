@@ -153,9 +153,9 @@ class Tracker():
             if all(ifEqualFinalParamId[i:]):
                 # All future points remain with this many parameters identified, therefore it is considered converged
                 print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
+                print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
                 print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
                 print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
-                print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
                 break
 
 
