@@ -566,7 +566,7 @@ class Benchmarker():
             try:
                 log = self.sim.run(self.tmax + 1, log_times=times)
                 return np.array(log[self._outputName])
-            except Exception:
+            except:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
