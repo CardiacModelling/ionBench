@@ -10,7 +10,7 @@ import pickle
 
 class Tracker():
     """
-    This class records the various performance metrics used to evaluate the optimisation algorithms. 
+    This class records the various performance metrics used to evaluate the optimisation algorithms.
 
     It records the number of times the model is solved (stored as tracker.solveCount), not including the times that parameters were out of bounds.
 
@@ -20,7 +20,7 @@ class Tracker():
 
     It records the number of parameters that were correctly identified (within 5% of the true values) each time a parameter vector is evaluated.
 
-    This class contains two methods: update(), and plot(). 
+    This class contains two methods: update(), and plot().
 
     update() is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.cost) and updates the performance metric vectors.
 
@@ -32,8 +32,10 @@ class Tracker():
         self.paramRMSRE = []
         self.paramIdentifiedCount = []
         self.solveCount = 0
+        self.gradSolveCount = 0
         self.firstParams = []
         self.modelSolves = []
+        self.gradSolves = []
         self._trueParams = trueParams
 
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True):
@@ -43,7 +45,7 @@ class Tracker():
         Parameters
         ----------
 
-        estimatedParams : arraylike
+        estimatedParams : list
             The vector of parameters that are being evaluated, after any transformations to return them to the original parameter space have been applied.
         cost : float, optional
             The RMSE cost of the parameter vectors that are being evaluated. The default is np.inf, to be used if parameters are out of bounds.
@@ -67,6 +69,7 @@ class Tracker():
         if incrementSolveCounter:
             self.solveCount += 1
         self.modelSolves.append(self.solveCount)
+        self.gradSolves.append(self.gradSolveCount)
 
     def plot(self):
         """
@@ -80,21 +83,21 @@ class Tracker():
         # Cost plot
         plt.figure()
         plt.scatter(range(len(self.costs)), self.costs, c="k", marker=".")
-        plt.xlabel('Cost function calls')
+        plt.xlabel('Model solves')
         plt.ylabel('RMSE cost')
         plt.title('Data error')
 
         # Parameter RMSRE plot
         plt.figure()
         plt.scatter(range(len(self.paramRMSRE)), self.paramRMSRE, c="k", marker=".")
-        plt.xlabel('Cost function calls')
+        plt.xlabel('Model solves')
         plt.ylabel('Parameter RMSRE')
         plt.title('Parameter error')
 
         # Number of identified parameters plot
         plt.figure()
         plt.scatter(range(len(self.paramIdentifiedCount)), self.paramIdentifiedCount, c="k", marker=".")
-        plt.xlabel('Cost function calls')
+        plt.xlabel('Model solves')
         plt.ylabel('Number of parameters identified')
         plt.title('Number of parameters identified')
 
@@ -112,7 +115,7 @@ class Tracker():
         None.
 
         """
-        data = (self.solveCount, self.costs, self.modelSolves, self.paramRMSRE, self.paramIdentifiedCount)
+        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount)
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -132,7 +135,7 @@ class Tracker():
         """
         with open(filename, 'rb') as f:
             data = pickle.load(f)
-        self.solveCount, self.costs, self.modelSolves, self.paramRMSRE, self.paramIdentifiedCount = data
+        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount = data
 
     def report_convergence(self):
         """
@@ -149,9 +152,10 @@ class Tracker():
         for i in ind:
             if all(ifEqualFinalParamId[i:]):
                 # All future points remain with this many parameters identified, therefore it is considered converged
-                print('Model solves until convergence:  ' + str(self.modelSolves[i]))
+                print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
                 print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
                 print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
+                print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
                 break
 
 
@@ -458,6 +462,7 @@ class Benchmarker():
             The gradient of the RMSE cost, evalauted at the inputted parameters.
 
         """
+
         # Undo any transforms
         if inInputSpace:
             parameters = self.original_parameter_space(parameters)
@@ -473,9 +478,6 @@ class Benchmarker():
             warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
             self.use_sensitivities()
 
-        if incrementSolveCounter:
-            self.tracker.solveCount += self.n_parameters() + 1
-
         # Get sensitivities
         self.simSens.reset()
         self.set_params(parameters)
@@ -485,6 +487,11 @@ class Benchmarker():
         # Convert to cost derivative or residual jacobian
         error = curr - self.data
         cost = np.sqrt(np.mean(error**2))
+
+        if incrementSolveCounter:
+            self.tracker.gradSolveCount += 1
+        self.tracker.update(self.original_parameter_space(parameters), cost=cost, incrementSolveCounter=False)
+
         if residuals:
             J = np.zeros((len(curr), self.n_parameters()))
             for i in range(len(curr)):
@@ -631,6 +638,7 @@ class Benchmarker():
         print('=========================================')
         print('')
         print('Number of cost evaluations:      ' + str(self.tracker.solveCount))
+        print('Number of grad evaluations:      ' + str(self.tracker.gradSolveCount))
         cost = self.cost(parameters, incrementSolveCounter=False)
         print('Final cost:                      {0:.6f}'.format(cost))
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
