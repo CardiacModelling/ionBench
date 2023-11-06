@@ -72,12 +72,12 @@ class Problem():
         # returns to 0 after resetting
         self.bm.reset()
         assert self.bm.tracker.solveCount == 0
+        self.bm._bounded = False
         if 'moreno' not in self.bm._name:
             # grad solve counter increments with grad but not normal solve counter
             self.bm.grad(p)
             assert self.bm.tracker.solveCount == 0
             assert self.bm.tracker.gradSolveCount == 1
-        self.bm._bounded = False
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad(self, plotting=False):
