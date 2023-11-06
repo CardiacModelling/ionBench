@@ -10,6 +10,6 @@ def test_multistart():
     costs = []
     for x0 in initParams:
         costs.append(bm.cost(x0))
-    outs = ionbench.multistart(ionbench.optimisers.scipy_optimisers.lm_scipy.run, bm, initParams, '', maxfev=50)
+    outs = ionbench.multistart(ionbench.optimisers.scipy_optimisers.lm_scipy.run, bm, initParams, '', maxIter=5)
     for i in range(numStarts):
         assert bm.cost(outs[i]) <= costs[i]
