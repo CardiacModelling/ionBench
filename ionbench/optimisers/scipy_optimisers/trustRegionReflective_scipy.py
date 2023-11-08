@@ -55,7 +55,7 @@ def get_modification(modNum=1):
     """
 
     if modNum == 1:
-        mod = ionbench.modification.Du2014()()
+        mod = ionbench.modification.Du2014()
     elif modNum == 2:
         mod = ionbench.modification.Loewe2016()
     elif modNum == 3:
