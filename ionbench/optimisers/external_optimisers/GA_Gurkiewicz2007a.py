@@ -9,7 +9,7 @@ from pymoo.core.problem import Problem
 from pymoo.operators.crossover.pntx import SinglePointCrossover
 
 
-def run(bm, x0=[], nGens=50, popSize=50, debug=False):
+def run(bm, x0=[], nGens=50, popSize=50, crossoverProb=0.5, debug=False):
     """
     Runs the genetic algorithm from Gurkiewicz et al 2007. This uses tournement selection (tournement size of 2) and single point crossover. This version of the algorithm, labelled version a, draws a new sample for the mutated parameters, ignoring the previous value.
 
@@ -23,6 +23,8 @@ def run(bm, x0=[], nGens=50, popSize=50, debug=False):
         The number of generations to run the optimisation algorithm for. The default is 1000.
     popSize : int, optional
         The size of the population in each generation. If the popSize is less than twenty times the number of parameters, it will be increased to twenty times the number of parameters. The default is 0.
+    crossoverProb : float, optional
+        The probability of a crossover. Gurkiewicz 2007 uses 0.5 (the default) while Ben-Shalom 2012 uses 0.1.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 
@@ -119,16 +121,22 @@ def run(bm, x0=[], nGens=50, popSize=50, debug=False):
     return elite.x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Gurkiewicz2007
+    modNum = 2 -> BenShalom2012
 
     Returns
     -------
     mod : modification
-        The modification used in Gurkiewicz et al 2007.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Gurkiewicz2007.
 
     """
-    mod = ionbench.modification.Gurkiewicz2007()
+
+    if modNum == 1:
+        mod = ionbench.modification.Gurkiewicz2007()
+    elif modNum == 2:
+        mod = ionbench.modification.BenShalom2012()
     return mod
 
 
