@@ -9,3 +9,4 @@ from ionbench.optimisers.external_optimisers import curvilinearGD_Dokos2004
 from ionbench.optimisers.external_optimisers import GA_Cairns2017
 from ionbench.optimisers.external_optimisers import GA_Gurkiewicz2007a
 from ionbench.optimisers.external_optimisers import GA_Gurkiewicz2007b
+from ionbench.optimisers.external_optimisers import DE_Zhou2009
