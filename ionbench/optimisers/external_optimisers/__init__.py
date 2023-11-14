@@ -14,3 +14,6 @@ from ionbench.optimisers.external_optimisers import pso_Cabo2022
 from ionbench.optimisers.external_optimisers import pso_Seemann2009
 from ionbench.optimisers.external_optimisers import NMPSO_Liu2011
 from ionbench.optimisers.external_optimisers import NMPSO_Clausen2020
+from ionbench.optimisers.external_optimisers import PSO_Loewe2016
+from ionbench.optimisers.external_optimisers import PSOTRR_Loewe2016
+from ionbench.optimisers.external_optimisers import hybridPSOTRRTRR_Loewe2016
