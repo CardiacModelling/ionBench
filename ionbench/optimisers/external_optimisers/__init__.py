@@ -18,3 +18,4 @@ from ionbench.optimisers.external_optimisers import PSO_Loewe2016
 from ionbench.optimisers.external_optimisers import PSOTRR_Loewe2016
 from ionbench.optimisers.external_optimisers import hybridPSOTRRTRR_Loewe2016
 from ionbench.optimisers.external_optimisers import randomSearch_Vanier1999
+from ionbench.optimisers.external_optimisers import stochasticSearch_Vanier1999
