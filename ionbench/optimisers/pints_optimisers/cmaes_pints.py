@@ -52,22 +52,29 @@ def run(bm, x0=[], maxIter=1000):
     return x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    bm.log_transform([True, False] * 4 + [False])
-    bm.add_bounds([[1e-7] * 8 + [-np.inf], [1e3, 0.4] * 4 + [np.inf]])
-    run(bm)
-
-
-def get_modification():
+def get_modification(modNum=1):
     """
-    The modification in Clerx et al 2019. Uses log transforms, and bounds (technically they are bounds on rates here. We just use sampler bounds for now).
+    modNum = 1 -> Clerx2019
+    modNum = 2 -> JedrzejewskiSzmek2018
 
     Returns
     -------
     mod : modification
-        The modification used in Clerx et al 2019.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Clerx2019.
 
     """
-    mod = ionbench.modification.Clerx2019()
+
+    if modNum == 1:
+        mod = ionbench.modification.Clerx2019()
+    elif modNum == 2:
+        mod = ionbench.modification.JedrzejewskiSzmek2018()
+    else:
+        mod = ionbench.modification.Empty(name='cmaes_pints')
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm)
