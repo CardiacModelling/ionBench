@@ -17,3 +17,4 @@ from ionbench.optimisers.external_optimisers import NMPSO_Clausen2020
 from ionbench.optimisers.external_optimisers import PSO_Loewe2016
 from ionbench.optimisers.external_optimisers import PSOTRR_Loewe2016
 from ionbench.optimisers.external_optimisers import hybridPSOTRRTRR_Loewe2016
+from ionbench.optimisers.external_optimisers import randomSearch_Vanier1999
