@@ -3,3 +3,4 @@ from ionbench.optimisers.scipy_optimisers import nelderMead_scipy
 from ionbench.optimisers.scipy_optimisers import powell_scipy
 from ionbench.optimisers.scipy_optimisers import trustRegionReflective_scipy
 from ionbench.optimisers.scipy_optimisers import conjugateGD_scipy
+from ionbench.optimisers.scipy_optimisers import slsqp_scipy
