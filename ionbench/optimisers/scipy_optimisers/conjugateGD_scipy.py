@@ -28,7 +28,6 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000):
         x0 = bm.sample()
 
     def fun(p):
-        print(p)
         return bm.grad(p, returnCost=True)
 
     out = scipy.optimize.minimize(fun, x0, jac=True, method='CG', options={'disp': True, 'gtol': gtol, 'maxiter': maxIter})
