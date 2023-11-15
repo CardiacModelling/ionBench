@@ -101,14 +101,14 @@ if __name__ == '__main__':
     run(bm, debug=True)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    The modification in Kojitani et al 2022 uses scaling factors. They have bounds on the sampling but I don't think they use these in the optimisation.
+    modNum = 1 -> Kohjitani2022
 
     Returns
     -------
     mod : modification
-        The modification used in Kohjitani et al 2022.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Kohjitani2022.
 
     """
     mod = ionbench.modification.Kohjitani2022()

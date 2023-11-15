@@ -45,13 +45,14 @@ def run(bm, x0=[], maxIter=1000):
     return x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Clausen2020
 
     Returns
     -------
     mod : modification
-        Modification from Clausen et al 2020.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Clausen2020.
 
     """
     mod = ionbench.modification.Clausen2020()

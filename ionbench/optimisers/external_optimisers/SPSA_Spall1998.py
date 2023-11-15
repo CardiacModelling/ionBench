@@ -81,13 +81,14 @@ if __name__ == '__main__':
     x = run(bm, x0=x0, maxIter=1000, debug=False)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Maryak1998
 
     Returns
     -------
     mod : modification
-        The modification used in Maryak1998.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Maryak1998.
 
     """
     mod = ionbench.modification.Maryak1998()

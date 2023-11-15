@@ -245,13 +245,14 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     return Gpos[L]
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Liu2011
 
     Returns
     -------
     mod : modification
-        The modification used in Liu et al 2011.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Liu2011.
 
     """
     mod = ionbench.modification.Liu2011()

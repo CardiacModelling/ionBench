@@ -165,14 +165,14 @@ if __name__ == '__main__':
     run(bm, debug=True)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    The modification in Loewe et al uses a bounded search space with no transforms. The bounds are the same as for the sampler.
+    modNum = 1 -> Loewe2016
 
     Returns
     -------
     mod : modification
-        The modification used in Loewe et al 2016.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Loewe2016.
 
     """
     mod = ionbench.modification.Loewe2016()

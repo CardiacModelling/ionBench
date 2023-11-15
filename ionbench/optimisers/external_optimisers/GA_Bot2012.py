@@ -124,14 +124,14 @@ if __name__ == '__main__':
     run(bm, debug=True)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    The modification in Bot et al uses a bounded search space for fitting conductances. The bounds are specified as a window around the true values, such as +-90%, +-10%, or -90% to +200% (although these may just be sampling starting points). This is closest to matching the 'sampler' bounds setting. There is no mention of scaling factor or log transforms.
+    modNum = 1 -> Bot2012
 
     Returns
     -------
     mod : modification
-        The modification used in Bot et al 2012.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Bot2012.
 
     """
     mod = ionbench.modification.Bot2012()

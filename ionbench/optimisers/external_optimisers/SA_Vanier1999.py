@@ -205,13 +205,14 @@ if __name__ == '__main__':
     x = run(bm, x0=x0, maxIter=1000, debug=False)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Vanier1999
 
     Returns
     -------
     mod : modification
-        The modification used in Vanier1999.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Vanier1999.
 
     """
     mod = ionbench.modification.Vanier1999()

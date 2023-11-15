@@ -254,14 +254,14 @@ if __name__ == '__main__':
     run(bm, groups, debug=True)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    The modification in Chen et al 2012 uses bounds. The method also uses scale factors in such a way that the range of parameters is bounded between 0 and 1, however, this is done automatically in the optimisers for bounded benchmarkers.
+    modNum = 1 -> Chen2012
 
     Returns
     -------
     mod : modification
-        The modification used in Chen et al 2012.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Chen2012.
 
     """
     mod = ionbench.modification.Chen2012()

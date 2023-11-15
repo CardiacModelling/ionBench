@@ -120,13 +120,14 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
     return elite.x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Gurkiewicz2007
 
     Returns
     -------
     mod : modification
-        The modification used in Gurkiewicz et al 2007.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Gurkiewicz2007.
 
     """
     mod = ionbench.modification.Gurkiewicz2007()

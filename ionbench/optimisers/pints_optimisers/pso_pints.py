@@ -49,9 +49,9 @@ if __name__ == '__main__':
     run(bm)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    No modification specified. Will use an empty modification
+    No modification for this optimiser. Will use an empty modification.
 
     Returns
     -------

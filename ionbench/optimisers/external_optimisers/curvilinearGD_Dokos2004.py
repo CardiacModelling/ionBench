@@ -239,13 +239,14 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
     return x0
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    Get the modification used by Dokos 2004.
+    modNum = 1 -> Dokos2004
+
     Returns
     -------
     mod : modification
-        The modification used in Dokos2004.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Dokos2004.
 
     """
     mod = ionbench.modification.Dokos2004()

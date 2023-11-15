@@ -57,13 +57,14 @@ def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=F
     return x0
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Vanier1999
 
     Returns
     -------
     mod : modification
-        The modification used in Vanier1999.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Vanier1999.
 
     """
     mod = ionbench.modification.Vanier1999()

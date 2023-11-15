@@ -143,13 +143,14 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
     return elite.x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Cairns2017
 
     Returns
     -------
     mod : modification
-        The modification used in Cairns et al 2017.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Cairns2017.
 
     """
     mod = ionbench.modification.Cairns2017()

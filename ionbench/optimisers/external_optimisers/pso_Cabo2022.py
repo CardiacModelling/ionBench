@@ -114,13 +114,14 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     return Gpos[L]
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Cabo2022
 
     Returns
     -------
     mod : modification
-        The modification used in Cabo et al 2022.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Cabo2022.
 
     """
     mod = ionbench.modification.Cabo2022()

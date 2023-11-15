@@ -118,14 +118,14 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     return bestInd.x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-
+    modNum = 1 -> Zhou2009
 
     Returns
     -------
     mod : modification
-        The modification used in Zhou et al 2009.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Zhou2009.
 
     """
     mod = ionbench.modification.Zhou2009()

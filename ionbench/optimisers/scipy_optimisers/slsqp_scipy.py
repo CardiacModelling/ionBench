@@ -50,13 +50,15 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000):
     return out.x
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> BuenoOrovio2008
 
     Returns
     -------
     mod : modification
-        Modification of Bueno-Orovio et al 2008.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so BuenoOrovio2008.
+
     """
     mod = ionbench.modification.BuenoOrovio2008()
     return mod

@@ -101,13 +101,14 @@ def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
     return Gpos[L]
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
+    modNum = 1 -> Seemann2009
 
     Returns
     -------
     mod : modification
-        The modification used in Seemann et al 2009.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Seemann2009.
 
     """
     mod = ionbench.modification.Seemann2009()

@@ -130,15 +130,15 @@ if __name__ == '__main__':
     run(bm, debug=True)
 
 
-def get_modification():
+def get_modification(modNum=1):
     """
-    No modification settings given in Smirnov et al 2020. Will use an empty modification
+    modNum = 1 -> Smirnov2020
 
     Returns
     -------
     mod : modification
-        Empty modification
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Smirnov2020.
 
     """
-    mod = ionbench.modification.Empty(name='Smirnov2020')
+    mod = ionbench.modification.Smirnov2020()
     return mod
