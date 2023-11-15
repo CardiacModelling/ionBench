@@ -51,6 +51,9 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
         def regen_noise(self):
             self.noise = temp * np.log(np.random.rand())
 
+        def tot_cost(self):
+            return self.cost + self.noise
+
     # class for the simplex
     class Simplex:
         def __init__(self, points):
@@ -65,7 +68,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             # returns the best point in the simplex
             x_best = self.points[0]
             for p in self.points:
-                if p.cost + p.noise < x_best.cost + x_best.noise:
+                if p.tot_cost() < x_best.tot_cost():
                     x_best = p
             return x_best
 
@@ -73,7 +76,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             # returns the worst point in the simplex
             x_worst = self.points[0]
             for p in self.points:
-                if p.cost + p.noise > x_worst.cost + x_worst.noise:
+                if p.tot_cost() > x_worst.tot_cost():
                     x_worst = p
             return x_worst
 
@@ -82,7 +85,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             x_worst = self.get_worst()
             x_secondWorst = self.points[0]
             for p in self.points:
-                if p.cost + p.noise > x_secondWorst.cost + x_secondWorst.noise and p != x_worst:
+                if p.tot_cost() > x_secondWorst.tot_cost() and p != x_worst:
                     x_secondWorst = p
             return x_secondWorst
 
@@ -113,16 +116,16 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             # attempt reflection
             xr = Point(2 * c - x_worst.x)
             xr.noise = -xr.noise
-            if xr.cost < x_secondWorst.cost and xr.cost >= x_best.cost:
+            if xr.tot_cost() < x_secondWorst.tot_cost() and xr.tot_cost() >= x_best.tot_cost():
                 if debug:
                     print("Accept reflection")
                 self.accept(xr)
                 return
-            if xr.cost < x_best.cost:
+            if xr.tot_cost() < x_best.tot_cost():
                 # Attempt expand
                 xe = Point(2 * xr.x - c)
                 xe.noise = -xe.noise
-                if xe.cost < xr.cost:
+                if xe.tot_cost() < xr.tot_cost():
                     if debug:
                         print("Accept expansion")
                     self.accept(xe)
@@ -131,15 +134,15 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
                         print("Ignore expansion. Accept reflection")
                     self.accept(xr)
                 return
-            if xr.cost >= x_secondWorst.cost:
+            if xr.tot_cost() >= x_secondWorst.tot_cost():
                 # contract
                 if debug:
                     print("Attempt contraction")
-                if xr.cost < x_worst.cost and xr.cost >= x_secondWorst.cost:
+                if xr.tot_cost() < x_worst.tot_cost() and xr.tot_cost() >= x_secondWorst.tot_cost():
                     # outside contract
                     xc = Point((xr.x + c) / 2)
                     xc.noise = -xc.noise
-                    if xc.cost <= xr.cost:
+                    if xc.tot_cost() <= xr.tot_cost():
                         if debug:
                             print("Accept inside contraction")
                         self.accept(xc)
@@ -148,7 +151,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
                     # inside contract
                     xc = Point((x_worst.x + c) / 2)
                     xc.noise = -xc.noise
-                    if xc.cost < x_worst.cost:
+                    if xc.tot_cost() < x_worst.tot_cost():
                         if debug:
                             print("Accept inside contraction")
                         self.accept(xc)
