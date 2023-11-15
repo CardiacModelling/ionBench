@@ -125,11 +125,6 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
     return elite.x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm, debug=True)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Smirnov2020
@@ -142,3 +137,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Smirnov2020()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, debug=True)

@@ -199,12 +199,6 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
     return x_best
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    x0 = bm.sample()
-    x = run(bm, x0=x0, maxIter=1000, debug=False)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Vanier1999
@@ -217,3 +211,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Vanier1999()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, maxIter=1000, debug=False)

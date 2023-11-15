@@ -39,12 +39,6 @@ def run(bm, x0=[], maxIter=1000):
     return x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    bm.log_transform([True, False] * 4 + [False])
-    run(bm)
-
-
 def get_modification(modNum=1):
     """
     No modification for this optimiser. Will use an empty modification.
@@ -57,3 +51,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Empty(name='nelderMead_pints')
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm)

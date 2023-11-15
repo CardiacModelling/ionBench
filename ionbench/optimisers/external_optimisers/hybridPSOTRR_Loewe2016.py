@@ -160,11 +160,6 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     return transform(Gpos[L])
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm, debug=True)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Loewe2016
@@ -177,3 +172,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Loewe2016()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, debug=True)

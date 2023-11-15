@@ -255,7 +255,6 @@ def get_modification(modNum=1):
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
-    x0 = bm.sample()
     mod = get_modification()
     mod.apply(bm)
-    x = run(bm, x0=x0, maxIter=1000, debug=True)
+    x = run(bm, maxIter=1000, debug=True)

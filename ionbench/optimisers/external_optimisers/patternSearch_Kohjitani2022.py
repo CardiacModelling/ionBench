@@ -96,11 +96,6 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
     return NP
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm, debug=True)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Kohjitani2022
@@ -113,3 +108,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Kohjitani2022()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, debug=True)

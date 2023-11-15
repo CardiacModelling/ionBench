@@ -248,12 +248,6 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
     return transform(Gpos[L])
 
 
-if __name__ == '__main__':
-    groups = [[0, 2, 4, 6], [1, 3, 5, 7], [8]]
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm, groups, debug=True)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Chen2012
@@ -266,3 +260,11 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Chen2012()
     return mod
+
+
+if __name__ == '__main__':
+    groups = [[0, 2, 4, 6], [1, 3, 5, 7], [8]]
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, groups, debug=True)

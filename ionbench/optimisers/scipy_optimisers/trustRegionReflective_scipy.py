@@ -36,11 +36,6 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000):
     return out.x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Du2014
@@ -63,3 +58,10 @@ def get_modification(modNum=1):
     else:
         mod = ionbench.modification.Empty(name='trr_scipy')
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm)

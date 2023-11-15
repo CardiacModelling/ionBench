@@ -36,13 +36,6 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000):
     return out.x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
-    bm._useScaleFactors = True
-    x0 = bm.sample()
-    run(bm, x0)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Sachse2003
@@ -62,3 +55,10 @@ def get_modification(modNum=1):
     else:
         mod = ionbench.modification.Empty(name='conjugateGD_scipy_scipy')
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm)

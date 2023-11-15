@@ -75,12 +75,6 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     return x0
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
-    x0 = bm.sample()
-    x = run(bm, x0=x0, maxIter=1000, debug=False)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Maryak1998
@@ -93,3 +87,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Maryak1998()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    mod = get_modification()
+    mod.apply(bm)
+    x = run(bm, maxIter=1000, debug=False)

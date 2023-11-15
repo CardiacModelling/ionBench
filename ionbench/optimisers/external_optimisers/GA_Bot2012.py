@@ -119,11 +119,6 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     return elite.x
 
 
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
-    run(bm, debug=True)
-
-
 def get_modification(modNum=1):
     """
     modNum = 1 -> Bot2012
@@ -136,3 +131,10 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Bot2012()
     return mod
+
+
+if __name__ == '__main__':
+    bm = ionbench.problems.staircase.HH_Benchmarker()
+    mod = get_modification()
+    mod.apply(bm)
+    run(bm, debug=True)
