@@ -34,7 +34,10 @@ class Modification():
         self.dict = {'log transform': logTransform, 'bounds': bounds, 'scale factors': scaleFactors}
         self.customLogTransform = customLogTransform
         self.customBounds = customBounds
-        self._name = None
+        if len(name) > 0:
+            self._name = name
+        else:
+            self._name = None
 
     def apply(self, bm):
         """
