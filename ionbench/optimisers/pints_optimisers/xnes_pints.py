@@ -30,7 +30,11 @@ def run(bm, x0=[], maxIter=1000):
     error = pints.RootMeanSquaredError(problem)
 
     # Create an optimisation controller
-    opt = pints.OptimisationController(error, x0, method=pints.XNES)
+    if bm._bounded:
+        boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
+        opt = pints.OptimisationController(error, x0, method=pints.XNES, boundaries=boundaries)
+    else:
+        opt = pints.OptimisationController(error, x0, method=pints.XNES)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     x, f = opt.run()
