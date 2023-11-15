@@ -496,7 +496,7 @@ class Benchmarker():
                 warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
 
         if failed:
-            self.tracker.update(parameters, incrementSolveCounter=False)
+            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter)
             if 'moreno' in self._name:
                 error = np.array([np.inf] * 69)
             else:
