@@ -38,6 +38,8 @@ class Tracker():
         self.gradSolves = []
         self._trueParams = trueParams
         self.evals = []
+        self.best_params = []
+        self.best_cost = np.inf
 
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost'):
         """
@@ -78,6 +80,9 @@ class Tracker():
             self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
         self.gradSolves.append(self.gradSolveCount)
+        if cost < self.best_cost:
+            self.best_params = estimatedParams
+            self.best_cost = cost
 
     def plot(self):
         """
@@ -696,6 +701,7 @@ class Benchmarker():
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: ' + str(self.tracker.paramIdentifiedCount[-1]))
         print('Total number of parameters:      ' + str(self.n_parameters()))
+        print('Best cost:                       {0:.6f}'.format(self.tracker.best_cost))
         self.tracker.report_convergence()
         print('')
         if self.plotter:
