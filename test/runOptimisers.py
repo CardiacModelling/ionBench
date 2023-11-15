@@ -9,5 +9,6 @@ for app in ionbench.APP_ALL:
     opt = importlib.import_module(app['module'])
     mod = opt.get_modification(app['modNum'])
     mod.apply(bm)
-    ionbench.multistart(opt.run, bm, initParams, app['module'] + 'modNum' + str(app['modNum']), **app['kwargs'])
+    kwargs = app['kwargs'] | mod.kwargs
+    ionbench.multistart(opt.run, bm, initParams, app['module'] + 'modNum' + str(app['modNum']), **kwargs)
     bm.reset()

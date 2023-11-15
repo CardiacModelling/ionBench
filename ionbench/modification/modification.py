@@ -7,7 +7,7 @@ class Modification():
     Modifications provide a way to store some benchmarker settings and apply them to a range of benchmarkers. These settings include log-transforms, parameter bounds, and the use of scale factors. A single modification can be generated, and then applied to a range of benchmarkers. Once a Modification object is instantiated, its transforms and bounds can be applied to a benchmarker, bm, by calling modification.apply(bm)
     """
 
-    def __init__(self, name="", logTransform='None', bounds='None', scaleFactors='off', customLogTransform=None, customBounds=None):
+    def __init__(self, name="", logTransform='None', bounds='None', scaleFactors='off', customLogTransform=None, customBounds=None, kwargs={}):
         """
         Initialise an Modification object. Once an Modification is built, its setting can be applied to any benchmarker, bm, by calling modification.apply(bm)
 
@@ -25,6 +25,8 @@ class Modification():
             A list of parameters to log transform. The list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be useable across different benchmarkers. Only required if logTransform = 'Custom'.
         customBounds : list, optional
             A list containing 2 elements, a list of lower bounds and a list of upper bounds. Each sub-list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be useable across different benchmarkers. Only required if bounds = 'Custom'.
+        kwargs : dict, optional
+            A dictionary of keyword arguements to be passed into an optimisers run function. The default is an empty dictionary.
 
         Returns
         -------
@@ -38,6 +40,7 @@ class Modification():
             self._name = name
         else:
             self._name = None
+        self.kwargs = kwargs
 
     def apply(self, bm):
         """
@@ -337,7 +340,7 @@ class Groenendaal2015(Modification):
         bounds = 'Sampler'
         scaleFactors = 'on'
         name = 'Groenendaal2015'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'nGens': 100, 'popSize': 500})
 
 
 class Guo2010(Modification):
@@ -391,7 +394,7 @@ class JedrzejewskiSzmek2018(Modification):
         bounds = 'Sampler'
         scaleFactors = 'off'
         name = 'JedrzejewskiSzmek2018'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'popSize': 8})
 
 
 class Kaur2014(Modification):

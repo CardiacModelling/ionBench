@@ -4,7 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
-def run(bm, x0=[], maxIter=1000):
+def run(bm, x0=[], maxIter=1000, debug=False):
     """
     Runs PSO (Particle Swarm Optimisation) from Pints using a benchmarker.
 
@@ -61,4 +61,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm)
+    run(bm, debug=True, **mod.kwargs)

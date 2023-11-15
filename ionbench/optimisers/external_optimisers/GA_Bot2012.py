@@ -52,6 +52,9 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     def cost_func(x):
         return bm.cost(x)
 
+    print(popSize)
+    print(nGens)
+
     pop = [None] * popSize
     for i in range(popSize):
         pop[i] = individual()
@@ -122,6 +125,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
 def get_modification(modNum=1):
     """
     modNum = 1 -> Bot2012
+    modNum = 2 -> Groenendaal2015
 
     Returns
     -------
@@ -129,12 +133,16 @@ def get_modification(modNum=1):
         Modification corresponding to inputted modNum. Default is modNum = 1, so Bot2012.
 
     """
-    mod = ionbench.modification.Bot2012()
+
+    if modNum == 1:
+        mod = ionbench.modification.Bot2012()
+    elif modNum == 2:
+        mod = ionbench.modification.Groenendaal2015()
     return mod
 
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
-    mod = get_modification()
+    mod = get_modification(2)
     mod.apply(bm)
-    run(bm, debug=True)
+    run(bm, debug=True, **mod.kwargs)

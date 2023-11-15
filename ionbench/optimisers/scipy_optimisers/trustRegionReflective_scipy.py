@@ -2,7 +2,7 @@ import ionbench.problems.staircase
 import scipy.optimize
 
 
-def run(bm, x0=[], diff_step=1e-3, maxIter=1000):
+def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     """
     Runs Trust Region Reflective optimiser from Scipy.
 
@@ -64,4 +64,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm)
+    run(bm, debug=True, **mod.kwargs)

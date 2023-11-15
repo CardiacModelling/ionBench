@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], gtol=0.001, maxIter=1000):
+def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
     """
     Runs Conjugate Gradient Descent optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -61,4 +61,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
     mod = get_modification()
     mod.apply(bm)
-    run(bm)
+    run(bm, debug=True, **mod.kwargs)

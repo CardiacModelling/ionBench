@@ -4,7 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
-def run(bm, x0=[], maxIter=1000):
+def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
     """
     Runs CMA-ES from Pints using a benchmarker.
 
@@ -14,6 +14,8 @@ def run(bm, x0=[], maxIter=1000):
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
         Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+    popSize : int, optional
+        The population size to use in CMA-ES.
     maxIter : int, optional
         Number of iterations of CMA-ES to run. The default is 1000.
 
@@ -44,6 +46,7 @@ def run(bm, x0=[], maxIter=1000):
         opt = pints.OptimisationController(error, x0, method=pints.CMAES, boundaries=boundaries)
     else:
         opt = pints.OptimisationController(error, x0, method=pints.CMAES)
+    opt.optimiser().set_population_size(popSize)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     x, f = opt.run()
@@ -77,4 +80,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm)
+    run(bm, **mod.kwargs)

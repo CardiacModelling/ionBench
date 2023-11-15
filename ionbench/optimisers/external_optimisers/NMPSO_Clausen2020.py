@@ -63,4 +63,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm, maxIter=20)
+    run(bm, maxIter=20, debug=True, **mod.kwargs)

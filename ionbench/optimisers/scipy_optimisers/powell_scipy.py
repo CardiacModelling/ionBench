@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000):
+def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False):
     """
     Runs Powell's Simplex optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -78,4 +78,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm)
+    run(bm, debug=True, **mod.kwargs)

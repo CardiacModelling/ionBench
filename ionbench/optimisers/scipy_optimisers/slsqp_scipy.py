@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], ftol=1e-6, maxIter=1000):
+def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
     """
     Runs Sequential Least SQuares Programming optimiser from Scipy. An example of a Sequantial Quadratic Programming method which uses a quasi-newton update strategy to approximate the hessian.
 
@@ -68,4 +68,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
     mod = get_modification()
     mod.apply(bm)
-    run(bm, maxIter=50)
+    run(bm, maxIter=50, debug=True, **mod.kwargs)
