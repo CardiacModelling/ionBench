@@ -43,8 +43,9 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
             if ub[i] == np.inf:
                 ub[i] = None
             bounds.append((lb[i], ub[i]))
-
-    out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': True, 'ftol': ftol, 'maxiter': maxIter}, bounds=bounds)
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': True, 'ftol': ftol, 'maxiter': maxIter}, bounds=bounds)
+    else:
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': True, 'ftol': ftol, 'maxiter': maxIter})
 
     bm.evaluate(out.x)
     return out.x
