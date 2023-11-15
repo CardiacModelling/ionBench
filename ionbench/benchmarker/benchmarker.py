@@ -37,8 +37,9 @@ class Tracker():
         self.modelSolves = []
         self.gradSolves = []
         self._trueParams = trueParams
+        self.evals = []
 
-    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True):
+    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost'):
         """
         This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class.
 
@@ -51,6 +52,8 @@ class Tracker():
             The RMSE cost of the parameter vectors that are being evaluated. The default is np.inf, to be used if parameters are out of bounds.
         incrementSolveCounter : bool, optional
             Should the solveCount be incremented, ie did the model need to be solved. This should only be False during benchmarker.evaluate() or if the parameters were out of bounds. The default is True.
+        solveType : string, optional
+            What type of model solve was used
 
         Returns
         -------
@@ -67,7 +70,12 @@ class Tracker():
         self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams - trueParams) / trueParams) < 0.05))
         self.costs.append(cost)
         if incrementSolveCounter:
-            self.solveCount += 1
+            if solveType == 'cost':
+                self.solveCount += 1
+            elif solveType == 'grad':
+                self.gradSolveCount += 1
+            self.check_repeated_param(estimatedParams, solveType)
+            self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
         self.gradSolves.append(self.gradSolveCount)
 
@@ -157,6 +165,27 @@ class Tracker():
                 print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
                 print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
                 break
+
+    def check_repeated_param(self, param, solveType):
+        """
+        Checks if a parameter vector has been evaluated before and reports a warning if it has.
+
+        Parameters
+        ----------
+        param : array
+            The parameters to check if the model has been already solved for.
+
+        Returns
+        -------
+        None.
+
+        """
+        for (p, st) in self.evals:
+            if all(p == param):
+                if st == solveType:
+                    warnings.warn(f'Paramter vector that has just been solved had been evaluated previously. In both cases, it was evaluated as a {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                else:
+                    warnings.warn(f'Paramter vector that has just been solved had been evaluated previously. It was first evaluated as a {st} and has just been evaluated as a {solveType}. This means the implementation of this optimiser might be able to be improved and the number of function evaluations could maybe be reduced, although this is not guaranteed. If you are using an optimiser which uses line searches and gradient calculations, and this parameter vector was first evaluated as a cost and then again for a gradient for example, then this behaviour is expected.')
 
 
 class Benchmarker():
@@ -496,7 +525,7 @@ class Benchmarker():
                 warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
 
         if failed:
-            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter)
+            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad')
             if 'moreno' in self._name:
                 error = np.array([np.inf] * 69)
             else:
@@ -513,9 +542,7 @@ class Benchmarker():
             error = curr - self.data
             cost = np.sqrt(np.mean(error**2))
 
-            if incrementSolveCounter:
-                self.tracker.gradSolveCount += 1
-                self.tracker.update(self.original_parameter_space(parameters), cost=cost, incrementSolveCounter=False)
+            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad')
 
             if residuals:
                 J = np.zeros((len(curr), self.n_parameters()))
