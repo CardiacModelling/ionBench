@@ -30,7 +30,7 @@ def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
 
     class particle:
         def __init__(self):
-            self.position = bm.input_parameter_space(x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
+            self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             self.velocity = 0.1 * np.random.rand(bm.n_parameters()) * self.position
             self.bestCost = np.inf  # Best cost of this particle
             self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
@@ -119,4 +119,5 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
+    bm._useScaleFactors = True
     run(bm, maxIter=5, debug=True, **mod.kwargs)
