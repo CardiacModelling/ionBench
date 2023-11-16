@@ -80,7 +80,7 @@ def run(bm, x0=[], nGens=50, popSize=50, crossoverProb=0.5, debug=False):
         pop = newPop  # Population of parents
         # One Point Crossover
         newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=0.0, xu=2.0)
+        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
         for i in range(popSize // 2):
             a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
 
