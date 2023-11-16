@@ -525,7 +525,7 @@ class Benchmarker():
             try:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
                 sens = np.array(sens)
-            except:
+            except myokit.SimulationError:
                 failed = True
                 warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
 
@@ -623,7 +623,7 @@ class Benchmarker():
             try:
                 log = self.sim.run(self.tmax + 1, log_times=times)
                 return np.array(log[self._outputName])
-            except:
+            except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
