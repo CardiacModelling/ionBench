@@ -188,9 +188,9 @@ class Tracker():
         for (p, st) in self.evals:
             if all(p == param):
                 if st == solveType:
-                    warnings.warn(f'Paramter vector that has just been solved had been evaluated previously. In both cases, it was evaluated as a {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                    warnings.warn(f'Parameter vector that has just been solved had been evaluated previously. In both cases, it was evaluated as a {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
                 else:
-                    warnings.warn(f'Paramter vector that has just been solved had been evaluated previously. It was first evaluated as a {st} and has just been evaluated as a {solveType}. This means the implementation of this optimiser might be able to be improved and the number of function evaluations could maybe be reduced, although this is not guaranteed. If you are using an optimiser which uses line searches and gradient calculations, and this parameter vector was first evaluated as a cost and then again for a gradient for example, then this behaviour is expected.')
+                    warnings.warn(f'Parameter vector that has just been solved had been evaluated previously. It was first evaluated as a {st} and has just been evaluated as a {solveType}. This means the implementation of this optimiser might be able to be improved and the number of function evaluations could maybe be reduced, although this is not guaranteed. If you are using an optimiser which uses line searches and gradient calculations, and this parameter vector was first evaluated as a cost and then again for a gradient for example, then this behaviour is expected.')
 
 
 class Benchmarker():
