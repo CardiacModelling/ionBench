@@ -516,7 +516,7 @@ class Seemann2009(Modification):
 class Smirnov2020(Modification):
     def __init__(self):
         logTransform = 'None'
-        bounds = 'None'
+        bounds = 'Sampler'
         scaleFactors = 'on'
         name = 'Smirnov2020'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)

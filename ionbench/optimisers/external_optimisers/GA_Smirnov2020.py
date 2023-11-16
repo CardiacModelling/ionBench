@@ -84,12 +84,12 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
         pop = newPop  # Population of parents
         # Crossover SBX
         newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=0.0, xu=2.0)
+        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
         for i in range(popSize // 2):
             a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
 
             parents = [[a, b]]
-            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents)  # What is prob vs prob_var
+            off = SBX(prob=0.9, prob_var=0.5, eta=eta_cross).do(problem, parents)
             Xp = off.get("X")
             newPop.append(individual())
             newPop[-1].x = Xp[0]

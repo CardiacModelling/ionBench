@@ -52,9 +52,6 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     def cost_func(x):
         return bm.cost(x)
 
-    print(popSize)
-    print(nGens)
-
     pop = [None] * popSize
     for i in range(popSize):
         pop[i] = individual()
@@ -82,12 +79,12 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
         pop = newPop  # Population of parents
         # Crossover SBX
         newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=0.0, xu=2.0)
+        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
         for i in range(popSize // 2):
             a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
 
             parents = [[a, b]]
-            off = SBX(prob=0.9, eta=eta_cross).do(problem, parents)  # What is prob vs prob_var
+            off = SBX(prob=0.9, prob_var=0.5, eta=eta_cross).do(problem, parents)
             Xp = off.get("X")
             newPop.append(individual())
             newPop[-1].x = Xp[0]
@@ -95,7 +92,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
             newPop[-1].x = Xp[1]
         pop = newPop
         # Mutation
-        mutation = PolynomialMutation(prob=0.1 * bm.n_parameters(), eta=eta_mut)
+        mutation = PolynomialMutation(prob=1, prob_var=0.1, eta=eta_mut)
         for i in range(popSize):
             ind = Population.new(X=[pop[i].x])
             off = mutation(problem, ind)
@@ -143,6 +140,6 @@ def get_modification(modNum=1):
 
 if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
-    mod = get_modification(2)
+    mod = get_modification()
     mod.apply(bm)
     run(bm, debug=True, **mod.kwargs)
