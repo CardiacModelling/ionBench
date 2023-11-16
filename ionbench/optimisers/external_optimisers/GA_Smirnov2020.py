@@ -77,7 +77,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
         for j in range(2):
             perm = np.random.permutation(popSize)
             for i in range(popSize // 2):
-                if pop[perm[2 * i]].cost > pop[perm[2 * i + 1]].cost:
+                if pop[perm[2 * i]].cost < pop[perm[2 * i + 1]].cost:
                     newPop.append(copy.deepcopy(pop[perm[2 * i]]))
                 else:
                     newPop.append(copy.deepcopy(pop[perm[2 * i + 1]]))
