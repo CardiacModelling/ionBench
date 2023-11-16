@@ -306,9 +306,9 @@ def grad_check(bm, plotting=False):
     """
     x0 = bm.sample()
     if plotting:
-        paramVec = np.linspace(0.99 * x0[0], 1.01 * x0[0], 10)
+        paramVec = np.linspace(0.999 * x0[0], 1.001 * x0[0], 10)
     else:
-        paramVec = [0.99 * x0[0], 1.01 * x0[0]]
+        paramVec = [0.999 * x0[0], 1.001 * x0[0]]
     nPoints = len(paramVec)
     costs = np.zeros(nPoints)
     for i in range(nPoints):
