@@ -65,8 +65,13 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         pop[i].find_cost()
 
     for gen in range(nGens):
+        print('----------------')
         print(f'Generation {gen} of {nGens}')
-
+        if debug:
+            costMean = 0
+            for p in pop:
+                costMean += p.cost / popSize
+            print(f'Average cost is {costMean}')
         if gen > 0 and gen % 1000 == 0:
             # Run lm on each point
             if debug:
@@ -105,9 +110,9 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             # Save best out of trial or pop[i]
             trial.find_cost()
             if trial.cost < pop[i].cost:
-                pop[i] = trial
                 if debug:
                     print(f'Point accepted since trail cost is {trial.cost} and ith cost is {pop[i].cost}')
+                pop[i] = trial
 
     # Find best point in final pop
     bestInd = individual()
