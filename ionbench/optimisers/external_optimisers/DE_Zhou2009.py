@@ -96,8 +96,9 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             L = get_L()
             n = np.random.choice(range(bm.n_parameters()))
             for j in range(bm.n_parameters()):
-                if j >= n % bm.n_parameters() and j < (n + L) % bm.n_parameters():
-                    trial.x[j] = nu[j]
+                if j == n:
+                    for k in range(L):
+                        trial.x[(j + k) % bm.n_parameters()] = nu[(j + k) % bm.n_parameters()]
             if debug:
                 print(f'Perturbed point after crossover with L {L} and n {n}')
                 print(trial.x)
