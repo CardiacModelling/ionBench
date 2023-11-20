@@ -4,7 +4,7 @@ import copy
 import warnings
 from functools import lru_cache
 
-from pymoo.core.individual import Individual
+from pymoo.core.individual import Individual as pymooInd
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.pntx import SinglePointCrossover
 
@@ -32,7 +32,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
         The best parameters identified.
 
     """
-    class individual():
+    class Individual():
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()
@@ -53,7 +53,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
 
     pop = [None] * popSize
     for i in range(popSize):
-        pop[i] = individual()
+        pop[i] = Individual()
         pop[i].find_cost()
 
     for gen in range(nGens):
@@ -80,14 +80,14 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
         newPop = []
         problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
         for i in range(popSize // 2):
-            a, b = Individual(X=np.array(pop[2 * i].x)), Individual(X=np.array(pop[2 * i + 1].x))
+            a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
 
             parents = [[a, b]]
             off = SinglePointCrossover(prob=0.5).do(problem, parents)
             Xp = off.get("X")
-            newPop.append(individual())
+            newPop.append(Individual())
             newPop[-1].x = Xp[0]
-            newPop.append(individual())
+            newPop.append(Individual())
             newPop[-1].x = Xp[1]
         pop = newPop
 

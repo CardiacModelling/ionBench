@@ -36,7 +36,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
 
     boundsRange = bm.ub - bm.lb
 
-    class individual():
+    class Individual():
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()
@@ -53,7 +53,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
 
     pop = [None] * popSize
     for i in range(popSize):
-        pop[i] = individual()
+        pop[i] = Individual()
         pop[i].find_cost()
 
     for gen in range(nGens):
@@ -88,7 +88,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
             par1 = parents[2 * j]
             par2 = parents[2 * j + 1]
             # Construct child
-            child = individual()
+            child = Individual()
             for i in range(bm.n_parameters()):
                 # Get parameter i from parents 1 and 2
                 num1 = par1.x[i]

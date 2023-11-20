@@ -48,7 +48,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
         else:
             x0 = x0 / (2 * bm.defaultParams)
 
-    class particle:
+    class Particle:
         def __init__(self, n_param):
             self.velocity = 0.1 * np.random.rand(n_param)
             if len(x0) > 0:
@@ -100,7 +100,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
 
     particleList = []
     for i in range(n):
-        particleList.append(particle(bm.n_parameters()))
+        particleList.append(Particle(bm.n_parameters()))
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
@@ -164,7 +164,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
             bestNewCost = np.inf
             bestNewPosition = None
             for i in range(N):
-                newParticle = particle(bm.n_parameters())
+                newParticle = Particle(bm.n_parameters())
                 newParticle.position = np.copy(Gpos[L])
                 for j in patterns[i]:
                     newParticle.position[j] *= 1 + (np.random.rand() - 0.5) / 40

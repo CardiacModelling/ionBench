@@ -45,7 +45,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
         else:
             x0 = x0 / (2 * bm.defaultParams)
 
-    class particle:
+    class Particle:
         def __init__(self, n_param):
             self.velocity = np.zeros(bm.n_parameters())
             if len(x0) > 0:
@@ -101,7 +101,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
     particleList = []
     for i in range(n):
-        particleList.append(particle(bm.n_parameters()))
+        particleList.append(Particle(bm.n_parameters()))
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever

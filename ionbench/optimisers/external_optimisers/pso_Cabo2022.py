@@ -26,7 +26,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     if len(x0) == 0:
         x0 = bm.sample()
 
-    class particle:
+    class Particle:
         def __init__(self):
             self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             self.velocity = (bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())) - self.position) / 2
@@ -51,7 +51,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     # Initial population
     particleList = []
     for i in range(n):
-        particleList.append(particle())
+        particleList.append(Particle())
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever

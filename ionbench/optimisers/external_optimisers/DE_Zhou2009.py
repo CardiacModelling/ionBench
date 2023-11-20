@@ -32,7 +32,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         The best parameters identified.
 
     """
-    class individual():
+    class Individual():
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()
@@ -61,7 +61,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     # Generate initial population
     pop = [None] * popSize
     for i in range(popSize):
-        pop[i] = individual()
+        pop[i] = Individual()
         pop[i].find_cost()
 
     for gen in range(nGens):
@@ -91,7 +91,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             r1, r2, r3 = np.random.choice(possible, size=3, replace=False)
             if debug:
                 print(f'r1: {r1}, r2: {r2}, r3: {r3}')
-            trial = individual()
+            trial = Individual()
             nu = pop[r1].x + F * (pop[r2].x - pop[r3].x)
             if debug:
                 print('Perturbed point (nu)')
@@ -115,7 +115,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
                 pop[i] = trial
 
     # Find best point in final pop
-    bestInd = individual()
+    bestInd = Individual()
     bestInd.cost = np.inf
     for i in range(popSize):
         if pop[i].cost <= bestInd.cost:
