@@ -25,12 +25,24 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     """
     if len(x0) == 0:
         x0 = bm.sample()
+        if debug:
+            print('Sampling x0')
+            print(x0)
+
+    if debug:
+        verbose = 2
+    else:
+        verbose = 1
 
     if bm._bounded:
         bounds = (bm.lb, bm.ub)
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev=maxIter, bounds=bounds)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=verbose, max_nfev=maxIter, bounds=bounds)
     else:
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=2, max_nfev=maxIter)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=verbose, max_nfev=maxIter)
+
+    if debug:
+        print(f'Cost of {out.cost} found at:')
+        print(out.x)
 
     bm.evaluate(out.x)
     return out.x

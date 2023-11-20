@@ -30,6 +30,9 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
     """
     if len(x0) == 0:
         x0 = bm.sample()
+        if debug:
+            print('Sampling x0')
+            print(x0)
 
     if bm._bounded:
         lb = bm.lb[:]  # Generate copy
@@ -41,10 +44,20 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
             if ub[i] == np.inf:
                 ub[i] = None
             bounds.append((lb[i], ub[i]))
-
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
+        if debug:
+            print('Bounds transformed')
+            print('Old Bounds:')
+            print(bm.lb)
+            print(bm.ub)
+            print('New bounds')
+            print(bounds)
+        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': True, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
+        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
+
+    if debug:
+        print(f'Cost of {out.cost} found at:')
+        print(out.x)
 
     bm.evaluate(out.x)
     return out.x

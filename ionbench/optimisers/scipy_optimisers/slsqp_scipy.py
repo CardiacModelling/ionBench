@@ -26,6 +26,9 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
     """
     if len(x0) == 0:
         x0 = bm.sample()
+        if debug:
+            print('Sampling x0')
+            print(x0)
 
     def grad(p):
         return bm.grad(p)
@@ -43,9 +46,20 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
             if ub[i] == np.inf:
                 ub[i] = None
             bounds.append((lb[i], ub[i]))
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': True, 'ftol': ftol, 'maxiter': maxIter}, bounds=bounds)
+        if debug:
+            print('Bounds transformed')
+            print('Old Bounds:')
+            print(bm.lb)
+            print(bm.ub)
+            print('New bounds')
+            print(bounds)
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': ftol, 'maxiter': maxIter}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': True, 'ftol': ftol, 'maxiter': maxIter})
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': ftol, 'maxiter': maxIter})
+
+    if debug:
+        print(f'Cost of {out.cost} found at:')
+        print(out.x)
 
     bm.evaluate(out.x)
     return out.x

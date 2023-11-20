@@ -26,11 +26,21 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
     """
     if len(x0) == 0:
         x0 = bm.sample()
+        if debug:
+            print('Sampling x0')
+            print(x0)
 
-    def fun(p):
-        return bm.grad(p, returnCost=True)
+    def grad(p):
+        return bm.grad(p)
 
-    out = scipy.optimize.minimize(fun, x0, jac=True, method='CG', options={'disp': True, 'gtol': gtol, 'maxiter': maxIter})
+    def cost(p):
+        return bm.cost(p)
+
+    out = scipy.optimize.minimize(cost, x0, jac=grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
+
+    if debug:
+        print(f'Cost of {out.cost} found at:')
+        print(out.x)
 
     bm.evaluate(out.x)
     return out.x

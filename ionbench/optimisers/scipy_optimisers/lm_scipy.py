@@ -16,6 +16,7 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
         Step size for finite difference calculation. The default is 1e-3.
     maxIter : int, optional
         Maximum number of cost function evaluations. The default is 1000.
+    debug : bool, optional
 
     Returns
     -------
@@ -25,8 +26,20 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     """
     if len(x0) == 0:
         x0 = bm.sample()
+        if debug:
+            print('Sampling x0')
+            print(x0)
 
-    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=1, max_nfev=maxIter)
+    if debug:
+        verbose = 2
+    else:
+        verbose = 1
+
+    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=verbose, max_nfev=maxIter)
+
+    if debug:
+        print(f'Cost of {out.cost} found at:')
+        print(out.x)
 
     bm.evaluate(out.x)
     return out.x
