@@ -7,6 +7,7 @@ import ionbench
 def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
     """
     Simulated Annealing by Vanier 1999 uses the algorithm presented in "Numerical Recipes in C" by Press et al. This features a nelder mead optimiser, in which each point in the simplex, in addition to the cost also stored a realisation of a logarithmically distributed random variable. When points are compared, if the point is already in the simplex, this random variable is added to the cost, and if the point is not yet in the simplex (or was added during this step), then it is subtracted from the cost. This ensures that 1) the point which is moved (the worst point in nelder mead) is now random, and 2) there is a non-zero probability to accept a move that increases the cost. As the temperature decreases, the magnitude of this noise also decreases, ensuring the algorithm approaches a standard nelder mead simplex as the number of iterations approaches the maximum number.
+
     Parameters
     ----------
     bm : Benchmarker

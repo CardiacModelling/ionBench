@@ -4,7 +4,7 @@ import ionbench
 
 def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
     """
-
+    Runs the PSO algorithm defined by Seemann et al 2022.
 
     Parameters
     ----------

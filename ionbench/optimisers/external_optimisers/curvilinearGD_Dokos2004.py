@@ -9,6 +9,7 @@ from functools import lru_cache
 def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
     """
     Curvilinear gradient descent from Dokos 2004. This method was first introduced in Dokos 2003, with this implementation using the updated scheme which includes weighted residuals (Dokos 2004). It calculates a curved path which initially follows the steepest descent, but curves to finally converge towards a Gauss-Newton step (minimum of a locally defined quadratic). In order to optimise along this line, we use Scipy's implementation of Brents method (an implementation based on Press et al "Numerical Recipes in C").
+
     Parameters
     ----------
     bm : Benchmarker

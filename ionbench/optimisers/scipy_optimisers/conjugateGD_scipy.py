@@ -5,7 +5,7 @@ import numpy as np
 
 def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
     """
-    Runs Conjugate Gradient Descent optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
+    Runs Conjugate Gradient Descent optimiser from Scipy.
 
     Parameters
     ----------
