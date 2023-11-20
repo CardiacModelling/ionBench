@@ -16,6 +16,8 @@ def run(bm, x0=[], maxIter=1000, debug=False):
         Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Number of iterations of XNES to run. The default is 1000.
+    debug : bool, optional
+        If True, logging messages are printed every iteration. Otherwise the default of every iteration for the first 3 and then every 20 iterations. The default is False.
 
     Returns
     -------
@@ -36,6 +38,8 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     else:
         opt = pints.OptimisationController(error, x0, method=pints.XNES)
     opt.set_max_iterations(maxIter)
+    if debug:
+        opt.set_log_interval(iters=1)
     # Run the optimisation
     x, f = opt.run()
 

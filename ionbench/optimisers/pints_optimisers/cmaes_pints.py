@@ -18,6 +18,8 @@ def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
         The population size to use in CMA-ES.
     maxIter : int, optional
         Number of iterations of CMA-ES to run. The default is 1000.
+    debug : bool, optional
+        If True, logging messages are printed every iteration. Otherwise the default of every iteration for the first 3 and then every 20 iterations. The default is False.
 
     Returns
     -------
@@ -47,6 +49,8 @@ def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
     else:
         opt = pints.OptimisationController(error, x0, method=pints.CMAES)
     opt.optimiser().set_population_size(popSize)
+    if debug:
+        opt.set_log_interval(iters=1)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     x, f = opt.run()
