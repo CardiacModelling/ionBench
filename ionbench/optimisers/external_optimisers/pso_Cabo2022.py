@@ -29,7 +29,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     class particle:
         def __init__(self):
             self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.velocity = (self.position - bm.input_parameter_space(x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))) / 2
+            self.velocity = (bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())) - self.position) / 2
             self.bestCost = np.inf  # Best cost of this particle
             self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
             self.currentCost = None
@@ -43,8 +43,8 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     def cost_func(x):
         return bm.cost(x)
 
-    lb = bm.lb
-    ub = bm.ub
+    lb = bm.input_parameter_space(bm.lb)
+    ub = bm.input_parameter_space(bm.ub)
 
     # Set population size n
     n = int(10 + 2 * np.sqrt(bm.n_parameters()))
@@ -132,4 +132,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH_Benchmarker()
     mod = get_modification()
     mod.apply(bm)
-    run(bm, maxIter=5, debug=True, **mod.kwargs)
+    run(bm, maxIter=200, gmin=0.02, debug=True, **mod.kwargs)
