@@ -158,8 +158,8 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     def cost_func(x):
         return bm.cost(x)
 
-    lb = bm.lb
-    ub = bm.ub
+    lb = bm.input_parameter_space(bm.lb)
+    ub = bm.input_parameter_space(bm.ub)
 
     # Set population size n
     n = 3 * bm.n_parameters() + 1

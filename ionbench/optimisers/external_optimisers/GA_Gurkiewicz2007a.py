@@ -39,7 +39,7 @@ def run(bm, x0=[], nGens=50, popSize=50, crossoverProb=0.5, debug=False):
             if len(x0) == 0:
                 self.x = bm.sample()
             else:
-                self.x = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
+                self.x = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             self.cost = None
 
         def find_cost(self):

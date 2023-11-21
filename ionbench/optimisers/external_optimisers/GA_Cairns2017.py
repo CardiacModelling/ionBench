@@ -34,14 +34,14 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
     if not bm._bounded:
         raise RuntimeError('Cairns et al 2017 GA optimiser requires bounds.')
 
-    boundsRange = bm.ub - bm.lb
+    boundsRange = bm.input_parameter_space(bm.ub) - bm.input_parameter_space(bm.lb)
 
     class Individual():
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()
             else:
-                self.x = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
+                self.x = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             self.cost = None
 
         def find_cost(self):
