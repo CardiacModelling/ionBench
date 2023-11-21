@@ -37,8 +37,8 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
         return bm.cost(p)
 
     if bm._bounded:
-        lb = bm.lb[:]  # Generate copy
-        ub = bm.ub[:]  # Generate copy
+        lb = bm.input_parameter_space(bm.lb)
+        ub = bm.input_parameter_space(bm.ub)
         bounds = []
         for i in range(bm.n_parameters()):
             if lb[i] == np.inf:
