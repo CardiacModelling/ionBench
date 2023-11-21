@@ -36,7 +36,7 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     if A is None:
         A = np.round(maxIter * 0.1)
         if debug:
-            print('No value of A was specified. "Optimal" value determined as: ' + str(A))
+            print(f'No value of A was specified. "Optimal" value determined as {A}')
 
     if a is None:
         # Find a such that there will be approximately a 'percentChangeInMinParam'*min(|x0|) sized step taken by SPSA during the early iterations.
@@ -46,11 +46,11 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
         approxGrad = np.dot(grad, perturbVector)
         a = percentChangeInMinParam * np.min(np.abs(x0)) * (A + 1)**alpha / np.abs(approxGrad)
         if debug:
-            print('No value of a was specified. "Optimal" value determined as: ' + str(a))
+            print(f'No value of a was specified. "Optimal" value determined as {a}')
 
     for k in range(maxIter):
         if debug:
-            print('Iteration: ' + str(k) + ' of ' + str(maxIter))
+            print(f'Iteration {k} of {maxIter}')
         # Step size
         ak = a / (k + A + 1)**alpha
         grad = bm.grad(x0, inInputSpace=True)

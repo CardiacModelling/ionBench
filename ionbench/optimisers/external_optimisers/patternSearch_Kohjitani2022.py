@@ -70,14 +70,14 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
         # Explore neighbouring points
         if debug:
             print("------------")
-            print("Current step size:" + str(Stp))
-            print("Cost: " + str(cost_func(tuple(BP))))
+            print(f'Current step size: {Stp}')
+            print(f'Cost: {cost_func(tuple(BP))}')
         improvementFound, NP = explore(BP, Stp)  # Explore neighbouring points
         funcCounter += 4
         while improvementFound:
             iterCounter += 1
             if debug:
-                print("Improvement Found? " + str(improvementFound))
+                print(f'Improvement Found? {improvementFound}')
             BP = np.copy(NP)  # Move to new improved point
             improvementFound, NP = explore(BP, Stp)  # Explore neighbouring points
             funcCounter += 4

@@ -112,9 +112,9 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
 
         if debug:
             print('-------------')
-            print("Begginning population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Begginning population: {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
         foundImprovement = False
         for p in particleList:
@@ -129,36 +129,31 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
             q = 0
             if debug:
                 print("Found improvement")
-                print("Best cost is now: " + str(Gcost[L]))
-                print("Found at position: " + str(Gpos[L]))
+                print(f'Best cost is now:  {Gcost[L]}')
+                print(f'Found at position: {Gpos[L]}')
         else:
             q += 1
             if debug:
                 print("Didn't find an improvement")
-                print("Current value of q: " + str(q))
+                print(f'Current value of q: {q}')
 
         if Gcost[L] < gmin:
             print("Cost successfully minimised")
-            print("Final cost of:")
-            print(Gcost[L])
-            print("found at:")
+            print(f'Final cost of {Gcost[L]} found at:')
             print(Gpos[L])
             break
 
         if q > 5 * qmax:
             # Abort
             print("Too many iterations without improvement")
-            print("Final cost of:")
-            print(Gcost[L])
-            print("found at:")
+            print(f'Final cost of {Gcost[L]} found at:')
             print(Gpos[L])
             break
 
         if q >= qmax:
             if debug:
                 print("q exceeds qmax so perturbing")
-                print("q: " + str(q))
-                print("qmax: " + str(qmax))
+                print(f'q: {q}, qmax: {qmax}')
             # steps 5.1 and 5.2
             newParticleList = []
             bestNewCost = np.inf
@@ -178,13 +173,11 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
                 newParticleList.append(newParticle)
             if debug:
                 print("Perturbed particles")
-                print("Best new cost is: " + str(bestNewCost))
-                print("Found at: " + str(bestNewPosition))
+                print(f'Best new cost is: {bestNewCost} found at {bestNewPosition}')
             if bestNewCost <= Gcost[L]:
                 if debug:
                     print("Cost improved by perturbing")
-                    print("Original best cost: " + str(Gcost[L]))
-                    print("New best cost: " + str(bestNewCost))
+                    print(f'Original best cost: {Gcost[L]}, new best cost: {bestNewCost}')
                 q = 0
                 Gcost[L] = bestNewCost
                 Gpos[L] = np.copy(bestNewPosition)
@@ -201,13 +194,11 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
                     if p.currentCost == worstCost and all(p.position == worstPosition):
                         if debug:
                             print("Worst particle found")
-                            print("Worst particle cost: " + str(worstCost))
-                            print("Worst particle position: " + str(worstPosition))
+                            print(f'Worst particle cost: {worstCost}, worst particle position: {worstPosition}')
                         p.bestCost = bestNewCost
                         p.bestPosition = np.copy(bestNewPosition)
                         if debug:
-                            print("New best cost for worst particle: " + str(p.bestCost))
-                            print("New best position for worst particle: " + str(p.bestPosition))
+                            print(f'New best cost for worst particle: {p.bestCost}, position: {p.position}')
             else:
                 if debug:
                     print("Cost wasn't improved by perturbing")
@@ -219,8 +210,8 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
             w = np.exp(-alpha[L - 1] / alpha[L - 2])
         if debug:
             print("Updating inertia")
-            print("w: " + str(w))
-            print("alpha: " + str(alpha[L]))
+            print(f'w: {w}')
+            print(f'alpha: {alpha[L]}')
 
         # Renew velocities according to (16)
         for p in particleList:
@@ -240,9 +231,9 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
 
         if debug:
             print("Positions renewed")
-            print("Finished population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Finished population {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
     bm.evaluate(transform(Gpos[L]))
     return transform(Gpos[L])

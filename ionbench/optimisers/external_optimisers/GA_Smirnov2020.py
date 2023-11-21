@@ -69,9 +69,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
             elites[i] = copy.deepcopy(pop[eliteIndices[i]])
         if debug:
             print("------------")
-            print("Gen " + str(gen))
-            print("Best cost: " + str(min(costVec)))
-            print("Average cost: " + str(np.mean(costVec)))
+            print(f'Gen {gen}, Best cost: {min(costVec)}, Average cost: {np.mean(costVec)}')
         # Tournement selection
         newPop = []
         for j in range(2):
@@ -104,7 +102,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
                 mag = scipy.stats.cauchy.rvs(loc=0, scale=0.18)
                 pop[i].x += mag * direc
         if debug:
-            print("Finishing gen " + str(gen))
+            print(f'Finishing gen {gen}')
         # Find costs
         for i in range(popSize):
             pop[i].find_cost()

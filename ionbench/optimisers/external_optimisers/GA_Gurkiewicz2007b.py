@@ -64,8 +64,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
                 elite = copy.deepcopy(pop[i])
         if debug:
             print("------------")
-            print("Gen " + str(gen))
-            print("Best cost: " + str(minCost))
+            print(f'Gen {gen}, Best cost: {minCost}')
         # Tournement selection
         newPop = []
         for j in range(2):
@@ -99,7 +98,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
                     pop[i].x[j] += np.random.normal(scale=0.05 * np.sqrt(np.abs(pop[i].x[j])))
 
         if debug:
-            print("Finishing gen " + str(gen))
+            print(f'Finishing gen {gen}')
         # Find costs
         for i in range(popSize):
             pop[i].find_cost()

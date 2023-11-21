@@ -41,8 +41,7 @@ def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
             x0 = bm.sample()
             counter += 1
         if counter > 10:
-            print("Struggled to find parameters in bounds")
-            print("Required " + str(counter) + " iterations")
+            print(f'Struggled to find parameters in bounds. Required {counter} iterations.')
     # Create an optimisation controller
     if bm._bounded:
         opt = pints.OptimisationController(error, x0, method=pints.CMAES, boundaries=boundaries)

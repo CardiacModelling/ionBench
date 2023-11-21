@@ -103,9 +103,9 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
         if debug:
             print('-------------')
-            print("Begginning population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Begginning population: {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
         # Find best positions, both globally and locally
         for p in particleList:
@@ -134,9 +134,9 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
         if debug:
             print("Positions renewed")
-            print("Finished population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Finished population {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
     bm.evaluate(transform(Gpos[L]))
     return transform(Gpos[L])

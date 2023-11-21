@@ -177,9 +177,9 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
 
         if debug:
             print('-------------')
-            print("Begginning population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Begginning population: {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
         for p in particleList:
             cost = cost_func(tuple(p.position))
@@ -190,9 +190,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
 
         if Gcost[L] < gmin:
             print("Cost successfully minimised")
-            print("Final cost of:")
-            print(Gcost[L])
-            print("found at:")
+            print(f'Final cost of {Gcost[L]} found at:')
             print(Gpos[L])
             break
 
@@ -229,9 +227,9 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
 
         if debug:
             print("Positions renewed")
-            print("Finished population: " + str(L))
-            print("Best cost so far: " + str(Gcost[L]))
-            print("Found at position: " + str(Gpos[L]))
+            print(f'Finished population {L}')
+            print(f'Best cost so far: {Gcost[L]}')
+            print(f'Found at position: {Gpos[L]}')
 
     # If terminated by max iter, simplex or pso may have found a new best point
     for p in particleList:

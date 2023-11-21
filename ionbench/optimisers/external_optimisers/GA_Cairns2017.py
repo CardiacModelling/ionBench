@@ -64,8 +64,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
                 elite = copy.deepcopy(pop[i])
         if debug:
             print("------------")
-            print("Gen " + str(gen))
-            print("Best cost: " + str(minCost))
+            print(f'Gen {gen}, Best cost: {minCost}')
 
         # Tournement selection
         parents = []
@@ -122,7 +121,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
                         newPop[j].x[i] -= perturb
         pop = newPop
         if debug:
-            print("Finishing gen " + str(gen))
+            print(f'Finishing gen {gen}')
         # Find costs
         for i in range(popSize):
             pop[i].find_cost()
