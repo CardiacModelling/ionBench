@@ -1,5 +1,6 @@
 import ionbench
 import myokit
+import myokit.lib.markov
 import os
 import numpy as np
 import csv

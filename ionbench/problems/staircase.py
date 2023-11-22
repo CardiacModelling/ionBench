@@ -2,6 +2,8 @@ import os
 import numpy as np
 import csv
 import myokit
+import myokit.lib.markov
+import myokit.lib.hh
 import ionbench
 
 
