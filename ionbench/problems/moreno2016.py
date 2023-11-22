@@ -1,6 +1,5 @@
 import ionbench
 import myokit
-import myokit.lib.markov as markov
 import os
 import numpy as np
 import csv
@@ -9,11 +8,11 @@ import warnings
 
 class ina(ionbench.benchmarker.Benchmarker):
     """
-    The Moreno 2016 INa benchmarker. 
+    The Moreno 2016 INa benchmarker.
 
-    The benchmarker uses the model from Moreno et al 2016 with a step protocol used to calculated summary curves which are then used for fitting. 
+    The benchmarker uses the model from Moreno et al 2016 with a step protocol used to calculated summary curves which are then used for fitting.
 
-    Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution.
     """
 
     def __init__(self):
@@ -28,9 +27,8 @@ class ina(ionbench.benchmarker.Benchmarker):
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self._trueParams = np.copy(self.defaultParams)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
-        self._analyticalModel = markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
-        self.sim.pre(500)  # Prepace for 500ms
         self.sensitivityCalc = False  # Moreno currently can't do sensitivities
         self.simSens = None
         super().__init__()
@@ -239,7 +237,7 @@ class ina(ionbench.benchmarker.Benchmarker):
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
-        Find the RMSE cost between the model solved using the inputted parameters and the data. For Moreno, this method weights the contributions of the summary curves by the reciprical of the number of points in each summary curve. 
+        Find the RMSE cost between the model solved using the inputted parameters and the data. For Moreno, this method weights the contributions of the summary curves by the reciprical of the number of points in each summary curve.
 
         Parameters
         ----------

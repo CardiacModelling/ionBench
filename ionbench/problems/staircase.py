@@ -18,12 +18,10 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(1e-8, 1e-8)
-            self.simSens.pre(500)  # Prepace for 500ms
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.set_tolerance(1e-8, 1e-8)
-        self.sim.pre(500)  # Prepace for 500ms
         super().__init__()
 
     def sample(self, n=1):
@@ -57,11 +55,11 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
 
 class HH_Benchmarker(Staircase_Benchmarker):
     """
-    The Hodgkin-Huxley IKr Staircase benchmarker. 
+    The Hodgkin-Huxley IKr Staircase benchmarker.
 
-    The benchmarker uses the Beattie et al 2017 IKr Hodgkin-Huxley model using the staircase protocol. 
+    The benchmarker uses the Beattie et al 2017 IKr Hodgkin-Huxley model using the staircase protocol.
 
-    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
+    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method.
     """
 
     def __init__(self, sensitivities=False):
@@ -75,17 +73,18 @@ class HH_Benchmarker(Staircase_Benchmarker):
         self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2] * np.exp(-p[3] * V), 'negative'), (lambda p, V:p[4] * np.exp(p[5] * V), 'positive'), (lambda p, V:p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
+        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
         super().__init__()
         print('Benchmarker initialised')
 
 
 class MM_Benchmarker(Staircase_Benchmarker):
     """
-    The Markov IKr Staircase benchmarker. 
+    The Markov IKr Staircase benchmarker.
 
-    The benchmarker uses the Fink et al 2008 IKr Markov model using the staircase protocol. 
+    The benchmarker uses the Fink et al 2008 IKr Markov model using the staircase protocol.
 
-    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method. 
+    Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method.
     """
 
     def __init__(self, sensitivities=False):
@@ -99,6 +98,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
         self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
         self.sensitivityCalc = sensitivities
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Ir5', 'Or4']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='Environment.V')
         super().__init__()
         print('Benchmarker initialised')
 

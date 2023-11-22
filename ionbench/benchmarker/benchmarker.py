@@ -522,6 +522,7 @@ class Benchmarker():
             # Get sensitivities
             self.simSens.reset()
             self.set_params(parameters)
+            self.set_steady_state(parameters)
             try:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
                 sens = np.array(sens)
@@ -598,6 +599,25 @@ class Benchmarker():
             if self.sensitivityCalc:
                 self.simSens.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
 
+    def set_steady_state(self, parameters):
+        """
+        Sets the model to steady state at -80mV for the specified parameters. Will update the sensitivity simulation if self.sensitivityCalc == True.
+
+        Parameters
+        ----------
+        parameters : list
+            Vector of parameters to use for the calculation of the steady state.
+
+        Returns
+        -------
+        None.
+
+        """
+        state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
+        self.sim.set_state(state)
+        if self.sensitivityCalc:
+            self.simSens.set_state(state)
+
     def solve_with_sensitivities(self, times):
         log, e = self.simSens.run(self.tmax + 1, log_times=times)
         return np.array(log[self._outputName]), e
@@ -667,6 +687,7 @@ class Benchmarker():
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
+        self.set_steady_state(parameters)
 
         # Run the simulation and track the performance
         out = self.solve_model(times, continueOnError=continueOnError)
@@ -708,9 +729,11 @@ class Benchmarker():
             self.tracker.plot()
             self.sim.reset()
             self.set_params(self.tracker.firstParams)
+            self.set_steady_state(self.tracker.firstParams)
             firstOut = self.solve_model(np.arange(self.tmax), continueOnError=True)
             self.sim.reset()
             self.set_params(self.original_parameter_space(parameters))
+            self.set_steady_state(self.original_parameter_space(parameters))
             lastOut = self.solve_model(np.arange(self.tmax), continueOnError=True)
             plt.figure()
             if "moreno" in self._name:

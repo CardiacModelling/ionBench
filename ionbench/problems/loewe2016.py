@@ -1,6 +1,5 @@
 import ionbench
 import myokit
-import myokit.lib.hh as hh
 import os
 import numpy as np
 import csv
@@ -16,13 +15,11 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
             # ODE solver
             sens = ([self._outputName], parameters)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
-            self.simSens.pre(500)  # Prepace for 500ms
         else:
             self.simSens = None
         # analytical model
         self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=states, parameters=parameters, current=self._outputName, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
-        self.sim.pre(500)  # Prepace for 500ms
         super().__init__()
 
     def sample(self, n=1):
