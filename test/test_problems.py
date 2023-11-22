@@ -96,6 +96,31 @@ class Problem():
         # Reset bm
         self.bm._useScaleFactors = False
 
+    def test_steady_state(self):
+        # Test steady state is right for random parameters
+        self.bm.reset()
+        out = self.bm.simulate(parameters=self.bm.sample(), times=np.arange(self.bm.tmax))
+        assert np.abs((out[0] - out[1])) < 1e-8
+        self.bm.reset()
+        p = self.bm.sample()
+        self.bm.set_steady_state(p)
+        initState = self.bm.sim.state()
+        self.bm.set_params(p)
+        self.bm.sim.run(1)
+        newState = self.bm.sim.state()
+        assert all([np.abs((newState[i] - initState[i])) < 1e-8 for i in range(len(initState))])
+        # Check it also updates simSens
+        if not self.bm.sensitivityCalc:
+            self.bm.use_sensitivities()
+        self.bm.reset()
+        p = self.bm.sample()
+        self.bm.set_steady_state(p)
+        initState = self.bm.simSens.state()
+        self.bm.set_params(p)
+        self.bm.simSens.run(1)
+        newState = self.bm.sim.state()
+        assert all([np.abs((newState[i] - initState[i])) < 1e-8 for i in range(len(initState))])
+
 
 class Staircase(Problem):
     def test_sampler(self):
@@ -251,6 +276,25 @@ class Test_Moreno(Problem):
     def test_grad(self):
         # Ignore grad test for Moreno. This problem cant use the grad yet.
         pass
+
+    def test_steady_state(self):
+        # Test steady state is right for random parameters
+        self.bm.reset()
+        p = self.bm.sample()
+        self.bm.set_steady_state(p)
+        self.bm.set_params(p)
+        log = self.bm.sim.run(2, log_times=np.array([0, 1]))
+        out = log[self.bm._outputName]
+        assert np.abs((out[0] - out[1])) < 1e-8
+        self.bm.reset()
+        p = self.bm.sample()
+        self.bm.set_steady_state(p)
+        self.bm.set_params(p)
+        initState = self.bm.sim.state()
+        self.bm.set_params(p)
+        self.bm.sim.run(1)
+        newState = self.bm.sim.state()
+        assert all([np.abs((newState[i] - initState[i])) < 1e-8 for i in range(len(initState))])
 
 
 class Test_HH(Staircase):
