@@ -229,7 +229,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         if continueOnError:
             try:
                 return self.run_moreno()
-            except:
+            except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * 69)
         else:
