@@ -38,8 +38,8 @@ class Tracker():
         self.gradSolves = []
         self._trueParams = trueParams
         self.evals = []
-        self.best_params = []
-        self.best_cost = np.inf
+        self.bestParams = []
+        self.bestCost = np.inf
 
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost'):
         """
@@ -80,9 +80,9 @@ class Tracker():
             self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
         self.gradSolves.append(self.gradSolveCount)
-        if cost < self.best_cost:
-            self.best_params = estimatedParams
-            self.best_cost = cost
+        if cost < self.bestCost:
+            self.bestParams = estimatedParams
+            self.bestCost = cost
 
     def plot(self):
         """
@@ -128,7 +128,7 @@ class Tracker():
         None.
 
         """
-        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.best_params, self.best_cost)
+        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost)
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -148,7 +148,7 @@ class Tracker():
         """
         with open(filename, 'rb') as f:
             data = pickle.load(f)
-        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.best_params, self.best_cost = data
+        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost = data
 
     def report_convergence(self):
         """
@@ -725,7 +725,7 @@ class Benchmarker():
         print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
         print('Number of identified parameters: ' + str(self.tracker.paramIdentifiedCount[-1]))
         print('Total number of parameters:      ' + str(self.n_parameters()))
-        print('Best cost:                       {0:.6f}'.format(self.tracker.best_cost))
+        print('Best cost:                       {0:.6f}'.format(self.tracker.bestCost))
         self.tracker.report_convergence()
         print('')
         if self.plotter:
