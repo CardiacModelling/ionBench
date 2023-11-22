@@ -613,7 +613,10 @@ class Benchmarker():
         None.
 
         """
-        state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
+        if 'moreno' in self._name:
+            state = self._analyticalModel.steady_state(membrane_potential=-120, parameters=parameters)
+        else:
+            state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
         self.sim.set_state(state)
         if self.sensitivityCalc:
             self.simSens.set_state(state)
