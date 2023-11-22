@@ -100,7 +100,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
         self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Ir5', 'Or4']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='Environment.V')
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Or4', 'Ir5']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='Environment.V')
         super().__init__()
         print('Benchmarker initialised')
 
