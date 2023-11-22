@@ -76,11 +76,11 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
 
 class ikr(loewe2016_Benchmarker):
     """
-    The Loewe 2016 IKr benchmarker. 
+    The Loewe 2016 IKr benchmarker.
 
-    The benchmarker uses the Courtemanche 1998 IKr model with a simple step protocol. 
+    The benchmarker uses the Courtemanche 1998 IKr model with a simple step protocol.
 
-    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution.
     """
 
     def __init__(self, sensitivities=False):
@@ -101,11 +101,11 @@ class ikr(loewe2016_Benchmarker):
 
 class ikur(loewe2016_Benchmarker):
     """
-    The Loewe 2016 IKur benchmarker. 
+    The Loewe 2016 IKur benchmarker.
 
-    The benchmarker uses the Courtemanche 1998 IKur model with a simple step protocol. 
+    The benchmarker uses the Courtemanche 1998 IKur model with a simple step protocol.
 
-    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution. 
+    Its parameters are specified as reported in Loewe et al 2016 with the true parameters being the same as the default and the center of the sampling distribution.
     """
 
     def __init__(self, sensitivities=False):
