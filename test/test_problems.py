@@ -78,6 +78,20 @@ class Problem():
             self.bm.grad(p)
             assert self.bm.tracker.solveCount == 0
             assert self.bm.tracker.gradSolveCount == 1
+        self.bm.reset()
+        p1 = self.bm.sample()
+        p2 = self.bm.sample()
+        c1 = self.bm.cost(p1)
+        c2 = self.bm.cost(p2)
+        if c1 < c2:
+            assert c1 == self.bm.tracker.bestCost
+            assert all(p1 == self.bm.tracker.bestParams)
+        else:
+            assert c2 == self.bm.tracker.bestCost
+            assert all(p2 == self.bm.tracker.bestParams)
+        self.bm.cost(self.bm.defaultParams)
+        assert all(self.bm.defaultParams == self.bm.tracker.bestParams)
+        self.bm.reset()
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad(self, plotting=False):
@@ -120,6 +134,7 @@ class Problem():
         self.bm.simSens.run(1)
         newState = self.bm.sim.state()
         assert all([np.abs((newState[i] - initState[i])) < 1e-8 for i in range(len(initState))])
+        self.bm.reset()
 
 
 class Staircase(Problem):
