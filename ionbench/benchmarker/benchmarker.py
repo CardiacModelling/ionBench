@@ -414,7 +414,7 @@ class Benchmarker():
 
         """
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax), incrementSolveCounter=incrementSolveCounter))
-        cost = np.sqrt(np.mean((testOutput - self.data)**2))
+        cost = self.rmse(testOutput, self.data)
         return cost
 
     def signed_error(self, parameters):
@@ -694,8 +694,26 @@ class Benchmarker():
 
         # Run the simulation and track the performance
         out = self.solve_model(times, continueOnError=continueOnError)
-        self.tracker.update(parameters, cost=np.sqrt(np.mean((out - self.data)**2)), incrementSolveCounter=incrementSolveCounter)
+        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter)
         return out
+
+    def rmse(self, c1, c2):
+        """
+        Returns the RMSE between c1 and c2. This function is overridden in the Moreno problem to do weighted RMSE.
+
+        Parameters
+        ----------
+        c1 : numpy array
+            A list of model outputs, typically current.
+        c2 : numpy array
+            The data to compare the model output to. Should be the same size as c1.
+
+        Returns
+        -------
+        rmse : float
+            The RMSE between c1 and c2.
+        """
+        return np.sqrt(np.mean((c1 - c2)**2))
 
     def evaluate(self, parameters):
         """

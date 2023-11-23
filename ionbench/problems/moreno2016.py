@@ -236,27 +236,24 @@ class ina(ionbench.benchmarker.Benchmarker):
         else:
             return self.run_moreno()
 
-    def cost(self, parameters, incrementSolveCounter=True):
+    def rmse(self, c1, c2):
         """
-        Find the RMSE cost between the model solved using the inputted parameters and the data. For Moreno, this method weights the contributions of the summary curves by the reciprical of the number of points in each summary curve.
+        Returns the RMSE between c1 and c2. This function is overrides the general benchmarker function to do weighted RMSE.
 
         Parameters
         ----------
-        parameters : list or numpy array
-            Vector of parameters to solve the model.
-        incrementSolveCounter : bool, optional
-            If False, it disables the solve counter tracker. This never needs to be set to False by a user. This is only required by the evaluate() method. The default is True.
+        c1 : numpy array
+            A list of model outputs, typically current.
+        c2 : numpy array
+            The data to compare the model output to. Should be the same size as c1.
 
         Returns
         -------
-        cost : float
-            The RMSE cost of the parameters.
-
+        rmse : float
+            The weighted RMSE between c1 and c2.
         """
         weights = [1 / 9] * 9 + [1 / 20] * 20 + [1 / 21] * 21 + [1 / 10] * 10 + [1 / 9] * 9
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax), incrementSolveCounter=incrementSolveCounter))
-        cost = np.sqrt(np.average((testOutput - self.data)**2, weights=weights))
-        return cost
+        return np.sqrt(np.average((c1 - c2)**2, weights=weights))
 
     def run_moreno(self):
         """
