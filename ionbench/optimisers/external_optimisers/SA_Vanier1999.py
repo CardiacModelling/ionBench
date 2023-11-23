@@ -183,6 +183,13 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
         perturb[i] = perturbVector[i]
         points.append(Point(x0 + perturb))
 
+    bestPos = None
+    bestCost = np.inf
+    for p in points:
+        if p.cost < bestCost:
+            bestCost = p.cost
+            bestPos = np.copy(p.x)
+
     # Build the simplex
     simplex = Simplex(points)
     for i in range(maxIter):
@@ -194,10 +201,16 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
         if i % N == 0:
             temp = tempInitial * (1 - i / maxIter)  # Proportional decrease in temperature
 
+        for p in simplex.points:
+            if p.cost < bestCost:
+                bestCost = p.cost
+                bestPos = np.copy(p.x)
+        if debug:
+            print(f'Best cost so far is {bestCost}')
+
     # Return the best point in the final simplex
-    x_best = simplex.get_best().x
-    bm.evaluate(x_best)
-    return x_best
+    bm.evaluate(bestPos)
+    return bestPos
 
 
 def get_modification(modNum=1):
