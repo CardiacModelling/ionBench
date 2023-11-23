@@ -50,7 +50,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             self.regen_noise()
 
         def regen_noise(self):
-            self.noise = temp * np.log(np.random.rand())
+            self.noise = -temp * np.log(np.random.rand())
 
         def tot_cost(self):
             return self.cost + self.noise
