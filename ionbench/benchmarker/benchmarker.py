@@ -6,6 +6,7 @@ import ionbench
 import matplotlib.pyplot as plt
 import warnings
 import pickle
+import time
 
 
 class Tracker():
@@ -40,8 +41,10 @@ class Tracker():
         self.evals = []
         self.bestParams = []
         self.bestCost = np.inf
+        self.costTimes = []
+        self.gradTimes = []
 
-    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost'):
+    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', time=np.NaN):
         """
         This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class.
 
@@ -74,8 +77,10 @@ class Tracker():
         if incrementSolveCounter:
             if solveType == 'cost':
                 self.solveCount += 1
+                self.costTimes.append(time)
             elif solveType == 'grad':
                 self.gradSolveCount += 1
+                self.gradTimes.append(time)
             self.check_repeated_param(estimatedParams, solveType)
             self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
@@ -113,6 +118,26 @@ class Tracker():
         plt.xlabel('Model solves')
         plt.ylabel('Number of parameters identified')
         plt.title('Number of parameters identified')
+
+        # Plot cost times
+        if len(self.costTimes) > 0:
+            plt.figure()
+            n, _, _ = plt.hist(self.costTimes)
+            plt.vlines(x=np.mean(self.costTimes), ymin=0, ymax=np.max(n), colors=['k'], label=f'Mean: {np.mean(self.costTimes):.3f}')
+            plt.xlabel('Time (sec)')
+            plt.ylabel('Frequency')
+            plt.title('Histogram of cost evaluation times')
+            plt.legend()
+
+        # Plot cost times
+        if len(self.gradTimes) > 0:
+            plt.figure()
+            n, _, _ = plt.hist(self.gradTimes)
+            plt.vlines(x=np.mean(self.gradTimes), ymin=0, ymax=np.max(n), colors=['k'], label=f'Mean: {np.mean(self.gradTimes):.3f}')
+            plt.xlabel('Time (sec)')
+            plt.ylabel('Frequency')
+            plt.title('Histogram of gradient evaluation times')
+            plt.legend()
 
     def save(self, filename):
         """
@@ -523,15 +548,17 @@ class Benchmarker():
             self.simSens.reset()
             self.set_params(parameters)
             self.set_steady_state(parameters)
+            start = time.monotonic()
             try:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
                 sens = np.array(sens)
             except myokit.SimulationError:
                 failed = True
                 warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+            end = time.monotonic()
 
         if failed:
-            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad')
+            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad', time=end - start)
             if 'moreno' in self._name:
                 error = np.array([np.inf] * 69)
             else:
@@ -548,7 +575,7 @@ class Benchmarker():
             error = curr - self.data
             cost = np.sqrt(np.mean(error**2))
 
-            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad')
+            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad', time=end - start)
 
             if residuals:
                 J = np.zeros((len(curr), self.n_parameters()))
@@ -693,8 +720,10 @@ class Benchmarker():
         self.set_steady_state(parameters)
 
         # Run the simulation and track the performance
+        start = time.monotonic()
         out = self.solve_model(times, continueOnError=continueOnError)
-        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter)
+        end = time.monotonic()
+        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter, time=end - start)
         return out
 
     def rmse(self, c1, c2):

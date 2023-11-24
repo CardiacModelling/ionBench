@@ -60,6 +60,9 @@ class Problem():
     def test_tracker(self):
         # Check solve count works with bounds and evaluate
         self.bm.reset()
+        # Solve times are empty
+        assert len(self.bm.tracker.costTimes) == 0
+        assert len(self.bm.tracker.gradTimes) == 0
         # Solve count is 0 after reset
         assert self.bm.tracker.solveCount == 0
         # Solve count increments after solving
@@ -74,6 +77,9 @@ class Problem():
         # Solve count doesn't increment when evaluating
         self.bm.evaluate(p)
         assert self.bm.tracker.solveCount == 1
+        # Only one cost time and no grad
+        assert len(self.bm.tracker.costTimes) == 1
+        assert len(self.bm.tracker.gradTimes) == 0
         # returns to 0 after resetting
         self.bm.reset()
         assert self.bm.tracker.solveCount == 0
@@ -83,6 +89,8 @@ class Problem():
             self.bm.grad(p)
             assert self.bm.tracker.solveCount == 0
             assert self.bm.tracker.gradSolveCount == 1
+            assert len(self.bm.tracker.costTimes) == 0
+            assert len(self.bm.tracker.gradTimes) == 1
         self.bm.reset()
         p1 = self.bm.sample()
         p2 = self.bm.sample()
