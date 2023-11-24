@@ -2,6 +2,7 @@
 
 import numpy as np
 import ionbench
+from functools import lru_cache
 
 
 def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
@@ -29,6 +30,10 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
         The best parameters in the final simplex.
 
     """
+    @lru_cache(maxsize=None)
+    def cost(p):
+        return bm.cost(p)
+
     def wrap_around_boundaries(xOld):
         x = np.copy(xOld)
         if not bm.in_bounds(x):
@@ -46,7 +51,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
     class Point:
         def __init__(self, x):
             self.x = wrap_around_boundaries(x)
-            self.cost = bm.cost(x)
+            self.cost = cost(tuple(x))
             self.regen_noise()
 
         def regen_noise(self):
@@ -171,7 +176,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
 
     # Initialise the temperature
     if tempInitial is None:
-        tempInitial = bm.cost(x0)
+        tempInitial = cost(tuple(x0))
     temp = tempInitial
 
     # Same initialization procedure as scipy or fminseach

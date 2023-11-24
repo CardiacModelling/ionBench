@@ -23,6 +23,9 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
         The best parameters identified by Trust Region Reflective.
 
     """
+    def grad(p):
+        return bm.grad(p, residuals=True)
+
     if len(x0) == 0:
         x0 = bm.sample()
         if debug:
@@ -36,9 +39,9 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
 
     if bm._bounded:
         bounds = (bm.lb, bm.ub)
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=verbose, max_nfev=maxIter, bounds=bounds)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter, bounds=bounds)
     else:
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', diff_step=diff_step, verbose=verbose, max_nfev=maxIter)
+        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter)
 
     if debug:
         print(f'Cost of {out.cost} found at:')
@@ -73,7 +76,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
     mod = get_modification()
     mod.apply(bm)
     run(bm, debug=True, **mod.kwargs)

@@ -58,7 +58,7 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
         out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': ftol, 'maxiter': maxIter})
 
     if debug:
-        print(f'Cost of {out.cost} found at:')
+        print(f'Cost of {out.fun} found at:')
         print(out.x)
 
     bm.evaluate(out.x)

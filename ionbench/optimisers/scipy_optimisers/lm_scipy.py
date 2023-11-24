@@ -1,5 +1,6 @@
 import ionbench.problems.staircase
 import scipy.optimize
+from functools import lru_cache
 
 
 def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
@@ -24,6 +25,20 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
         The best parameters identified by LM.
 
     """
+    @lru_cache(maxsize=None)
+    def grad(p):
+        return bm.grad(p, residuals=True)
+
+    @lru_cache(maxsize=None)
+    def signed_error(p):
+        return bm.signed_error(p)
+
+    def grad_scipy(p):
+        return grad(tuple(p))
+
+    def signed_error_scipy(p):
+        return signed_error(tuple(p))
+
     if len(x0) == 0:
         x0 = bm.sample()
         if debug:
@@ -35,7 +50,7 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     else:
         verbose = 1
 
-    out = scipy.optimize.least_squares(bm.signed_error, x0, method='lm', diff_step=diff_step, verbose=verbose, max_nfev=maxIter)
+    out = scipy.optimize.least_squares(signed_error_scipy, x0, method='lm', jac=grad_scipy, verbose=verbose, max_nfev=maxIter)
 
     if debug:
         print(f'Cost of {out.cost} found at:')
@@ -67,7 +82,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
     mod = get_modification()
     mod.apply(bm)
     run(bm, debug=True, **mod.kwargs)

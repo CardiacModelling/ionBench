@@ -1,6 +1,6 @@
 import ionbench.problems.staircase
 import scipy.optimize
-import numpy as np
+from functools import lru_cache
 
 
 def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
@@ -24,22 +24,30 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
         The best parameters identified by Conjugate Gradient Descent.
 
     """
+    @lru_cache(maxsize=None)
+    def grad(p):
+        return bm.grad(p)
+
+    @lru_cache(maxsize=None)
+    def cost(p):
+        return bm.cost(p)
+
+    def grad_scipy(p):
+        return grad(tuple(p))
+
+    def cost_scipy(p):
+        return cost(tuple(p))
+
     if len(x0) == 0:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
             print(x0)
 
-    def grad(p):
-        return bm.grad(p)
-
-    def cost(p):
-        return bm.cost(p)
-
-    out = scipy.optimize.minimize(cost, x0, jac=grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
+    out = scipy.optimize.minimize(cost_scipy, x0, jac=grad_scipy, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
 
     if debug:
-        print(f'Cost of {out.cost} found at:')
+        print(f'Cost of {out.fun} found at:')
         print(out.x)
 
     bm.evaluate(out.x)

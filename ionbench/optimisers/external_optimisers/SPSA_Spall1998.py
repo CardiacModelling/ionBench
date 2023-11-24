@@ -1,5 +1,6 @@
 import numpy as np
 import ionbench
+from functools import lru_cache
 
 
 def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
@@ -29,6 +30,14 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
         The best parameters identified.
 
     """
+    @lru_cache(maxsize=None)
+    def grad(p):
+        return bm.grad(p)
+
+    @lru_cache(maxsize=None)
+    def cost(p):
+        return bm.cost(p)
+
     if len(x0) == 0:
         # sample initial point
         x0 = bm.sample()
@@ -41,9 +50,9 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     if a is None:
         # Find a such that there will be approximately a 'percentChangeInMinParam'*min(|x0|) sized step taken by SPSA during the early iterations.
         percentChangeInMinParam = 0.1
-        grad = bm.grad(x0, inInputSpace=True)
+        g = grad(tuple(x0))
         perturbVector = (np.random.rand(bm.n_parameters()) < 0.5) * 2 - 1
-        approxGrad = np.dot(grad, perturbVector)
+        approxGrad = np.dot(g, perturbVector)
         a = percentChangeInMinParam * np.min(np.abs(x0)) * (A + 1)**alpha / np.abs(approxGrad)
         if debug:
             print(f'No value of a was specified. "Optimal" value determined as {a}')
@@ -53,16 +62,16 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
             print(f'Iteration {k} of {maxIter}')
         # Step size
         ak = a / (k + A + 1)**alpha
-        grad = bm.grad(x0, inInputSpace=True)
+        g = grad(tuple(x0))
         # Bernoulli (+-1) distributed random perturbation vector
         perturbVector = (np.random.rand(bm.n_parameters()) < 0.5) * 2 - 1
         # Gradient in random direction
-        approxGrad = np.dot(grad, perturbVector)
+        approxGrad = np.dot(g, perturbVector)
         if debug:
             print('Old x0')
             print(x0)
             print('Others: grad, perturbVector, approxGrad, step size')
-            print(grad)
+            print(g)
             print(perturbVector)
             print(approxGrad)
             print(ak)

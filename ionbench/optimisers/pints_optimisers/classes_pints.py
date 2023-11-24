@@ -1,5 +1,6 @@
 import pints
 import numpy as np
+from functools import lru_cache
 
 
 class Model(pints.ForwardModel):
@@ -53,7 +54,11 @@ class Model(pints.ForwardModel):
 
         """
         # Reset the simulation
-        return self.bm.simulate(parameters, times)
+        return self.sim(tuple(parameters))
+
+    @lru_cache(maxsize=None)
+    def sim(self, p):
+        return self.bm.simulate(p, np.arange(0, self.bm.tmax))
 
 
 class AdvancedBoundaries(pints.Boundaries):

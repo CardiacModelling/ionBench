@@ -2,10 +2,11 @@ import pints
 import ionbench
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
+from functools import lru_cache
 # Limited information on the implementation given in Clausen 2020.
 
 
-def run(bm, x0=[], maxIter=1000):
+def run(bm, x0=[], maxIter=1000, debug=False):
     """
     Runs PSO (Particle Swarm Optimisation) from Pints and then Nelder Mead from Pints.
 
@@ -24,6 +25,7 @@ def run(bm, x0=[], maxIter=1000):
         The best parameters identified by PSO.
 
     """
+
     if len(x0) == 0:
         x0 = bm.sample()
     model = classes_pints.Model(bm)
@@ -33,14 +35,21 @@ def run(bm, x0=[], maxIter=1000):
     # Create an optimisation controller
     opt = pints.OptimisationController(error, x0, method=pints.PSO, boundaries=bounds)
     opt.set_max_iterations(maxIter)
+    if debug:
+        print('Beginning PSO')
     # Run the optimisation
     x, f = opt.run()
+    if debug:
+        print(f'PSO complete with best cost of {f}')
     # Create an optimisation controller
     opt = pints.OptimisationController(error, x0, method=pints.NelderMead)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
+    if debug:
+        print('Beginning NM')
     x, f = opt.run()
-
+    if debug:
+        print(f'Nelder Mead complete with best cost of {f}')
     model.bm.evaluate(x)
     return x
 

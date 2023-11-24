@@ -1,5 +1,6 @@
 import numpy as np
 import ionbench
+from functools import lru_cache
 
 
 def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
@@ -61,11 +62,9 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
 
+    @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(transform(x))
-
-    def signed_error(x):
-        return bm.signed_error(transform(x))
 
     def evaluate(x):
         return bm.evaluate(transform(x))
@@ -109,7 +108,7 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
         # Find best positions, both globally and locally
         for p in particleList:
-            cost = cost_func(p.position)
+            cost = cost_func(tuple(p.position))
             p.set_cost(cost)
             if cost < Gcost[L]:
                 Gcost[L] = cost

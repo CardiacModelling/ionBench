@@ -1,6 +1,7 @@
 import ionbench.problems.staircase
 import scipy.optimize
 import numpy as np
+from functools import lru_cache
 
 
 def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False):
@@ -28,6 +29,13 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
         The best parameters identified by Nelder-Mead.
 
     """
+    @lru_cache(maxsize=None)
+    def cost(p):
+        return bm.cost(p)
+
+    def cost_scipy(p):
+        return cost(tuple(p))
+
     if len(x0) == 0:
         x0 = bm.sample()
         if debug:
@@ -51,12 +59,12 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
             print(bm.ub)
             print('New bounds')
             print(bounds)
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
+        out = scipy.optimize.minimize(cost_scipy, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(bm.cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
+        out = scipy.optimize.minimize(cost_scipy, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
 
     if debug:
-        print(f'Cost of {out.cost} found at:')
+        print(f'Cost of {out.fun} found at:')
         print(out.x)
 
     bm.evaluate(out.x)
