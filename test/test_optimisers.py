@@ -31,6 +31,7 @@ class Test_scipy:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
         x0_opt = module.run(self.bmTest)
@@ -59,6 +60,7 @@ class Test_pints:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
         x0_opt = module.run(self.bmTest)
@@ -88,6 +90,7 @@ class Test_external:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_EXT)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
         if 'Loewe' in opt:

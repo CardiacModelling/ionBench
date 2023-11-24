@@ -6,6 +6,7 @@ import numpy as np
 class Test_Modifications:
     bm = ionbench.problems.staircase.HH_Benchmarker()
 
+    @pytest.mark.cheap
     def test_bounds(self):
         # Check bounds are correctly applied for all settings
         # No bounds initially
@@ -35,6 +36,7 @@ class Test_Modifications:
         mod.apply(self.bm)
         assert not self.bm._bounded
 
+    @pytest.mark.cheap
     def test_log_transform(self):
         # Check log transform is correctly applied for all settings
         # No log transform initially
@@ -60,6 +62,7 @@ class Test_Modifications:
         mod.apply(self.bm)
         assert not any(self.bm._logTransformParams)
 
+    @pytest.mark.cheap
     def test_scale_factors(self):
         # Check scale factors are correctly applied
         # No scale factors initially
@@ -73,6 +76,7 @@ class Test_Modifications:
         mod.apply(self.bm)
         assert not self.bm._useScaleFactors
 
+    @pytest.mark.cheap
     def test_multiple_settings(self):
         # Check multiple settings applied at once doesn't break anything and order in the .apply() method doesn't matter
         mod = modification.Modification(logTransform='Full', bounds='positive', scaleFactors='On')
@@ -97,6 +101,7 @@ class Test_Modifications:
         assert all(np.array(self.bm.lb) == np.array(lb))
         assert all(np.array(self.bm.ub) == np.array(ub))
 
+    @pytest.mark.cheap
     def test_other_problems(self):
         # Basic check for another benchmarker
         mod = modification.Modification(logTransform='standard', bounds='sampler', scaleFactors='On')

@@ -7,10 +7,12 @@ import myokit
 
 
 class Problem():
+    @pytest.mark.cheap
     def test_cost(self):
         # Check cost of default params is sufficiently low (0 for loewe)
         assert self.bm.cost(self.bm.defaultParams) <= self.costBound
 
+    @pytest.mark.cheap
     def test_hasattr(self):
         # Check all neccessary variables in problems are defined
         assert hasattr(self.bm, "_name")
@@ -30,6 +32,7 @@ class Problem():
         assert hasattr(self.bm, "tracker")
         assert hasattr(self.bm, "sensitivityCalc")
 
+    @pytest.mark.cheap
     def test_plotter(self, monkeypatch):
         # Test plotting functionality runs for evaluate
         monkeypatch.setattr(plt, 'show', lambda: None)  # Disables plots from being shown
@@ -37,6 +40,7 @@ class Problem():
         self.bm.evaluate(self.bm.defaultParams)
         self.bm.plotter = False
 
+    @pytest.mark.cheap
     def test_bounds(self):
         # Check bounds give infinite cost outside and solve inside bounds
         self.bm.add_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
@@ -52,6 +56,7 @@ class Problem():
         p[0] = 0.98 * p[0]
         assert self.bm.cost(p) < np.inf
 
+    @pytest.mark.cheap
     def test_tracker(self):
         # Check solve count works with bounds and evaluate
         self.bm.reset()
@@ -110,6 +115,7 @@ class Problem():
         # Reset bm
         self.bm._useScaleFactors = False
 
+    @pytest.mark.cheap
     def test_steady_state(self):
         # Test steady state is right for random parameters
         self.bm.reset()
@@ -138,6 +144,7 @@ class Problem():
 
 
 class Staircase(Problem):
+    @pytest.mark.cheap
     def test_sampler(self):
         # Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Sampler in bounds
@@ -162,6 +169,7 @@ class Staircase(Problem):
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 
+    @pytest.mark.cheap
     def test_transforms(self):
         # Check transforms map as expected
         # Log transform default rates
@@ -183,6 +191,7 @@ class Staircase(Problem):
 
 
 class Loewe(Problem):
+    @pytest.mark.cheap
     def test_sampler(self):
         # Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Get bounds from a modification
@@ -213,6 +222,7 @@ class Loewe(Problem):
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 
+    @pytest.mark.cheap
     def test_transforms(self):
         # Check transforms map as expected
         # Log transform default rates
@@ -239,6 +249,7 @@ class Test_Moreno(Problem):
     bm.plotter = False
     costBound = 1e-4
 
+    @pytest.mark.cheap
     def test_sampler(self):
         # Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Sampler in bounds
@@ -269,6 +280,7 @@ class Test_Moreno(Problem):
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 
+    @pytest.mark.cheap
     def test_transforms(self):
         # Check transforms map as expected
         # Log transform default rates
@@ -292,6 +304,7 @@ class Test_Moreno(Problem):
         # Ignore grad test for Moreno. This problem cant use the grad yet.
         pass
 
+    @pytest.mark.cheap
     def test_steady_state(self):
         # Test steady state is right for random parameters
         self.bm.reset()
