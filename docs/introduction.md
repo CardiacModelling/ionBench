@@ -12,6 +12,8 @@ The third metric is the number of correctly identified parameters. It identifies
 
 The fourth metric is the number of times the model is solved. All algorithms are able to identify the true parameters if given an infinite amount of computation time (since any algorithm can be utilised in a multistart approach). To better compare algorithms, we want to identify how fast an algorithm can identify parameters which reproduce the data or can identify the true parameters. A common metric for this is computation time. However, this is dependent on the machine the algorithm is run on, the precise implementation of the algorithm and other aspects that introduce noise. To resolve these issues, we track the number of times the model is solved. Solving an ODE model is by far the most computationally expensive part of ODE optimisation, where typically between 80% and 99% of the total computation time is dedicated to solving the model.
 
+The model solves are separated into two groups, model solves for the cost function and model solves for a gradient calculation using myokit sensitivities.
+
 These performance metrics are tracked automatically when using ***ionBench***. They are stored in a __Tracker__ object associated with each benchmarker problem class. 
 
 ## The Benchmarker class
@@ -19,7 +21,9 @@ The __Benchmarker__ class contains the majority of the features needed to evalua
 
 The main feature of the __Benchmarker__ classes are there abstraction of the cost function, `benchmarker.cost(parameters)`. This evalutes a RMSE cost function at the inputted parameters compared with the __Benchmarkers__ pregenerated synthetic data (`benchmarker.signed_error(parameters)` and `benchmarker.squared_error(parameters)` are also available as alternative cost functions, returning vectors of residuals and squared residuals, respectively). Through the use of the __Tracker__ class, the benchmaker will also record the number of times the model has been solved, the evaluated cost at all of the inputted parameters, the RMSRE in parameter space of all inputted parameters, and the number of correctly identified parameters (those within 5% of the true values) at all evaluated parameters. 
 
-Once fitting is complete, `benchmarker.evaluate(parameters)` can be called with the fitted parameters. This will report the performance metrics like RMSRE in parameter space, cost, number of identified parameters, and number of model solves. In addition, calling this function will also plot these metrics as a function of time (the order the `benchmarker.cost()` was called). Plotting can be disabled by setting `benchmarker.plotter = False`. 
+In addition to evaluating the cost of a set of parameters, the benchmarkers can also evaluate the gradient of the cost function at a set of parameters. This can be done by calling `benchmarker.grad(parameters)` and can also be used to find the jacobian of the signed error.
+
+Once fitting is complete, `benchmarker.evaluate(parameters)` can be called with the fitted parameters. This will report the performance metrics like RMSRE in parameter space, cost, number of identified parameters, and number of model solves. In addition, calling this function will also plot these metrics as a function of time (the order the `benchmarker.cost()` was called), a plot of the model output compared with the data, and histograms of the time to solve the model. Plotting can be disabled by setting `benchmarker.plotter = False`. 
 
 Log transforms can also be specified in the benchmarker using `benchmarker.log_transform()` and inputting a list of booleans indicating which parameters you wish to log transform (base e), all future inputted parameters in the benchmarker can then be in log-space (or a mix if only some parameters are log transformed), while the recorded RMSRE and number of identified parameters will use the original parameter space to ensure results are comparable between transformed and non-transformed optimisations.
 
@@ -70,19 +74,19 @@ The Pints optimisers currently available are CMA-ES, Nelder-Mead, PSO, SNES, and
 For CMA-ES, if the benchmarker has active bounds, then CMA-ES will automatically use bound on the transition rates in addition to parameter bounds, defined in the __ionbench.optimisers.pints_optimisers.classes_pints.AdvancedBoundaries__ module. 
 
 ### Scipy
-The Scipy optimisers currently available are LM (Levenberg-Marquardt), Nelder-Mead, Powell's simplex method, Conjugate Gradient Descent, and Trust Region Reflective. 
+The Scipy optimisers currently available are LM (Levenberg-Marquardt), Nelder-Mead, Powell's simplex method, Conjugate Gradient Descent, SLSQP, and Trust Region Reflective. 
 
 Both Trust Region Reflective and LM make use of the alternative cost functions, in this case `benchmarker.signed_error()` returning a vector of residuals rather than the RMSE cost. 
 
 ### External Optimisers
-We currently have eight optimisers defined from other papers for ion channel fitting. Two of these are the genetic algorithms from Bot et al 2012 (GA_Bot2012) and Smirnov et al 2020 (GA_Smirnov2020), one is the pattern search algorithm defined in Kohjitani et al 2022 (patternSearch_Kohjitani2022), the perturbed particle swarm optimisation defined in Chen et al 2012 (ppso_Chen2012), the hybrid PSO+TRR algorithm from Loewe et al 2016 (hybridPSOTRR_Loewe2016), the simulated annealing algorithm from Vanier et al 1999 (SA_Vanier1999), the simultaneous perturbation stochastic approximation from Spall 1998 (SPSA_Spall1998), and curvilinear gradient descent from Dokos 2004 (curvilinearGD_Dokos2004).
+We currently have twenty-one optimisers defined from other papers for ion channel fitting.
 
 ## Modifications
 Some optimisation algorithms come with recommendations for other characteristics such as log-transforms or bounds to be applied to the parameters. These are implemented in ***ionBench*** through the use of modifications. Modifications store benchmarker settings, such as to log-transform parameters, add bounds, or use scale factors, that can then be applied to any benchmarker problem object. 
 
 They can be particularly useful if you want to apply problem-specific settings, such as bounds determined by the problem-specific sampling function. In addition to constructing a new modification, standard modifications defined by different papers can also be loaded.
 
-Each optimiser has a `.get_modification()` function which will get the recommended modification for that particular optimiser.
+Each optimiser has a `.get_modification()` function which will get a modification relevant to that particular optimiser. The choice of modification can be changed by varying the optional input `modNum`.
 
 ## Uncertainty
 There are two uncertainty and unindentifiability tools built into ***ionBench***. The first is a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem. The second is a Fisher's Information Matrix calculator. This uses the curvature of the likelihood to find the FIM but it will likely be switched over to a MCMC approach at some point so its a bit more reliable. 
