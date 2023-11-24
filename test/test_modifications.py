@@ -1,6 +1,7 @@
 import ionbench
 from ionbench import modification
 import numpy as np
+import pytest
 
 
 class Test_Modifications:
