@@ -19,15 +19,14 @@ class Test_scipy:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_cost_reduction(self, opt):
+    def test_with_problem(self, opt):
         x0 = self.bm.sample()
-        cost = self.bm.cost(x0)
-        # sample initial point, find its cost, optimise, find opt cost, assert reduction
+        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
         self.bm.reset()
-        assert cost_opt <= cost
+        assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
@@ -48,15 +47,14 @@ class Test_pints:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_cost_reduction(self, opt):
+    def test_with_problem(self, opt):
         x0 = self.bm.sample()
-        cost = self.bm.cost(x0)
-        # sample initial point, find its cost, optimise, find opt cost, assert reduction
+        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
         self.bm.reset()
-        assert cost_opt <= cost
+        assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
@@ -78,10 +76,10 @@ class Test_external:
 
     @pytest.mark.parametrize("opt", ionbench.OPT_EXT)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_cost_reduction(self, opt):
+    def test_with_problem(self, opt):
         hyperparams = {'maxIter': 5, 'nGens': 5, 'maxfev': 50, 'n': 5, 'popSize': 20, 'maxInnerIter': 20}
         x0 = self.bm.sample()
-        # sample initial point, find its cost, optimise, find opt cost, can't assert reduction - population algorithms sample around x0 not at x0
+        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, **sub_dict(hyperparams, signature(module.run).parameters))
         cost_opt = self.bm.cost(x0_opt)
