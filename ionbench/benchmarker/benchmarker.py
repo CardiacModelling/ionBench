@@ -289,6 +289,32 @@ class Benchmarker():
             self.ub = bounds[1]
         self._bounded = True
 
+    def clamp(self, parameters):
+        """
+        Clamp a parameter vector to be between the current benchmarker bounds. Parameters should be specified in input parameter space. If no bounds are active or the inputted parameter vector obeys the current bounds, the inputted parameter vector is returned.
+
+        Parameters
+        ----------
+        parameters : list
+            Parameter vector in input space to clamp to the current bounds.
+
+        Returns
+        -------
+        clampedParameters : list
+            Parameter vector where the parameters that are out of bounds are clamped to the bounds.
+
+        """
+        p = np.copy(parameters)
+        if not self.in_bounds(parameters):
+            lb = self.input_parameter_space(self.lb)
+            ub = self.input_parameter_space(self.ub)
+            for i in range(self.n_parameters()):
+                if p[i] < lb[i]:
+                    p[i] = lb[i]
+                elif p[i] > ub[i]:
+                    p[i] = ub[i]
+        return p
+
     def log_transform(self, whichParams=[]):
         """
         Fit some parameters in a log-transformed space.
