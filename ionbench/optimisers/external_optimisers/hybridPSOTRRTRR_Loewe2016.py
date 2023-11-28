@@ -71,7 +71,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
         return bm.signed_error(transform(x))
 
     def cost_func(x):
-        return bm.rmse(signed_error(tuple(transform(x))) + bm.data, bm.data)
+        return bm.rmse(signed_error(tuple(x)) + bm.data, bm.data)
 
     def trr_error(x):
         return signed_error(tuple(x))
