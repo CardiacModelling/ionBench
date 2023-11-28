@@ -127,6 +127,8 @@ class Modification():
                 bm.add_bounds([lb, ub])
             elif 'moreno2016' in bm._name:
                 bm.add_bounds([bm.defaultParams * (1 - bm.paramSpaceWidth), bm.defaultParams * (1 + bm.paramSpaceWidth)])
+            elif 'test' in bm._name:
+                bm.add_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
             else:
                 print("Could not identify the benchmaker using benchmarker._name when trying to add bounds. If a new benchmarker is being used, then this code needs updating. For the time being, you can use 'custom' bounds.")
         elif setting.lower() == 'custom':

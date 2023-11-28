@@ -33,6 +33,8 @@ class Test_scipy:
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
+        mod = module.get_modification()
+        mod.apply(self.bmTest)
         x0_opt = module.run(self.bmTest)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
@@ -61,6 +63,8 @@ class Test_pints:
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
+        mod = module.get_modification()
+        mod.apply(self.bmTest)
         x0_opt = module.run(self.bmTest)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
@@ -91,6 +95,8 @@ class Test_external:
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
         module = import_module(opt)
+        mod = module.get_modification()
+        mod.apply(self.bmTest)
         if 'Loewe' in opt:
             x0_opt = module.run(self.bmTest, maxIter=50)
         elif 'Liu' in opt or 'Chen' in opt or 'Cabo' in opt:
