@@ -1,13 +1,17 @@
 # Changelog
 
-## v0.3.0-alpha
+## v0.4.0-alpha
 Planned changes:
-* More approaches (particularly genetic algorithms)
-* Better bounds
-* Tracking time for each model solve
+* Improved bounds
 * Refactoring benchmarker attributes
+* Standardising assumptions in optimisers
+* Standard termination criteria on all optimisers
+* Set seeds across ionBench
 
-## v0.2.0-alpha - Current release
+## v0.3.0-alpha - Current release
+Added many more optimisers. Introduced lists of approaches to loop through and run everything. Added more features to the Tracker (now tracks time for model solves, reports if model was solve multiple times at the same parameters, and tracks best parameters). Added more tests for the optimisers through a new problem specifically for ensuring all optimisers can optimise a simple problem. All problems now simulate from steady state for current parameters, rather than steady state for true parameters. Gradient calculator doesn't yet account for this.
+
+## v0.2.0-alpha
 Upgraded the gradient calculator to calculate the gradient of the cost function (or jacobian of the residuals) with respect to the parameters using myokit sensitivities. Added more optimisers which make use of this, such as a new SPSA algorithm, better matching the original from Spall 1998. Also added cojugate gradient descent, simulated annealing by Vanier 1999 and curvilinear gradient descent by Dokos 2004.
 
 ## v0.1.1-alpha
