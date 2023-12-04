@@ -66,8 +66,6 @@ optimisedParameters = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(
 ## Future Features
 * Bounds - Current only bounds on the parameters can be included in the benchmarker but it would be nice to have bounds on the rates. Additionally, it would be good to include barrier function style bounds to allow them to work nicely with gradient based methods.
 
-* Additional optimisation algorithms - There are still lots of different algorithms from various papers for fitting ion channel models to include (Current plans to include a further 29 external optimisers). 
-
 * Parallelisation - Its not clear yet how well the benchmarker would handle being run in parallel (specifically for the tracker) but it is something that would be worth looking into.
 
 * Real data - Both Moreno et al 2016 and Loewe et al 2016 include real data in the papers. It would be nice to see how the algorithms handle fitting to real data but its not clear how to best implement the performance metrics, two of which rely on knowing the true parameters.
