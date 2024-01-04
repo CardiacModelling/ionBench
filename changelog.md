@@ -8,7 +8,10 @@ Planned changes:
 * Standard termination criteria on all optimisers
 * Set seeds across ionBench
 
-## v0.3.0-alpha - Current release
+## v0.3.1-alpha - Current release
+Tracker now records and saves the times for each of the model solves, separated into cost and gradient solves.
+
+## v0.3.0-alpha
 Added many more optimisers. Introduced lists of approaches to loop through and run everything. Added more features to the Tracker (now tracks time for model solves, reports if model was solve multiple times at the same parameters, and tracks best parameters). Added more tests for the optimisers through a new problem specifically for ensuring all optimisers can optimise a simple problem. All problems now simulate from steady state for current parameters, rather than steady state for true parameters. Gradient calculator doesn't yet account for this.
 
 ## v0.2.0-alpha
