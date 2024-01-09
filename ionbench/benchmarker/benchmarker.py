@@ -568,6 +568,9 @@ class Benchmarker():
             failed = True
             incrementSolveCounter = False
             warnings.warn('Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+            # The start and end varaibles won't be recorded since incrementSolveCounter is False but need to be defined for the tracker.update function to be called
+            start = 0
+            end = 0
 
         else:
             # Get sensitivities
