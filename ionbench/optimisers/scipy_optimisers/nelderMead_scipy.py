@@ -43,13 +43,13 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
             print(x0)
 
     if bm._bounded:
-        lb = bm.input_parameter_space(bm.lb)
-        ub = bm.input_parameter_space(bm.ub)
+        lb = list(bm.input_parameter_space(bm.lb))
+        ub = list(bm.input_parameter_space(bm.ub))
         bounds = []
         for i in range(bm.n_parameters()):
-            if lb[i] == np.inf:
+            if lb[i] == np.inf or lb[i] == np.nan:
                 lb[i] = None
-            if ub[i] == np.inf:
+            if ub[i] == np.inf or ub[i] == np.nan:
                 ub[i] = None
             bounds.append((lb[i], ub[i]))
         if debug:
