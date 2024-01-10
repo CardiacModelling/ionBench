@@ -125,7 +125,8 @@ def generate_data(modelType):
     elif modelType == 'MM':
         bm = MM_Benchmarker()
     out = bm.simulate(bm._trueParams, np.arange(bm.tmax), continueOnError=False)
-    out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
+    if modelType == 'HH':
+        out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
