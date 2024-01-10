@@ -43,6 +43,12 @@ class ProfileManager():
         """
         return self.bm.cost(self.set_params(params))
 
+    def grad(self,params, **kwargs):
+        """
+        ProfileManager wrapper for the benchmarker's .grad() method. 
+        """
+        return np.delete(self.bm.grad(self.set_params(params), **kwargs),self.fixedParam,1)
+
     def signed_error(self, params):
         """
         ProfileManager wrapper for the benchmarker's .signed_error() method. Inserts the fixed parameter before evaluating.
@@ -108,7 +114,8 @@ def run(bm, variations, plot=True, filename=''):
                     if pm.cost(out) == np.inf:
                         pm.MLE = bm.defaultParams
                         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
-                except Exception:
+                except Exception as e:
+                    print(e)
                     out = pm.sample()
                 costs[j] = pm.cost(out)
                 out = pm.set_params(out)
