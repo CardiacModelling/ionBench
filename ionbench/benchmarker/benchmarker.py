@@ -746,7 +746,12 @@ class Benchmarker():
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
-        self.set_steady_state(parameters)
+        try:
+            self.set_steady_state(parameters)
+        except myokit.lib.markov.LinearModelError:
+            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
+        except myokit.lib.hh.HHModelError:
+            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
 
         # Run the simulation and track the performance
         start = time.monotonic()
