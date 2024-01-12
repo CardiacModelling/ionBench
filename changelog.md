@@ -8,7 +8,10 @@ Planned changes:
 * Standard termination criteria on all optimisers
 * Set seeds across ionBench
 
-## v0.3.2-alpha - Current release
+## v0.3.3-alpha - Current release
+Bug fix in initial state setting to allow optimisation of remaining problems.
+
+## v0.3.2-alpha
 Improvements and updates made to profile likelihood. Markov model staircase problem no longer features noise as it interferes with the identifiability.
 
 ## v0.3.1-alpha
