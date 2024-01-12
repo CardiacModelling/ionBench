@@ -669,13 +669,18 @@ class Benchmarker():
         None.
 
         """
-        if 'moreno' in self._name:
-            state = self._analyticalModel.steady_state(membrane_potential=-120, parameters=parameters)
-        else:
-            state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
-        self.sim.set_state(state)
-        if self.sensitivityCalc:
-            self.simSens.set_state(state)
+        try:
+            if 'moreno' in self._name:
+                state = self._analyticalModel.steady_state(membrane_potential=-120, parameters=parameters)
+            else:
+                    state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
+            self.sim.set_state(state)
+            if self.sensitivityCalc:
+                self.simSens.set_state(state)
+        except myokit.lib.markov.LinearModelError:
+            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
+        except myokit.lib.hh.HHModelError:
+            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
 
     def solve_with_sensitivities(self, times):
         log, e = self.simSens.run(self.tmax + 1, log_times=times)
@@ -746,12 +751,7 @@ class Benchmarker():
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
-        try:
-            self.set_steady_state(parameters)
-        except myokit.lib.markov.LinearModelError:
-            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
-        except myokit.lib.hh.HHModelError:
-            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
+        self.set_steady_state(parameters)
 
         # Run the simulation and track the performance
         start = time.monotonic()
