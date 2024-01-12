@@ -8,7 +8,10 @@ Planned changes:
 * Standard termination criteria on all optimisers
 * Set seeds across ionBench
 
-## v0.3.3-alpha - Current release
+## v0.3.4-alpha - Current release
+Initial state setting bug remaining in the previous release. Fixed here.
+
+## v0.3.3-alpha
 Bug fix in initial state setting to allow optimisation of remaining problems.
 
 ## v0.3.2-alpha
