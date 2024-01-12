@@ -16,7 +16,6 @@ The tree structure of this project is outlined below.
 │   │   ├───external_optimisers
 │   │   ├───pints_optimisers
 │   │   ├───scipy_optimisers
-│   │   └───spsa_spsa.py
 │   ├───problems
 │   ├───uncertainty
 │   └───multistart.py
