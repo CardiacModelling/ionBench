@@ -5,25 +5,27 @@ import numpy as np
 
 
 def var(x):
-    return np.linspace(1 - x, 1 + x, 2)
+    return np.linspace(1 - x, 1 + x, 51)
 
-
-variations = [var(0.2)] * 4 + [var(0.4)] * 4 + [var(0.2)]  # aVar = 0.2, bVar = 0.4
 bm = ionbench.problems.staircase.HH_Benchmarker()
+variations = [var(0.2)]*bm.n_parameters()
 ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='hh')
+ionbench.uncertainty.profile_likelihood.run(bm, variations, backwardPass=True, filename='hh')
 
-variations = [var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8), var(0.8)]
-variations = [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], var(0.8), var(0.8), var(0.8)]
 bm = ionbench.problems.staircase.MM_Benchmarker()
+variations = [var(0.2)]*bm.n_parameters()
 ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='mm')
+ionbench.uncertainty.profile_likelihood.run(bm, variations, backwardPass=True, filename='mm')
 
-variations = [var(0.99), var(2), var(1.5), var(2), var(1.5), var(1.2), var(0.99), var(0.99), var(0.99), var(0.6), var(0.7), var(0.7)]
 bm = ionbench.problems.loewe2016.ikr()
+variations = [var(0.2)]*bm.n_parameters()
 ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='ikr')
+ionbench.uncertainty.profile_likelihood.run(bm, variations, backwardPass=True, filename='ikr')
 
-variations = [var(0.99), var(2), var(0.99), var(2), var(0.99), var(2), var(2), var(0.99), var(2), var(0.99), var(0.99), var(0.99), var(2), var(2), var(0.99), var(2), var(2), var(2), var(0.99), var(0.99), var(2), var(0.99), var(2), var(0.99), var(0.99)]
 bm = ionbench.problems.loewe2016.ikur()
+variations = [var(0.2)]*bm.n_parameters()
 ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='ikur')
+ionbench.uncertainty.profile_likelihood.run(bm, variations, backwardPass=True, filename='ikur')
 
 # %% FIM
 bm = ionbench.problems.staircase.HH_Benchmarker()

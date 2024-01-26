@@ -72,9 +72,9 @@ class ProfileManager():
         ProfileManager wrapper for the benchmarker's .evaluate() method. This method does nothing, but is neccessary since optimisers will attempt to call it.
         """
         pass
+    
 
-
-def run(bm, variations, plot=True, filename=''):
+def run(bm, variations, backwardPass = False, filename=''):
     """
     Generate a profile likelihood style plot, reporting the fitted cost as a function of each fixed parameter.
 
@@ -84,8 +84,8 @@ def run(bm, variations, plot=True, filename=''):
         A benchmarker function to explore.
     variations : list
         A list of parameter variations to apply for each parameter. It should be a list of length bm.n_parameters(), where the ith element is a list of variations to use to fix parameter i and fit the remaining parameters.
-    plot : bool, optional
-        Whether or not to plot the likelihood and give plots of the current at the start and end points to see if the variability is significant. The default is True.
+    backwardPass : bool, optional
+        If False, the profile likelihood curve will be found by going left to right, using the optimised parameters from the left (lower variation) to initiate the optimisation. If True, it will travel right to left and the final name will be appended with 'B'. Both can be combined when plotting which can be advantageous to ensure a smooth profile likelihood plot. The default is False.
     filename : string, optional
         A name to use to save the cost data. It will pickle the cost and variations and save them under [filename]_param[i].pickle. The default is '', in which case no data will be saved.
 
@@ -95,68 +95,103 @@ def run(bm, variations, plot=True, filename=''):
 
     """
     bm.plotter = False
+    if backwardPass:
+        filename += 'B'
     for i in range(bm.n_parameters()):
         print('Working on parameter ' + str(i))
         costs = np.zeros(len(variations[i]))
         for j in range(len(variations[i])):
             bm.reset()
-            var = variations[i][j]
+            if backwardPass:
+                varIndex = len(variations[i])-j-1
+            else:
+                varIndex = j
+            var = variations[i][varIndex]
             if j == 0:
                 pm = ProfileManager(bm, i, bm._trueParams[i] * var, bm.defaultParams)
             else:
                 pm = ProfileManager(bm, i, bm._trueParams[i] * var, out)
             if var == 1:
-                costs[j] = bm.cost(bm._trueParams)
+                costs[varIndex] = bm.cost(bm._trueParams)
                 out = pm.set_params(pm.sample())
             else:
                 try:
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
-                    if pm.cost(out) == np.inf:
+                    pm.MLE = bm.defaultParams
+                    if pm.cost(out) >= 0.99*pm.cost(pm.sample()): #If optimised cost not significantly better than unoptimised from default rates
                         pm.MLE = bm.defaultParams
                         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                 except Exception as e:
                     print(e)
                     out = pm.sample()
-                costs[j] = pm.cost(out)
+                    
+                costs[varIndex] = pm.cost(out)
                 out = pm.set_params(out)
             print('Variation: ' + str(var))
-            print('Cost found: ' + str(costs[j]))
-            if (j == 0 or j == len(variations[i]) - 1) and plot:
-                bm.sim.reset()
-                bm.set_params(out)
-                curr1 = bm.solve_model(np.arange(bm.tmax), continueOnError=True)
-                bm.sim.reset()
-                bm.set_params(bm._trueParams)
-                curr2 = bm.solve_model(np.arange(bm.tmax), continueOnError=True)
-                plt.figure()
-                plt.plot(np.arange(bm.tmax), curr1, 'k')
-                plt.plot(np.arange(bm.tmax), curr2, 'b')
-                plt.ylabel('Current')
-                plt.xlabel('Time (ms)')
-                plt.legend(['Fitted', 'Data'])
-                plt.show()
-        if plot:
-            plt.figure()
-            plt.plot(variations[i], costs)
-            plt.xlabel('Parameter ' + str(i))
-            plt.title('Profile Likelihood')
-            plt.ylabel('Cost')
-            plt.show()
+            print('Cost found: ' + str(costs[varIndex]))
         if not filename == '':
             data = (variations[i], costs)
             with open(filename + '_param' + str(i) + '.pickle', 'wb') as f:
                 pickle.dump(data, f)
 
 
-def plot_profile_likelihood(modelType, numberToPlot, ymax=0):
+def plot_profile_likelihood(modelType, numberToPlot, debug=False):
+    if modelType == 'hh':
+        bm = ionbench.problems.staircase.HH_Benchmarker()
+    elif modelType == 'mm':
+        bm = ionbench.problems.staircase.MM_Benchmarker()
+    elif modelType == 'ikr':
+        bm = ionbench.problems.loewe2016.ikr()
+    elif modelType == 'ikur':
+        bm = ionbench.problems.loewe2016.ikur()
+    bm._useScaleFactors = True
+    ymin = np.inf
+    ymax = 0
     for i in range(numberToPlot):
         with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
             variations, costs = pickle.load(f)
+        try:
+            with open(modelType + 'B_param' + str(i) + '.pickle', 'rb') as f:
+                variationsB, costsB = pickle.load(f)
+            if len(variationsB) == len(variations):
+                costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
+        except FileNotFoundError:
+            pass
+        if np.max(costs[costs<np.inf]) > ymax:
+            ymax = np.max(costs[costs<np.inf])
+        if np.min(costs[costs>1e-15]) < ymin:
+            ymin = np.min(costs[costs>1e-15])
+    ymin = ymin/2
+    ymax = ymax*5
+    for i in range(numberToPlot):
+        with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
+            variationsA, costsA = pickle.load(f)
+            variations, costs = variationsA, costsA
+        try:
+            with open(modelType + 'B_param' + str(i) + '.pickle', 'rb') as f:
+                variationsB, costsB = pickle.load(f)
+            if len(variationsB) == len(variationsA):
+                costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
+        except FileNotFoundError:
+            pass
         plt.figure()
-        plt.plot(variations, costs)
-        if not ymax == 0:
-            plt.ylim(0, ymax)
+        plt.semilogy(variations, costs, label = 'Optimised', zorder = 1)
+        costs = np.zeros(len(variations))
+        for j in range(len(variations)):
+            p = bm.input_parameter_space(bm.defaultParams)
+            p[i] = variations[j]
+            costs[j] = bm.cost(p)
+        plt.semilogy(variations, costs, label = 'Unoptimised', zorder = 0)
+        if debug:
+            plt.semilogy(variations, costsA, label = 'Forwards', zorder = 2, linestyle = 'dashed')
+            try:
+                if len(variationsB) == len(variationsA):
+                    plt.semilogy(variations, costsB, label = 'Backwards', zorder = 3, linestyle = 'dotted')
+            except:
+                pass
+        plt.ylim(ymin, ymax)
         plt.title('Profile likelihood: ' + modelType)
         plt.xlabel('Factor for parameter ' + str(i))
         plt.ylabel('Cost')
+        plt.legend()
         plt.show()
