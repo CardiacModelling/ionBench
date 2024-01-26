@@ -15,6 +15,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         self.sensitivityCalc = True
         self._trueParams = np.copy(self.defaultParams)
         self.tmax = 20
+        self.freq = 1 #Timestep in data between points
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
@@ -62,7 +63,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         # Abort solving if the parameters are out of bounds
         if not self.in_bounds(parameters):
             warnings.warn('Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            error = np.array([np.inf] * len(np.arange(0, self.tmax)))
+            error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))
             cost = np.inf
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
@@ -73,7 +74,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         else:
             # Get sensitivities
             sens = np.zeros((self.tmax, self.n_parameters()))
-            curr = self.simulate(parameters, np.arange(self.tmax))
+            curr = self.simulate(parameters, np.arange(0, self.tmax, self.freq))
             for t in range(self.tmax):
                 sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1]**2
                 sens[t, 1] = curr[t] * ((t - parameters[0])**2 / parameters[1]**3 - 1 / parameters[1])
@@ -137,7 +138,7 @@ def generate_data():
 
     """
     bm = Test()
-    out = bm.simulate(bm._trueParams, np.arange(bm.tmax), continueOnError=False)
+    out = bm.simulate(bm._trueParams, np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

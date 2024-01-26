@@ -21,6 +21,7 @@ class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
         # analytical model
         self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=states, parameters=parameters, current=self._outputName, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
+        self.freq = 1 #Timestep in data between points
         super().__init__()
 
     def sample(self, n=1):
@@ -144,7 +145,7 @@ def generate_data(modelType):
         bm = ikr()
     elif modelType == 'ikur':
         bm = ikur()
-    out = bm.simulate(bm.defaultParams, np.arange(bm.tmax), continueOnError=False)
+    out = bm.simulate(bm.defaultParams, np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'loewe2016', modelType.lower() + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

@@ -464,7 +464,7 @@ class Benchmarker():
             The RMSE cost of the parameters.
 
         """
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax), incrementSolveCounter=incrementSolveCounter))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq), incrementSolveCounter=incrementSolveCounter))
         cost = self.rmse(testOutput, self.data)
         return cost
 
@@ -484,7 +484,7 @@ class Benchmarker():
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
         return (testOutput - self.data)
 
     def squared_error(self, parameters):
@@ -503,7 +503,7 @@ class Benchmarker():
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
         return (testOutput - self.data)**2
 
     def use_sensitivities(self):
@@ -579,7 +579,7 @@ class Benchmarker():
             self.set_steady_state(parameters)
             start = time.monotonic()
             try:
-                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax))
+                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax, self.freq))
                 sens = np.array(sens)
             except myokit.SimulationError:
                 failed = True
@@ -591,7 +591,7 @@ class Benchmarker():
             if 'moreno' in self._name:
                 error = np.array([np.inf] * 69)
             else:
-                error = np.array([np.inf] * len(np.arange(0, self.tmax)))
+                error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))
             cost = np.inf
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
@@ -814,11 +814,11 @@ class Benchmarker():
             self.sim.reset()
             self.set_params(self.tracker.firstParams)
             self.set_steady_state(self.tracker.firstParams)
-            firstOut = self.solve_model(np.arange(self.tmax), continueOnError=True)
+            firstOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
             self.sim.reset()
             self.set_params(self.original_parameter_space(parameters))
             self.set_steady_state(self.original_parameter_space(parameters))
-            lastOut = self.solve_model(np.arange(self.tmax), continueOnError=True)
+            lastOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
             plt.figure()
             if "moreno" in self._name:
                 plt.plot(self.data)
@@ -826,9 +826,9 @@ class Benchmarker():
                 plt.plot(lastOut)
                 plt.ylabel('Summary Statistics')
             else:
-                plt.plot(np.arange(self.tmax), self.data)
-                plt.plot(np.arange(self.tmax), firstOut)
-                plt.plot(np.arange(self.tmax), lastOut)
+                plt.plot(np.arange(0, self.tmax, self.freq), self.data)
+                plt.plot(np.arange(0, self.tmax, self.freq), firstOut)
+                plt.plot(np.arange(0, self.tmax, self.freq), lastOut)
                 plt.ylabel('Current')
                 plt.xlabel('Time (ms)')
             plt.legend(['Data', 'First Parameters', 'Final Parameters'])
