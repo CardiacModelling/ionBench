@@ -25,7 +25,7 @@ with open(os.path.join(os.getcwd(),'resultsFile.csv'), 'w', newline='') as csvfi
         costAverTime = []
         gradAverTime = []
         try:
-            bm.tracker.load(f"{app['module']}modNum{app['modNum']}_run0.pickle")
+            bm.tracker.load(f"{app['module']}modNum{app['modNum']}_run4.pickle")
         except Exception as e:
             print(e)
             print(f"Tracking of {app['module']} failed.")
