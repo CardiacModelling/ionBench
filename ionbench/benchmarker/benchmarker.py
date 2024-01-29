@@ -1,7 +1,6 @@
 import numpy as np
 import myokit
 import csv
-import os
 import ionbench
 import matplotlib.pyplot as plt
 import warnings
@@ -232,7 +231,7 @@ class Benchmarker():
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._trueParams)  # Tracks the performance metrics
 
-    def load_data(self, dataPath='', paramPath=''):
+    def load_data(self, dataPath=''):
         """
         Loads output data to use in fitting.
 
@@ -240,8 +239,6 @@ class Benchmarker():
         ----------
         dataPath : string, optional
             An absolute filepath to the .csv data file. The default is '', in which case no file will be loaded.
-        paramPath : string, optional
-            An absolute filepath to the .csv file containing the true parameters. The default is '', in which case no file will be loaded.
 
         Returns
         -------
@@ -255,13 +252,6 @@ class Benchmarker():
                 for row in reader:
                     tmp.append(float(row[0]))
             self.data = np.array(tmp)
-        if not paramPath == '':
-            tmp = []
-            with open(paramPath, newline='') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    tmp.append(float(row[0]))
-            self._trueParams = np.array(tmp)
 
     def add_bounds(self, bounds, parameterSpace='original'):
         """

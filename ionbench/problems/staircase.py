@@ -132,6 +132,3 @@ def generate_data(modelType):
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
-    with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'trueParams' + modelType + '.csv'), 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile, delimiter=',')
-        writer.writerows(map(lambda x: [x], bm._trueParams))
