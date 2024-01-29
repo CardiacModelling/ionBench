@@ -27,9 +27,7 @@ V = -80 [mV] bind pace
     in [mV]
 
 [IKr]
-g_Kr_0 = 0.024 [mS/uF]
-    in [mS/uF]
-i_Kr = g_Kr_0 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (Environment.V - Environment.E_K)
+i_Kr = iKr_Markov.p15 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (Environment.V - Environment.E_K)
     in [A/F]
 
 [iKr_Markov]
@@ -89,4 +87,5 @@ p13 = 0.04150 [1]
     in [1]
 p14 = 0.0312 [mV^-1]
     in [mV^-1]
-
+p15 = 0.024 [mS/uF]
+    in [mS/uF]

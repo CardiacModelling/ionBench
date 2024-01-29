@@ -97,7 +97,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
-        self.defaultParams = np.array([0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399, 0.04150, 0.0312])
+        self.defaultParams = np.array([0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399, 0.04150, 0.0312, 0.024])
         self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
         self.sensitivityCalc = sensitivities
