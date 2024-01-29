@@ -289,6 +289,7 @@ class Clerx2019(Modification):
         scaleFactors = 'off'
         name = 'Clerx2019'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'rateBounds': True})
 
 
 class Davies2011(Modification):
