@@ -55,6 +55,8 @@ def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=F
     if debug:
         print('Complete')
         print(f'Final cost is {x0_cost}')
+
+    bm.evaluate(x0)
     return x0
 
 
