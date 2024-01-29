@@ -42,7 +42,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     if debug:
         print(f'PSO complete with best cost of {f}')
     # Create an optimisation controller
-    opt = pints.OptimisationController(error, x0, method=pints.NelderMead)
+    opt = pints.OptimisationController(error, x, method=pints.NelderMead)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     if debug:
