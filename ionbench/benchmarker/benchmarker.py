@@ -423,9 +423,14 @@ class Benchmarker():
         """
         return len(self.defaultParams)
 
-    def reset(self):
+    def reset(self, fullReset = True):
         """
-        Resets the benchmarker. This clears the simulation object and restarts the performance tracker.
+        Resets the benchmarker. This clears the simulation object and restarts the performance tracker. Optionally, the transforms and bounds can be turned off.
+
+        Parameters
+        ----------
+        fullReset : bool, optional
+            If True, transforms and bounds will be reset (turned off). The default is True.
 
         Returns
         -------
@@ -436,6 +441,9 @@ class Benchmarker():
         if self.sensitivityCalc:
             self.simSens.reset()
         self.tracker = Tracker(self._trueParams)
+        self.log_transform([False]*self.n_parameters())
+        self._useScaleFactors = False
+        self._bounded = False
 
     def cost(self, parameters, incrementSolveCounter=True):
         """

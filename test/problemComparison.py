@@ -32,11 +32,11 @@ bmHH.addBounds([lb, ub])
 
 # CMA-ES run
 for i in range(5):
-    bmHH.reset()
+    bmHH.reset(fullReset = False)
     ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmHH)
 
 for i in range(5):
-    bmLoewe.reset()
+    bmLoewe.reset(fullReset = False)
     ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmLoewe, maxIter=3000)
 
 

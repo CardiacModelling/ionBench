@@ -25,7 +25,7 @@ class Test_scipy:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset()
+        self.bm.reset(fullReset = False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
@@ -55,7 +55,7 @@ class Test_pints:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset()
+        self.bm.reset(fullReset = False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
@@ -90,7 +90,7 @@ class Test_external:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, **sub_dict(hyperparams, signature(module.run).parameters))
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset()
+        self.bm.reset(fullReset = False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_EXT)

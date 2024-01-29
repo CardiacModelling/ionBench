@@ -6,5 +6,5 @@ def multistart(opt, bm, initParams, filename, **kwargs):
             bm.tracker.save(filename + '_run' + str(i) + '.pickle')
         print(out)
         outs.append(out)
-        bm.reset()
+        bm.reset(fullReset = False)
     return outs

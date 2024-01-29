@@ -81,7 +81,7 @@ class Problem():
         assert len(self.bm.tracker.costTimes) == 1
         assert len(self.bm.tracker.gradTimes) == 0
         # returns to 0 after resetting
-        self.bm.reset()
+        self.bm.reset(fullReset = False)
         assert self.bm.tracker.solveCount == 0
         self.bm._bounded = False
         if 'moreno' not in self.bm._name:
@@ -91,7 +91,7 @@ class Problem():
             assert self.bm.tracker.gradSolveCount == 1
             assert len(self.bm.tracker.costTimes) == 0
             assert len(self.bm.tracker.gradTimes) == 1
-        self.bm.reset()
+        self.bm.reset(fullReset = False)
         p1 = self.bm.sample()
         p2 = self.bm.sample()
         c1 = self.bm.cost(p1)
