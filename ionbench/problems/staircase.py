@@ -128,8 +128,7 @@ def generate_data(modelType):
     bm.set_params(bm._trueParams)
     bm.set_steady_state(bm._trueParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
-    if modelType == 'HH':
-        out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
+    out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
