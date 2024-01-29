@@ -28,7 +28,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     if len(x0) == 0:
         x0 = bm.sample()
     model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
+    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.tmax, model.bm.freq), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
 
     # Create an optimisation controller

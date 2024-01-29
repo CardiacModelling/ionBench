@@ -5,6 +5,7 @@ from ionbench.optimisers.pints_optimisers import classes_pints
 
 
 def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
+def run(bm, x0=[], popSize=12, maxIter=1000, rateBounds=False, debug=False):
     """
     Runs CMA-ES from Pints using a benchmarker.
 
@@ -30,7 +31,7 @@ def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
     if len(x0) == 0:
         x0 = bm.sample()
     model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(model.bm.tmax), model.bm.data)
+    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.tmax, model.bm.freq), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
     if bm._bounded:
         boundaries = classes_pints.AdvancedBoundaries(bm)

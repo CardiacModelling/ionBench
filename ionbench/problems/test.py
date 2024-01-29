@@ -73,9 +73,9 @@ class Test(ionbench.benchmarker.Benchmarker):
                     J[i, ] = grad
         else:
             # Get sensitivities
-            sens = np.zeros((self.tmax, self.n_parameters()))
             curr = self.simulate(parameters, np.arange(0, self.tmax, self.freq))
-            for t in range(self.tmax):
+            sens = np.zeros((len(curr), self.n_parameters()))
+            for t in range(len(curr)):
                 sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1]**2
                 sens[t, 1] = curr[t] * ((t - parameters[0])**2 / parameters[1]**3 - 1 / parameters[1])
 

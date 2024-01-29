@@ -58,7 +58,7 @@ class Model(pints.ForwardModel):
 
     @lru_cache(maxsize=None)
     def sim(self, p):
-        return self.bm.simulate(p, np.arange(0, self.bm.tmax))
+        return self.bm.simulate(p, np.arange(0, self.bm.tmax, self.bm.freq))
 
 
 class AdvancedBoundaries(pints.Boundaries):

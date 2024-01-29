@@ -127,7 +127,7 @@ class Problem():
     def test_steady_state(self):
         # Test steady state is right for random parameters
         self.bm.reset()
-        out = self.bm.simulate(parameters=self.bm.sample(), times=np.arange(self.bm.tmax))
+        out = self.bm.simulate(parameters=self.bm.sample(), times=np.arange(0, self.bm.tmax, self.bm.freq))
         assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()
         p = self.bm.sample()
