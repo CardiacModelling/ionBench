@@ -32,7 +32,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sensitivityCalc = False  # Moreno currently can't do sensitivities
         self.simSens = None
-        self.freq = 1 #Timestep in data between points
+        self.freq = 0.5 #Timestep in data between points
         super().__init__()
         print('Benchmarker initialised')
 
@@ -322,6 +322,8 @@ def generate_data():
 
     """
     bm = ina()
+    bm.set_params(bm._trueParams)
+    bm.set_steady_state(bm._trueParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
