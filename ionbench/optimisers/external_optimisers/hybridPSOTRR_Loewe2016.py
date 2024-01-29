@@ -46,7 +46,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
             x0 = x0 / (2 * bm.defaultParams)
 
     class Particle:
-        def __init__(self, n_param):
+        def __init__(self):
             self.velocity = np.zeros(bm.n_parameters())
             if len(x0) > 0:
                 self.position = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
@@ -54,7 +54,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
                     if self.position[i] > 1:
                         self.position[i] = 1
             else:
-                self.position = np.random.rand(n_param)
+                self.position = np.random.rand(bm.n_parameters())
             self.bestCost = np.inf  # Best cost of this particle
             self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
             self.currentCost = None
@@ -105,7 +105,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
     particleList = []
     for i in range(n):
-        particleList.append(Particle(bm.n_parameters()))
+        particleList.append(Particle())
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
