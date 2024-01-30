@@ -670,6 +670,8 @@ class Benchmarker():
         try:
             if 'moreno' in self._name:
                 state = self._analyticalModel.steady_state(membrane_potential=-120, parameters=parameters)
+                state[state<0] = 0
+                state = state/sum(state)
             else:
                     state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
             self.sim.set_state(state)

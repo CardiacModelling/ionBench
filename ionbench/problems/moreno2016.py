@@ -29,7 +29,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._trueParams = np.copy(self.defaultParams)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
-        self.sim = myokit.Simulation(self.model, protocol=self.protocol())
+        self.sim = myokit.lib.markov.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.sensitivityCalc = False  # Moreno currently can't do sensitivities
         self.simSens = None
         self.freq = 0.5 #Timestep in data between points
@@ -77,11 +77,11 @@ class ina(ionbench.benchmarker.Benchmarker):
         gap = 5000
         newProtocol = myokit.Protocol()
 
-        # Protocol 1 - Measure peak current at -10mV after holding at voltages between -120mV and -40mV
+        # Protocol 1 - Measure peak current at -10mV (25ms) after holding at voltages between -120mV and -40mV (5000ms)
         # Track start times
         protocolStartTimes = [0]
         # Create protocol
-        protocol = myokit.pacing.steptrain_linear(vstart=-120, vend=-30, dv=10, vhold=-10, tpre=0, tstep=gap, tpost=gap)
+        protocol = myokit.pacing.steptrain_linear(vstart=-120, vend=-30, dv=10, vhold=-10, tpre=0, tstep=gap, tpost=25)
         # Add windows to measure at
         for e in protocol.events():
             if e.level() == -10:
@@ -112,7 +112,8 @@ class ina(ionbench.benchmarker.Benchmarker):
         # Track start times
         protocolStartTimes.append(newProtocol.characteristic_time())
         # Create protocol
-        dt = [0.1, 0.5, 1, 3, 6, 9, 12, 15, 21, 30, 60, 90, 120, 210, 300, 450, 600, 900, 1500, 3000, 6000]
+        #dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 3000, 5000, 7500, 10000]
+        dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000] #Cut short since larger dt all round to 1 in data so remaining points will be most informative
         vsteps = [-100, -10, -100, -10] * len(dt) + [-100]
         times = []
         for i in range(len(dt)):
@@ -135,41 +136,42 @@ class ina(ionbench.benchmarker.Benchmarker):
         # Add barrier to separate effects from different protocols
         newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
 
-        # Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
-        # Track start times
-        protocolStartTimes.append(newProtocol.characteristic_time())
-        # Create protocol
-        dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
-        vsteps = []
-        times = []
-        for i in range(len(dt)):
-            vsteps.append(-100)
-            times.append(gap)
-            vsteps += [-10, -100] * 300
-            times += [25, dt[i]] * 300
-        times.append(gap)
-        vsteps.append(-100)
-        protocol = myokit.Protocol()
-        for i in range(len(times)):
-            protocol.add_step(vsteps[i], times[i])
-        # Add windows to measure at
-        offset = newProtocol.characteristic_time()
-        tmpOffset = offset
-        for i in range(len(dt)):
-            measurementWindows.append([tmpOffset + gap, tmpOffset + gap + 25, 'rudb'])
-            measurementWindows.append([tmpOffset + gap + (25 + dt[i]) * 299, tmpOffset + gap + (25 + dt[i]) * 299 + 25, 'rudb'])
-            tmpOffset = tmpOffset + gap + (25 + dt[i]) * 300
-        # Add protocol to full protocol
-        for e in protocol.events():
-            newProtocol.schedule(level=e.level(), start=offset + e.start(), duration=e.duration())
-        # Add barrier to separate effects from different protocols
-        newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
+        # # Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
+        # # Track start times
+        # protocolStartTimes.append(newProtocol.characteristic_time())
+        # # Create protocol
+        # #dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
+        # dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 3000, 5000, 7500, 10000]
+        # vsteps = []
+        # times = []
+        # for i in range(len(dt)):
+        #     vsteps.append(-100)
+        #     times.append(gap)
+        #     vsteps += [-10, -100] * 300
+        #     times += [25, dt[i]] * 300
+        # times.append(gap)
+        # vsteps.append(-100)
+        # protocol = myokit.Protocol()
+        # for i in range(len(times)):
+        #     protocol.add_step(vsteps[i], times[i])
+        # # Add windows to measure at
+        # offset = newProtocol.characteristic_time()
+        # tmpOffset = offset
+        # for i in range(len(dt)):
+        #     measurementWindows.append([tmpOffset + gap, tmpOffset + gap + 25, 'rudb'])
+        #     measurementWindows.append([tmpOffset + gap + (25 + dt[i]) * 299, tmpOffset + gap + (25 + dt[i]) * 299 + 25, 'rudb'])
+        #     tmpOffset = tmpOffset + gap + (25 + dt[i]) * 300
+        # # Add protocol to full protocol
+        # for e in protocol.events():
+        #     newProtocol.schedule(level=e.level(), start=offset + e.start(), duration=e.duration())
+        # # Add barrier to separate effects from different protocols
+        # newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
 
         # Protocol 5 - Time to 50% of max current after step to between -20mV and 20mV
         # Track start times
         protocolStartTimes.append(newProtocol.characteristic_time())
         # Create protocol
-        protocol = myokit.pacing.steptrain_linear(vstart=-20, vend=25, dv=5, vhold=-100, tpre=gap, tstep=gap, tpost=0)
+        protocol = myokit.pacing.steptrain_linear(vstart=-20, vend=25, dv=5, vhold=-100, tpre=gap, tstep=40, tpost=0)
         # Add windows to measure at
         offset = newProtocol.characteristic_time()
         for e in protocol.events():
@@ -195,7 +197,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         for i in measurementWindows:
             if i[-1] == 'act':
                 self._logTimes.append(i[0])
-                self._actBounds.append(len(self._logTimes))
+                self._actBounds.append(len(self._logTimes)-1)
             else:
                 lb = len(self._logTimes)
                 self._logTimes += list(np.arange(i[0], i[1], 0.005))
@@ -204,8 +206,8 @@ class ina(ionbench.benchmarker.Benchmarker):
                     self._ssiBounds.append([lb, ub])
                 elif i[-1] == 'rfi':
                     self._rfiBounds.append([lb, ub])
-                elif i[-1] == 'rudb':
-                    self._rudbBounds.append([lb, ub])
+                # elif i[-1] == 'rudb':
+                #     self._rudbBounds.append([lb, ub])
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb, ub])
         self._logTimes = np.array(self._logTimes)
@@ -253,7 +255,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         rmse : float
             The weighted RMSE between c1 and c2.
         """
-        weights = [1 / 9] * 9 + [1 / 20] * 20 + [1 / 21] * 21 + [1 / 10] * 10 + [1 / 9] * 9
+        weights = [1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9
         return np.sqrt(np.average((c1 - c2)**2, weights=weights))
 
     def run_moreno(self):
@@ -268,7 +270,8 @@ class ina(ionbench.benchmarker.Benchmarker):
         """
 
         # Run a simulation
-        log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName])
+        log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
+        #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
         inaOut = -np.array(log[self._outputName])
 
         ssi = [-1] * 9
@@ -281,23 +284,23 @@ class ina(ionbench.benchmarker.Benchmarker):
             act[i] = inaOut[self._actBounds[i]]
         act = [a / max(act) for a in act]
 
-        rfi = [-1] * 21
+        rfi = [-1] * 10
         for i in range(len(rfi)):
             firstPulse = max(inaOut[self._rfiBounds[2 * i][0]:self._rfiBounds[2 * i][1]])
             secondPulse = max(inaOut[self._rfiBounds[2 * i + 1][0]:self._rfiBounds[2 * i + 1][1]])
             rfi[i] = secondPulse / firstPulse
 
-        rudb = [-1] * 10
-        for i in range(len(rudb)):
-            firstPulse = max(inaOut[self._rudbBounds[2 * i][0]:self._rudbBounds[2 * i][1]])
-            lastPulse = max(inaOut[self._rudbBounds[2 * i + 1][0]:self._rudbBounds[2 * i + 1][1]])
-            rudb[i] = lastPulse / firstPulse
+        # rudb = [-1] * 10
+        # for i in range(len(rudb)):
+        #     firstPulse = max(inaOut[self._rudbBounds[2 * i][0]:self._rudbBounds[2 * i][1]])
+        #     lastPulse = max(inaOut[self._rudbBounds[2 * i + 1][0]:self._rudbBounds[2 * i + 1][1]])
+        #     rudb[i] = lastPulse / firstPulse
 
         tau = [-1] * 9
         for i in range(len(tau)):
             peak = max(inaOut[self._tauBounds[i][0]:self._tauBounds[i][1]])
             reachedPeak = False
-            for j in range(1000000):
+            for j in range(self._tauBounds[i][1]-self._tauBounds[i][0]):
                 current = inaOut[self._tauBounds[i][0] + j]
                 if current == peak:
                     reachedPeak = True
@@ -305,7 +308,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                 if reachedPeak and abs(current) <= abs(peak / 2):
                     tau[i] = self._logTimes[self._tauBounds[i][0] + j] - timeToPeak
                     break
-        return np.array(ssi + act + rfi + rudb + tau)
+        return np.array(ssi + act + rfi + tau)
 
 
 def generate_data():
