@@ -305,14 +305,11 @@ class ina(ionbench.benchmarker.Benchmarker):
         tau = [-1] * 9
         for i in range(len(tau)):
             peak = max(inaOut[self._tauBounds[i][0]:self._tauBounds[i][1]])
-            reachedPeak = False
             for j in range(self._tauBounds[i][1]-self._tauBounds[i][0]):
                 current = inaOut[self._tauBounds[i][0] + j]
                 if current == peak:
-                    reachedPeak = True
                     timeToPeak = self._logTimes[self._tauBounds[i][0] + j]
-                if reachedPeak and abs(current) <= abs(peak / 2):
-                    tau[i] = self._logTimes[self._tauBounds[i][0] + j] - timeToPeak
+                    tau[i] = np.interp(abs(peak/2), abs(np.flip(inaOut[self._tauBounds[i][0]+j:self._tauBounds[i][1]])), np.flip(self._logTimes[self._tauBounds[i][0]+j:self._tauBounds[i][1]]))-timeToPeak
                     break
         return np.array(ssi + act + rfi + tau)
 
