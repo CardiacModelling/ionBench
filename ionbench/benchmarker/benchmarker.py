@@ -586,11 +586,7 @@ class Benchmarker():
 
         if failed:
             self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad', time=end - start)
-            if 'moreno' in self._name:
-                error = np.array([np.inf] * 69)
-            else:
-                error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))
-            cost = np.inf
+            error = np.array([np.inf] * len(self.data))
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
             if residuals:
@@ -744,10 +740,7 @@ class Benchmarker():
         # Abort solving if the parameters are out of bounds
         if not self.in_bounds(parameters):
             self.tracker.update(parameters, incrementSolveCounter=False)
-            if 'moreno' in self._name:
-                return [np.inf] * 69
-            else:
-                return [np.inf] * len(times)
+            return [np.inf] * len(self.data)
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
