@@ -215,7 +215,7 @@ class ina(ionbench.benchmarker.Benchmarker):
 
     def solve_model(self, times, continueOnError=True):
         """
-        Replaces the Benchmarker solve_model to call a special Moreno 2016 method (run_moreno()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
+        Replaces the Benchmarker solve_model to call a special Moreno 2016 method (sum_stats()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
 
         Parameters
         ----------
@@ -232,12 +232,19 @@ class ina(ionbench.benchmarker.Benchmarker):
         """
         if continueOnError:
             try:
-                return self.run_moreno()
+                # Run a simulation
+                log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
+                #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
+                inaOut = -np.array(log[self._outputName])
+                return self.sum_stats(inaOut)
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * 69)
         else:
-            return self.run_moreno()
+            log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
+            #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting outputName only works for ODE sims, not analytical
+            inaOut = -np.array(log[self._outputName])
+            return self.sum_stats(inaOut)
 
     def rmse(self, c1, c2):
         """
@@ -258,21 +265,20 @@ class ina(ionbench.benchmarker.Benchmarker):
         weights = [1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9
         return np.sqrt(np.average((c1 - c2)**2, weights=weights))
 
-    def run_moreno(self):
+    def sum_stats(self, inaOut):
         """
         Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
-
+        
+        Parameters
+        ----------
+        inaOut : numpy array
+            The iNa current trace on which to calculate the summary statistics.
         Returns
         -------
         modelOutput : list
-            A vector of points on summary curves.
+            A list of points on summary curves.
 
         """
-
-        # Run a simulation
-        log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-        #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
-        inaOut = -np.array(log[self._outputName])
 
         ssi = [-1] * 9
         for i in range(len(ssi)):
