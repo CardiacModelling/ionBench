@@ -16,7 +16,7 @@ class ina(ionbench.benchmarker.Benchmarker):
     Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution.
     """
 
-    def __init__(self):
+    def __init__(self, sensitivities = False):
         print('Initialising Moreno 2016 INa benchmark')
         self._name = "moreno2016.ina"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
@@ -28,11 +28,19 @@ class ina(ionbench.benchmarker.Benchmarker):
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self._trueParams = np.copy(self.defaultParams)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
+        parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=parameters, current=self._outputName, vm='membrane.V')
         self.sim = myokit.lib.markov.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
-        self.sensitivityCalc = False  # Moreno currently can't do sensitivities
+        self.sensitivityCalc = sensitivities
+        if self.sensitivityCalc:
+            # ODE solver
+            sens = ([self._outputName], parameters)
+            self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+        else:
+            self.simSens = None
         self.simSens = None
         self.freq = 0.5 #Timestep in data between points
+        self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         super().__init__()
         print('Benchmarker initialised')
 
@@ -262,8 +270,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         rmse : float
             The weighted RMSE between c1 and c2.
         """
-        weights = [1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9
-        return np.sqrt(np.average((c1 - c2)**2, weights=weights))
+        return np.sqrt(np.average((c1 - c2)**2, weights=self.weights))
 
     def sum_stats(self, inaOut):
         """
