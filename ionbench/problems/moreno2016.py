@@ -38,7 +38,6 @@ class ina(ionbench.benchmarker.Benchmarker):
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
         else:
             self.simSens = None
-        self.simSens = None
         self.freq = 0.5 #Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         super().__init__()
