@@ -655,6 +655,9 @@ class Benchmarker():
             self.sim.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
             if self.sensitivityCalc:
                 self.simSens.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
+        # Workaround for myokit bug
+        if 'moreno' in self._name:
+            self.sim.set_parameters(self.sim.parameters())
 
     def set_steady_state(self, parameters):
         """
