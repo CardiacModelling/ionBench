@@ -591,14 +591,6 @@ class Benchmarker():
                     J[i, ] = grad
         else:
             # Convert to cost derivative or residual jacobian
-            if 'moreno' in self._name:
-                # Adjust sens to emulate moreno summary statistics
-                sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
-                for i in range(self.n_parameters()):
-                    step = max(1e-7*parameters[i], 1e-8)
-                    sens_SS[:,0,i] = (self.sum_stats(curr + step*sens[:,0,i])-self.sum_stats(curr - step*sens[:,0,i]))/(2*step)
-                curr = self.sum_stats(curr)
-                sens = sens_SS
             error = curr - self.data
             cost = self.rmse(curr, self.data)
 
@@ -613,7 +605,7 @@ class Benchmarker():
                 grad = []
                 for i in range(self.n_parameters()):
                     if 'moreno' in self._name:
-                        grad.append(np.dot(error*self.weights, sens[:, 0, i]) / (len(error) * cost))
+                        grad.append(np.dot(error*self.weights, sens[:, 0, i]) / (cost))
                     else:
                         grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
 

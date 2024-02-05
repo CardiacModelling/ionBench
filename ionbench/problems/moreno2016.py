@@ -40,6 +40,7 @@ class ina(ionbench.benchmarker.Benchmarker):
             self.simSens = None
         self.freq = 0.5 #Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
+        self.weights = self.weights/np.sum(self.weights)
         super().__init__()
         print('Benchmarker initialised')
 
@@ -220,6 +221,19 @@ class ina(ionbench.benchmarker.Benchmarker):
         self._logTimes = np.array(self._logTimes)
         return newProtocol
 
+    def solve_with_sensitivities(self, times):
+        log, sens = self.simSens.run(self.tmax + 1, log_times=self._logTimes)
+        curr = np.array(log[self._outputName])
+        sens = np.array(sens)
+        # Adjust sens to emulate moreno summary statistics
+        sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
+        for i in range(self.n_parameters()):
+            step = 1e-5*self.defaultParams[i]
+            sens_SS[:,0,i] = (self.sum_stats(curr + step*sens[:,0,i])-self.sum_stats(curr - step*sens[:,0,i]))/(2*step)
+        curr = self.sum_stats(curr)
+        sens = sens_SS
+        return curr, sens
+
     def solve_model(self, times, continueOnError=True):
         """
         Replaces the Benchmarker solve_model to call a special Moreno 2016 method (sum_stats()) which handles the summary curve calculations. The output is a vector of points on the summary curves.
@@ -242,16 +256,14 @@ class ina(ionbench.benchmarker.Benchmarker):
                 # Run a simulation
                 log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
                 #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
-                inaOut = -np.array(log[self._outputName])
-                return self.sum_stats(inaOut)
+                return self.sum_stats(np.array(log[self._outputName],dtype='float64'))
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
-                return np.array([np.inf] * 69)
+                return np.array([np.inf] * len(self.data),dtype='float64')
         else:
             log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
             #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting outputName only works for ODE sims, not analytical
-            inaOut = -np.array(log[self._outputName])
-            return self.sum_stats(inaOut)
+            return self.sum_stats(np.array(log[self._outputName]),dtype='float64')
 
     def rmse(self, c1, c2):
         """
@@ -285,6 +297,8 @@ class ina(ionbench.benchmarker.Benchmarker):
             A list of points on summary curves.
 
         """
+        #Flip sign of current for max current calculations
+        inaOut = -inaOut
 
         ssi = [-1] * 9
         for i in range(len(ssi)):
@@ -315,7 +329,7 @@ class ina(ionbench.benchmarker.Benchmarker):
                 current = inaOut[self._tauBounds[i][0] + j]
                 if current == peak:
                     timeToPeak = self._logTimes[self._tauBounds[i][0] + j]
-                    tau[i] = np.interp(abs(peak/2), abs(np.flip(inaOut[self._tauBounds[i][0]+j:self._tauBounds[i][1]])), np.flip(self._logTimes[self._tauBounds[i][0]+j:self._tauBounds[i][1]]))-timeToPeak
+                    tau[i] = np.interp(np.abs(peak/2), np.abs(np.flip(inaOut[self._tauBounds[i][0]+j:self._tauBounds[i][1]])), np.flip(self._logTimes[self._tauBounds[i][0]+j:self._tauBounds[i][1]]))-timeToPeak
                     break
         return np.array(ssi + act + rfi + tau)
 

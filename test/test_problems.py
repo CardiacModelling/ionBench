@@ -308,10 +308,6 @@ class Test_Moreno(Problem):
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 
-    def test_grad(self):
-        # Ignore grad test for Moreno. This problem cant use the grad yet.
-        pass
-
     @pytest.mark.cheap
     def test_steady_state(self):
         # Test steady state is right for random parameters
