@@ -247,6 +247,8 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
 def get_modification(modNum=1):
     """
     modNum = 1 -> Dokos2004
+    modNum = 2 -> Abed2013
+    modNum = 3 -> Guo2010
 
     Returns
     -------
@@ -254,7 +256,15 @@ def get_modification(modNum=1):
         Modification corresponding to inputted modNum. Default is modNum = 1, so Dokos2004.
 
     """
-    mod = ionbench.modification.Dokos2004()
+
+    if modNum == 1:
+        mod = ionbench.modification.Dokos2004()
+    elif modNum == 2:
+        mod = ionbench.modification.Abed2013()
+    elif modNum == 3:
+        mod = ionbench.modification.Guo2010()
+    else:
+        mod = ionbench.modification.Empty(name='dokos_gd')
     return mod
 
 

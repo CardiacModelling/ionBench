@@ -20,9 +20,9 @@ OPT_EXT = ['ionbench.optimisers.external_optimisers.' + st for st in ['curviline
 
 OPT_ALL = OPT_SCIPY + OPT_PINTS + OPT_EXT
 
-N_MOD_SCIPY = [2, 2, 4, 3, 1, 3]
+N_MOD_SCIPY = [2, 2, 3, 3, 1, 3]
 N_MOD_PINTS = [2, 0, 0, 0, 0]
-N_MOD_EXT = [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+N_MOD_EXT = [3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 N_MOD_ALL = N_MOD_SCIPY + N_MOD_PINTS + N_MOD_EXT
 
 APP_SCIPY = []
@@ -41,4 +41,4 @@ for i in range(len(OPT_EXT)):
         APP_EXT.append({'module': OPT_EXT[i], 'modNum': j + 1, 'kwargs': {}})
 
 APP_ALL = APP_SCIPY + APP_PINTS + APP_EXT
-APP_UNIQUE = [APP_ALL[i] for i in range(len(APP_ALL)) if i not in [3, 9, 10, 13, 14]]
+APP_UNIQUE = [APP_ALL[i] for i in range(len(APP_ALL)) if i not in [3, 8, 9, 12, 13, 17, 18]]

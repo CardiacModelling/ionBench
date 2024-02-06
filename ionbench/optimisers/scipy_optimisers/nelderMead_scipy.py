@@ -75,7 +75,6 @@ def get_modification(modNum=1):
     """
     modNum = 1 -> Balser1990
     modNum = 2 -> Davies2011
-    modNum = 3 -> Iozzia2014
     modNum = 4 -> Moreno2016
 
     Returns

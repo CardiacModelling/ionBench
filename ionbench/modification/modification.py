@@ -162,21 +162,20 @@ class Modification():
             print("'" + setting + "' is not a valid option for scale factors. Please use either 'on' or 'off'.")
 
 
+class Abed2013(Modification):
+    def __init__(self):
+        logTransform = 'None'
+        bounds = 'Sampler'  # Technically upper and lower bounds are done through a custom transformation
+        scaleFactors = 'off'
+        name = 'Abed2013'
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
+
 class Achard2006(Modification):
     def __init__(self):
         logTransform = 'None'
         bounds = 'Sampler'
         scaleFactors = 'off'
         name = 'Archard2006'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
-
-
-class Amrit2023(Modification):
-    def __init__(self):
-        logTransform = 'None'
-        bounds = 'Sampler'
-        scaleFactors = 'off'
-        name = 'Amrit2023'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
 
 
@@ -349,7 +348,7 @@ class Groenendaal2015(Modification):
 class Guo2010(Modification):
     def __init__(self):
         logTransform = 'None'
-        bounds = 'None'
+        bounds = 'Sampler'  # Technically upper and lower bounds are done through a custom transformation
         scaleFactors = 'off'
         name = 'Guo2010'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
@@ -379,15 +378,6 @@ class Houston2020(Modification):
         bounds = 'Sampler'
         scaleFactors = 'off'
         name = 'Houston2020'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
-
-
-class Iozzia2014(Modification):
-    def __init__(self):
-        logTransform = 'None'
-        bounds = 'Sampler'
-        scaleFactors = 'off'
-        name = 'Iozzia2014'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
 
 
