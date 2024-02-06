@@ -16,7 +16,7 @@ with open(os.path.join(os.getcwd(),'resultsFile.csv'), 'w', newline='') as csvfi
             titles.append(f'Run {i} - {j}')
     titles += ['Success Rate', 'Expected Cost FE', 'Expected Cost Time', 'Expected Grad FE', 'Expected Grad Time', 'Tier', 'Tier Score (Sensitivities)', 'Tier Score (Finite Difference)']
     writer.writerow(titles)
-    for app in ionbench.APP_ALL:
+    for app in ionbench.APP_UNIQUE:
         costAtConv = []
         bestCost = []
         costEvalsAtConv = []

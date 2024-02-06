@@ -4,7 +4,7 @@ import importlib
 bm = ionbench.problems.staircase.HH_Benchmarker()
 initParams = bm.sample(n=5)
 print(initParams)
-for app in ionbench.APP_ALL:
+for app in ionbench.APP_UNIQUE:
     print(app['module'])
     try:
         opt = importlib.import_module(app['module'])
