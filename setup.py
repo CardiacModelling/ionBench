@@ -125,6 +125,7 @@ setup(
                       "pints>=0.4.1",
                       "myokit>=1.34.0",
                       "matplotlib>=3.7.1",
+                      "mygrad>=2.2.0",
                       "pymoo>=0.6.0.1"],
 
     # List additional groups of dependencies here (e.g. development

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import warnings
 import pickle
 import time
+import mygrad as mg
 
 
 class Tracker():
@@ -665,20 +666,60 @@ class Benchmarker():
         None.
 
         """
+        if 'moreno' in self._name:
+            V = -120
+        else:
+            V = -80
+        
+        if 'hh' in str(type(self._analyticalModel)):
+            t = [mg.tensor(a, dtype=np.double) for a in parameters]
+            state = self._analyticalModel._steady_state_function(V, *t)
+            s_state = np.zeros((len(parameters),len(state)))
+            for j in range(len(state)):
+                state[j].backward()
+                sens = [float(t[i].grad) if t[i].grad is not None else 0 for i in range(self.n_parameters())]
+                [t[i].null_grad() for i in range(self.n_parameters())]
+                s_state[:,j] = sens
+
+            state = [float(state[i]) for i in range(len(state))]
+            s_state = [list(s_state[i]) for i in range(self.n_parameters())]
+        elif 'markov' in str(type(self._analyticalModel)):
+            n = len(self._analyticalModel._states)
+            f = ionbench.utils.autodiff.get_matrix_function(self._analyticalModel)
+
+            s_state = np.zeros((len(parameters),n))
+            for j in range(n):
+                t = [mg.tensor(a, np.double) for a in parameters]
+                At, _ = f(*t, V)
+                B = At[:-1, -1:]
+                A = At[:-1, :-1] - B
+                
+                xMG = ionbench.utils.autodiff.linalg_solve(A, -B)
+                state = mg.zeros(n)
+                for i in range(len(xMG)):
+                    state[i] = xMG[i]
+                state[-1] = 1-np.sum(xMG)
+                state[j].backward()
+                sens = [float(t[i].grad) if t[i].grad is not None else 0 for i in range(self.n_parameters())]
+                s_state[:,j] = sens
+            state = [float(state[i]) for i in range(len(state))]
+            s_state = [list(s_state[i]) for i in range(self.n_parameters())]
+        # Check our steady state calculations don't differ from myokit
         try:
-            if 'moreno' in self._name:
-                state = self._analyticalModel.steady_state(membrane_potential=-120, parameters=parameters)
-                state[state<0] = 0
-                state = state/sum(state)
+            myokitState = self._analyticalModel.steady_state(V, parameters)
+            if np.linalg.norm(myokitState-state)>1e-6:
+                raise RuntimeError(f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState-state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
+        except myokit.lib.markov.LinearModelError as e:
+            if 'eigenvalues' in str(e):
+                warnings.warn('Positive eigenvalues found so steady state is unstable. Will use states defined in problem instead.')
+                state = None
             else:
-                    state = self._analyticalModel.steady_state(membrane_potential=-80, parameters=parameters)
+                raise
+        if state is not None:
             self.sim.set_state(state)
             if self.sensitivityCalc:
                 self.simSens.set_state(state)
-        except myokit.lib.markov.LinearModelError:
-            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
-        except myokit.lib.hh.HHModelError:
-            warnings.warn("Error caught when setting inital state. The parameters probably don't allow a stable steady state. Will use default state in .mmt file.")
+                self.simSens._s_state = s_state
 
     def solve_with_sensitivities(self, times):
         log, e = self.simSens.run(self.tmax + 1, log_times=times)

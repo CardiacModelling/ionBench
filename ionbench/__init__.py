@@ -4,6 +4,7 @@ from ionbench import problems
 from ionbench import optimisers
 from ionbench import modification
 from ionbench import uncertainty
+from ionbench import utils
 from ionbench.multistart import *
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
