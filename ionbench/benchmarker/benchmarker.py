@@ -707,7 +707,7 @@ class Benchmarker():
         # Check our steady state calculations don't differ from myokit
         try:
             myokitState = self._analyticalModel.steady_state(V, parameters)
-            if np.linalg.norm(myokitState-state)>1e-6:
+            if np.linalg.norm(np.subtract(myokitState,state))>1e-6:
                 raise RuntimeError(f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState-state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
         except myokit.lib.markov.LinearModelError as e:
             if 'eigenvalues' in str(e):
