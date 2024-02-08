@@ -19,11 +19,11 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
-            self.simSens.set_tolerance(1e-8, 1e-8)
+            self.simSens.set_tolerance(1e-9, 1e-9)
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
-        self.sim.set_tolerance(1e-8, 1e-8)
+        self.sim.set_tolerance(1e-9, 1e-9)
         self.freq = 0.5 #Timestep in data between points
         super().__init__()
 
