@@ -10,11 +10,16 @@ class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self._name = "test"
         self.defaultParams = np.array([2, 4])
-        self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
+        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V: p[2], 'independent'),
+                               (lambda p, V: p[3] * np.exp(p[4] * V), 'positive'),
+                               (lambda p, V: p[5] * np.exp(p[6] * V), 'positive'),
+                               (lambda p, V: p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V: p[9], 'independent'),
+                               (lambda p, V: p[10] * np.exp(-p[11] * V), 'negative'),
+                               (lambda p, V: p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [False, True]
         self.sensitivityCalc = True
         self.tmax = 20
-        self.freq = 1 #Timestep in data between points
+        self.freq = 1  # Timestep in data between points
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
@@ -38,7 +43,8 @@ class Test(ionbench.benchmarker.Benchmarker):
         """
         params = [None] * n
         for i in range(n):
-            params[i] = self.input_parameter_space(self.defaultParams * np.random.uniform(0.5, 1.5, self.n_parameters()))
+            params[i] = self.input_parameter_space(
+                self.defaultParams * np.random.uniform(0.5, 1.5, self.n_parameters()))
         if n == 1:
             return params[0]
         else:
@@ -48,7 +54,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         # Calculate function at times for parameters and return
         parameters = self.original_parameter_space(parameters)
         if not self.in_bounds(parameters):
-            return [np.inf for t in times]
+            return [np.inf for _ in times]
         return scipy.stats.norm(parameters[0], parameters[1]).pdf(times)
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
@@ -61,26 +67,26 @@ class Test(ionbench.benchmarker.Benchmarker):
 
         # Abort solving if the parameters are out of bounds
         if not self.in_bounds(parameters):
-            warnings.warn('Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+            warnings.warn(
+                'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
             error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))
-            cost = np.inf
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
             if residuals:
                 J = np.zeros((len(error), self.n_parameters()))
                 for i in range(len(error)):
-                    J[i, ] = grad
+                    J[i,] = grad
         else:
             # Get sensitivities
             curr = self.simulate(parameters, np.arange(0, self.tmax, self.freq))
             sens = np.zeros((len(curr), self.n_parameters()))
             for t in range(len(curr)):
-                sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1]**2
-                sens[t, 1] = curr[t] * ((t - parameters[0])**2 / parameters[1]**3 - 1 / parameters[1])
+                sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
+                sens[t, 1] = curr[t] * ((t - parameters[0]) ** 2 / parameters[1] ** 3 - 1 / parameters[1])
 
         # Convert to cost derivative or residual jacobian
         error = curr - self.data
-        cost = np.sqrt(np.mean(error**2))
+        cost = np.sqrt(np.mean(error ** 2))
 
         if residuals:
             J = sens
@@ -96,22 +102,22 @@ class Test(ionbench.benchmarker.Benchmarker):
         if inInputSpace:
             derivs = self.transform_jacobian(self.input_parameter_space(parameters))
             if residuals:
-                J = J * derivs
+                J *= derivs
             else:
                 grad *= derivs
 
         if returnCost:
             if residuals:
-                return (error, J)
+                return error, J
             else:
-                return (cost, grad)
+                return cost, grad
         else:
             if residuals:
                 return J
             else:
                 return grad
 
-    def reset(self):
+    def reset(self, fullReset=True):
         self.tracker = ionbench.benchmarker.Tracker(self.defaultParams)
 
     def use_sensitivities(self):
@@ -141,8 +147,3 @@ def generate_data():
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
-
-
-if __name__ == '__main__':
-    bm = Test()
-    bm.grad(bm.sample())
