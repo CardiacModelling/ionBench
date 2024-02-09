@@ -9,3 +9,4 @@ ionBench.egg-info/*
 *.out
 *checkpoint.ipynb
 .coverage
+.idea/
