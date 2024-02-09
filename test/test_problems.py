@@ -22,7 +22,6 @@ class Problem():
         assert hasattr(self.bm, "defaultParams")
         assert hasattr(self.bm, "_rateFunctions")
         assert hasattr(self.bm, "standardLogTransform")
-        assert hasattr(self.bm, "_trueParams")
         assert hasattr(self.bm, "data")
         assert hasattr(self.bm, "sim")
         assert hasattr(self.bm, "_useScaleFactors")

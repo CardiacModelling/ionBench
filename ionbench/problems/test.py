@@ -13,7 +13,6 @@ class Test(ionbench.benchmarker.Benchmarker):
         self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [False, True]
         self.sensitivityCalc = True
-        self._trueParams = np.copy(self.defaultParams)
         self.tmax = 20
         self.freq = 1 #Timestep in data between points
         try:
@@ -113,7 +112,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 return grad
 
     def reset(self):
-        self.tracker = ionbench.benchmarker.Tracker(self._trueParams)
+        self.tracker = ionbench.benchmarker.Tracker(self.defaultParams)
 
     def use_sensitivities(self):
         # Not needed for test function. Override to avoid trying to access myokit objects
@@ -138,7 +137,7 @@ def generate_data():
 
     """
     bm = Test()
-    out = bm.simulate(bm._trueParams, np.arange(0, bm.tmax, bm.freq), continueOnError=False)
+    out = bm.simulate(bm.defaultParams, np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

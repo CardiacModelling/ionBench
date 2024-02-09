@@ -230,7 +230,7 @@ class Benchmarker():
         self._bounded = False  # Should the parameters be bounded
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
-        self.tracker = Tracker(self._trueParams)  # Tracks the performance metrics
+        self.tracker = Tracker(self.defaultParams)  # Tracks the performance metrics
 
     def load_data(self, dataPath=''):
         """
@@ -441,7 +441,7 @@ class Benchmarker():
         self.sim.reset()
         if self.sensitivityCalc:
             self.simSens.reset()
-        self.tracker = Tracker(self._trueParams)
+        self.tracker = Tracker(self.defaultParams)
         if fullReset:
             self.log_transform([False]*self.n_parameters())
             self._useScaleFactors = False

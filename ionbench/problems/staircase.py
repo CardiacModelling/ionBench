@@ -10,7 +10,6 @@ import ionbench
 class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
-        self._trueParams = np.copy(self.defaultParams)
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
         except FileNotFoundError:
@@ -125,8 +124,8 @@ def generate_data(modelType):
         bm = HH_Benchmarker()
     elif modelType == 'MM':
         bm = MM_Benchmarker()
-    bm.set_params(bm._trueParams)
-    bm.set_steady_state(bm._trueParams)
+    bm.set_params(bm.defaultParams)
+    bm.set_steady_state(bm.defaultParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:

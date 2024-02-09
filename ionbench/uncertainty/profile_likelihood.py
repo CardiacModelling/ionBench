@@ -108,11 +108,11 @@ def run(bm, variations, backwardPass = False, filename=''):
                 varIndex = j
             var = variations[i][varIndex]
             if j == 0:
-                pm = ProfileManager(bm, i, bm._trueParams[i] * var, bm.defaultParams)
+                pm = ProfileManager(bm, i, bm.defaultParams[i] * var, bm.defaultParams)
             else:
-                pm = ProfileManager(bm, i, bm._trueParams[i] * var, out)
+                pm = ProfileManager(bm, i, bm.defaultParams[i] * var, out)
             if var == 1:
-                costs[varIndex] = bm.cost(bm._trueParams)
+                costs[varIndex] = bm.cost(bm.defaultParams)
                 out = pm.set_params(pm.sample())
             else:
                 try:

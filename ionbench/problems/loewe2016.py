@@ -8,7 +8,6 @@ import csv
 
 class loewe2016_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
-        self._trueParams = np.copy(self.defaultParams)
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
         self.standardLogTransform = [not i for i in self.additiveParams]
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
@@ -145,8 +144,8 @@ def generate_data(modelType):
         bm = ikr()
     elif modelType == 'ikur':
         bm = ikur()
-    bm.set_params(bm._trueParams)
-    bm.set_steady_state(bm._trueParams)
+    bm.set_params(bm.defaultParams)
+    bm.set_steady_state(bm.defaultParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'loewe2016', modelType.lower() + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
