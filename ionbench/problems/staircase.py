@@ -81,10 +81,10 @@ class HH(StaircaseBenchmarker):
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
-        self._rateFunctions = [(lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
-                               (lambda p, v: p[2] * np.exp(-p[3] * v), 'negative'),
-                               (lambda p, v: p[4] * np.exp(p[5] * v), 'positive'),
-                               (lambda p, v: p[6] * np.exp(-p[7] * v), 'negative')]  # Used for rate bounds
+        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
+                               (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
+                               (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
+                               (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'],
