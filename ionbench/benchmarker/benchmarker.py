@@ -9,7 +9,7 @@ import time
 import mygrad as mg
 
 
-class Tracker():
+class Tracker:
     """
     This class records the various performance metrics used to evaluate the optimisation algorithms.
 
@@ -25,7 +25,7 @@ class Tracker():
 
     update() is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.cost) and updates the performance metric vectors.
 
-    plot() is called during the benchmarkers .evaluate() method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
+    plot() is called during the benchmarker's .evaluate() method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
 
     def __init__(self, trueParams):
@@ -71,7 +71,7 @@ class Tracker():
         trueParams = np.array(self._trueParams)
         estimatedParams = np.array(estimatedParams)
         # Update performance metrics
-        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams - trueParams) / trueParams)**2)))
+        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams - trueParams) / trueParams) ** 2)))
         self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams - trueParams) / trueParams) < 0.05))
         self.costs.append(cost)
         if incrementSolveCounter:
@@ -123,7 +123,8 @@ class Tracker():
         if len(self.costTimes) > 0:
             plt.figure()
             n, _, _ = plt.hist(self.costTimes)
-            plt.vlines(x=np.mean(self.costTimes), ymin=0, ymax=np.max(n), colors=['k'], label=f'Mean: {np.mean(self.costTimes):.3f}')
+            plt.vlines(x=np.mean(self.costTimes), ymin=0, ymax=np.max(n), colors=['k'],
+                       label=f'Mean: {np.mean(self.costTimes):.3f}')
             plt.xlabel('Time (sec)')
             plt.ylabel('Frequency')
             plt.title('Histogram of cost evaluation times')
@@ -133,7 +134,8 @@ class Tracker():
         if len(self.gradTimes) > 0:
             plt.figure()
             n, _, _ = plt.hist(self.gradTimes)
-            plt.vlines(x=np.mean(self.gradTimes), ymin=0, ymax=np.max(n), colors=['k'], label=f'Mean: {np.mean(self.gradTimes):.3f}')
+            plt.vlines(x=np.mean(self.gradTimes), ymin=0, ymax=np.max(n), colors=['k'],
+                       label=f'Mean: {np.mean(self.gradTimes):.3f}')
             plt.xlabel('Time (sec)')
             plt.ylabel('Frequency')
             plt.title('Histogram of gradient evaluation times')
@@ -153,7 +155,9 @@ class Tracker():
         None.
 
         """
-        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes, self.gradTimes)
+        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE,
+                self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes,
+                self.gradTimes)
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -186,7 +190,8 @@ class Tracker():
         """
         finalParamId = self.paramIdentifiedCount[-1]
         ifEqualFinalParamId = self.paramIdentifiedCount == finalParamId
-        ind = [i for i, x in enumerate(ifEqualFinalParamId) if x]  # Indexes where number of parameters identified is equal to the final count
+        ind = [i for i, x in enumerate(ifEqualFinalParamId) if
+               x]  # Indexes where number of parameters identified is equal to the final count
         for i in ind:
             if all(ifEqualFinalParamId[i:]):
                 # All future points remain with this many parameters identified, therefore it is considered converged
@@ -213,12 +218,14 @@ class Tracker():
         for (p, st) in self.evals:
             if all(p == param):
                 if st == solveType:
-                    warnings.warn(f'Duplicate solve. Both as {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
-                elif st=='grad' and solveType=='cost':
-                    warnings.warn(f'Duplicate solve. First as {st}, then as {solveType}. Cost can be found for free from a gradient solve. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                    warnings.warn(
+                        f'Duplicate solve. Both as {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                elif st == 'grad' and solveType == 'cost':
+                    warnings.warn(
+                        f'Duplicate solve. First as {st}, then as {solveType}. Cost can be found for free from a gradient solve. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
 
 
-class Benchmarker():
+class Benchmarker:
     """
     The Benchmarker class contains all the features needed to evaluate an optimisation algorithm. This class should not need to be called directly and is instead used as a parent class for the benchmarker problems.
 
@@ -315,7 +322,7 @@ class Benchmarker():
         Parameters
         ----------
         whichParams : list, optional
-            Which parameters should be log-transformed, in the form of a list of bools, the same length as the number of parameters, where True is a parameter to be log-transformed. The default is [], in which case all parameters will be log-transformed.
+            Which parameters should be log-transformed, in the form of a list of booleans, the same length as the number of parameters, where True is a parameter to be log-transformed. The default is [], in which case all parameters will be log-transformed.
 
         Returns
         -------
@@ -376,7 +383,7 @@ class Benchmarker():
 
     def transform_jacobian(self, parameters):
         """
-        Finds the jacobian for the current parameter transform for derivatives calculated in original parameter space to be mapped to the input paramete space.
+        Finds the jacobian for the current parameter transform for derivatives calculated in original parameter space to be mapped to the input parameter space.
 
         Parameters
         ----------
@@ -386,7 +393,7 @@ class Benchmarker():
         Returns
         -------
         derivs : array
-            Vector of transform derivaties. To map a derivative that was calculated in original parameter space to one calculated in input parameter space, it should be multiplied elementwise by derivs.
+            Vector of transform derivatives. To map a derivative that was calculated in original parameter space to one calculated in input parameter space, it should be multiplied element-wise by derivs.
 
         """
         derivs = np.ones(self.n_parameters())
@@ -424,7 +431,7 @@ class Benchmarker():
         """
         return len(self.defaultParams)
 
-    def reset(self, fullReset = True):
+    def reset(self, fullReset=True):
         """
         Resets the benchmarker. This clears the simulation object and restarts the performance tracker. Optionally, the transforms and bounds can be turned off.
 
@@ -443,7 +450,7 @@ class Benchmarker():
             self.simSens.reset()
         self.tracker = Tracker(self.defaultParams)
         if fullReset:
-            self.log_transform([False]*self.n_parameters())
+            self.log_transform([False] * self.n_parameters())
             self._useScaleFactors = False
             self._bounded = False
 
@@ -464,7 +471,8 @@ class Benchmarker():
             The RMSE cost of the parameters.
 
         """
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq), incrementSolveCounter=incrementSolveCounter))
+        testOutput = np.array(
+            self.simulate(parameters, np.arange(0, self.tmax, self.freq), incrementSolveCounter=incrementSolveCounter))
         cost = self.rmse(testOutput, self.data)
         return cost
 
@@ -485,7 +493,7 @@ class Benchmarker():
         """
         # Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
-        return (testOutput - self.data)
+        return testOutput - self.data
 
     def squared_error(self, parameters):
         """
@@ -504,7 +512,7 @@ class Benchmarker():
         """
         # Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
-        return (testOutput - self.data)**2
+        return (testOutput - self.data) ** 2
 
     def use_sensitivities(self):
         """
@@ -520,7 +528,8 @@ class Benchmarker():
 
         """
         paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self.simSens = myokit.Simulation(self.model, protocol=self.protocol(), sensitivities=([self._outputName], paramNames))
+        self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
+                                         sensitivities=([self._outputName], paramNames))
         self.simSens.set_tolerance(1e-9, 1e-9)
         self.sensitivityCalc = True
 
@@ -544,7 +553,7 @@ class Benchmarker():
         Returns
         -------
         grad : array
-            The gradient of the RMSE cost, evalauted at the inputted parameters.
+            The gradient of the RMSE cost, evaluated at the inputted parameters.
 
         """
         failed = False
@@ -556,15 +565,17 @@ class Benchmarker():
 
         # Check model is setup to solve for sensitivities
         if not self.sensitivityCalc:
-            warnings.warn("Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
+            warnings.warn(
+                "Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
             self.use_sensitivities()
 
         # Abort solving if the parameters are out of bounds
         if not self.in_bounds(parameters):
             failed = True
             incrementSolveCounter = False
-            warnings.warn('Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            # The start and end varaibles won't be recorded since incrementSolveCounter is False but need to be defined for the tracker.update function to be called
+            warnings.warn(
+                'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+            # The start and end variables won't be recorded since incrementSolveCounter is False but need to be defined for the tracker.update function to be called
             start = 0
             end = 0
 
@@ -579,24 +590,27 @@ class Benchmarker():
                 sens = np.array(sens)
             except myokit.SimulationError:
                 failed = True
-                warnings.warn('Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
+                warnings.warn(
+                    'Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
             end = time.monotonic()
 
         if failed:
-            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad', time=end - start)
+            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad',
+                                time=end - start)
             error = np.array([np.inf] * len(self.data))
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
             if residuals:
                 J = np.zeros((len(error), self.n_parameters()))
                 for i in range(len(error)):
-                    J[i, ] = grad
+                    J[i,] = grad
         else:
             # Convert to cost derivative or residual jacobian
             error = curr - self.data
             cost = self.rmse(curr, self.data)
 
-            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad', time=end - start)
+            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad',
+                                time=end - start)
 
             if residuals:
                 J = np.zeros((len(curr), self.n_parameters()))
@@ -607,7 +621,7 @@ class Benchmarker():
                 grad = []
                 for i in range(self.n_parameters()):
                     if 'moreno' in self._name:
-                        grad.append(np.dot(error*self.weights, sens[:, 0, i]) / (cost))
+                        grad.append(np.dot(error * self.weights, sens[:, 0, i]) / cost)
                     else:
                         grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
 
@@ -615,15 +629,15 @@ class Benchmarker():
         if inInputSpace:
             derivs = self.transform_jacobian(self.input_parameter_space(parameters))
             if residuals:
-                J = J * derivs
+                J *= derivs
             else:
                 grad *= derivs
 
         if returnCost:
             if residuals:
-                return (error, J)
+                return error, J
             else:
-                return (cost, grad)
+                return cost, grad
         else:
             if residuals:
                 return J
@@ -671,16 +685,16 @@ class Benchmarker():
             V = -120
         else:
             V = -80
-        
+
         if 'hh' in str(type(self._analyticalModel)):
             t = [mg.tensor(a, dtype=np.double) for a in parameters]
             state = self._analyticalModel._steady_state_function(V, *t)
-            s_state = np.zeros((len(parameters),len(state)))
+            s_state = np.zeros((len(parameters), len(state)))
             for j in range(len(state)):
                 state[j].backward()
                 sens = [float(t[i].grad) if t[i].grad is not None else 0 for i in range(self.n_parameters())]
                 [t[i].null_grad() for i in range(self.n_parameters())]
-                s_state[:,j] = sens
+                s_state[:, j] = sens
 
             state = [float(state[i]) for i in range(len(state))]
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
@@ -688,31 +702,33 @@ class Benchmarker():
             n = len(self._analyticalModel._states)
             f = ionbench.utils.autodiff.get_matrix_function(self._analyticalModel)
 
-            s_state = np.zeros((len(parameters),n))
+            s_state = np.zeros((len(parameters), n))
             for j in range(n):
                 t = [mg.tensor(a, np.double) for a in parameters]
                 At, _ = f(*t, V)
                 B = At[:-1, -1:]
                 A = At[:-1, :-1] - B
-                
+
                 xMG = ionbench.utils.autodiff.linalg_solve(A, -B)
                 state = mg.zeros(n)
                 for i in range(len(xMG)):
                     state[i] = xMG[i]
-                state[-1] = 1-np.sum(xMG)
+                state[-1] = 1 - np.sum(xMG)
                 state[j].backward()
                 sens = [float(t[i].grad) if t[i].grad is not None else 0 for i in range(self.n_parameters())]
-                s_state[:,j] = sens
+                s_state[:, j] = sens
             state = [float(state[i]) for i in range(len(state))]
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
         # Check our steady state calculations don't differ from myokit
         try:
             myokitState = self._analyticalModel.steady_state(V, parameters)
-            if np.linalg.norm(np.subtract(myokitState,state))>1e-6:
-                raise RuntimeError(f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState-state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
+            if np.linalg.norm(np.subtract(myokitState, state)) > 1e-6:
+                raise RuntimeError(
+                    f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState - state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
         except myokit.lib.markov.LinearModelError as e:
             if 'eigenvalues' in str(e):
-                warnings.warn('Positive eigenvalues found so steady state is unstable. Will use states defined in problem instead.')
+                warnings.warn(
+                    'Positive eigenvalues found so steady state is unstable. Will use states defined in problem instead.')
                 state = None
             else:
                 raise
@@ -733,7 +749,7 @@ class Benchmarker():
         Parameters
         ----------
         times : list or numpy array
-            Vector of timepoints to record model output. Typically in ms.
+            Vector of time points to record model output. Typically, in ms.
         continueOnError : bool, optional
             If continueOnError is True, any errors that occur during solving the model will be ignored and an infinite output will be given. The default is True.
 
@@ -763,7 +779,7 @@ class Benchmarker():
         parameters : list or numpy array
             Vector of parameters to solve the model.
         times : list or numpy array
-            Vector of timepoints to record model output. Typically in ms.
+            Vector of time points to record model output. Typically, in ms.
         continueOnError : bool, optional
             If continueOnError is True, any errors that occur during solving the model will be ignored and an infinite output will be given. The default is True.
         incrementSolveCounter : bool, optional
@@ -794,7 +810,8 @@ class Benchmarker():
         start = time.monotonic()
         out = self.solve_model(times, continueOnError=continueOnError)
         end = time.monotonic()
-        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter, time=end - start)
+        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter,
+                            time=end - start)
         return out
 
     def rmse(self, c1, c2):
@@ -813,7 +830,7 @@ class Benchmarker():
         rmse : float
             The RMSE between c1 and c2.
         """
-        return np.sqrt(np.mean((c1 - c2)**2))
+        return np.sqrt(np.mean((c1 - c2) ** 2))
 
     def evaluate(self, parameters):
         """
