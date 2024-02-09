@@ -9,6 +9,7 @@ import ionbench
 
 class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
+        self.tmax = None
         self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
@@ -23,7 +24,7 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.set_tolerance(1e-9, 1e-9)
-        self.freq = 0.5 #Timestep in data between points
+        self.freq = 0.5  # Timestep in data between points
         super().__init__()
 
     def sample(self, n=1):
@@ -43,7 +44,8 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
         """
         params = [None] * n
         for i in range(n):
-            params[i] = self.input_parameter_space(self.defaultParams * np.random.uniform(0.5, 1.5, self.n_parameters()))
+            params[i] = self.input_parameter_space(
+                self.defaultParams * np.random.uniform(0.5, 1.5, self.n_parameters()))
         if n == 1:
             return params[0]
         else:
@@ -59,7 +61,7 @@ class HH_Benchmarker(Staircase_Benchmarker):
     """
     The Hodgkin-Huxley IKr Staircase benchmarker.
 
-    The benchmarker uses the Beattie et al 2017 IKr Hodgkin-Huxley model using the staircase protocol.
+    The benchmarker uses the Beattie et al. 2017 IKr Hodgkin-Huxley model using the staircase protocol.
 
     Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method.
     """
@@ -72,10 +74,16 @@ class HH_Benchmarker(Staircase_Benchmarker):
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
-        self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2] * np.exp(-p[3] * V), 'negative'), (lambda p, V:p[4] * np.exp(p[5] * V), 'positive'), (lambda p, V:p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
+        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
+                               (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
+                               (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
+                               (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='membrane.V')
+        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'],
+                                                      parameters=[self._paramContainer + '.p' + str(i + 1) for i in
+                                                                  range(self.n_parameters())], current=self._outputName,
+                                                      vm='membrane.V')
         super().__init__()
         print('Benchmarker initialised')
 
@@ -84,7 +92,7 @@ class MM_Benchmarker(Staircase_Benchmarker):
     """
     The Markov IKr Staircase benchmarker.
 
-    The benchmarker uses the Fink et al 2008 IKr Markov model using the staircase protocol.
+    The benchmarker uses the Fink et al. 2008 IKr Markov model using the staircase protocol.
 
     Its parameters are specified as scaling factors, so start at a vector of all ones, or sample from the benchmarker.sample() method.
     """
@@ -96,11 +104,23 @@ class MM_Benchmarker(Staircase_Benchmarker):
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
-        self.defaultParams = np.array([0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399, 0.04150, 0.0312, 0.024])
-        self._rateFunctions = [(lambda p, V:p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V:p[2], 'independent'), (lambda p, V:p[3] * np.exp(p[4] * V), 'positive'), (lambda p, V:p[5] * np.exp(p[6] * V), 'positive'), (lambda p, V:p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V:p[9], 'independent'), (lambda p, V:p[10] * np.exp(-p[11] * V), 'negative'), (lambda p, V:p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
+        self.defaultParams = np.array(
+            [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
+             0.04150, 0.0312, 0.024])
+        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V: p[2], 'independent'),
+                               (lambda p, V: p[3] * np.exp(p[4] * V), 'positive'),
+                               (lambda p, V: p[5] * np.exp(p[6] * V), 'positive'),
+                               (lambda p, V: p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V: p[9], 'independent'),
+                               (lambda p, V: p[10] * np.exp(-p[11] * V), 'negative'),
+                               (lambda p, V: p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Or4', 'Ir5']], parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())], current=self._outputName, vm='Environment.V')
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in
+                                                                                        ['Cr1', 'Cr2', 'Cr3', 'Or4',
+                                                                                         'Ir5']],
+                                                              parameters=[self._paramContainer + '.p' + str(i + 1) for i
+                                                                          in range(self.n_parameters())],
+                                                              current=self._outputName, vm='Environment.V')
         super().__init__()
         print('Benchmarker initialised')
 
