@@ -252,7 +252,7 @@ class Loewe(Problem):
 
 
 class Test_Moreno(Problem):
-    bm = ionbench.problems.moreno2016.ina()
+    bm = ionbench.problems.moreno2016.INa()
     bm.plotter = False
     costBound = 1e-4
 

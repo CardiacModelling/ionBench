@@ -7,28 +7,54 @@ import csv
 import warnings
 
 
-class ina(ionbench.benchmarker.Benchmarker):
+class INa(ionbench.benchmarker.Benchmarker):
     """
     The Moreno 2016 INa benchmarker.
 
-    The benchmarker uses the model from Moreno et al 2016 with a step protocol used to calculated summary curves which are then used for fitting.
+    The benchmarker uses the model from Moreno et al. 2016 with a step protocol used to calculated summary curves which are then used for fitting.
 
-    Its parameters are specified as reported in Moreno et al 2016 with the true parameters being the same as the default and the center of the sampling distribution.
+    Its parameters are specified as reported in Moreno et al. 2016 with the true parameters being the same as the default and the center of the sampling distribution.
     """
 
-    def __init__(self, sensitivities = False):
+    def __init__(self, sensitivities=False):
         print('Initialising Moreno 2016 INa benchmark')
         self._name = "moreno2016.ina"
+        self.tmax = None
+        self._logTimes = None
+        self._ssiBounds = None
+        self._actBounds = None
+        self._rfiBounds = None
+        self._rudbBounds = None
+        self._tauBounds = None
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._outputName = 'ina.INa'
         self._paramContainer = 'ina'
         self.paramSpaceWidth = 25  # 5, 10, or 25
-        self.defaultParams = np.array([7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771, 2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
-        self._rateFunctions = [(lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'), (lambda p, V: p[2] / (p[0] * np.exp(-V / p[1])), 'negative'), (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])), 'negative'), (lambda p, V: 1 / (p[4] * np.exp(V / p[5])), 'positive'), (lambda p, V: p[6] / (p[4] * np.exp(V / p[5])), 'positive'), (lambda p, V: p[7] / (p[4] * np.exp(V / p[5])), 'positive'), (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'), (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'), (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[8] * np.exp(-V / p[9]) / (p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])), 'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'), (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative')]  # Used for rate bounds
+        self.defaultParams = np.array(
+            [7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771,
+             2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
+        self._rateFunctions = [(lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'),
+                               (lambda p, V: p[2] / (p[0] * np.exp(-V / p[1])), 'negative'),
+                               (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])), 'negative'),
+                               (lambda p, V: 1 / (p[4] * np.exp(V / p[5])), 'positive'),
+                               (lambda p, V: p[6] / (p[4] * np.exp(V / p[5])), 'positive'),
+                               (lambda p, V: p[7] / (p[4] * np.exp(V / p[5])), 'positive'),
+                               (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'),
+                               (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'),
+                               (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (
+                               lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[
+                                   8] * np.exp(-V / p[9]) / (
+                                                        p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
+                               'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
+                               (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
-        parameters=[self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o', 'is']], parameters=parameters, current=self._outputName, vm='membrane.V')
+        parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in
+                                                                                        ['ic3', 'ic2', 'if', 'c3', 'c2',
+                                                                                         'c1', 'o', 'is']],
+                                                              parameters=parameters, current=self._outputName,
+                                                              vm='membrane.V')
         self.sim = myokit.lib.markov.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.sensitivityCalc = sensitivities
         if self.sensitivityCalc:
@@ -37,15 +63,15 @@ class ina(ionbench.benchmarker.Benchmarker):
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
         else:
             self.simSens = None
-        self.freq = 0.5 #Timestep in data between points
+        self.freq = 0.5  # Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
-        self.weights = self.weights/np.sum(self.weights)
+        self.weights = self.weights / np.sum(self.weights)
         super().__init__()
         print('Benchmarker initialised')
 
     def sample(self, n=1):
         """
-        Sample parameters for the Moreno 2016 problems. The sampling width can be changed by setting bm.paramSpaceWidth. The values used in Moreno et al 2016 are 5, 10, and 25. The default used is 5.
+        Sample parameters for the Moreno 2016 problems. The sampling width can be changed by setting bm.paramSpaceWidth. The values used in Moreno et al. 2016 are 5, 10, and 25. The default used is 5.
 
         Parameters
         ----------
@@ -62,7 +88,8 @@ class ina(ionbench.benchmarker.Benchmarker):
         for i in range(n):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
-                param[j] = self.defaultParams[j] * np.random.uniform(1 - self.paramSpaceWidth / 100, 1 + self.paramSpaceWidth / 100)
+                param[j] = self.defaultParams[j] * np.random.uniform(1 - self.paramSpaceWidth / 100,
+                                                                     1 + self.paramSpaceWidth / 100)
             params[i] = self.input_parameter_space(param)
         if n == 1:
             return params[0]
@@ -71,12 +98,12 @@ class ina(ionbench.benchmarker.Benchmarker):
 
     def protocol(self):
         """
-        Add the protocol from Moreno et al 2016. This is a series of steps, used for forming the summary statistic curves. This also sets the timepoints that need to be recorded to evaluate these summary statistics.
+        Add the protocol from Moreno et al. 2016. This is a series of steps, used for forming the summary statistic curves. This also sets the time points that need to be recorded to evaluate these summary statistics.
 
         Returns
         -------
-        p : myokit.protocol
-            A myokit.protocol for the voltage clamp protocol from Loewe et al 2016.
+        p : myokit.Protocol
+            A myokit.Protocol for the voltage clamp protocol from Moreno et al. 2016.
 
         """
         # Setup
@@ -119,8 +146,9 @@ class ina(ionbench.benchmarker.Benchmarker):
         # Track start times
         protocolStartTimes.append(newProtocol.characteristic_time())
         # Create protocol
-        #dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 3000, 5000, 7500, 10000]
-        dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000] #Cut short since larger dt all round to 1 in data so remaining points will be most informative
+        # dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 3000, 5000, 7500, 10000]
+        dt = [1, 5, 10, 25, 50, 100, 150, 250, 500,
+              1000]  # Cut short since larger dt all round to 1 in data so remaining points will be most informative
         vsteps = [-100, -10, -100, -10] * len(dt) + [-100]
         times = []
         for i in range(len(dt)):
@@ -204,7 +232,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         for i in measurementWindows:
             if i[-1] == 'act':
                 self._logTimes.append(i[0])
-                self._actBounds.append(len(self._logTimes)-1)
+                self._actBounds.append(len(self._logTimes) - 1)
             else:
                 lb = len(self._logTimes)
                 self._logTimes += list(np.arange(i[0], i[1], 0.005))
@@ -221,14 +249,29 @@ class ina(ionbench.benchmarker.Benchmarker):
         return newProtocol
 
     def solve_with_sensitivities(self, times):
+        """
+        Overrides Benchmarker.solve_with_sensitivities() in order to calculate sensitivities of summary statistics rather than current.
+        Parameters
+        ----------
+        times : list
+            Unused. Would be used to specify a list of times at which to record the model but the Moreno problem does not use that. Only kept here to ensure compatibility with the other problems.
+
+        Returns
+        -------
+        curr : numpy array
+            The summary statistics of the solved current.
+        sens : numpy array
+            The summary statistic sensitivities of the solved current.
+        """
         log, sens = self.simSens.run(self.tmax + 1, log_times=self._logTimes)
         curr = np.array(log[self._outputName])
         sens = np.array(sens)
         # Adjust sens to emulate moreno summary statistics
         sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
         for i in range(self.n_parameters()):
-            step = 1e-5*self.defaultParams[i]
-            sens_SS[:,0,i] = (self.sum_stats(curr + step*sens[:,0,i])-self.sum_stats(curr - step*sens[:,0,i]))/(2*step)
+            step = 1e-5 * self.defaultParams[i]
+            sens_SS[:, 0, i] = (self.sum_stats(curr + step * sens[:, 0, i]) - self.sum_stats(
+                curr - step * sens[:, 0, i])) / (2 * step)
         curr = self.sum_stats(curr)
         sens = sens_SS
         return curr, sens
@@ -240,7 +283,7 @@ class ina(ionbench.benchmarker.Benchmarker):
         Parameters
         ----------
         times : list or numpy array
-            Unneccessary for Moreno 2016. Only kept in since it will be passed in as an input by the main Benchmarker methods.
+            Unnecessary for Moreno 2016. Only kept in since it will be passed in as an input by the main Benchmarker methods.
         continueOnError : bool, optional
             If continueOnError is True, any errors that occur during solving the model will be ignored and an infinite output will be given. The default is True.
 
@@ -254,15 +297,15 @@ class ina(ionbench.benchmarker.Benchmarker):
             try:
                 # Run a simulation
                 log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-                #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
-                return self.sum_stats(np.array(log[self._outputName],dtype='float64'))
+                # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
+                return self.sum_stats(np.array(log[self._outputName], dtype='float64'))
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
-                return np.array([np.inf] * len(self.data),dtype='float64')
+                return np.array([np.inf] * len(self.data), dtype='float64')
         else:
             log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-            #log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting outputName only works for ODE sims, not analytical
-            return self.sum_stats(np.array(log[self._outputName]),dtype='float64')
+            # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting outputName only works for ODE sims, not analytical
+            return self.sum_stats(np.array(log[self._outputName], dtype='float64'))
 
     def rmse(self, c1, c2):
         """
@@ -280,11 +323,11 @@ class ina(ionbench.benchmarker.Benchmarker):
         rmse : float
             The weighted RMSE between c1 and c2.
         """
-        return np.sqrt(np.average((c1 - c2)**2, weights=self.weights))
+        return np.sqrt(np.average((c1 - c2) ** 2, weights=self.weights))
 
     def sum_stats(self, inaOut):
         """
-        Runs the model to generate the Moreno et al 2016 summary curves. The points on these summary curves are then returned.
+        Runs the model to generate the Moreno et al. 2016 summary curves. The points on these summary curves are then returned.
         
         Parameters
         ----------
@@ -296,7 +339,7 @@ class ina(ionbench.benchmarker.Benchmarker):
             A list of points on summary curves.
 
         """
-        #Flip sign of current for max current calculations
+        # Flip sign of current for max current calculations
         inaOut = -inaOut
 
         ssi = [-1] * 9
@@ -324,18 +367,21 @@ class ina(ionbench.benchmarker.Benchmarker):
         tau = [-1] * 9
         for i in range(len(tau)):
             peak = max(inaOut[self._tauBounds[i][0]:self._tauBounds[i][1]])
-            for j in range(self._tauBounds[i][1]-self._tauBounds[i][0]):
+            for j in range(self._tauBounds[i][1] - self._tauBounds[i][0]):
                 current = inaOut[self._tauBounds[i][0] + j]
                 if current == peak:
                     timeToPeak = self._logTimes[self._tauBounds[i][0] + j]
-                    tau[i] = np.interp(np.abs(peak/2), np.abs(np.flip(inaOut[self._tauBounds[i][0]+j:self._tauBounds[i][1]])), np.flip(self._logTimes[self._tauBounds[i][0]+j:self._tauBounds[i][1]]))-timeToPeak
+                    tau[i] = np.interp(np.abs(peak / 2),
+                                       np.abs(np.flip(inaOut[self._tauBounds[i][0] + j:self._tauBounds[i][1]])),
+                                       np.flip(self._logTimes[
+                                               self._tauBounds[i][0] + j:self._tauBounds[i][1]])) - timeToPeak
                     break
         return np.array(ssi + act + rfi + tau)
 
 
 def generate_data():
     """
-    Generate the data files for the Moreno 2016 benchmarker problems. The true parameters are the same as the deafult for these benchmark problems.
+    Generate the data files for the Moreno 2016 benchmarker problems. The true parameters are the same as the default for this benchmark problem.
 
     Parameters
     ----------
@@ -346,7 +392,7 @@ def generate_data():
     None.
 
     """
-    bm = ina()
+    bm = INa()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
