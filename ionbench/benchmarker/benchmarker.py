@@ -442,9 +442,10 @@ class Benchmarker():
         if self.sensitivityCalc:
             self.simSens.reset()
         self.tracker = Tracker(self._trueParams)
-        self.log_transform([False]*self.n_parameters())
-        self._useScaleFactors = False
-        self._bounded = False
+        if fullReset:
+            self.log_transform([False]*self.n_parameters())
+            self._useScaleFactors = False
+            self._bounded = False
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
