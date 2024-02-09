@@ -7,7 +7,7 @@ import myokit.lib.hh
 import ionbench
 
 
-class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
+class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.tmax = None
         self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
@@ -57,7 +57,7 @@ class Staircase_Benchmarker(ionbench.benchmarker.Benchmarker):
         return protocol
 
 
-class HH_Benchmarker(Staircase_Benchmarker):
+class HH(StaircaseBenchmarker):
     """
     The Hodgkin-Huxley IKr Staircase benchmarker.
 
@@ -88,7 +88,7 @@ class HH_Benchmarker(Staircase_Benchmarker):
         print('Benchmarker initialised')
 
 
-class MM_Benchmarker(Staircase_Benchmarker):
+class MM(StaircaseBenchmarker):
     """
     The Markov IKr Staircase benchmarker.
 
@@ -141,9 +141,9 @@ def generate_data(modelType):
     """
     modelType = modelType.upper()
     if modelType == 'HH':
-        bm = HH_Benchmarker()
+        bm = HH()
     elif modelType == 'MM':
-        bm = MM_Benchmarker()
+        bm = MM()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
     out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)

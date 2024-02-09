@@ -11,7 +11,7 @@ def sub_dict(d, keys):
 
 class Test_scipy:
     # Check all scipy optimisers run and improve cost compared to x0
-    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    bm = ionbench.problems.staircase.HH(sensitivities=True)
     bm._useScaleFactors = True  # Helps the stability of conjugate GD (avoiding big steps which lead to parameters that result in failed model solves)
     bm.plotter = False
 
@@ -42,7 +42,7 @@ class Test_scipy:
 
 class Test_pints:
     # Check all pints optimisers run and improve cost compared to x0
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
     bm.plotter = False
 
     bmTest = ionbench.problems.test.Test()
@@ -75,7 +75,7 @@ class Test_pints:
 
 class Test_external:
     # Check all external optimisers run
-    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    bm = ionbench.problems.staircase.HH(sensitivities=True)
     bm._useScaleFactors = True
     bm.plotter = False
 

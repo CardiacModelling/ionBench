@@ -6,7 +6,7 @@ import os
 import pandas
 import re
 
-bm = ionbench.problems.staircase.HH_Benchmarker()
+bm = ionbench.problems.staircase.HH()
 with open(os.path.join(os.getcwd(),'resultsFile.csv'), 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     titles = ['Optimiser Name', 'Mod Num', 'Mod Name']

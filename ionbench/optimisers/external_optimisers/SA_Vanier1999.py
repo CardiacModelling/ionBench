@@ -233,7 +233,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
     run(bm, maxIter=1000, debug=True, **mod.kwargs)

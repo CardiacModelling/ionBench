@@ -2,7 +2,7 @@ import ionbench
 import numpy as np
 import importlib
 
-bm = ionbench.problems.staircase.MM_Benchmarker()
+bm = ionbench.problems.staircase.MM()
 for app in ionbench.APP_SCIPY:
     try:
         bm.tracker.load(f"{app['module']}modNum{app['modNum']}_run4.pickle")

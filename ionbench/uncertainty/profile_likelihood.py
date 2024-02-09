@@ -137,9 +137,9 @@ def run(bm, variations, backwardPass = False, filename=''):
 
 def plot_profile_likelihood(modelType, numberToPlot, debug=False):
     if modelType == 'hh':
-        bm = ionbench.problems.staircase.HH_Benchmarker()
+        bm = ionbench.problems.staircase.HH()
     elif modelType == 'mm':
-        bm = ionbench.problems.staircase.MM_Benchmarker()
+        bm = ionbench.problems.staircase.MM()
     elif modelType == 'ikr':
         bm = ionbench.problems.loewe2016.ikr()
     elif modelType == 'ikur':

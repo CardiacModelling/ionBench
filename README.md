@@ -56,7 +56,7 @@ If you want to use ***ionBench***, check out the __introduction__ and __tutorial
 The intended workflow for using the benchmarker is to generate a benchmarker object, setup the optimisers modification and apply it to the benchmarker, and pass the benchmarker into the optimisation algorithm to evaluate. All optimisers should accept a single benchmarker as input with all other inputs being optional. 
 ```
 import ionbench
-bm = ionbench.problems.staircase.HH_Benchmarker()
+bm = ionbench.problems.staircase.HH()
 modification = ionbench.optimisers.pints_optimisers.cmaes_pints.get_modification()
 modification.apply(bm)
 optimisedParameters = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm)

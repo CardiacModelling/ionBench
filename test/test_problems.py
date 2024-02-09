@@ -329,13 +329,13 @@ class Test_Moreno(Problem):
 
 
 class Test_HH(Staircase):
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
     bm.plotter = False
     costBound = 0.04  # Accounts for noise
 
 
 class Test_MM(Staircase):
-    bm = ionbench.problems.staircase.MM_Benchmarker()
+    bm = ionbench.problems.staircase.MM()
     bm.plotter = False
     costBound = 0.02  # Accounts for noise
 

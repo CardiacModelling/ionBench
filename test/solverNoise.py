@@ -15,10 +15,10 @@ def solver_noise(bm, nPoints, intervalWidth):
     plt.title(f'Solver noise for {bm._name}')
     plt.show()
 
-bm = ionbench.problems.staircase.HH_Benchmarker()
+bm = ionbench.problems.staircase.HH()
 solver_noise(bm, 100, 1e-6)
 
-bm = ionbench.problems.staircase.MM_Benchmarker()
+bm = ionbench.problems.staircase.MM()
 solver_noise(bm, 100, 1e-7)
 
 bm = ionbench.problems.loewe2016.ikr()

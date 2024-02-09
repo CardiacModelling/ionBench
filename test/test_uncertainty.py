@@ -9,7 +9,7 @@ def test_profile_likelihood(monkeypatch):
         return np.linspace(1 - x, 1 + x, 3)
     monkeypatch.setattr(plt, 'show', lambda: None)
     variations = [var(0.2)] * 9  # aVar = 0.2, bVar = 0.4
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
     ionbench.uncertainty.profile_likelihood.run(bm, variations)
 
 

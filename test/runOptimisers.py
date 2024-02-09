@@ -1,7 +1,7 @@
 import ionbench
 import importlib
 
-bm = ionbench.problems.staircase.HH_Benchmarker()
+bm = ionbench.problems.staircase.HH()
 initParams = bm.sample(n=5)
 print(initParams)
 for app in ionbench.APP_UNIQUE:

@@ -3,7 +3,7 @@ import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
 
-bm = ionbench.problems.staircase.MM_Benchmarker()
+bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
 data = bm.data
@@ -43,7 +43,7 @@ import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
 
-bm = ionbench.problems.staircase.MM_Benchmarker()
+bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
 #Cant use simulate to get data as current data is different length to new data. Will need to use solve_model and add in the extra bits
@@ -89,7 +89,7 @@ import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
 
-bm = ionbench.problems.staircase.MM_Benchmarker()
+bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
 bm.freq = 0.1
@@ -115,7 +115,7 @@ import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
 
-bm = ionbench.problems.staircase.MM_Benchmarker(sensitivities=True)
+bm = ionbench.problems.staircase.MM(sensitivities=True)
 p = bm.defaultParams
 # Get sensitivities
 bm.simSens.reset()

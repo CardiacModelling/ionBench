@@ -5,7 +5,7 @@ import pytest
 
 
 class Test_Modifications:
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
 
     @pytest.mark.cheap
     def test_bounds(self):

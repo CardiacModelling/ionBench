@@ -255,7 +255,7 @@ def get_modification(modNum=1):
 
 if __name__ == '__main__':
     groups = [[0, 2, 4, 6], [1, 3, 5, 7], [8]]
-    bm = ionbench.problems.staircase.HH_Benchmarker()
+    bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
     run(bm, groups=groups, debug=True, gmin=0.01, **mod.kwargs)

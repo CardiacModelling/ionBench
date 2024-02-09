@@ -80,7 +80,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH_Benchmarker(sensitivities=True)
+    bm = ionbench.problems.staircase.HH(sensitivities=True)
     mod = get_modification()
     mod.apply(bm)
     run(bm, maxIter=50, debug=True, **mod.kwargs)
