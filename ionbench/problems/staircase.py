@@ -52,6 +52,13 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             return params
 
     def protocol(self):
+        """
+        Gets the staircase voltage protocol from the loaded log and returns it. Setting self.tmax to the length of the protocol.
+        Returns
+        -------
+        protocol : myokit.Protocol
+            The staircase protocol.
+        """
         protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
         self.tmax = self._log.time()[-1]
         return protocol
@@ -74,10 +81,10 @@ class HH(StaircaseBenchmarker):
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
-        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
-                               (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
-                               (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
-                               (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
+        self._rateFunctions = [(lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
+                               (lambda p, v: p[2] * np.exp(-p[3] * v), 'negative'),
+                               (lambda p, v: p[4] * np.exp(p[5] * v), 'positive'),
+                               (lambda p, v: p[6] * np.exp(-p[7] * v), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'],
@@ -107,12 +114,14 @@ class MM(StaircaseBenchmarker):
         self.defaultParams = np.array(
             [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
              0.04150, 0.0312, 0.024])
-        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V: p[2], 'independent'),
-                               (lambda p, V: p[3] * np.exp(p[4] * V), 'positive'),
-                               (lambda p, V: p[5] * np.exp(p[6] * V), 'positive'),
-                               (lambda p, V: p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V: p[9], 'independent'),
-                               (lambda p, V: p[10] * np.exp(-p[11] * V), 'negative'),
-                               (lambda p, V: p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
+        self._rateFunctions = [(lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
+                               (lambda p, v: p[2], 'independent'),
+                               (lambda p, v: p[3] * np.exp(p[4] * v), 'positive'),
+                               (lambda p, v: p[5] * np.exp(p[6] * v), 'positive'),
+                               (lambda p, v: p[7] * np.exp(-p[8] * v), 'negative'),
+                               (lambda p, v: p[9], 'independent'),
+                               (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
+                               (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in
@@ -142,7 +151,7 @@ def generate_data(modelType):
     modelType = modelType.upper()
     if modelType == 'HH':
         bm = HH()
-    elif modelType == 'MM':
+    else:
         bm = MM()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
