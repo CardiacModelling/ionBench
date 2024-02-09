@@ -3,7 +3,7 @@ import numpy as np
 
 # Michael's approach
 bmHH = ionbench.problems.staircase.HH()
-bmLoewe = ionbench.problems.loewe2016.ikr()
+bmLoewe = ionbench.problems.loewe2016.IKr()
 
 # Log transform applicable rates
 bmHH.logTransform([True, False] * 4 + [False])
@@ -42,7 +42,7 @@ for i in range(5):
 
 # Loewe et al 2016 approach
 bmHH = ionbench.problems.staircase.HH()
-bmLoewe = ionbench.problems.loewe2016.ikr()
+bmLoewe = ionbench.problems.loewe2016.IKr()
 
 # Bounds on parameters
 lb = []

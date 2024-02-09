@@ -341,13 +341,13 @@ class Test_MM(Staircase):
 
 
 class Test_Loewe_IKr(Loewe):
-    bm = ionbench.problems.loewe2016.ikr()
+    bm = ionbench.problems.loewe2016.IKr()
     bm.plotter = False
     costBound = 0
 
 
 class Test_Loewe_IKur(Loewe):
-    bm = ionbench.problems.loewe2016.ikur()
+    bm = ionbench.problems.loewe2016.IKur()
     bm.plotter = False
     costBound = 0
 

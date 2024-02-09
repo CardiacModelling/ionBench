@@ -16,5 +16,5 @@ def test_profile_likelihood(monkeypatch):
 def test_fim(monkeypatch):
     # Calculate fim. Only checks for crashes/errors
     monkeypatch.setattr(plt, 'show', lambda: None)
-    bm = ionbench.problems.loewe2016.ikr()
+    bm = ionbench.problems.loewe2016.IKr()
     ionbench.uncertainty.fim.run(bm, sigma=1, preoptimise=True, ftol=1e-9, step=1e-6, buffer=1e-8)

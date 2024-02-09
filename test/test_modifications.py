@@ -106,7 +106,7 @@ class Test_Modifications:
     def test_other_problems(self):
         # Basic check for another benchmarker
         mod = modification.Modification(logTransform='standard', bounds='sampler', scaleFactors='On')
-        newbm = ionbench.problems.loewe2016.ikr()
+        newbm = ionbench.problems.loewe2016.IKr()
         mod.apply(newbm)
         assert newbm._useScaleFactors
         assert all(np.array(newbm._logTransformParams) == np.array(newbm.standardLogTransform))

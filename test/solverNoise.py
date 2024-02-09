@@ -21,8 +21,8 @@ solver_noise(bm, 100, 1e-6)
 bm = ionbench.problems.staircase.MM()
 solver_noise(bm, 100, 1e-7)
 
-bm = ionbench.problems.loewe2016.ikr()
+bm = ionbench.problems.loewe2016.IKr()
 solver_noise(bm, 100, 1e-15)
 
-bm = ionbench.problems.loewe2016.ikur()
+bm = ionbench.problems.loewe2016.IKur()
 solver_noise(bm, 100, 1e-15)
