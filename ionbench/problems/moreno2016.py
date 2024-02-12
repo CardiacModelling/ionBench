@@ -1,3 +1,7 @@
+"""
+Contains the INa benchmark problem based on the problem from Moreno et al. 2016, which some changes to the voltage clamp protocol for speeding up model evaluation. This inherits from benchmarker.Benchmarker.
+generate_data() will generate the data the INa problem and store it in the data directory.
+"""
 import ionbench
 import myokit
 import myokit.lib.markov

@@ -1,3 +1,7 @@
+"""
+Contains the main Benchmarker class from which the benchmarker problems inherit the vast majority of their methods.
+Contains the Tracker class which is stored as an attribute in each benchmarker and managers tracking the performance metrics over an optimisation.
+"""
 import numpy as np
 import myokit
 import csv

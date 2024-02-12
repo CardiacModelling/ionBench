@@ -1,3 +1,7 @@
+"""
+Contains the test benchmarker problem. This inherits from benchmarker.Benchmarker but with many of the methods overwritten. It is used to test the optimisers are able to sufficiently optimise on a problem that is much quicker to solve.
+generate_data() will generate the data for test problem and store it in the data directory.
+"""
 import os
 import numpy as np
 import csv

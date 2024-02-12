@@ -1,3 +1,7 @@
+"""
+Contains the two benchmarker problems from Loewe et al. 2016, IKr and IKur. These both inherit from LoeweBenchmarker which itself inherits from benchmarker.Benchmarker.
+generate_data(modelType) will generate the data for either the IKr or IKur problem and store it in the data directory.
+"""
 import ionbench
 import myokit
 import myokit.lib.hh

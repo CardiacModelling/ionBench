@@ -1,3 +1,7 @@
+"""
+Contains the two staircase benchmarker problems, HH and MM. These both inherit from StaircaseBenchmarker which itself inherits from benchmarker.Benchmarker.
+generate_data(modelType) will generate the data for either the HH or MM problem and store it in the data directory.
+"""
 import os
 import numpy as np
 import csv
