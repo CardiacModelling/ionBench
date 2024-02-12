@@ -141,9 +141,11 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
     elif modelType == 'mm':
         bm = ionbench.problems.staircase.MM()
     elif modelType == 'ikr':
-    elif modelType == 'ikur':
         bm = ionbench.problems.loewe2016.IKr()
+    elif modelType == 'ikur':
         bm = ionbench.problems.loewe2016.IKur()
+    else:
+        bm = None
     bm._useScaleFactors = True
     ymin = np.inf
     ymax = 0
