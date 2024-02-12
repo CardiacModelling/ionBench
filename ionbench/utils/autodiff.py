@@ -1,9 +1,15 @@
+"""
+Functions for compatibility with MyGrad to allow automatic differentiation. Includes:
+    get_matrix_function() which returns a mygrad compatible version of the _matrix_function() in myokit markov models.
+    linalg_solve() which is a mygrad compatible matrix Ax=b equation solver.
+"""
 import myokit
 import numpy as np
 import mygrad as mg
 
+
 # =============================================================================
-# Functions for compatibility with MyGrad to allow automatic differention
+#
 # =============================================================================
 
 
@@ -17,12 +23,13 @@ import mygrad as mg
 # Copyright (c) 2020-2024 University of Nottingham. All rights reserved.
 # =============================================================================
 
+# noinspection PyProtectedMember,PyListCreation,PyUnboundLocalVariable,PyUnusedLocal
 def get_matrix_function(model):
     """
     Generates a MyGrad compatible _matrix_function for the automatic differentiation in the calculation of Markov model steady states. 
     Contains edits to swap out the numpy transition matrix with a MyGrad tensor.
     Removed any code that edits the model.
-    Some edits to allow the code to work outside of myokit.lib.markov
+    Some edits to allow the code to work outside myokit.lib.markov
     Unnecessary code for the matrix function has been commented out.
     """
     # Create mapping from states to index
@@ -147,6 +154,7 @@ def get_matrix_function(model):
 
     return local['matrix_function']
 
+
 def linalg_solve(A, B):
     """
     Solve the linear system Ax=B for x. Uses MyGrad tensors to ensure automatic differentiation works.
@@ -166,25 +174,25 @@ def linalg_solve(A, B):
     """
     x = mg.zeros(B.shape, dtype=np.double)
     n = B.size
-    l = list(range(n))
-    for row in range(n-1):
+    pivot = list(range(n))
+    for row in range(n - 1):
         # Partial pivoting
-        for i in range(row+1,n):
-            if np.abs(A[l[row],row]) < np.abs(A[l[i],row]):
-                l[row], l[i] = l[i], l[row]
+        for i in range(row + 1, n):
+            if np.abs(A[pivot[row], row]) < np.abs(A[pivot[i], row]):
+                pivot[row], pivot[i] = pivot[i], pivot[row]
         # Gaussian elimination
-        for i in range(row+1,n):
-            ratio = A[l[i],row]/A[l[row],row]
-            A[l[i],:] -= ratio*A[l[row],:]
-            B[l[i]] -= ratio*B[l[row]]
+        for i in range(row + 1, n):
+            ratio = A[pivot[i], row] / A[pivot[row], row]
+            A[pivot[i], :] -= ratio * A[pivot[row], :]
+            B[pivot[i]] -= ratio * B[pivot[row]]
     # Zero out any rounding errors in A
     for row in range(n):
         for i in range(row):
-            A[l[row],i] = 0
-    # Backsubstitution
-    x[n-1] = B[l[n-1]]/A[l[n-1],n-1]
-    
-    for row in range(n-2,-1,-1):
-        summ = A[l[row],:]@x
-        x[row] = (B[l[row]]-summ)/A[l[row],row]
+            A[pivot[row], i] = 0
+    # Back substitution
+    x[n - 1] = B[pivot[n - 1]] / A[pivot[n - 1], n - 1]
+
+    for row in range(n - 2, -1, -1):
+        summ = A[pivot[row], :] @ x
+        x[row] = (B[pivot[row]] - summ) / A[pivot[row], row]
     return x
