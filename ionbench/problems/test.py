@@ -57,7 +57,7 @@ class Test(ionbench.benchmarker.Benchmarker):
     def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
         # Calculate function at times for parameters and return
         parameters = self.original_parameter_space(parameters)
-        if not self.in_bounds(parameters):
+        if not self.in_parameter_bounds(parameters):
             return [np.inf for _ in times]
         return scipy.stats.norm(parameters[0], parameters[1]).pdf(times)
 
@@ -75,7 +75,7 @@ class Test(ionbench.benchmarker.Benchmarker):
             parameters = np.copy(parameters)
 
         # Abort solving if the parameters are out of bounds
-        if not self.in_bounds(parameters):
+        if not self.in_parameter_bounds(parameters):
             warnings.warn(
                 'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
             error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))

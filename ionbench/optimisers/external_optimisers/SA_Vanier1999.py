@@ -36,7 +36,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
 
     def wrap_around_boundaries(xOld):
         x = np.copy(xOld)
-        if not bm.in_bounds(bm.original_parameter_space(x)):
+        if not bm.in_parameter_bounds(bm.original_parameter_space(x)):
             for i in range(bm.n_parameters()):
                 ub = bm.input_parameter_space(bm.ub)
                 lb = bm.input_parameter_space(bm.lb)

@@ -321,7 +321,7 @@ class Benchmarker:
 
         """
         p = np.copy(parameters)
-        if not self.in_bounds(parameters):
+        if not self.in_parameter_bounds(parameters):
             lb = self.input_parameter_space(self.lb)
             ub = self.input_parameter_space(self.ub)
             for i in range(self.n_parameters()):
@@ -423,9 +423,9 @@ class Benchmarker:
 
         return derivs
 
-    def in_bounds(self, parameters):
+    def in_parameter_bounds(self, parameters):
         """
-        Checks if parameters are inside any bounds. If benchmarker._bounded = False, then it always returns True.
+        Checks if parameters are inside any rectangular bounds. If benchmarker._bounded = False, then it always returns True.
 
         Parameters
         ----------
@@ -593,7 +593,7 @@ class Benchmarker:
             self.use_sensitivities()
 
         # Abort solving if the parameters are out of bounds
-        if not self.in_bounds(parameters):
+        if not self.in_parameter_bounds(parameters):
             failed = True
             incrementSolveCounter = False
             warnings.warn(
@@ -837,7 +837,7 @@ class Benchmarker:
         self.sim.reset()
 
         # Abort solving if the parameters are out of bounds
-        if not self.in_bounds(parameters):
+        if not self.in_parameter_bounds(parameters):
             self.tracker.update(parameters, incrementSolveCounter=False)
             return [np.inf] * len(self.data)
 

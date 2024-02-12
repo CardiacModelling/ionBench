@@ -217,7 +217,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
         for p in particleList[bm.n_parameters() + 1:]:
             p.position += p.velocity
             # Enfore bounds by clamping
-            if not bm.in_bounds(bm.original_parameter_space(p.position)):
+            if not bm.in_parameter_bounds(bm.original_parameter_space(p.position)):
                 for i in range(bm.n_parameters()):
                     if p.position[i] > ub[i]:
                         p.position[i] = ub[i]
