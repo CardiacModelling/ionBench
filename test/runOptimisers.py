@@ -12,7 +12,7 @@ for app in ionbench.APP_UNIQUE:
         mod.apply(bm)
         x0 = [bm.input_parameter_space(x) for x in initParams]
         kwargs = app['kwargs'] | mod.kwargs
-        ionbench.multistart(opt.run, bm, x0, app['module'] + 'modNum' + str(app['modNum']), **kwargs)
+        ionbench.utils.multistart(opt.run, bm, x0, app['module'] + 'modNum' + str(app['modNum']), **kwargs)
     except Exception as e:
         print(e)
         print(f"Approach {app['module']} with modNum {app['modNum']} failed. Will skip and keep going to get as many results as possible")

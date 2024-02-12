@@ -1,3 +1,8 @@
+"""
+Contains the multistart function (referenced as ionbench.multistart) which can perform multiple runs of the same optimisation function starting at different initial conditions.
+"""
+
+
 def multistart(opt, bm, initParams, filename, **kwargs):
     """
     Run an optimiser multiple times from different starting location.
