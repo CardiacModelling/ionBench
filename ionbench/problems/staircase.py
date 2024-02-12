@@ -130,7 +130,7 @@ class MM(StaircaseBenchmarker):
                                (lambda p, v: p[9], 'independent'),
                                (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
                                (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative')]  # Used for rate bounds
-        self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2
+        self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2 + [False]
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in
                                                                                         ['Cr1', 'Cr2', 'Cr3', 'Or4',
