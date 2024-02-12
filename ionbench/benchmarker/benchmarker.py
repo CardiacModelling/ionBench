@@ -242,6 +242,16 @@ class Benchmarker:
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self.defaultParams)  # Tracks the performance metrics
+        if not hasattr(self, 'data'):
+            self.data = None
+        if not hasattr(self, 'lb'):
+            self.lb = None
+        if not hasattr(self, 'ub'):
+            self.ub = None
+        if not hasattr(self, 'simSens'):
+            self.simSens = None
+        if not hasattr(self, 'sensitivityCalc'):
+            self.sensitivityCalc = None
 
     def load_data(self, dataPath=''):
         """
