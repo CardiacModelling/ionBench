@@ -13,6 +13,10 @@ import csv
 class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
         self.tmax = None
+        self.rateMin = 1.67e-5
+        self.rateMax = 1e3
+        self.vLow = None
+        self.vHigh = None
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
         self.standardLogTransform = [not i for i in self.additiveParams]
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
@@ -80,6 +84,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         for i in range(len(vsteps)):
             p.add_step(vsteps[i], durations[i])
         self.tmax = sum(durations)
+        self.vLow = min(vsteps)
+        self.vHigh = max(vsteps)
         return p
 
 

@@ -256,6 +256,14 @@ class Benchmarker:
             self.simSens = None
         if not hasattr(self, 'sensitivityCalc'):
             self.sensitivityCalc = None
+        if not hasattr(self, 'rateMin'):
+            self.rateMin = None
+        if not hasattr(self, 'rateMax'):
+            self.rateMax = None
+        if not hasattr(self, 'vLow'):
+            self.vLow = None
+        if not hasattr(self, 'vHigh'):
+            self.vHigh = None
 
     def load_data(self, dataPath=''):
         """
@@ -423,14 +431,16 @@ class Benchmarker:
 
         return derivs
 
-    def in_parameter_bounds(self, parameters):
+    def in_parameter_bounds(self, parameters, boundedCheck=True):
         """
-        Checks if parameters are inside any rectangular bounds. If benchmarker._bounded = False, then it always returns True.
+        Checks if parameters are inside any rectangular parameter bounds. If boundedCheck is True, then it will always return True if benchmarker._bounded = False.
 
         Parameters
         ----------
         parameters : list or numpy array
             Vector of parameters (in original parameter space) to check against the bounds.
+        boundedCheck : bool, optional
+            If True, and benchmarker._bounded=False, in_parameter_bounds will always return True. If False, it will ignore the value of bm._bounded and base the returned value only on the parameters and parameter bounds. The default is True.
 
         Returns
         -------
@@ -438,9 +448,47 @@ class Benchmarker:
             True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside the bounds.
 
         """
-        if self._bounded:
+        if self._bounded and boundedCheck:
             if any(parameters[i] < self.lb[i] or parameters[i] > self.ub[i] for i in range(self.n_parameters())):
                 return False
+        return True
+
+    def in_rate_bounds(self, parameters, boundedCheck=True):
+        """
+        Checks if rates are inside bounds. If boundedCheck is True, then it will always return True if benchmarker._bounded = False.
+
+        Parameters
+        ----------
+        parameters : list or numpy array
+            Vector of parameters (in original parameter space) to check against the bounds.
+        boundedCheck : bool, optional
+            If True, and benchmarker._bounded=False, in_rate_bounds will always return True. If False, it will ignore the value of bm._bounded and base the returned value only on the parameters and rate bounds. The default is True.
+
+        Returns
+        -------
+        bool
+            True if rates are inside the bounds or no bounds are specified, False if the rates are outside the bounds.
+
+        """
+        if not self._bounded and boundedCheck:
+            return True
+        for rateFunc, rateType in self._rateFunctions:
+            if rateType == 'positive':
+                # check kHigh is in bounds
+                k = rateFunc(parameters, self.vHigh)
+            elif rateType == 'negative':
+                # check kLow is in bounds
+                k = rateFunc(parameters, self.vLow)
+            elif rateType == 'independent':
+                # check rate in bounds
+                k = rateFunc(parameters, 0)  # Voltage doesn't matter
+            else:
+                raise RuntimeError(
+                    "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
+            if k < self.rateMin or k > self.rateMax:
+                return False
+
+        # All tests passed!
         return True
 
     def n_parameters(self):

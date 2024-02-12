@@ -250,6 +250,8 @@ class INa(ionbench.benchmarker.Benchmarker):
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb, ub])
         self._logTimes = np.array(self._logTimes)
+        self.vLow = min(newProtocol.levels())
+        self.vHigh = max(newProtocol.levels())
         return newProtocol
 
     def solve_with_sensitivities(self, times):
