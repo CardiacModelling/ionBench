@@ -20,7 +20,7 @@ pace = -80 [mV] bind pace
 V = engine.pace
     desc: membane potential
     in [mV]
-EK = if(Ki==0,1e100,R*T/F*log(Ko/Ki))
+EK = R*T/F*log(Ko/Ki)
     in [mV]
 Ko = 5 [mmol]
     in [mmol]
@@ -38,10 +38,8 @@ use membrane.V
 IKr = if(gkr2==0, 0, gkr * xr / (1 + exp((V+gkr1)/gkr2)) * (V - membrane.EK))
     in [A/F]
 dot(xr) = (inf - xr) / tau
-    inf = piecewise(xrm2==0,0,
-    1/(1+exp((V+xrm1)/xrm2))) in [1]
-    tau = if(xrkq10==0 or alphaxr==betaxr,1e100,
-    abs(1 [ms*mV] / ((alphaxr + betaxr)*xrkq10)))
+    inf = 1/(1+exp((V+xrm1)/xrm2)) in [1] #Steady state autodiff requires that there are no 'if()'s or 'piecewise()'s in the inf so can't catch xrm2==0
+    tau = abs(1 [ms*mV] / ((alphaxr + betaxr)*xrkq10))
     in [ms] #Given units don't match. Scaling factor introduced to make tau have units of ms rather than mV
     alphaxr = if(xra3==0 or xra2==V,-xra1*xra3,
     xra1*(V+xra2)/(1-exp((V+xra2)/xra3))) in [mV]
