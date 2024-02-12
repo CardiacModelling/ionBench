@@ -1,13 +1,20 @@
+"""
+Generates and plots profile likelihoods of benchmarker problems. Contains the class ProfileManager which masks a benchmarker but has a reduced parameter size. Contains the functions run(), which generates and saves the profile likelihoods, and plot_profile_likelihood(), which plots the saved results.
+"""
 import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
 
-class ProfileManager():
+class ProfileManager:
+    """
+    A middle-man for handling profile likelihood plots. This class acts as a wrapper for the benchmarker, such that the benchmarker always sees the full parameter vector, while the optimiser sees a reduced vector with one parameter missing.
+    Contains methods for n_parameters(), cost(), grad(), signed_error(), set_params(), sample(), and evaluate(), all of which handle the mapping between the full set of parameters and the reduced optimised set of parameters.
+    """
     def __init__(self, bm, fixedParam, fixedValue, x0):
         """
-        A middle-man for handling profile likelihood plots. This class acts as a wrapper for the benchmarker, such that the benchmarker always sees the full parameter vector, while the optimiser sees a reduced vector with one parameter missing.
+        Construct a ProfileManager.
 
         Parameters
         ----------
@@ -43,11 +50,11 @@ class ProfileManager():
         """
         return self.bm.cost(self.set_params(params))
 
-    def grad(self,params, **kwargs):
+    def grad(self, params, **kwargs):
         """
         ProfileManager wrapper for the benchmarker's .grad() method. 
         """
-        return np.delete(self.bm.grad(self.set_params(params), **kwargs),self.fixedParam,1)
+        return np.delete(self.bm.grad(self.set_params(params), **kwargs), self.fixedParam, 1)
 
     def signed_error(self, params):
         """
@@ -69,12 +76,13 @@ class ProfileManager():
 
     def evaluate(self, x):
         """
-        ProfileManager wrapper for the benchmarker's .evaluate() method. This method does nothing, but is neccessary since optimisers will attempt to call it.
+        ProfileManager wrapper for the benchmarker's .evaluate() method. This method does nothing, but is necessary since optimisers will attempt to call it.
         """
         pass
-    
 
-def run(bm, variations, backwardPass = False, filename=''):
+
+# noinspection PyUnboundLocalVariable
+def run(bm, variations, backwardPass=False, filename=''):
     """
     Generate a profile likelihood style plot, reporting the fitted cost as a function of each fixed parameter.
 
@@ -103,7 +111,7 @@ def run(bm, variations, backwardPass = False, filename=''):
         for j in range(len(variations[i])):
             bm.reset()
             if backwardPass:
-                varIndex = len(variations[i])-j-1
+                varIndex = len(variations[i]) - j - 1
             else:
                 varIndex = j
             var = variations[i][varIndex]
@@ -118,13 +126,14 @@ def run(bm, variations, backwardPass = False, filename=''):
                 try:
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                     pm.MLE = bm.defaultParams
-                    if pm.cost(out) >= 0.99*pm.cost(pm.sample()): #If optimised cost not significantly better than unoptimised from default rates
+                    if pm.cost(out) >= 0.99 * pm.cost(
+                            pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
                         pm.MLE = bm.defaultParams
                         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                 except Exception as e:
                     print(e)
                     out = pm.sample()
-                    
+
                 costs[varIndex] = pm.cost(out)
                 out = pm.set_params(out)
             print('Variation: ' + str(var))
@@ -136,6 +145,18 @@ def run(bm, variations, backwardPass = False, filename=''):
 
 
 def plot_profile_likelihood(modelType, numberToPlot, debug=False):
+    """
+    Plot profile likelihood plots based on the pickled data in the current working directory.
+
+    Parameters
+    ----------
+    modelType : string
+        Type of model in benchmarker. This is used to load the benchmarker (options are hh, mm, ikr, ikur) and as the filename to load the pickled data [modelType]_param[i].pickle for i in range(numberToPlot)
+    numberToPlot : int
+        The number of profile likelihood plots to create. Should not exceed the number of parameters in the model.
+    debug : bool, optional
+        If True, extra plots will be drawn to separate the forwards and backwards passes of the profile likelihood optimisation. The default is False.
+    """
     if modelType == 'hh':
         bm = ionbench.problems.staircase.HH()
     elif modelType == 'mm':
@@ -159,12 +180,12 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
                 costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
         except FileNotFoundError:
             pass
-        if np.max(costs[costs<np.inf]) > ymax:
-            ymax = np.max(costs[costs<np.inf])
-        if np.min(costs[costs>1e-15]) < ymin:
-            ymin = np.min(costs[costs>1e-15])
-    ymin = ymin/2
-    ymax = ymax*5
+        if np.max(costs[costs < np.inf]) > ymax:
+            ymax = np.max(costs[costs < np.inf])
+        if np.min(costs[costs > 1e-15]) < ymin:
+            ymin = np.min(costs[costs > 1e-15])
+    ymin /= 2
+    ymax *= 5
     for i in range(numberToPlot):
         with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
             variationsA, costsA = pickle.load(f)
@@ -177,19 +198,19 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
         except FileNotFoundError:
             pass
         plt.figure()
-        plt.semilogy(variations, costs, label = 'Optimised', zorder = 1)
+        plt.semilogy(variations, costs, label='Optimised', zorder=1)
         costs = np.zeros(len(variations))
         for j in range(len(variations)):
             p = bm.input_parameter_space(bm.defaultParams)
             p[i] = variations[j]
             costs[j] = bm.cost(p)
-        plt.semilogy(variations, costs, label = 'Unoptimised', zorder = 0)
+        plt.semilogy(variations, costs, label='Unoptimised', zorder=0)
         if debug:
-            plt.semilogy(variations, costsA, label = 'Forwards', zorder = 2, linestyle = 'dashed')
+            plt.semilogy(variations, costsA, label='Forwards', zorder=2, linestyle='dashed')
             try:
                 if len(variationsB) == len(variationsA):
-                    plt.semilogy(variations, costsB, label = 'Backwards', zorder = 3, linestyle = 'dotted')
-            except:
+                    plt.semilogy(variations, costsB, label='Backwards', zorder=3, linestyle='dotted')
+            except NameError:
                 pass
         plt.ylim(ymin, ymax)
         plt.title('Profile likelihood: ' + modelType)
