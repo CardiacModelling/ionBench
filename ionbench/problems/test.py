@@ -60,6 +60,11 @@ class Test(ionbench.benchmarker.Benchmarker):
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         # Calculate gradient wrt parameters
         # Undo any transforms
+        curr = None
+        sens = None
+        J = None
+        grad = None
+
         if inInputSpace:
             parameters = self.original_parameter_space(parameters)
         else:
