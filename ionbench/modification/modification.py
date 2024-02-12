@@ -1,15 +1,20 @@
+"""
+Contains the main Modification class and all the paper-specific modification subclasses.
+"""
 import ionbench
 import numpy as np
 
 
-class Modification():
+# noinspection PyProtectedMember
+class Modification:
     """
     Modifications provide a way to store some benchmarker settings and apply them to a range of benchmarkers. These settings include log-transforms, parameter bounds, and the use of scale factors. A single modification can be generated, and then applied to a range of benchmarkers. Once a Modification object is instantiated, its transforms and bounds can be applied to a benchmarker, bm, by calling modification.apply(bm)
     """
 
-    def __init__(self, name="", logTransform='None', bounds='None', scaleFactors='off', customLogTransform=None, customBounds=None, kwargs={}):
+    def __init__(self, name="", logTransform='None', bounds='None', scaleFactors='off', customLogTransform=None,
+                 customBounds=None, kwargs=None):
         """
-        Initialise an Modification object. Once an Modification is built, its setting can be applied to any benchmarker, bm, by calling modification.apply(bm)
+        Initialise a Modification object. Once a Modification is built, its setting can be applied to any benchmarker, bm, by calling modification.apply(bm)
 
         Parameters
         ----------
@@ -22,17 +27,19 @@ class Modification():
         scaleFactors : string, optional
             Setting for scale factors. Options are 'off' (default, scale factors won't be used), and 'on' (scale factors will be used, with the default parameters representing 1).
         customLogTransform : list, optional
-            A list of parameters to log transform. The list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be useable across different benchmarkers. Only required if logTransform = 'Custom'.
+            A list of parameters to log transform. The list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be usable across different benchmarkers. Only required if logTransform = 'Custom'.
         customBounds : list, optional
-            A list containing 2 elements, a list of lower bounds and a list of upper bounds. Each sub-list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be useable across different benchmarkers. Only required if bounds = 'Custom'.
+            A list containing 2 elements, a list of lower bounds and a list of upper bounds. Each sub-list should be the same length as the number of parameters in the benchmarker. This makes this option problem specific and will be unlikely to be usable across different benchmarkers. Only required if bounds = 'Custom'.
         kwargs : dict, optional
-            A dictionary of keyword arguements to be passed into an optimisers run function. The default is an empty dictionary.
+            A dictionary of keyword arguments to be passed into an optimisers run function. The default is None.
 
         Returns
         -------
         None.
 
         """
+        if kwargs is None:
+            kwargs = {}
         self.dict = {'log transform': logTransform, 'bounds': bounds, 'scale factors': scaleFactors}
         self.customLogTransform = customLogTransform
         self.customBounds = customBounds
@@ -88,7 +95,8 @@ class Modification():
         elif setting.lower() == 'custom':
             bm.log_transform(self.customLogTransform)
         else:
-            print("'" + setting + "' is not a valid option for log transforms. Please use either 'None', 'Standard', 'Full', or 'Custom'.")
+            print(
+                "'" + setting + "' is not a valid option for log transforms. Please use either 'None', 'Standard', 'Full', or 'Custom'.")
 
     def apply_bounds(self, setting, bm):
         """
@@ -122,21 +130,25 @@ class Modification():
                         lb.append(bm.defaultParams[i] - 60 * bm.paramSpaceWidth)
                         ub.append(bm.defaultParams[i] + 60 * bm.paramSpaceWidth)
                     else:
-                        lb.append(bm.defaultParams[i] * 10**-1)
-                        ub.append(bm.defaultParams[i] * 10**1)
+                        lb.append(bm.defaultParams[i] * 10 ** -1)
+                        ub.append(bm.defaultParams[i] * 10 ** 1)
                 bm.add_bounds([lb, ub])
             elif 'moreno2016' in bm._name:
-                bm.add_bounds([bm.defaultParams * (1 - bm.paramSpaceWidth), bm.defaultParams * (1 + bm.paramSpaceWidth)])
+                bm.add_bounds(
+                    [bm.defaultParams * (1 - bm.paramSpaceWidth), bm.defaultParams * (1 + bm.paramSpaceWidth)])
             elif 'test' in bm._name:
                 bm.add_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
             else:
-                print("Could not identify the benchmaker using benchmarker._name when trying to add bounds. If a new benchmarker is being used, then this code needs updating. For the time being, you can use 'custom' bounds.")
+                print(
+                    "Could not identify the benchmarker using benchmarker._name when trying to add bounds. If a new benchmarker is being used, then this code needs updating. For the time being, you can use 'custom' bounds.")
         elif setting.lower() == 'custom':
             bm.add_bounds(self.customBounds)
         else:
-            print("'" + setting + "' is not a valid option for bounds. Please use either 'None', 'Positive', 'Sampler', or 'Custom'.")
+            print(
+                "'" + setting + "' is not a valid option for bounds. Please use either 'None', 'Positive', 'Sampler', or 'Custom'.")
 
-    def apply_scale_factors(self, setting, bm):
+    @staticmethod
+    def apply_scale_factors(setting, bm):
         """
         Apply the scale factor setting to a benchmarker.
 
@@ -169,6 +181,7 @@ class Abed2013(Modification):
         scaleFactors = 'off'
         name = 'Abed2013'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
+
 
 class Achard2006(Modification):
     def __init__(self):
@@ -208,7 +221,7 @@ class BenShalom2012(Modification):
 
 class Bot2012(Modification):
     """
-    The modification from Bot et al 2012. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    The modification from Bot et al. 2012. Uses no log transforms, bounds defined by the sampler, and no scale factors.
     """
 
     def __init__(self):
@@ -248,7 +261,7 @@ class Cairns2017(Modification):
 
 class Chen2012(Modification):
     """
-    The modification from Chen et al 2012. Uses sampler bounds only.
+    The modification from Chen et al. 2012. Uses sampler bounds only.
     """
 
     def __init__(self):
@@ -279,7 +292,7 @@ class Clausen2020(Modification):
 
 class Clerx2019(Modification):
     """
-    The modification from Clerx et al 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
+    The modification from Clerx et al. 2019. Uses standard log transforms, bounds defined by the sampler in place of rates bounds, and no scale factors.
     """
 
     def __init__(self):
@@ -288,7 +301,8 @@ class Clerx2019(Modification):
         scaleFactors = 'off'
         name = 'Clerx2019'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'rateBounds': True})
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors,
+                         kwargs={'rateBounds': True})
 
 
 class Davies2011(Modification):
@@ -321,7 +335,7 @@ class Druckmann2007(Modification):
 class Du2014(Modification):
     def __init__(self):
         logTransform = 'None'
-        bounds = 'Sampler'  # Only say constainted optimisation
+        bounds = 'Sampler'  # Only says constrained optimisation
         scaleFactors = 'off'
         name = 'Du2014'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
@@ -342,7 +356,8 @@ class Groenendaal2015(Modification):
         bounds = 'Sampler'
         scaleFactors = 'on'
         name = 'Groenendaal2015'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'nGens': 100, 'popSize': 500})
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors,
+                         kwargs={'nGens': 100, 'popSize': 500})
 
 
 class Guo2010(Modification):
@@ -387,7 +402,8 @@ class JedrzejewskiSzmek2018(Modification):
         bounds = 'Sampler'
         scaleFactors = 'off'
         name = 'JedrzejewskiSzmek2018'
-        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors, kwargs={'popSize': 8})
+        super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors,
+                         kwargs={'popSize': 8})
 
 
 class Kaur2014(Modification):
@@ -401,7 +417,7 @@ class Kaur2014(Modification):
 
 class Kohjitani2022(Modification):
     """
-    The modification from Kohjitani et al 2022. Uses scaling factors only.
+    The modification from Kohjitani et al. 2022. Uses scaling factors only.
     """
 
     def __init__(self):
@@ -423,7 +439,7 @@ class Liu2011(Modification):
 
 class Loewe2016(Modification):
     """
-    The modification from Loewe et al 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
+    The modification from Loewe et al. 2016. Uses no log transforms, bounds defined by the sampler, and no scale factors.
     """
 
     def __init__(self):
@@ -589,7 +605,7 @@ class Zhou2009(Modification):
 
 class Empty(Modification):
     """
-    An modification with default settings.
+    A modification with default settings.
     """
 
     def __init__(self, name=""):
