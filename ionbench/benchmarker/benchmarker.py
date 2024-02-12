@@ -23,7 +23,7 @@ class Tracker:
 
     This class contains two methods: update(), and plot().
 
-    update() is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.cost) and updates the performance metric vectors.
+    update() is called everytime a parameter vector is simulated in the benchmarker (for example, in bm.cost()) and updates the performance metric vectors.
 
     plot() is called during the benchmarker's .evaluate() method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
@@ -44,7 +44,7 @@ class Tracker:
         self.costTimes = []
         self.gradTimes = []
 
-    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', time=np.NaN):
+    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.NaN):
         """
         This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class.
 
@@ -58,7 +58,9 @@ class Tracker:
         incrementSolveCounter : bool, optional
             Should the solveCount be incremented, ie did the model need to be solved. This should only be False during benchmarker.evaluate() or if the parameters were out of bounds. The default is True.
         solveType : string, optional
-            What type of model solve was used
+            What type of model solve was used. 'grad' for with sensitivities and 'cost' for without.
+        solveTime : float, optional
+            A float representing the time, in seconds, it took to solve the model.
 
         Returns
         -------
@@ -77,10 +79,10 @@ class Tracker:
         if incrementSolveCounter:
             if solveType == 'cost':
                 self.solveCount += 1
-                self.costTimes.append(time)
+                self.costTimes.append(solveTime)
             elif solveType == 'grad':
                 self.gradSolveCount += 1
-                self.gradTimes.append(time)
+                self.gradTimes.append(solveTime)
             self.check_repeated_param(estimatedParams, solveType)
             self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
@@ -209,6 +211,8 @@ class Tracker:
         ----------
         param : array
             The parameters to check if the model has been already solved for.
+        solveType : string
+            Specifies the type of solve that param corresponds to. 'grad' refers to solving with sensitivities and 'cost' refers to one without. The allows check_repeated_params to ignore any cases where the parameters are first solved as a cost and then again as a grad which is common, expected and optimal for line search based gradient descent methods.
 
         Returns
         -------
@@ -313,7 +317,7 @@ class Benchmarker:
                     p[i] = ub[i]
         return p
 
-    def log_transform(self, whichParams=[]):
+    def log_transform(self, whichParams=None):
         """
         Fit some parameters in a log-transformed space.
 
@@ -322,14 +326,14 @@ class Benchmarker:
         Parameters
         ----------
         whichParams : list, optional
-            Which parameters should be log-transformed, in the form of a list of booleans, the same length as the number of parameters, where True is a parameter to be log-transformed. The default is [], in which case all parameters will be log-transformed.
+            Which parameters should be log-transformed, in the form of a list of booleans, the same length as the number of parameters, where True is a parameter to be log-transformed. The default is None, in which case all parameters will be log-transformed.
 
         Returns
         -------
         None.
 
         """
-        if whichParams == []:  # Log-transform all parameters
+        if whichParams is None:  # Log-transform all parameters
             whichParams = [True] * self.n_parameters()
         self._logTransformParams = whichParams
 
@@ -417,7 +421,7 @@ class Benchmarker:
         Returns
         -------
         bool
-            True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside of the bounds.
+            True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside the bounds.
 
         """
         if self._bounded:
@@ -556,6 +560,11 @@ class Benchmarker:
             The gradient of the RMSE cost, evaluated at the inputted parameters.
 
         """
+        curr = None
+        sens = None
+        J = None
+        grad = None
+        cost = None
         failed = False
         # Undo any transforms
         if inInputSpace:
@@ -563,7 +572,7 @@ class Benchmarker:
         else:
             parameters = np.copy(parameters)
 
-        # Check model is setup to solve for sensitivities
+        # Check model is set up to solve for sensitivities
         if not self.sensitivityCalc:
             warnings.warn(
                 "Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
@@ -596,7 +605,7 @@ class Benchmarker:
 
         if failed:
             self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad',
-                                time=end - start)
+                                solveTime=end - start)
             error = np.array([np.inf] * len(self.data))
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
@@ -610,7 +619,7 @@ class Benchmarker:
             cost = self.rmse(curr, self.data)
 
             self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad',
-                                time=end - start)
+                                solveTime=end - start)
 
             if residuals:
                 J = np.zeros((len(curr), self.n_parameters()))
@@ -667,6 +676,7 @@ class Benchmarker:
         if 'moreno' in self._name:
             self.sim.set_parameters(self.sim.parameters())
 
+    # noinspection PyProtectedMember
     def set_steady_state(self, parameters):
         """
         Sets the model to steady state at -80mV for the specified parameters. Will update the sensitivity simulation if self.sensitivityCalc == True.
@@ -698,10 +708,12 @@ class Benchmarker:
 
             state = [float(state[i]) for i in range(len(state))]
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
-        elif 'markov' in str(type(self._analyticalModel)):
+        else:
+            assert 'markov' in str(type(self._analyticalModel))
             n = len(self._analyticalModel._states)
             f = ionbench.utils.autodiff.get_matrix_function(self._analyticalModel)
 
+            state = np.zeros((len(parameters), n))
             s_state = np.zeros((len(parameters), n))
             for j in range(n):
                 t = [mg.tensor(a, np.double) for a in parameters]
@@ -739,6 +751,19 @@ class Benchmarker:
                 self.simSens._s_state = s_state
 
     def solve_with_sensitivities(self, times):
+        """
+        Solve the model with sensitivities to find both the current, curr, and the sensitivities dcurr/dp_i, sens.
+        ----------
+        times : list
+            The times at which to record the current and sensitivities.
+
+        Returns
+        -------
+        curr : numpy array
+            The model outputted current.
+        sens : numpy array
+            The sensitivities of the outputted current.
+        """
         log, e = self.simSens.run(self.tmax + 1, log_times=times)
         return np.array(log[self._outputName]), e
 
@@ -811,7 +836,7 @@ class Benchmarker:
         out = self.solve_model(times, continueOnError=continueOnError)
         end = time.monotonic()
         self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter,
-                            time=end - start)
+                            solveTime=end - start)
         return out
 
     def rmse(self, c1, c2):
