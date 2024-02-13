@@ -330,7 +330,7 @@ class Benchmarker:
         """
         self._rates_bounded = True
 
-    def clamp(self, parameters):
+    def clamp_parameters(self, parameters):
         """
         Clamp a parameter vector to be between the current benchmarker bounds. Parameters should be specified in input parameter space. If no bounds are active or the inputted parameter vector obeys the current bounds, the inputted parameter vector is returned.
 

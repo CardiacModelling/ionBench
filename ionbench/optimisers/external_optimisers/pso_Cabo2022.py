@@ -29,7 +29,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     class Particle:
         def __init__(self):
             self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.position = bm.clamp(self.position)
+            self.position = bm.clamp_parameters(self.position)
             self.velocity = (bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())) - self.position) / 2
             self.bestCost = np.inf  # Best cost of this particle
             self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
