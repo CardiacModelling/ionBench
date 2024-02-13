@@ -489,24 +489,7 @@ class Benchmarker:
         """
         if not self._rates_bounded and boundedCheck:
             return True
-        for rateFunc, rateType in self._rateFunctions:
-            if rateType == 'positive':
-                # check kHigh is in bounds
-                k = rateFunc(parameters, self.vHigh)
-            elif rateType == 'negative':
-                # check kLow is in bounds
-                k = rateFunc(parameters, self.vLow)
-            elif rateType == 'independent':
-                # check rate in bounds
-                k = rateFunc(parameters, 0)  # Voltage doesn't matter
-            else:
-                raise RuntimeError(
-                    "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
-            if k < self.rateMin or k > self.rateMax:
-                return False
-
-        # All tests passed!
-        return True
+        return self.parameter_penalty(parameters) == 0
 
     def n_parameters(self):
         """
@@ -902,9 +885,14 @@ class Benchmarker:
         self.sim.reset()
 
         # Abort solving if the parameters are out of bounds
-        if not self.in_parameter_bounds(parameters):
+        penalty = 0
+        if bm._parameters_bounded or 'staircase' in self._name:
+            penalty += self.parameter_penalty(parameters)
+        if bm._rates_bounded or 'staircase' in self._name:
+            penalty += self.rate_penalty(parameters)
+        if penalty > 0:
             self.tracker.update(parameters, incrementSolveCounter=False)
-            return [np.inf] * len(self.data)
+            return [penalty] * len(self.data)
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
@@ -917,6 +905,59 @@ class Benchmarker:
         self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter,
                             solveTime=end - start)
         return out
+
+    def parameter_penalty(self, parameters):
+        """
+        Penalty function for out of bound parameters. The penalty for each parameter p that is out of bounds is 1e4+1e4*|p-bound| where bound is either the upper or lower bound for p, whichever was violated.
+        Parameters
+        ----------
+        parameters : numpy array
+            A possibly out-of-bounds parameter vector to penalise.
+        Returns
+        -------
+        penalty : float
+            The penalty to apply for parameter bound violations.
+        """
+        # Penalty increases linearly with parameters out of bounds
+        penalty = 1e4 * np.sum(np.abs(parameters - self.ub), where=parameters > self.ub)
+        penalty += 1e4 * np.sum(np.abs(parameters - self.lb), where=parameters < self.lb)
+        # Minimum penalty per parameter violation
+        penalty += 1e4 * np.sum(parameters > self.ub or parameters < self.lb)
+        return penalty
+
+    def rate_penalty(self, parameters):
+        """
+        Penalty function for out of bound rates. The penalty for each rate r that is out of bounds is 1e4+1e4*|r-bound| where bound is either the upper or lower bound for r, whichever was violated.
+        Parameters
+        ----------
+        parameters : numpy array
+            A possibly out-of-bounds parameter vector to penalise.
+        Returns
+        -------
+        penalty : float
+            The penalty to apply for rate bound violations.
+        """
+        penalty = 0
+        for rateFunc, rateType in self._rateFunctions:
+            if rateType == 'positive':
+                # check kHigh is in bounds
+                k = rateFunc(parameters, self.vHigh)
+            elif rateType == 'negative':
+                # check kLow is in bounds
+                k = rateFunc(parameters, self.vLow)
+            elif rateType == 'independent':
+                # check rate in bounds
+                k = rateFunc(parameters, 0)  # Voltage doesn't matter
+            else:
+                raise RuntimeError(
+                    "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
+            if k < self.rateMin:
+                penalty += 1e4
+                penalty += 1e4*np.abs(k-self.rateMin)
+            elif k > self.rateMax:
+                penalty += 1e4
+                penalty += 1e4*np.abs(k-self.rateMax)
+        return penalty
 
     def rmse(self, c1, c2):
         """
