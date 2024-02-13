@@ -83,7 +83,7 @@ class Test_Modifications:
         mod = modification.Modification(logTransform='Full', bounds='positive', scaleFactors='On')
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
-        mod.apply_bounds(mod.dict['bounds'], self.bm)
+        mod.apply_parameter_bounds(mod.dict['bounds'], self.bm)
         assert all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
         assert self.bm._parameters_bounded
@@ -93,7 +93,7 @@ class Test_Modifications:
         emptyMod = modification.Empty()
         emptyMod.apply(self.bm)
         mod = modification.Modification(logTransform='Full', bounds='positive', scaleFactors='on')
-        mod.apply_bounds(mod.dict['bounds'], self.bm)
+        mod.apply_parameter_bounds(mod.dict['bounds'], self.bm)
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
         assert all(self.bm._logTransformParams)
