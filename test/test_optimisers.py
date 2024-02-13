@@ -67,7 +67,7 @@ class Test_pints:
         mod.apply(self.bmTest)
         if 'cmaes' in opt:
             # Turn off bounds since rate bounds don't make sense here
-            self.bmTest._bounded = False
+            self.bmTest._parameters_bounded = False
         x0_opt = module.run(self.bmTest)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3

@@ -11,17 +11,17 @@ class Test_Modifications:
     def test_bounds(self):
         # Check bounds are correctly applied for all settings
         # No bounds initially
-        assert not self.bm._bounded
+        assert not self.bm._parameters_bounded
         # Positive
         mod = modification.Modification(bounds='positive')
         mod.apply(self.bm)
-        assert self.bm._bounded
+        assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) == 0)
         assert all(np.array(self.bm.ub) == np.inf)
         # Sampler
         mod = modification.Modification(bounds='Sampler')
         mod.apply(self.bm)
-        assert self.bm._bounded
+        assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) > 0)
         assert all(np.array(self.bm.ub) < np.inf)
         # Custom
@@ -29,13 +29,13 @@ class Test_Modifications:
         ub = np.random.rand(self.bm.n_parameters()) + 1
         mod = modification.Modification(bounds='Custom', customBounds=[lb, ub])
         mod.apply(self.bm)
-        assert self.bm._bounded
+        assert self.bm._parameters_bounded
         assert all(self.bm.lb == lb)
         assert all(self.bm.ub == ub)
         # None
         mod = modification.Modification()
         mod.apply(self.bm)
-        assert not self.bm._bounded
+        assert not self.bm._parameters_bounded
 
     @pytest.mark.cheap
     def test_log_transform(self):
@@ -86,7 +86,7 @@ class Test_Modifications:
         mod.apply_bounds(mod.dict['bounds'], self.bm)
         assert all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
-        assert self.bm._bounded
+        assert self.bm._parameters_bounded
         lb = self.bm.lb
         ub = self.bm.ub
         # Check order of applying doesnt change bounds
@@ -98,7 +98,7 @@ class Test_Modifications:
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
         assert all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
-        assert self.bm._bounded
+        assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) == np.array(lb))
         assert all(np.array(self.bm.ub) == np.array(ub))
 
@@ -112,4 +112,4 @@ class Test_Modifications:
         assert all(np.array(newbm._logTransformParams) == np.array(newbm.standardLogTransform))
         assert any(newbm._logTransformParams)
         assert not all(newbm._logTransformParams)
-        assert newbm._bounded
+        assert newbm._parameters_bounded

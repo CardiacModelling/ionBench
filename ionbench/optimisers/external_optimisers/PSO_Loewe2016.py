@@ -37,7 +37,7 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     if len(x0) > 0:
         # Map from input parameter space to [0,1]
         x0 = bm.original_parameter_space(x0)
-        if bm._bounded:
+        if bm._parameters_bounded:
             x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
         else:
             x0 = x0 / (2 * bm.defaultParams)
@@ -73,7 +73,7 @@ def run(bm, x0=[], n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
         """
         Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
         """
-        if bm._bounded:
+        if bm._parameters_bounded:
             lb = bm.lb
             ub = bm.ub
         else:

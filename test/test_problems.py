@@ -25,7 +25,7 @@ class Problem():
         assert hasattr(self.bm, "data")
         assert hasattr(self.bm, "sim")
         assert hasattr(self.bm, "_useScaleFactors")
-        assert hasattr(self.bm, "_bounded")
+        assert hasattr(self.bm, "_parameters_bounded")
         assert hasattr(self.bm, "_logTransformParams")
         assert hasattr(self.bm, "plotter")
         assert hasattr(self.bm, "tracker")
@@ -42,7 +42,7 @@ class Problem():
     @pytest.mark.cheap
     def test_bounds(self):
         # Check bounds give infinite cost outside and solve inside bounds
-        self.bm.add_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
+        self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
         # Check bounds give infinite cost outside of bounds
         p = copy.copy(self.bm.defaultParams)
         p[0] = 0.98 * p[0]
@@ -50,8 +50,8 @@ class Problem():
         # Check cost is finite inside bounds when bounded
         p[0] = self.bm.defaultParams[0]
         assert self.bm.cost(p) < np.inf
-        # Check _bounded = False turns off bounds
-        self.bm._bounded = False
+        # Check _parameters_bounded = False turns off bounds
+        self.bm._parameters_bounded = False
         p[0] = 0.98 * p[0]
         assert self.bm.cost(p) < np.inf
 
@@ -68,7 +68,7 @@ class Problem():
         self.bm.cost(self.bm.defaultParams)
         assert self.bm.tracker.solveCount == 1
         # but not when out of bounds
-        self.bm.add_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
+        self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
         p = copy.copy(self.bm.defaultParams)
         p[0] = 0.98 * self.bm.defaultParams[0]
         self.bm.cost(p)
@@ -82,7 +82,7 @@ class Problem():
         # returns to 0 after resetting
         self.bm.reset(fullReset = False)
         assert self.bm.tracker.solveCount == 0
-        self.bm._bounded = False
+        self.bm._parameters_bounded = False
         if 'moreno' not in self.bm._name:
             # grad solve counter increments with grad but not normal solve counter
             self.bm.grad(p)
@@ -206,7 +206,7 @@ class Loewe(Problem):
         mod.apply(self.bm)
         lb = self.bm.lb
         ub = self.bm.ub
-        self.bm._bounded = False
+        self.bm._parameters_bounded = False
         # Sampler in bounds
         assert sampler_bounds(self.bm, lb, ub)
         # Sampled different to default

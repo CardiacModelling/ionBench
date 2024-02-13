@@ -115,13 +115,13 @@ class Modification:
 
         """
         if setting.lower() == 'none':
-            bm.add_bounds([[-np.inf] * bm.n_parameters(), [np.inf] * bm.n_parameters()])
-            bm._bounded = False
+            bm.add_parameter_bounds([[-np.inf] * bm.n_parameters(), [np.inf] * bm.n_parameters()])
+            bm._parameters_bounded = False
         elif setting.lower() == 'positive':
-            bm.add_bounds([[0] * bm.n_parameters(), [np.inf] * bm.n_parameters()])
+            bm.add_parameter_bounds([[0] * bm.n_parameters(), [np.inf] * bm.n_parameters()])
         elif setting.lower() == 'sampler':
             if 'staircase' in bm._name:
-                bm.add_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
+                bm.add_parameter_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
             elif 'loewe2016' in bm._name:
                 lb = []
                 ub = []
@@ -132,17 +132,17 @@ class Modification:
                     else:
                         lb.append(bm.defaultParams[i] * 10 ** -1)
                         ub.append(bm.defaultParams[i] * 10 ** 1)
-                bm.add_bounds([lb, ub])
+                bm.add_parameter_bounds([lb, ub])
             elif 'moreno2016' in bm._name:
-                bm.add_bounds(
+                bm.add_parameter_bounds(
                     [bm.defaultParams * (1 - bm.paramSpaceWidth), bm.defaultParams * (1 + bm.paramSpaceWidth)])
             elif 'test' in bm._name:
-                bm.add_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
+                bm.add_parameter_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
             else:
                 print(
                     "Could not identify the benchmarker using benchmarker._name when trying to add bounds. If a new benchmarker is being used, then this code needs updating. For the time being, you can use 'custom' bounds.")
         elif setting.lower() == 'custom':
-            bm.add_bounds(self.customBounds)
+            bm.add_parameter_bounds(self.customBounds)
         else:
             print(
                 "'" + setting + "' is not a valid option for bounds. Please use either 'None', 'Positive', 'Sampler', or 'Custom'.")
@@ -188,7 +188,7 @@ class Achard2006(Modification):
         logTransform = 'None'
         bounds = 'Sampler'
         scaleFactors = 'off'
-        name = 'Archard2006'
+        name = 'Achard2006'
         super().__init__(name=name, logTransform=logTransform, bounds=bounds, scaleFactors=scaleFactors)
 
 

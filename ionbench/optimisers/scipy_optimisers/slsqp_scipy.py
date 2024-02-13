@@ -36,7 +36,7 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
     def cost(p):
         return bm.cost(p)
 
-    if bm._bounded:
+    if bm._parameters_bounded:
         lb = bm.input_parameter_space(bm.lb)
         ub = bm.input_parameter_space(bm.ub)
         bounds = []

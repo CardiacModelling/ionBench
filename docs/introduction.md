@@ -29,7 +29,7 @@ Log transforms can also be specified in the benchmarker using `benchmarker.log_t
 
 When working with log transforms (or equivalenty scale factor transforms using `benchmarker._useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
 
-Parameter upper and lower bounds can be included by using `benchmarker.add_bounds([lb,ub])` where `lb` and `ub` are lists of lower and upper bounds. This will result in `benchmarker.cost()` returning `inf` if any of the bounds are violated. Additionally, the number of solves will not be incremented (since the time taken to compare against bounds is negligible compared with the time to solve the model) but the trackers for cost, RMSE in parameter space, and number of identified parameters will include this point. More advanced options for bounds are still to come.
+Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds([lb,ub])` where `lb` and `ub` are lists of lower and upper bounds. This will result in `benchmarker.cost()` returning `inf` if any of the bounds are violated. Additionally, the number of solves will not be incremented (since the time taken to compare against bounds is negligible compared with the time to solve the model) but the trackers for cost, RMSE in parameter space, and number of identified parameters will include this point. More advanced options for bounds are still to come.
 
 Other useful functions include:
 

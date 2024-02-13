@@ -242,7 +242,7 @@ class Benchmarker:
 
     def __init__(self):
         self._useScaleFactors = False
-        self._bounded = False  # Should the parameters be bounded
+        self._parameters_bounded = False  # Should the parameters be bounded
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self.defaultParams)  # Tracks the performance metrics
@@ -287,7 +287,7 @@ class Benchmarker:
                     tmp.append(float(row[0]))
             self.data = np.array(tmp)
 
-    def add_bounds(self, bounds, parameterSpace='original'):
+    def add_parameter_bounds(self, bounds, parameterSpace='original'):
         """
         Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
 
@@ -311,7 +311,7 @@ class Benchmarker:
         elif parameterSpace.lower() == 'original':
             self.lb = bounds[0]
             self.ub = bounds[1]
-        self._bounded = True
+        self._parameters_bounded = True
 
     def clamp(self, parameters):
         """
@@ -433,14 +433,14 @@ class Benchmarker:
 
     def in_parameter_bounds(self, parameters, boundedCheck=True):
         """
-        Checks if parameters are inside any rectangular parameter bounds. If boundedCheck is True, then it will always return True if benchmarker._bounded = False.
+        Checks if parameters are inside any rectangular parameter bounds. If boundedCheck is True, then it will always return True if benchmarker._parameters_bounded = False.
 
         Parameters
         ----------
         parameters : list or numpy array
             Vector of parameters (in original parameter space) to check against the bounds.
         boundedCheck : bool, optional
-            If True, and benchmarker._bounded=False, in_parameter_bounds will always return True. If False, it will ignore the value of bm._bounded and base the returned value only on the parameters and parameter bounds. The default is True.
+            If True, and benchmarker._parameters_bounded=False, in_parameter_bounds will always return True. If False, it will ignore the value of bm._parameters_bounded and base the returned value only on the parameters and parameter bounds. The default is True.
 
         Returns
         -------
@@ -448,21 +448,21 @@ class Benchmarker:
             True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside the bounds.
 
         """
-        if self._bounded and boundedCheck:
+        if self._parameters_bounded and boundedCheck:
             if any(parameters[i] < self.lb[i] or parameters[i] > self.ub[i] for i in range(self.n_parameters())):
                 return False
         return True
 
     def in_rate_bounds(self, parameters, boundedCheck=True):
         """
-        Checks if rates are inside bounds. If boundedCheck is True, then it will always return True if benchmarker._bounded = False.
+        Checks if rates are inside bounds. If boundedCheck is True, then it will always return True if benchmarker._parameters_bounded = False.
 
         Parameters
         ----------
         parameters : list or numpy array
             Vector of parameters (in original parameter space) to check against the bounds.
         boundedCheck : bool, optional
-            If True, and benchmarker._bounded=False, in_rate_bounds will always return True. If False, it will ignore the value of bm._bounded and base the returned value only on the parameters and rate bounds. The default is True.
+            If True, and benchmarker._parameters_bounded=False, in_rate_bounds will always return True. If False, it will ignore the value of bm._parameters_bounded and base the returned value only on the parameters and rate bounds. The default is True.
 
         Returns
         -------
@@ -470,7 +470,7 @@ class Benchmarker:
             True if rates are inside the bounds or no bounds are specified, False if the rates are outside the bounds.
 
         """
-        if not self._bounded and boundedCheck:
+        if not self._parameters_bounded and boundedCheck:
             return True
         for rateFunc, rateType in self._rateFunctions:
             if rateType == 'positive':
@@ -518,7 +518,7 @@ class Benchmarker:
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self._useScaleFactors = False
-            self._bounded = False
+            self._parameters_bounded = False
 
     def cost(self, parameters, incrementSolveCounter=True):
         """

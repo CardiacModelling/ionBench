@@ -31,7 +31,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
         The best parameters identified.
 
     """
-    if not bm._bounded:
+    if not bm._parameters_bounded:
         raise RuntimeError('Cairns et al 2017 GA optimiser requires bounds.')
 
     boundsRange = bm.input_parameter_space(bm.ub) - bm.input_parameter_space(bm.lb)
