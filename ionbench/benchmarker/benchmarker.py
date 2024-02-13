@@ -465,10 +465,9 @@ class Benchmarker:
             True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside the bounds.
 
         """
-        if self._parameters_bounded and boundedCheck:
-            if any(parameters[i] < self.lb[i] or parameters[i] > self.ub[i] for i in range(self.n_parameters())):
-                return False
-        return True
+        if not self._parameters_bounded and boundedCheck:
+            return True
+        return self.parameter_penalty(parameters) == 0
 
     def in_rate_bounds(self, parameters, boundedCheck=True):
         """
@@ -489,7 +488,7 @@ class Benchmarker:
         """
         if not self._rates_bounded and boundedCheck:
             return True
-        return self.parameter_penalty(parameters) == 0
+        return self.rate_penalty(parameters) == 0
 
     def n_parameters(self):
         """
