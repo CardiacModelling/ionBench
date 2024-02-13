@@ -243,6 +243,7 @@ class Benchmarker:
     def __init__(self):
         self._useScaleFactors = False
         self._parameters_bounded = False  # Should the parameters be bounded
+        self._rates_bounded = False  # Should the rates be bounded
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self.defaultParams)  # Tracks the performance metrics
@@ -312,6 +313,22 @@ class Benchmarker:
             self.lb = bounds[0]
             self.ub = bounds[1]
         self._parameters_bounded = True
+
+    def add_rate_bounds(self):
+        """
+        Add bounds to the rates. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
+
+        The bounds are checked after reversing any log-transforms on parameters (ie on exp(inputted parameters)).
+
+        Parameters
+        ----------
+        None.
+        Returns
+        -------
+        None.
+
+        """
+        self._rates_bounded = True
 
     def clamp(self, parameters):
         """
@@ -470,7 +487,7 @@ class Benchmarker:
             True if rates are inside the bounds or no bounds are specified, False if the rates are outside the bounds.
 
         """
-        if not self._parameters_bounded and boundedCheck:
+        if not self._rates_bounded and boundedCheck:
             return True
         for rateFunc, rateType in self._rateFunctions:
             if rateType == 'positive':
