@@ -104,4 +104,4 @@ class AdvancedBoundaries(pints.Boundaries):
 
         """
         parameters = self.bm.original_parameter_space(parameters)
-        return self.bm.in_rate_bounds(parameters)
+        return self.bm.in_rate_bounds(parameters) and self.bm.in_parameter_bounds(parameters)

@@ -4,7 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
-def run(bm, x0=[], popSize=12, maxIter=1000, rateBounds=False, debug=False):
+def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
     """
     Runs CMA-ES from Pints using a benchmarker.
 
@@ -18,8 +18,6 @@ def run(bm, x0=[], popSize=12, maxIter=1000, rateBounds=False, debug=False):
         The population size to use in CMA-ES.
     maxIter : int, optional
         Number of iterations of CMA-ES to run. The default is 1000.
-    rateBounds : bool, optional
-        If True, then if bm has active bounds, a boundary object which includes bounds on rates as well as parameters will be passed to Pints (used for Clerx 2019 approach). The default is False.
     debug : bool, optional
         If True, logging messages are printed every iteration. Otherwise the default of every iteration for the first 3 and then every 20 iterations. The default is False.
 
@@ -34,11 +32,10 @@ def run(bm, x0=[], popSize=12, maxIter=1000, rateBounds=False, debug=False):
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.tmax, model.bm.freq), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
-    if bm._parameters_bounded:
-        if rateBounds:
-            boundaries = classes_pints.AdvancedBoundaries(bm)
-        else:
-            boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
+    if bm._parameters_bounded and bm._rates_bounded:
+        boundaries = classes_pints.AdvancedBoundaries(bm)
+    elif bm._parameters_bounded:
+        boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
 
     if bm._parameters_bounded:
         counter = 1
