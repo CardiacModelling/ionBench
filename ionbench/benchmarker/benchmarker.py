@@ -890,8 +890,8 @@ class Benchmarker:
         if self._rates_bounded or 'staircase' in self._name:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
-            self.tracker.update(parameters, incrementSolveCounter=False)
-            return [penalty] * len(self.data)
+            self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)
+            return np.subtract(penalty, self.data)
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
@@ -921,7 +921,7 @@ class Benchmarker:
         penalty = 1e4 * np.sum(np.abs(parameters - self.ub), where=parameters > self.ub)
         penalty += 1e4 * np.sum(np.abs(parameters - self.lb), where=parameters < self.lb)
         # Minimum penalty per parameter violation
-        penalty += 1e4 * np.sum(parameters > self.ub or parameters < self.lb)
+        penalty += 1e4 * np.sum(np.logical_or(parameters > self.ub, parameters < self.lb))
         return penalty
 
     def rate_penalty(self, parameters):
@@ -952,10 +952,10 @@ class Benchmarker:
                     "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
             if k < self.rateMin:
                 penalty += 1e4
-                penalty += 1e4*np.abs(k-self.rateMin)
+                penalty += 1e4 * np.abs(k - self.rateMin)
             elif k > self.rateMax:
                 penalty += 1e4
-                penalty += 1e4*np.abs(k-self.rateMax)
+                penalty += 1e4 * np.abs(k - self.rateMax)
         return penalty
 
     def rmse(self, c1, c2):
