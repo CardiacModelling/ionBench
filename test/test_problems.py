@@ -202,7 +202,7 @@ class Loewe(Problem):
     def test_sampler(self):
         # Check sampler is inside the right bounds and doesnt just return default rates, across all transforms
         # Get bounds from a modification
-        mod = ionbench.modification.Modification(bounds='Sampler')
+        mod = ionbench.modification.Modification(parameterBounds='Sampler')
         mod.apply(self.bm)
         lb = self.bm.lb
         ub = self.bm.ub

@@ -885,9 +885,9 @@ class Benchmarker:
 
         # Abort solving if the parameters are out of bounds
         penalty = 0
-        if bm._parameters_bounded or 'staircase' in self._name:
+        if self._parameters_bounded or 'staircase' in self._name:
             penalty += self.parameter_penalty(parameters)
-        if bm._rates_bounded or 'staircase' in self._name:
+        if self._rates_bounded or 'staircase' in self._name:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, incrementSolveCounter=False)
