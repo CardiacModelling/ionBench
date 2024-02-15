@@ -14,7 +14,7 @@ class Problem():
 
     @pytest.mark.cheap
     def test_hasattr(self):
-        # Check all neccessary variables in problems are defined
+        # Check all necessary variables in problems are defined
         assert hasattr(self.bm, "_name")
         assert hasattr(self.bm, "model")
         assert hasattr(self.bm, "_outputName")
@@ -30,6 +30,17 @@ class Problem():
         assert hasattr(self.bm, "plotter")
         assert hasattr(self.bm, "tracker")
         assert hasattr(self.bm, "sensitivityCalc")
+        assert hasattr(self.bm, "_analyticalModel")
+        assert hasattr(self.bm, "tmax")
+        assert hasattr(self.bm, "simSens")
+        assert hasattr(self.bm, "freq")
+        assert hasattr(self.bm, "rateMin")
+        assert hasattr(self.bm, "rateMax")
+        assert hasattr(self.bm, "vLow")
+        assert hasattr(self.bm, "vHigh")
+        assert hasattr(self.bm, "lbStandard")
+        assert hasattr(self.bm, "ubStandard")
+
 
     @pytest.mark.cheap
     def test_plotter(self, monkeypatch):
