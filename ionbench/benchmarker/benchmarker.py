@@ -518,6 +518,7 @@ class Benchmarker:
             self.log_transform([False] * self.n_parameters())
             self._useScaleFactors = False
             self._parameters_bounded = False
+            self._rates_bounded = False
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
