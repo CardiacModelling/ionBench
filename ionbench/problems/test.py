@@ -28,6 +28,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
             self.data = None
+        self.lbStandard = self.defaultParams * 0.5
+        self.ubStandard = self.defaultParams * 1.5
         super().__init__()
 
     def sample(self, n=1):

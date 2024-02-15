@@ -70,6 +70,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.freq = 0.5  # Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         self.weights = self.weights / np.sum(self.weights)
+        self.lbStandard = self.defaultParams * (1 - self.paramSpaceWidth)
+        self.ubStandard = self.defaultParams * (1 + self.paramSpaceWidth)
         super().__init__()
         print('Benchmarker initialised')
 

@@ -31,6 +31,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
                                                       current=self._outputName, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.freq = 0.5  # Timestep in data between points
+        self.lbStandard = np.array([self.defaultParams[i] - 60 * self.paramSpaceWidth if self.additiveParams[i] else self.defaultParams[i] * 10 ** (-self.paramSpaceWidth) for i in range(self.n_parameters())])
+        self.ubStandard = np.array([self.defaultParams[i] + 60 * self.paramSpaceWidth if self.additiveParams[i] else self.defaultParams[i] * 10 ** self.paramSpaceWidth for i in range(self.n_parameters())])
         super().__init__()
 
     def sample(self, n=1):

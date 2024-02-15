@@ -125,27 +125,7 @@ class Modification:
         elif setting.lower() == 'positive':
             bm.add_parameter_bounds([[0] * bm.n_parameters(), [np.inf] * bm.n_parameters()])
         elif setting.lower() == 'sampler':
-            if 'staircase' in bm._name:
-                bm.add_parameter_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
-            elif 'loewe2016' in bm._name:
-                lb = []
-                ub = []
-                for i in range(bm.n_parameters()):
-                    if bm.additiveParams[i]:
-                        lb.append(bm.defaultParams[i] - 60 * bm.paramSpaceWidth)
-                        ub.append(bm.defaultParams[i] + 60 * bm.paramSpaceWidth)
-                    else:
-                        lb.append(bm.defaultParams[i] * 10 ** -1)
-                        ub.append(bm.defaultParams[i] * 10 ** 1)
-                bm.add_parameter_bounds([lb, ub])
-            elif 'moreno2016' in bm._name:
-                bm.add_parameter_bounds(
-                    [bm.defaultParams * (1 - bm.paramSpaceWidth), bm.defaultParams * (1 + bm.paramSpaceWidth)])
-            elif 'test' in bm._name:
-                bm.add_parameter_bounds([bm.defaultParams * 0.5, bm.defaultParams * 1.5])
-            else:
-                print(
-                    "Could not identify the benchmarker using benchmarker._name when trying to add bounds. If a new benchmarker is being used, then this code needs updating. For the time being, you can use 'custom' bounds.")
+            bm.add_parameter_bounds([bm.lbStandard, bm.ubStandard])
         elif setting.lower() == 'custom':
             bm.add_parameter_bounds(self.customBounds)
         else:
