@@ -892,7 +892,7 @@ class Benchmarker:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)
-            return np.subtract(penalty, self.data)
+            return np.add(penalty, self.data)
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
