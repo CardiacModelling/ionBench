@@ -62,7 +62,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
                     if self.standardLogTransform[j]:
                         p.append(scipy.stats.loguniform.rvs(self.lbStandard[j], self.ubStandard[j]))
                     else:
-                        p.append(scipy.stats.uniform.rvs(self.lbStandard[j], self.ubStandard[j]))
+                        p.append(np.random.uniform(self.lbStandard[j], self.ubStandard[j]))
                 if self.in_rate_bounds(p, boundedCheck=False):
                     break
             params[i] = self.input_parameter_space(p)
