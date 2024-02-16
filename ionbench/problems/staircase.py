@@ -10,6 +10,7 @@ import myokit.lib.markov
 import myokit.lib.hh
 import ionbench
 import scipy.stats
+import copy
 
 
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
@@ -37,6 +38,8 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.lbStandard = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
         self.ubStandard = np.array(
             [1e3 if self.standardLogTransform[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
+        self.lb = copy.copy(self.lbStandard)
+        self.ub = copy.copy(self.ubStandard)
         super().__init__()
 
     def sample(self, n=1):
