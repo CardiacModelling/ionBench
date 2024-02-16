@@ -11,6 +11,7 @@ import warnings
 import pickle
 import time
 import mygrad as mg
+import copy
 
 
 class Tracker:
@@ -519,6 +520,8 @@ class Benchmarker:
             self._useScaleFactors = False
             self._parameters_bounded = False
             self._rates_bounded = False
+            self.lb = copy.copy(self.lbStandard)
+            self.ub = copy.copy(self.ubStandard)
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
