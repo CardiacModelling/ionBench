@@ -599,7 +599,8 @@ class Benchmarker:
         paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
         self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
                                          sensitivities=([self._outputName], paramNames))
-        self.simSens.set_tolerance(1e-9, 1e-9)
+        if 'staircase' in self._name:
+            self.simSens.set_tolerance(1e-9, 1e-9)
         self.sensitivityCalc = True
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
