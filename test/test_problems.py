@@ -336,7 +336,7 @@ class Staircase(Problem):
         assert sampler_different(self.bm, self.bm.defaultParams)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
-        assert sampler_bounds(self.bm, self.bm.input_parameter_space(bm.lbStandard), self.bm.input_parameter_space(bm.ubStandard))
+        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard), self.bm.input_parameter_space(self.bm.ubStandard))
         assert sampler_different(self.bm, np.ones(self.bm.n_parameters()))
         self.bm._useScaleFactors = False
         # Same for log transformed space
