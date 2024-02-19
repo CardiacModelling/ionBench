@@ -30,6 +30,10 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._rfiBounds = None
         self._rudbBounds = None
         self._tauBounds = None
+        self.rateMin = 1.67e-5
+        self.rateMax = 1e3
+        self.vLow = None
+        self.vHigh = None
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._outputName = 'ina.INa'
         self._paramContainer = 'ina'
