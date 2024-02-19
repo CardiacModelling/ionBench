@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 
-class Test_Modifications:
+class TestModifications:
     bm = ionbench.problems.staircase.HH()
 
     @pytest.mark.cheap
@@ -13,13 +13,13 @@ class Test_Modifications:
         # No bounds initially
         assert not self.bm._parameters_bounded
         # Positive
-        mod = modification.Modification(bounds='positive')
+        mod = modification.Modification(parameterBounds='positive')
         mod.apply(self.bm)
         assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) == 0)
         assert all(np.array(self.bm.ub) == np.inf)
         # Sampler
-        mod = modification.Modification(bounds='Sampler')
+        mod = modification.Modification(parameterBounds='Sampler')
         mod.apply(self.bm)
         assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) > 0)
@@ -27,7 +27,7 @@ class Test_Modifications:
         # Custom
         lb = np.random.rand(self.bm.n_parameters())
         ub = np.random.rand(self.bm.n_parameters()) + 1
-        mod = modification.Modification(bounds='Custom', customBounds=[lb, ub])
+        mod = modification.Modification(parameterBounds='Custom', customBounds=[lb, ub])
         mod.apply(self.bm)
         assert self.bm._parameters_bounded
         assert all(self.bm.lb == lb)
@@ -36,6 +36,24 @@ class Test_Modifications:
         mod = modification.Modification()
         mod.apply(self.bm)
         assert not self.bm._parameters_bounded
+
+    @pytest.mark.cheap
+    def test_rate_bounds(self):
+        # Check rate bounds are correctly applied for all settings
+        # No rate bounds initially
+        assert not self.bm._rates_bounded
+        # On
+        mod = modification.Modification(rateBounds='on')
+        mod.apply(self.bm)
+        assert self.bm._rates_bounded
+        # Off
+        mod = modification.Modification(rateBounds='off')
+        mod.apply(self.bm)
+        assert not self.bm._rates_bounded
+        # By default, they will be turned off
+        mod = modification.Modification()
+        mod.apply(self.bm)
+        assert not self.bm._rates_bounded
 
     @pytest.mark.cheap
     def test_log_transform(self):
@@ -80,20 +98,20 @@ class Test_Modifications:
     @pytest.mark.cheap
     def test_multiple_settings(self):
         # Check multiple settings applied at once doesn't break anything and order in the .apply() method doesn't matter
-        mod = modification.Modification(logTransform='Full', bounds='positive', scaleFactors='On')
+        mod = modification.Modification(logTransform='Full', parameterBounds='positive', scaleFactors='On')
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
-        mod.apply_parameter_bounds(mod.dict['bounds'], self.bm)
+        mod.apply_parameter_bounds(mod.dict['parameterBounds'], self.bm)
         assert all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
         assert self.bm._parameters_bounded
         lb = self.bm.lb
         ub = self.bm.ub
-        # Check order of applying doesnt change bounds
+        # Check order of applying doesn't change bounds
         emptyMod = modification.Empty()
         emptyMod.apply(self.bm)
-        mod = modification.Modification(logTransform='Full', bounds='positive', scaleFactors='on')
-        mod.apply_parameter_bounds(mod.dict['bounds'], self.bm)
+        mod = modification.Modification(logTransform='Full', parameterBounds='positive', scaleFactors='on')
+        mod.apply_parameter_bounds(mod.dict['parameterBounds'], self.bm)
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
         assert all(self.bm._logTransformParams)
@@ -105,7 +123,7 @@ class Test_Modifications:
     @pytest.mark.cheap
     def test_other_problems(self):
         # Basic check for another benchmarker
-        mod = modification.Modification(logTransform='standard', bounds='sampler', scaleFactors='On')
+        mod = modification.Modification(logTransform='standard', parameterBounds='sampler', scaleFactors='On')
         newbm = ionbench.problems.loewe2016.IKr()
         mod.apply(newbm)
         assert newbm._useScaleFactors
