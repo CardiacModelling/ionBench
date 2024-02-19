@@ -811,6 +811,13 @@ class Benchmarker:
             else:
                 raise
         if state is not None:
+            if np.any(np.array(state) < 0):
+                npstate = np.array(state)
+                if np.all(np.abs(npstate[npstate < 0]) < 1e-12):
+                    # If the negative values are very close to zero, then we can assume they are zero
+                    state = [max(0, s)/np.sum(npstate) for s in npstate]
+                else:
+                    raise ValueError('Steady state contains significant (>1e-12) negative values. This needs fixing.')
             self.sim.set_state(state)
             if self.sensitivityCalc:
                 self.simSens.set_state(state)
