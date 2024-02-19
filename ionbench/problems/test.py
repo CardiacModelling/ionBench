@@ -9,6 +9,8 @@ import ionbench
 import scipy.stats
 import warnings
 
+import ionbench.tracker.tracker
+
 
 class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
@@ -129,7 +131,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 return grad
 
     def reset(self, fullReset=True):
-        self.tracker = ionbench.benchmarker.Tracker(self.defaultParams)
+        self.tracker = ionbench.tracker.Tracker(self.defaultParams)
 
     def use_sensitivities(self):
         # Not needed for test function. Override to avoid trying to access myokit objects
