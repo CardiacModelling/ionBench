@@ -19,7 +19,7 @@ def run(bm, x0=[], popSize=12, maxIter=1000, debug=False):
     maxIter : int, optional
         Number of iterations of CMA-ES to run. The default is 1000.
     debug : bool, optional
-        If True, logging messages are printed every iteration. Otherwise the default of every iteration for the first 3 and then every 20 iterations. The default is False.
+        If True, logging messages are printed every iteration. Otherwise, the default of every iteration for the first 3 and then every 20 iterations. The default is False.
 
     Returns
     -------

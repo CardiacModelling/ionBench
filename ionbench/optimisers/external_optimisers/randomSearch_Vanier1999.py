@@ -4,7 +4,7 @@ import ionbench
 
 def run(bm, x0=[], maxIter=1000, debug=False):
     """
-    Random search from Vanier et al 1999. This optimiser random sample maxIter parameters and reports the best one.
+    Random search from Vanier et al. 1999. This optimiser random sample maxIter parameters and reports the best one.
 
     Parameters
     ----------

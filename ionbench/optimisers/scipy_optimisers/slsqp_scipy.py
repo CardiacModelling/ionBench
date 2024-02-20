@@ -5,7 +5,7 @@ import numpy as np
 
 def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
     """
-    Runs Sequential Least SQuares Programming optimiser from Scipy. An example of a Sequantial Quadratic Programming method which uses a quasi-newton update strategy to approximate the hessian.
+    Runs Sequential Least SQuares Programming optimiser from Scipy. An example of a Sequential Quadratic Programming method which uses a quasi-newton update strategy to approximate the hessian.
 
     Parameters
     ----------

@@ -100,7 +100,7 @@ class AdvancedBoundaries(pints.Boundaries):
         Returns
         -------
         paramsInsideBounds : bool
-            True if the parameters are inside the bound. False if the parameters are outside of the bounds.
+            True if the parameters are inside the bound. False if the parameters are outside the bounds.
 
         """
         parameters = self.bm.original_parameter_space(parameters)

@@ -1,4 +1,4 @@
-# Only works with positive parameters, crossover isnt defined for the possibility of negative parameters
+# Only works with positive parameters, crossover isn't defined for the possibility of negative parameters
 
 import numpy as np
 import ionbench
@@ -8,7 +8,7 @@ from functools import lru_cache
 
 def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
     """
-    Runs the genetic algorithm from Cairns et al 2017.
+    Runs the genetic algorithm from Cairns et al. 2017.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
     popSize : int, optional
         The size of the population in each generation. The default is 2500.
     tournementSize : int, optional
-        The size of the tournement to run during tournement selection. The default is 5.
+        The size of the tournament to run during tournament selection. The default is 5.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 
@@ -67,13 +67,13 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
             print("------------")
             print(f'Gen {gen}, Best cost: {minCost}')
 
-        # Tournement selection
+        # Tournament selection
         parents = []
         # Generate 2*popSize number of parents
         for j in range(popSize * 2):
-            # Tournement indices
             tour = np.random.choice(np.arange(popSize), tournementSize, replace=False)
-            # Find best individual in the tournement
+            # Tournament indices
+            # Find the best individual in the tournament
             bestInd = pop[tour[0]]
             for i in tour[1:]:
                 if pop[i].cost < bestInd.cost:

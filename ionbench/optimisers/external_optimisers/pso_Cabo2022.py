@@ -63,7 +63,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
 
         if debug:
             print('-------------')
-            print(f'Begginning population: {L}')
+            print(f'Beginning population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
@@ -93,7 +93,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
         # Move positions
         for p in particleList:
             p.position += p.velocity
-            # Enfore bounds by clamping
+            # Enforce bounds by clamping
             if not bm.in_parameter_bounds(bm.original_parameter_space(p.position)):
                 for i in range(bm.n_parameters()):
                     if p.position[i] > ub[i]:

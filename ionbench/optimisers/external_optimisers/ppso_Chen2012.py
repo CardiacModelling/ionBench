@@ -6,7 +6,7 @@ import itertools
 
 def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0.05, w=0.6, debug=False):
     """
-    Runs the perturbed particle swarm optimisation algorithm from Chen et al 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
+    Runs the perturbed particle swarm optimisation algorithm from Chen et al. 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
     Parameters
     ----------
@@ -19,7 +19,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
     n : int, optional
         Number of particles. The default is 20.
     c1 : float, optional
-        Scale of the acceleration towards a particles best positions. The default is 1.4.
+        Scale of the acceleration towards a particle's best positions. The default is 1.4.
     c2 : float, optional
         Scale of the acceleration towards the best point seen across all particles. The default is 1.4.
     qmax : int, optional
@@ -112,7 +112,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
 
         if debug:
             print('-------------')
-            print(f'Begginning population: {L}')
+            print(f'Beginning population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 

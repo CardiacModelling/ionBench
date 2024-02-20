@@ -1,4 +1,4 @@
-# Find the curved line between the steepest direction and the minimum is a quadratic shape is assumed based on the local curvature. Minimise along this line using Brents method, as implemented in Press et al "Numerical Recipes in C" by scipy. Update from Dokos 2004 compared with Dokos 2003 says that if you reach a local minimum whos cost is non-zero, you should weight the residuals and carry on
+# Find the curved line between the steepest direction and the minimum is a quadratic shape is assumed based on the local curvature. Minimise along this line using Brent's method, as implemented in Press et al. "Numerical Recipes in C" by scipy. Update from Dokos 2004 compared with Dokos 2003 says that if you reach a local minimum whose cost is non-zero, you should weight the residuals and carry on
 
 import numpy as np
 import ionbench
@@ -8,7 +8,7 @@ from functools import lru_cache
 
 def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
     """
-    Curvilinear gradient descent from Dokos 2004. This method was first introduced in Dokos 2003, with this implementation using the updated scheme which includes weighted residuals (Dokos 2004). It calculates a curved path which initially follows the steepest descent, but curves to finally converge towards a Gauss-Newton step (minimum of a locally defined quadratic). In order to optimise along this line, we use Scipy's implementation of Brents method (an implementation based on Press et al "Numerical Recipes in C").
+    Curvilinear gradient descent from Dokos 2004. This method was first introduced in Dokos 2003, with this implementation using the updated scheme which includes weighted residuals (Dokos 2004). It calculates a curved path which initially follows the steepest descent, but curves to finally converge towards a Gauss-Newton step (minimum of a locally defined quadratic). In order to optimise along this line, we use Scipy's implementation of Brent's method (an implementation based on Press et al. "Numerical Recipes in C").
 
     Parameters
     ----------
@@ -106,7 +106,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
                 print('Setting weights at initial values')
                 print(f'Setting initial weighted SSE at {weightedSSE}')
         elif weightCounter == 1 and currentCost > bestCost:
-            # Perturb best parameters and make that the starting location. Perturbation chosen to match http://dx.doi.org/https://doi.org/10.26190/unsworks/21047
+            # Perturb the best parameters and make that the starting location. Perturbation chosen to match http://dx.doi.org/https://doi.org/10.26190/unsworks/21047
             if debug:
                 print(f'Current cost ({currentCost}) was actually worse than best so far ({bestCost}) so randomly perturbing parameters which gave best cost')
             x0 = bestParams * np.random.uniform(low=0.9, high=1.1, size=bm.n_parameters())
@@ -127,7 +127,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
             wTmp = np.copy(w)
             w = weight_update(w, r0)
             if debug:
-                print(f'Appled weight update. First weight used to be {wTmp[0]}, and is now {w[0]}')
+                print(f'Applied weight update. First weight used to be {wTmp[0]}, and is now {w[0]}')
 
         if currentCost < bestCost:
             # Update which is the best point so far
@@ -136,7 +136,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
 
         # Begin curvilinear gradient descent
         for k in range(maxInnerIter):
-            # Update number of curvlinear GD iterations
+            # Update number of curvilinear GD iterations
             iterCounter += 1
             if debug:
                 print(f'Curvilinear GD Iteration: {k} of {maxInnerIter}')
@@ -165,7 +165,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
                 print('Eigenvalues:')
                 print(d)
 
-            # Generate function of the curved path from starting point (no step, L(0)=[0,0,0,...]), initially moving in steepest descent direction, convering towards Gauss Newton step at alpha=inf
+            # Generate function of the curved path from starting point (no step, L(0)=[0,0,0,...]), initially moving in the steepest descent direction, converging towards Gauss Newton step at alpha=inf
             def L(alpha):
                 m = np.zeros(len(d))
                 for i in range(len(d)):
@@ -179,14 +179,14 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
             if debug:
                 print(f'L(0): {L(0)}, L(inf): {L(np.inf)}')
 
-            # Minimise bm.SSE(x0+L(alpha)) with respect to alpha using Brents method
+            # Minimise bm.SSE(x0+L(alpha)) with respect to alpha using Brent's method
             # Define function to find weighted SSE from alpha
             # Cache SSE function to help make the code to handle the brent method more robust without needing repeated function evaluations
             @lru_cache(maxsize=None)
             def SSE(alpha):
                 weightedr0 = np.diag(w) @ bm.signed_error(model_params(x0 + L(alpha)))
                 return np.dot(weightedr0, weightedr0)
-            # Run brents method to optimise SSE with respect to alpha
+            # Run Brent's method to optimise SSE with respect to alpha
             try:
                 out = scipy.optimize.brent(SSE, brack=(0, 1, 1e9), tol=1e-8, full_output=True)
                 alpha = out[0]

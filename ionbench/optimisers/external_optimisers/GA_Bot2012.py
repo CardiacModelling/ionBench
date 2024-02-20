@@ -12,7 +12,7 @@ from pymoo.core.population import Population
 
 def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     """
-    Runs the genetic algorithm from Bot et al 2012.
+    Runs the genetic algorithm from Bot et al. 2012.
 
     Parameters
     ----------
@@ -67,7 +67,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
         if debug:
             print("------------")
             print(f'Gen {gen}, Best cost: {minCost}')
-        # Tournement selection
+        # Tournament selection
         newPop = []
         for j in range(2):
             perm = np.random.permutation(popSize)

@@ -11,7 +11,7 @@ from pymoo.operators.crossover.sbx import SBX
 
 def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
     """
-    Runs the genetic algorithm from Smirnov et al 2020.
+    Runs the genetic algorithm from Smirnov et al. 2020.
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, po
         if debug:
             print("------------")
             print(f'Gen {gen}, Best cost: {min(costVec)}, Average cost: {np.mean(costVec)}')
-        # Tournement selection
+        # Tournament selection
         newPop = []
         for j in range(2):
             perm = np.random.permutation(popSize)

@@ -7,7 +7,7 @@ import scipy.optimize
 
 def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     """
-    Run differential evolution, as defined by Zhou et al 2009. This algorithm is based on scheme DE/rand/1 of Storn 1999.
+    Run differential evolution, as defined by Zhou et al. 2009. This algorithm is based on scheme DE/rand/1 of Storn 1999.
 
     Parameters
     ----------
@@ -20,9 +20,9 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     popSize : int, optional
         The size of the population in each generation. The default is None, in which case 10 times the number of parameters will be used.
     F : float, optional
-        The weight applied to the difference vector. No recommended value is reported by Zhou et al 2009. The range is [0.5,1.0] is recommended by Storn 1996 (the citation within Zhou et al 2009). We have arbitrarily chosen 0.5 to be the default value.
+        The weight applied to the difference vector. No recommended value is reported by Zhou et al. 2009. The range is [0.5,1.0] is recommended by Storn 1996 (the citation within Zhou et al. 2009). We have arbitrarily chosen 0.5 to be the default value.
     CR : float, optional
-        The crossover probability. No recommended value is reported by Zhou et al 2009. The value of 0.3 is recommended by Storn 1996 (the citation within Zhou et al 2009), so we use this as the default value.
+        The crossover probability. No recommended value is reported by Zhou et al. 2009. The value of 0.3 is recommended by Storn 1996 (the citation within Zhou et al. 2009), so we use this as the default value.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 

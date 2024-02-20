@@ -87,7 +87,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             return x_worst
 
         def get_second_worst(self):
-            # returns second worst point in the simplex
+            # returns second-worst point in the simplex
             x_worst = self.get_worst()
             x_secondWorst = self.points[0]
             for p in self.points:
@@ -96,7 +96,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             return x_secondWorst
 
         def centroid(self, x_worst):
-            # find the centroid of the simplex by averaging the x positions, not including x_worst. Dont generate a point, cost not needed
+            # find the centroid of the simplex by averaging the x positions, not including x_worst. Don't generate a point, cost not needed
             cen = [0] * bm.n_parameters()
             for p in self.points:
                 if p != x_worst:

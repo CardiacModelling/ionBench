@@ -5,7 +5,7 @@ from functools import lru_cache
 
 def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     """
-    Runs lm (Levenberg-Marquardt) least squares optimiser from Scipy.
+    Runs lm (Levenberg-Marquardt), the least squares optimiser from Scipy.
 
     Parameters
     ----------

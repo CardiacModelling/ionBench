@@ -5,7 +5,7 @@ import numpy as np
 
 def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=20000, debug=False):
     """
-    Runs the pattern search algorithm from Kohjitani et al 2022.
+    Runs the pattern search algorithm from Kohjitani et al. 2022.
 
     Parameters
     ----------
@@ -49,7 +49,7 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
             MSEp = cost_func(tuple(NP))  # Positive MSE
             NP[i] = home - Stp  # Negative Step
             MSEn = cost_func(tuple(NP))  # Negative MSE
-            minMSE = min(MSEp, MSEn)  # MSE in best direction (postive or negative Stp)
+            minMSE = min(MSEp, MSEn)  # MSE in the best direction (positive or negative Stp)
             if minMSE < MSE:  # If improvement found
                 if MSEp < MSEn:  # If positive step is better
                     NP[i] = home + Stp  # Take positive step

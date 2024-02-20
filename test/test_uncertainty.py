@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def test_profile_likelihood(monkeypatch):
-    # Generate profile likelihood plots (dont actually plot). Only checks for crashes/error
+    # Generate profile likelihood plots (don't actually plot). Only checks for crashes/error
     def var(x):
         return np.linspace(1 - x, 1 + x, 3)
     monkeypatch.setattr(plt, 'show', lambda: None)

@@ -1,12 +1,12 @@
 import numpy as np
 import ionbench
 from functools import lru_cache
-# Velocity of new points from NM is undefined. New particles from NM (either accepting or shrinking) maintain their old locally best position and previous velocity. We dont update the velocity of particles which underwent a NM step
+# Velocity of new points from NM is undefined. New particles from NM (either accepting or shrinking) maintain their old locally best position and previous velocity. We don't update the velocity of particles which underwent a NM step
 
 
 def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
     """
-    Run the hybrid Nelder-Mead and PSO optimiser from Liu et al 2011.
+    Run the hybrid Nelder-Mead and PSO optimiser from Liu et al. 2011.
 
     Parameters
     ----------
@@ -70,7 +70,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
             return x_worst
 
         def get_second_worst(self):
-            # returns second worst point in the simplex
+            # returns second-worst point in the simplex
             x_worst = self.get_worst()
             x_secondWorst = self.particles[0]
             for p in self.particles:
@@ -79,7 +79,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
             return x_secondWorst
 
         def centroid(self, x_worst):
-            # find the centroid of the simplex by averaging the positions, not including x_worst. Dont generate a point, cost not needed
+            # find the centroid of the simplex by averaging the positions, not including x_worst. Don't generate a point, cost not needed
             cen = [0] * bm.n_parameters()
             for p in self.particles:
                 if p != x_worst:
@@ -178,7 +178,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
 
         if debug:
             print('-------------')
-            print(f'Begginning population: {L}')
+            print(f'Beginning population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
@@ -216,7 +216,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
         # Move positions
         for p in particleList[bm.n_parameters() + 1:]:
             p.position += p.velocity
-            # Enfore bounds by clamping
+            # Enforce bounds by clamping
             if not bm.in_parameter_bounds(bm.original_parameter_space(p.position)):
                 for i in range(bm.n_parameters()):
                     if p.position[i] > ub[i]:

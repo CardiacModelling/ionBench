@@ -23,7 +23,7 @@ import mygrad as mg
 # Copyright (c) 2020-2024 University of Nottingham. All rights reserved.
 # =============================================================================
 
-# noinspection PyProtectedMember,PyListCreation,PyUnboundLocalVariable,PyUnusedLocal
+# noinspection PyProtectedMember,PyListCreation,PyUnboundLocalVariable,PyUnusedLocal,GrazieInspection
 def get_matrix_function(model):
     """
     Generates a MyGrad compatible _matrix_function for the automatic differentiation in the calculation of Markov model steady states. 

@@ -11,7 +11,7 @@ from pymoo.operators.crossover.pntx import SinglePointCrossover
 
 def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
     """
-    Runs the genetic algorithm from Gurkiewicz et al 2007. This uses tournement selection (tournement size of 2) and single point crossover. This version of the algorithm, labelled version b, uses gaussian perturbations as the mutation method.
+    Runs the genetic algorithm from Gurkiewicz et al. 2007. This uses tournament selection (tournament size of 2) and single point crossover. This version of the algorithm, labelled version b, uses gaussian perturbations as the mutation method.
 
     Parameters
     ----------
@@ -66,7 +66,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
         if debug:
             print("------------")
             print(f'Gen {gen}, Best cost: {minCost}')
-        # Tournement selection
+        # Tournament selection
         newPop = []
         for j in range(2):
             perm = np.random.permutation(popSize)

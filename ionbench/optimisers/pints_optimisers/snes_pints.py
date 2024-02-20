@@ -6,7 +6,7 @@ from ionbench.optimisers.pints_optimisers import classes_pints
 
 def run(bm, x0=[], maxIter=1000, debug=False):
     """
-    Runs SNES (Seperable Natural Evolution Strategy) from Pints using a benchmarker.
+    Runs SNES (Separable Natural Evolution Strategy) from Pints using a benchmarker.
 
     Parameters
     ----------
@@ -17,7 +17,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     maxIter : int, optional
         Number of iterations of SNES to run. The default is 1000.
     debug : bool, optional
-        If True, logging messages are printed every iteration. Otherwise the default of every iteration for the first 3 and then every 20 iterations. The default is False.
+        If True, logging messages are printed every iteration. Otherwise, the default of every iteration for the first 3 and then every 20 iterations. The default is False.
 
     Returns
     -------

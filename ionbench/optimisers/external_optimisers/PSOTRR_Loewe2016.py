@@ -6,11 +6,11 @@ from functools import lru_cache
 
 def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     """
-    Runs the particle swarm optimisation from Loewe et al 2016 followed by trust region reflective. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
+    Runs the particle swarm optimisation from Loewe et al. 2016 followed by trust region reflective. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
 
     Notes on using this optimiser:
-        It is unclear the specifics of the optimisation used in Loewe et al 2016. It does not describe the method for sampling the initial positions or velocities of the particles (we use uniform distribution between bounds for position and expect Loewe et al 2016 did similarly, and zeros for the initial velocities, waiting for them to be set by TRR). The initial velocities may be different to those used in the Loewe et al 2016, but luckily the algorithm quickly overwrites the velocities after the first iteration based on the movement under TRR so it is only a difference between randomly sampled points and running TRR (our method) or randomly sampling points, moving them in a random direction and applying the bounds then applying TRR (a method with a non-zero random velocity).
-        The TRR method in Loewe et al 2016 using Matlab's lsqnonlin implementation. As a Python based substitute we have used Scipy. Unfortunately, the Scipy implementation does not allow a maximum number of iterations to be specified. We have specified the maximum number of cost function evaluations (which appears to not include calls to calculate the gradient), which is strictly more than the number of iterations, but still of a comparable size. There may also be differences in how the radius of the trust region is calculated and updated between these two implementations.
+        It is unclear the specifics of the optimisation used in Loewe et al. 2016. It does not describe the method for sampling the initial positions or velocities of the particles (we use uniform distribution between bounds for position and expect Loewe et al. 2016 did similarly, and zeros for the initial velocities, waiting for them to be set by TRR). The initial velocities may be different to those used in the Loewe et al. 2016, but luckily the algorithm quickly overwrites the velocities after the first iteration based on the movement under TRR, so it is only a difference between randomly sampled points and running TRR (our method) or randomly sampling points, moving them in a random direction and applying the bounds then applying TRR (a method with a non-zero random velocity).
+        The TRR method in Loewe et al. 2016 using Matlab's lsqnonlin implementation. As a Python based substitute we have used Scipy. Unfortunately, the Scipy implementation does not allow a maximum number of iterations to be specified. We have specified the maximum number of cost function evaluations (which appears to not include calls to calculate the gradient), which is strictly more than the number of iterations, but still of a comparable size. There may also be differences in how the radius of the trust region is calculated and updated between these two implementations.
 
     Parameters
     ----------
@@ -21,11 +21,11 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     n : int, optional
         Number of particles. The default is 96.
     K : int, optional
-        Number of function calls allowed in TRR. Note that this uses the function calls reported by scipy, similar in scale to the number of iterations of TRR used in Loewe et al 2016. This is not the true number of function calls to the benchmarker as this appears to not include finite difference gradient calculations. The default is 5.
+        Number of function calls allowed in TRR. Note that this uses the function calls reported by scipy, similar in scale to the number of iterations of TRR used in Loewe et al. 2016. This is not the true number of function calls to the benchmarker as this appears to not include finite difference gradient calculations. The default is 5.
     maxIter : int, optional
         Maximum number of iterations. The default is 1000.
     phi1 : float, optional
-        Scale of the acceleration towards a particles best positions. The default is 2.05.
+        Scale of the acceleration towards a particle's best positions. The default is 2.05.
     phi2 : float, optional
         Scale of the acceleration towards the best point seen across all particles. The default is 2.05.
     debug : bool, optional
@@ -116,7 +116,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
         if debug:
             print('-------------')
-            print(f'Begginning population: {L}')
+            print(f'Beginning population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
@@ -153,7 +153,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
     # Iterations of TRR
     if debug:
-        print("Begginning TRR")
+        print("Beginning TRR")
     bounds = ([0] * bm.n_parameters(), [1] * bm.n_parameters())
     for p in particleList:
         out = scipy.optimize.least_squares(trr_error, p.position, method='trf', diff_step=1e-3, max_nfev=2 * K, bounds=bounds, verbose=verbose)

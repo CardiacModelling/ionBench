@@ -4,7 +4,7 @@ import ionbench
 
 def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
     """
-    Runs the PSO algorithm defined by Seemann et al 2022.
+    Runs the PSO algorithm defined by Seemann et al. 2022.
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
 
         if debug:
             print('-------------')
-            print(f'Begginning population: {L}')
+            print(f'Beginning population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
