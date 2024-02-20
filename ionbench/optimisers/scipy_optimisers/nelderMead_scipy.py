@@ -89,8 +89,6 @@ def get_modification(modNum=1):
     elif modNum == 2:
         mod = ionbench.modification.Davies2011()
     elif modNum == 3:
-        mod = ionbench.modification.Iozzia2014()
-    elif modNum == 4:
         mod = ionbench.modification.Moreno2016()
     else:
         mod = ionbench.modification.Empty(name='nelderMead_scipy')
