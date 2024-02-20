@@ -303,6 +303,8 @@ class Benchmarker:
             self._rates_bounded = False
             self.lb = copy.copy(self.lbStandard)
             self.ub = copy.copy(self.ubStandard)
+            self.rateMin = 1.67e-5
+            self.rateMax = 1e3
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
