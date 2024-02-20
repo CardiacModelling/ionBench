@@ -6,7 +6,7 @@ import copy
 from functools import lru_cache
 
 
-def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
+def run(bm, x0=[], nGens=10, popSize=2500, tournamentSize=5, debug=False):
     """
     Runs the genetic algorithm from Cairns et al. 2017.
 
@@ -20,7 +20,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
         The number of generations to run the optimisation algorithm for. The default is 10.
     popSize : int, optional
         The size of the population in each generation. The default is 2500.
-    tournementSize : int, optional
+    tournamentSize : int, optional
         The size of the tournament to run during tournament selection. The default is 5.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
@@ -71,8 +71,8 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournementSize=5, debug=False):
         parents = []
         # Generate 2*popSize number of parents
         for j in range(popSize * 2):
-            tour = np.random.choice(np.arange(popSize), tournementSize, replace=False)
             # Tournament indices
+            tour = np.random.choice(np.arange(popSize), tournamentSize, replace=False)
             # Find the best individual in the tournament
             bestInd = pop[tour[0]]
             for i in tour[1:]:
