@@ -16,7 +16,8 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
         for j in variables:
             titles.append(f'Run {i} - {j}')
     titles += ['Success Rate', 'Expected Cost FE', 'Expected Cost Time', 'Expected Grad FE', 'Expected Grad Time',
-               'Tier', 'Tier Score (Sensitivities)', 'Tier Score (Finite Difference)']
+               'Tier', 'Tier Score (Sensitivities)', 'Tier Score (Finite Difference)', 'Expected Time (Sensitivities)',
+               'Expected Time (Finite Difference)', 'Expected Cost']
     writer.writerow(titles)
     for app in ionbench.APP_UNIQUE:
         costAtConv = []
@@ -55,7 +56,6 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
                     gradEvalsAtConv.append(bm.tracker.gradSolves[i])
                     costAtConv.append(bm.tracker.costs[i])
                     break
-
             bm.reset()
         successRate = np.mean(np.array(paramIdenAtConv) == bm.n_parameters())
         if all(np.isnan(gradAverTime)):
@@ -71,6 +71,9 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
             expectedGradEvals = np.mean(gradEvalsAtConv)
             tier = 1
             score = expectedCostEvals * costTime + expectedGradEvals * gradTime
+            timeSens = np.nan
+            timeFD = np.nan
+            expectedCost = np.nan
             if 'SPSA' in app['module']:
                 scoreFD = (expectedCostEvals + expectedGradEvals * 2) * costTime
             else:
@@ -83,6 +86,9 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
             Tfail = np.mean([gradEvalsAtConv[t] for t in range(5) if paramIdenAtConv[t] != bm.n_parameters()])
             expectedGradEvals = Tsucc + Tfail * (1 - successRate) / successRate
             tier = 2
+            timeSens = np.nan
+            timeFD = np.nan
+            expectedCost = np.nan
             score = expectedCostEvals * costTime + expectedGradEvals * gradTime
             if 'SPSA' in app['module']:
                 scoreFD = (expectedCostEvals + expectedGradEvals * 2) * costTime
@@ -90,16 +96,17 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
                 scoreFD = (expectedCostEvals + expectedGradEvals * (bm.n_parameters() + 1)) * costTime
         else:
             tier = 3
-            expectedCostEvals = np.inf
-            expectedGradEvals = np.inf
-            score = np.mean(np.array(costEvalsAtConv) * costTime + np.array(gradEvalsAtConv) * gradTime) / np.mean(
-                paramIdenAtConv)
+            timeSens = np.mean(np.array(costEvalsAtConv) * costTime + np.array(gradEvalsAtConv) * gradTime)
+            expectedCost = np.mean(bestCost)
+            expectedCostEvals = np.nan
+            expectedGradEvals = np.nan
+            score = np.nan
+            scoreFD = np.nan
             if 'SPSA' in app['module']:
-                scoreFD = np.mean(np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * 2) * costTime / np.mean(
-                    paramIdenAtConv)
+                timeFD = np.mean(np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * 2) * costTime
             else:
-                scoreFD = np.mean(np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * (
-                            bm.n_parameters() + 1)) * costTime / np.mean(paramIdenAtConv)
+                timeFD = np.mean(np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * (
+                        bm.n_parameters() + 1)) * costTime
         optimiserName = app['module'].split('.')[-1]
         modNum = app['modNum']
         mod = importlib.import_module(app['module']).get_modification(app['modNum'])
@@ -107,11 +114,20 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
         for i in range(5):
             row += [costAtConv[i], bestCost[i], costEvalsAtConv[i], gradEvalsAtConv[i], paramIdenAtConv[i],
                     costAverTime[i], gradAverTime[i]]
-        row += [successRate, expectedCostEvals, costTime, expectedGradEvals, gradTime, tier, score, scoreFD]
+        row += [successRate, expectedCostEvals, costTime, expectedGradEvals, gradTime, tier, score, scoreFD, timeSens,
+                timeFD, expectedCost]
         writer.writerow(row)
 
 
 # %%
+def upper_rep(match):
+    return match.group(1).upper()
+
+
+def title_rep(match):
+    return match.group(1).title()
+
+
 def full_name(s):
     # Put in spaces before capital letters, ignoring acronyms, capitalise first letter
     s2 = s[0].upper()
@@ -121,18 +137,12 @@ def full_name(s):
         else:
             s2 += s[i]
     s2 += s[-4:]
-    # Replace _ with spaces
+    # Remove _
     s = s2.replace('_', '')
     # Put in spaces before years
     s = re.sub(r'(\d{4})', r' \1', s)
     # Space before scipy of pints
     s = re.sub(r'(scipy|pints)', r' (\1)', s)
-
-    def upper_rep(match):
-        return match.group(1).upper()
-
-    def title_rep(match):
-        return match.group(1).title()
 
     # Make remaining acronyms upper case
     s = re.sub(r'(?i)^(cmaes|lm|slsqp|ppso|pso|snes|xnes)', upper_rep, s)
@@ -146,11 +156,23 @@ df = df.sort_values(['Tier', 'Tier Score (Sensitivities)'])
 df.to_csv('resultsFile-sorted.csv', index=False, na_rep='NA')
 
 header = ['Optimiser', 'Modification', 'Tier', 'Tier Score (Sensitivities; s)', 'Tier Score (Finite Difference; s)']
-caption = 'Preliminary results for the approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
-label = 'tab:prelimResults'
+caption = 'Preliminary results for the successful approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
+label = 'tab:prelimResultsSucc'
 
-df.to_latex(buf='results-latex.txt', columns=['Optimiser Name', 'Mod Name', 'Tier', 'Tier Score (Sensitivities)',
-                                              'Tier Score (Finite Difference)'], header=header, index=False,
+df.to_latex(buf='results-latex-succ.txt', columns=['Optimiser Name', 'Mod Name', 'Tier', 'Tier Score (Sensitivities)',
+                                                   'Tier Score (Finite Difference)'], header=header, index=False,
             float_format='%.2f', formatters={'Tier': lambda x: int(x), 'Optimiser Name': lambda x: full_name(x),
                                              'Mod Name': lambda x: full_name(x)}, column_format='llrrr', longtable=True,
+            label=label, caption=caption)
+
+header = ['Optimiser', 'Modification', 'Tier', 'Time (Sensitivities; s)', 'Time (Finite Difference; s)',
+          'Expected Cost']
+caption = 'Preliminary results for the failed approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
+label = 'tab:prelimResultsFail'
+df.to_latex(buf='results-latex-fail.txt',
+            columns=['Optimiser Name', 'Mod Name', 'Tier', 'Expected Time (Sensitivities)',
+                     'Expected Time (Finite Difference)', 'Expected Cost'], header=header, index=False,
+            float_format='%.2f', formatters={'Tier': lambda x: int(x), 'Optimiser Name': lambda x: full_name(x),
+                                             'Mod Name': lambda x: full_name(x)}, column_format='llrrrr',
+            longtable=True,
             label=label, caption=caption)
