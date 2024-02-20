@@ -9,7 +9,7 @@ def sub_dict(d, keys):
     return dict((k, d[k]) for k in keys if k in d)
 
 
-class Test_scipy:
+class TestScipy:
     # Check all scipy optimisers run and improve cost compared to x0
     bm = ionbench.problems.staircase.HH(sensitivities=True)
     bm._useScaleFactors = True  # Helps the stability of conjugate GD (avoiding big steps which lead to parameters that result in failed model solves)
@@ -25,7 +25,7 @@ class Test_scipy:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset = False)
+        self.bm.reset(fullReset=False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
@@ -40,7 +40,7 @@ class Test_scipy:
         assert cost_opt < 5e-3
 
 
-class Test_pints:
+class TestPints:
     # Check all pints optimisers run and improve cost compared to x0
     bm = ionbench.problems.staircase.HH()
     bm.plotter = False
@@ -55,7 +55,7 @@ class Test_pints:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, maxIter=5)
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset = False)
+        self.bm.reset(fullReset=False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
@@ -73,7 +73,7 @@ class Test_pints:
         assert cost_opt < 5e-3
 
 
-class Test_external:
+class TestExternal:
     # Check all external optimisers run
     bm = ionbench.problems.staircase.HH(sensitivities=True)
     bm._useScaleFactors = True
@@ -90,7 +90,7 @@ class Test_external:
         module = import_module(opt)
         x0_opt = module.run(self.bm, x0=x0, **sub_dict(hyperparams, signature(module.run).parameters))
         cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset = False)
+        self.bm.reset(fullReset=False)
         assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_EXT)

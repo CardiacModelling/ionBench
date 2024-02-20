@@ -90,7 +90,7 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
                 bm.evaluate(NP)
                 return NP
 
-        Stp = Stp * RedFct  # Decrease step size if all neighbouring points are worse
+        Stp *= RedFct  # Decrease step size if all neighbouring points are worse
 
     bm.evaluate(NP)
     return NP

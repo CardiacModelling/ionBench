@@ -32,7 +32,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         The best parameters identified.
 
     """
-    class Individual():
+    class Individual:
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()
@@ -48,7 +48,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         # Get the number of parameters to perturb in crossover
         L = 1
         while np.random.rand() < CR and L < bm.n_parameters():
-            L = L + 1
+            L += 1
         return L
 
     @lru_cache(maxsize=None)

@@ -21,8 +21,8 @@ for i in range(bmLoewe.n_parameters()):
         lb.append(bmLoewe.defaultParams[i] - 60 * bmLoewe.paramSpaceWidth)
         ub.append(bmLoewe.defaultParams[i] + 60 * bmLoewe.paramSpaceWidth)
     else:
-        lb.append(bmLoewe.defaultParams[i] * 10**(-1 * bmLoewe.paramSpaceWidth))
-        ub.append(bmLoewe.defaultParams[i] * 10**(1 * bmLoewe.paramSpaceWidth))
+        lb.append(bmLoewe.defaultParams[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
+        ub.append(bmLoewe.defaultParams[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
 bmLoewe.addBounds([lb, ub])
 
 bmHH._useScaleFactors = False
@@ -32,13 +32,12 @@ bmHH.addBounds([lb, ub])
 
 # CMA-ES run
 for i in range(5):
-    bmHH.reset(fullReset = False)
+    bmHH.reset(fullReset=False)
     ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmHH)
 
 for i in range(5):
-    bmLoewe.reset(fullReset = False)
+    bmLoewe.reset(fullReset=False)
     ionbench.optimisers.pints_optimisers.cmaes_pints.run(bmLoewe, maxIter=3000)
-
 
 # Loewe et al 2016 approach
 bmHH = ionbench.problems.staircase.HH()
@@ -52,8 +51,8 @@ for i in range(bmLoewe.n_parameters()):
         lb.append(bmLoewe.defaultParams[i] - 60 * bmLoewe.paramSpaceWidth)
         ub.append(bmLoewe.defaultParams[i] + 60 * bmLoewe.paramSpaceWidth)
     else:
-        lb.append(bmLoewe.defaultParams[i] * 10**(-1 * bmLoewe.paramSpaceWidth))
-        ub.append(bmLoewe.defaultParams[i] * 10**(1 * bmLoewe.paramSpaceWidth))
+        lb.append(bmLoewe.defaultParams[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
+        ub.append(bmLoewe.defaultParams[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
 bmLoewe.addBounds([lb, ub])
 
 bmHH._useScaleFactors = False

@@ -50,6 +50,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
 
     class Point:
         def __init__(self, x):
+            self.noise = None
             self.x = wrap_around_boundaries(x)
             self.cost = cost(tuple(x))
             self.regen_noise()
@@ -122,7 +123,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             # attempt reflection
             xr = Point(2 * c - x_worst.x)
             xr.noise = -xr.noise
-            if xr.tot_cost() < x_secondWorst.tot_cost() and xr.tot_cost() >= x_best.tot_cost():
+            if x_secondWorst.tot_cost() > xr.tot_cost() >= x_best.tot_cost():
                 if debug:
                     print("Accept reflection")
                 self.accept(xr)
@@ -144,7 +145,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
                 # contract
                 if debug:
                     print("Attempt contraction")
-                if xr.tot_cost() < x_worst.tot_cost() and xr.tot_cost() >= x_secondWorst.tot_cost():
+                if x_worst.tot_cost() > xr.tot_cost() >= x_secondWorst.tot_cost():
                     # outside contract
                     xc = Point((xr.x + c) / 2)
                     xc.noise = -xc.noise

@@ -106,7 +106,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
             # attempt reflection
             xr = Particle(position=2 * c - x_worst.position)
             xr.set_cost(cost_func(tuple(xr.position)))
-            if xr.currentCost < x_secondWorst.currentCost and xr.currentCost >= x_best.currentCost:
+            if x_secondWorst.currentCost > xr.currentCost >= x_best.currentCost:
                 if debug:
                     print("Accept reflection")
                 self.accept(xr)
@@ -128,7 +128,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
                 # contract
                 if debug:
                     print("Attempt contraction")
-                if xr.currentCost < x_worst.currentCost and xr.currentCost >= x_secondWorst.currentCost:
+                if x_worst.currentCost > xr.currentCost >= x_secondWorst.currentCost:
                     # outside contract
                     xc = Particle(position=(xr.position + c) / 2)
                     xc.set_cost(cost_func(tuple(xc.position)))

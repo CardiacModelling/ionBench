@@ -36,7 +36,7 @@ def run(bm, x0=[], nGens=10, popSize=2500, tournamentSize=5, debug=False):
 
     boundsRange = bm.input_parameter_space(bm.ub) - bm.input_parameter_space(bm.lb)
 
-    class Individual():
+    class Individual:
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()

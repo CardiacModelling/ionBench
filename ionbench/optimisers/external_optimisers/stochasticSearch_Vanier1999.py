@@ -48,7 +48,7 @@ def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=F
             x0_cost = trial_cost
             if debug:
                 print('Found improvement')
-        var = var * varCont
+        var *= varCont
         if var < varMin:
             var = varInit
 

@@ -37,7 +37,7 @@ def run(bm, x0=[], nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
         The best parameters identified.
 
     """
-    class Individual():
+    class Individual:
         def __init__(self):
             if len(x0) == 0:
                 self.x = bm.sample()

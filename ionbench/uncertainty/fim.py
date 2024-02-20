@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-def secondDeriv(bm, i, j, step=1e-4, buffer=1e-4):
+def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
     """
     Calculate the second order partial derivative of the log likelihood (specifically the negative of the sum of squared errors) in parameters i and j.
 
@@ -128,11 +128,11 @@ def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
         print(bm.defaultParams)
         print('Storing in this benchmarker object as the true parameters')
     for i, j in itertools.combinations(range(bm.n_parameters()), 2):
-        d = secondDeriv(bm, i, j, step=step, buffer=buffer) * 1 / (2 * sigma**2)
+        d = second_deriv(bm, i, j, step=step, buffer=buffer) * 1 / (2 * sigma ** 2)
         mat[i, j] = d
         mat[j, i] = d
     for i in range(bm.n_parameters()):
-        mat[i, i] = secondDeriv(bm, i, i, step=step, buffer=buffer) * 1 / (2 * sigma**2)
+        mat[i, i] = second_deriv(bm, i, i, step=step, buffer=buffer) * 1 / (2 * sigma ** 2)
     eigs = np.linalg.eigvals(mat)
     plt.eventplot(-eigs, orientation='vertical')
     plt.yscale('log')
@@ -160,7 +160,7 @@ def explore_solver_noise(bm):
     """
     bm._useScaleFactors = True
     p = bm.input_parameter_space(bm.defaultParams)
-    params = [copy.copy(p) for i in range(100)]
+    params = [copy.copy(p) for _ in range(100)]
     for i in range(100):
         params[i][0] = 0.9999999**i
     # print(params)
