@@ -368,7 +368,7 @@ class Benchmarker:
 
     def use_sensitivities(self):
         """
-        Turn on sensitivities for a benchmarker. Also sets the parameter self.sensitivityCalc to True
+        Turn on sensitivities for a benchmarker. Also sets the parameter self.sensitivityCalc to True. If sensitivities are already enabled (by checking bm.sensitivityCalc), then this method will do nothing.
 
         Parameters
         ----------
@@ -379,12 +379,13 @@ class Benchmarker:
         None.
 
         """
-        paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
-                                         sensitivities=([self._outputName], paramNames))
-        if 'staircase' in self._name:
-            self.simSens.set_tolerance(1e-9, 1e-9)
-        self.sensitivityCalc = True
+        if not self.sensitivityCalc:
+            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+            self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
+                                             sensitivities=([self._outputName], paramNames))
+            if 'staircase' in self._name:
+                self.simSens.set_tolerance(1e-9, 1e-9)
+            self.sensitivityCalc = True
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         """
