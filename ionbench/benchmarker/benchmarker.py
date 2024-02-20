@@ -410,12 +410,6 @@ class Benchmarker:
             The gradient of the RMSE cost, evaluated at the inputted parameters.
 
         """
-        curr = None
-        sens = None
-        J = None
-        grad = None
-        cost = None
-        failed = False
         # Undo any transforms
         if inInputSpace:
             parameters = self.original_parameter_space(parameters)
@@ -427,19 +421,32 @@ class Benchmarker:
             warnings.warn(
                 "Current benchmarker problem not configured to use derivatives. Will recompile the simulation object with this enabled.")
             self.use_sensitivities()
-
-        # Abort solving if the parameters are out of bounds
-        if not self.in_parameter_bounds(parameters):
-            failed = True
+        # Now to find grad, cost, J (jacobian) and error (residuals)
+        # First check if the parameters are out of bounds
+        # Abort solving if the parameters are out of bounds (if staircase, don't check bounded)
+        inParameterBounds = self.in_parameter_bounds(parameters, boundedCheck='staircase' not in self._name)
+        inRateBounds = self.in_rate_bounds(parameters, boundedCheck='staircase' not in self._name)
+        if not inParameterBounds or not inRateBounds:
+            # Gradient out of bounds so use penalty function
             incrementSolveCounter = False
-            warnings.warn(
-                'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            # The start and end variables won't be recorded since incrementSolveCounter is False but need to be defined for the tracker.update function to be called
-            start = 0
-            end = 0
-
+            # Calculate gradient of penalty function
+            parametersMG = [mg.Tensor(p) for p in parameters]
+            penalty = self.parameter_penalty(parametersMG) + self.rate_penalty(parametersMG)
+            assert penalty.data > 0
+            penalty.backward()
+            grad = np.zeros(self.n_parameters())
+            for i in range(self.n_parameters()):
+                grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
+            cost = float(penalty.data)
+            error = [float(penalty.data)]*len(self.data)
+            J = np.zeros((len(self.data), self.n_parameters()))
+            for i in range(len(self.data)):
+                J[i,] = grad
+            self.tracker.update(parameters, incrementSolveCounter=False, solveType='grad', cost=cost,
+                                solveTime=0)
         else:
-            # Get sensitivities
+            # Inside any bounds, so we can get sensitivities
+            # Will get sensitivities and find the J (jacobian) and curr (current), then exit the try except else block to calculate grad, cost and error from J and curr
             self.simSens.reset()
             self.set_params(parameters)
             self.set_steady_state(parameters)
@@ -448,41 +455,39 @@ class Benchmarker:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax, self.freq))
                 sens = np.array(sens)
             except myokit.SimulationError:
-                failed = True
+                # If the model fails to solve, we will assume the cost is infinite and the jacobian/gradient points back towards good parameters
+                end = time.monotonic()
                 warnings.warn(
                     'Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            end = time.monotonic()
-
-        if failed:
-            self.tracker.update(parameters, incrementSolveCounter=incrementSolveCounter, solveType='grad',
-                                solveTime=end - start)
-            error = np.array([np.inf] * len(self.data))
-            # use grad to point back to reasonable parameter space
-            grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
-            if residuals:
-                J = np.zeros((len(error), self.n_parameters()))
-                for i in range(len(error)):
-                    J[i,] = grad
-        else:
-            # Convert to cost derivative or residual jacobian
-            error = curr - self.data
-            cost = self.rmse(curr, self.data)
-
-            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter, solveType='grad',
-                                solveTime=end - start)
-
-            if residuals:
+                self.tracker.update(parameters, incrementSolveCounter=False, solveType='grad',
+                                    solveTime=end - start)
+                curr = np.array([np.inf] * len(self.data))
+                # use grad to point back to reasonable parameter space
+                # Define jacobian
+                J = np.zeros((len(curr), self.n_parameters()))
+                tmp = -1 / (self.original_parameter_space(self.sample()) - parameters)
+                for i in range(len(curr)):
+                    J[i,] = tmp
+            else:
+                # Here the model successfully solved, so we can calculate the jacobian
+                end = time.monotonic()
+                # Define the jacobian from the sensitivities
                 J = np.zeros((len(curr), self.n_parameters()))
                 for i in range(len(curr)):
                     for j in range(self.n_parameters()):
                         J[i, j] = sens[i, 0, j]
-            else:
-                grad = []
-                for i in range(self.n_parameters()):
-                    if 'moreno' in self._name:
-                        grad.append(np.dot(error * self.weights, sens[:, 0, i]) / cost)
-                    else:
-                        grad.append(np.dot(error, sens[:, 0, i]) / (len(error) * cost))
+            # Calculate the gradient from the jacobian
+            grad = []
+            error = curr - self.data
+            cost = self.rmse(curr, self.data)
+            for i in range(self.n_parameters()):
+                if 'moreno' in self._name:
+                    grad.append(np.dot(error * self.weights, J[:, i]) / cost)
+                else:
+                    grad.append(np.dot(error, J[:, i]) / (len(self.data) * cost))
+            self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
+                                solveType='grad',
+                                solveTime=end - start)
 
         # Map derivatives to input space
         if inInputSpace:
@@ -714,10 +719,12 @@ class Benchmarker:
             The penalty to apply for parameter bound violations.
         """
         # Penalty increases linearly with parameters out of bounds
-        penalty = 1e4 * np.sum(np.abs(parameters - self.ub), where=parameters > self.ub)
-        penalty += 1e4 * np.sum(np.abs(parameters - self.lb), where=parameters < self.lb)
-        # Minimum penalty per parameter violation
-        penalty += 1e4 * np.sum(np.logical_or(parameters > self.ub, parameters < self.lb))
+        penalty = 0
+        for i in range(self.n_parameters()):
+            if parameters[i] < self.lb[i]:
+                penalty += 1e4 + 1e4 * np.abs(parameters[i] - self.lb[i])
+            elif parameters[i] > self.ub[i]:
+                penalty += 1e4 + 1e4 * np.abs(parameters[i] - self.ub[i])
         return penalty
 
     def rate_penalty(self, parameters):
