@@ -39,10 +39,6 @@ for i in range(bm.n_parameters()):
     plt.show()
 
 # %% Noise bias as a function of data frequency
-import ionbench
-import numpy as np
-import matplotlib.pyplot as plt
-
 bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
@@ -85,10 +81,6 @@ for i in range(bm.n_parameters()):
     plt.show()
 
 # %% What does noise bias actually change in the current
-import ionbench
-import numpy as np
-import matplotlib.pyplot as plt
-
 bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
@@ -111,10 +103,6 @@ plt.plot(np.arange(0, bm.tmax, bm.freq), optCurrent - defCurrent)
 plt.show()
 
 # %% Sensitivity plots
-import ionbench
-import numpy as np
-import matplotlib.pyplot as plt
-
 bm = ionbench.problems.staircase.MM(sensitivities=True)
 p = bm.defaultParams
 # Get sensitivities
