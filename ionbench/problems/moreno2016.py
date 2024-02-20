@@ -28,7 +28,6 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._ssiBounds = None
         self._actBounds = None
         self._rfiBounds = None
-        self._rudbBounds = None
         self._tauBounds = None
         self.rateMin = 1.67e-5
         self.rateMax = 1e3
@@ -181,37 +180,6 @@ class INa(ionbench.benchmarker.Benchmarker):
         # Add barrier to separate effects from different protocols
         newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
 
-        # # Protocol 4 - Ratio of first and last max currents at 300 steps to -10mV with varying length gaps between
-        # # Track start times
-        # protocolStartTimes.append(newProtocol.characteristic_time())
-        # # Create protocol
-        # #dt = [0.5, 1, 3, 9, 30, 90, 300, 900, 3000, 9000]
-        # dt = [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000, 2000, 3000, 5000, 7500, 10000]
-        # vsteps = []
-        # times = []
-        # for i in range(len(dt)):
-        #     vsteps.append(-100)
-        #     times.append(gap)
-        #     vsteps += [-10, -100] * 300
-        #     times += [25, dt[i]] * 300
-        # times.append(gap)
-        # vsteps.append(-100)
-        # protocol = myokit.Protocol()
-        # for i in range(len(times)):
-        #     protocol.add_step(vsteps[i], times[i])
-        # # Add windows to measure at
-        # offset = newProtocol.characteristic_time()
-        # tmpOffset = offset
-        # for i in range(len(dt)):
-        #     measurementWindows.append([tmpOffset + gap, tmpOffset + gap + 25, 'rudb'])
-        #     measurementWindows.append([tmpOffset + gap + (25 + dt[i]) * 299, tmpOffset + gap + (25 + dt[i]) * 299 + 25, 'rudb'])
-        #     tmpOffset = tmpOffset + gap + (25 + dt[i]) * 300
-        # # Add protocol to full protocol
-        # for e in protocol.events():
-        #     newProtocol.schedule(level=e.level(), start=offset + e.start(), duration=e.duration())
-        # # Add barrier to separate effects from different protocols
-        # newProtocol.schedule(level=-100, start=newProtocol.characteristic_time(), duration=gap)
-
         # Protocol 5 - Time to 50% of max current after step to between -20mV and 20mV
         # Track start times
         protocolStartTimes.append(newProtocol.characteristic_time())
@@ -236,7 +204,6 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._ssiBounds = []
         self._actBounds = []
         self._rfiBounds = []
-        self._rudbBounds = []
         self._tauBounds = []
 
         for i in measurementWindows:
@@ -251,8 +218,6 @@ class INa(ionbench.benchmarker.Benchmarker):
                     self._ssiBounds.append([lb, ub])
                 elif i[-1] == 'rfi':
                     self._rfiBounds.append([lb, ub])
-                # elif i[-1] == 'rudb':
-                #     self._rudbBounds.append([lb, ub])
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb, ub])
         self._logTimes = np.array(self._logTimes)
@@ -369,12 +334,6 @@ class INa(ionbench.benchmarker.Benchmarker):
             firstPulse = max(inaOut[self._rfiBounds[2 * i][0]:self._rfiBounds[2 * i][1]])
             secondPulse = max(inaOut[self._rfiBounds[2 * i + 1][0]:self._rfiBounds[2 * i + 1][1]])
             rfi[i] = secondPulse / firstPulse
-
-        # rudb = [-1] * 10
-        # for i in range(len(rudb)):
-        #     firstPulse = max(inaOut[self._rudbBounds[2 * i][0]:self._rudbBounds[2 * i][1]])
-        #     lastPulse = max(inaOut[self._rudbBounds[2 * i + 1][0]:self._rudbBounds[2 * i + 1][1]])
-        #     rudb[i] = lastPulse / firstPulse
 
         tau = [-1] * 9
         for i in range(len(tau)):
