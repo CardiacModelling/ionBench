@@ -428,7 +428,6 @@ class Benchmarker:
         inRateBounds = self.in_rate_bounds(parameters, boundedCheck='staircase' not in self._name)
         if not inParameterBounds or not inRateBounds:
             # Gradient out of bounds so use penalty function
-            incrementSolveCounter = False
             # Calculate gradient of penalty function
             parametersMG = [mg.Tensor(p) for p in parameters]
             penalty = self.parameter_penalty(parametersMG) + self.rate_penalty(parametersMG)
