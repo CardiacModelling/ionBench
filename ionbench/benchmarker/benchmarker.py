@@ -92,8 +92,8 @@ class Benchmarker:
             self.lb = self.original_parameter_space(bounds[0])
             self.ub = self.original_parameter_space(bounds[1])
         elif parameterSpace.lower() == 'original':
-            self.lb = bounds[0]
-            self.ub = bounds[1]
+            self.lb = np.copy(bounds[0])
+            self.ub = np.copy(bounds[1])
         self._parameters_bounded = True
 
     def add_rate_bounds(self):
