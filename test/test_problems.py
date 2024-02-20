@@ -63,7 +63,7 @@ class Problem:
         # Check bounds give infinite cost outside and solve inside bounds
         self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
         # Check bounds give penalty for 1 param out of bounds outside of bounds
-        p = copy.copy(self.bm.defaultParams)
+        p = np.copy(self.bm.defaultParams)
         p[0] *= 0.98
         c = self.bm.signed_error(p)[0]
         c2 = self.bm.cost(p)
@@ -81,11 +81,11 @@ class Problem:
             assert self.bm.cost(p) < 1e4
         self.bm._parameters_bounded = True
         # Check penalty increases with more bound violations
-        p = copy.copy(self.bm.defaultParams) * 0.98
+        p = np.copy(self.bm.defaultParams) * 0.98
         c = self.bm.signed_error(p)[0]
         assert c > 1e4 * self.bm.n_parameters()
         # Check penalty increases linearly as parameters move out of bounds
-        p = copy.copy(self.bm.defaultParams)
+        p = np.copy(self.bm.defaultParams)
         p[2] *= 0.5  # Even if other parameters oob
         p[0] = 0.89 * self.bm.defaultParams[0]
         c1 = self.bm.signed_error(p)[0]
@@ -131,7 +131,7 @@ class Problem:
         assert self.bm.tracker.solveCount == 1
         # but not when out of bounds
         self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
-        p = copy.copy(self.bm.defaultParams)
+        p = np.copy(self.bm.defaultParams)
         p[0] = 0.98 * self.bm.defaultParams[0]
         self.bm.cost(p)
         assert self.bm.tracker.solveCount == 1
@@ -194,20 +194,48 @@ class Problem:
         self.bm.reset()
         self.bm.use_sensitivities()
         # Check gradient calculator is accurate
-        a = grad_check(bm=self.bm,
+        a = grad_check(bm=self.bm, x0=self.bm.sample(),
                        plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
         assert a
         # Same under log transforms
         self.bm.log_transform([True] + [False] * (self.bm.n_parameters() - 1))
-        assert grad_check(bm=self.bm, plotting=plotting) < 0.01
+        assert grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting) < 0.01
         # Same under scale factor and log transforms
         self.bm._useScaleFactors = True
-        assert grad_check(bm=self.bm, plotting=plotting) < 0.01
+        assert grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting) < 0.01
         # Same under scale factor only
         self.bm.log_transform([False] * self.bm.n_parameters())
-        assert grad_check(bm=self.bm, plotting=plotting) < 0.01
+        assert grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting) < 0.01
         # Reset bm
         self.bm._useScaleFactors = False
+
+    @pytest.mark.filterwarnings("ignore:Current:UserWarning")
+    def test_grad_bounds(self, plotting=False):
+        self.bm.reset()
+        mod = ionbench.modification.Modification(parameterBounds='Sampler')
+        mod.apply(self.bm)
+        self.bm.use_sensitivities()
+        x0 = self.bm.sample()
+        # Put two parameter outside of bounds
+        self.bm.lb[0] = self.bm.ub[0]
+        self.bm.lb[2] = self.bm.ub[2]
+        # Check gradient calculator is accurate when outside of bounds
+        a = grad_check(bm=self.bm, x0=x0,
+                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
+        assert a
+        # Handles rate bounds as well
+        self.bm.add_rate_bounds()
+        self.bm.lb = np.copy(self.bm.lbStandard)
+        tmp = self.bm.rateMin
+        self.bm.rateMin = self.bm.rateMax
+        a = grad_check(bm=self.bm, x0=x0,
+                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
+        assert a
+        self.bm._useScaleFactors = True
+        a = grad_check(bm=self.bm, x0=self.bm.input_parameter_space(x0),
+                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
+        assert a
+        self.bm.rateMin = tmp
 
     @pytest.mark.cheap
     def test_steady_state(self):
@@ -216,8 +244,8 @@ class Problem:
         if 'moreno' not in self.bm._name:
             self.bm.reset()
             p = self.bm.sample()
-            assert self.bm.in_parameter_bounds(p, boundedCheck=False)
-            assert self.bm.in_rate_bounds(p, boundedCheck=False)
+            assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm._name)
+            assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm._name)
             out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.tmax, self.bm.freq))
             assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()
@@ -267,7 +295,7 @@ class Problem:
     def test_clamp(self):
         self.bm.reset()
         # Check parameters that start out of bounds get clamped to inside bounds
-        p = copy.copy(self.bm.defaultParams)
+        p = np.copy(self.bm.defaultParams)
         self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, 1.01 * self.bm.defaultParams])
         assert self.bm.in_parameter_bounds(p)
         p[0] = 0.5 * self.bm.defaultParams[0]
@@ -546,11 +574,10 @@ def param_equal(p1, p2):
     return all(np.abs(p1 - p2) < 1e-10)
 
 
-def grad_check(bm, plotting=False):
+def grad_check(bm, x0, plotting=False):
     """
     Test function for checking gradient matches perturbing the cost function
     """
-    x0 = bm.sample()
     if plotting:
         paramVec = np.linspace(0.999 * x0[0], 1.001 * x0[0], 10)
     else:
