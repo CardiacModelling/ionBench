@@ -37,6 +37,7 @@ class Tracker:
         self.evals = []
         self.bestParams = []
         self.bestCost = np.inf
+        self.bestCosts = []
         self.costTimes = []
         self.gradTimes = []
 
@@ -86,6 +87,7 @@ class Tracker:
         if cost < self.bestCost:
             self.bestParams = estimatedParams
             self.bestCost = cost
+        self.bestCosts.append(self.bestCost)
 
     def plot(self):
         """
@@ -103,19 +105,26 @@ class Tracker:
         plt.ylabel('RMSE cost')
         plt.title('Data error')
 
-        # Parameter RMSRE plot
+        # Best cost plot
         plt.figure()
-        plt.scatter(range(len(self.paramRMSRE)), self.paramRMSRE, c="k", marker=".")
+        plt.scatter(range(len(self.bestCosts)), self.bestCosts, c="k", marker=".")
         plt.xlabel('Model solves')
-        plt.ylabel('Parameter RMSRE')
-        plt.title('Parameter error')
+        plt.ylabel('RMSE cost')
+        plt.title('Data error')
 
-        # Number of identified parameters plot
-        plt.figure()
-        plt.scatter(range(len(self.paramIdentifiedCount)), self.paramIdentifiedCount, c="k", marker=".")
-        plt.xlabel('Model solves')
-        plt.ylabel('Number of parameters identified')
-        plt.title('Number of parameters identified')
+        # # Parameter RMSRE plot
+        # plt.figure()
+        # plt.scatter(range(len(self.paramRMSRE)), self.paramRMSRE, c="k", marker=".")
+        # plt.xlabel('Model solves')
+        # plt.ylabel('Parameter RMSRE')
+        # plt.title('Parameter error')
+        #
+        # # Number of identified parameters plot
+        # plt.figure()
+        # plt.scatter(range(len(self.paramIdentifiedCount)), self.paramIdentifiedCount, c="k", marker=".")
+        # plt.xlabel('Model solves')
+        # plt.ylabel('Number of parameters identified')
+        # plt.title('Number of parameters identified')
 
         # Plot cost times
         if len(self.costTimes) > 0:
@@ -128,7 +137,7 @@ class Tracker:
             plt.title('Histogram of cost evaluation times')
             plt.legend()
 
-        # Plot cost times
+        # Plot grad times
         if len(self.gradTimes) > 0:
             plt.figure()
             n, _, _ = plt.hist(self.gradTimes)
@@ -153,9 +162,12 @@ class Tracker:
         None.
 
         """
-        data = (self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE,
-                self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes,
-                self.gradTimes)
+        data = {'solveCount': self.solveCount, 'gradSolveCount': self.gradSolveCount, 'costs': self.costs,
+                'modelSolves': self.modelSolves, 'gradSolves': self.gradSolves, 'paramRMSE': self.paramRMSRE,
+                'paramIdentifiedCount': self.paramIdentifiedCount, 'firstParams': self.firstParams, 'evals': self.evals,
+                'bestParams': self.bestParams, 'bestCost': self.bestCost, 'bestCosts': self.bestCosts,
+                'costTimes': self.costTimes,
+                'gradTimes': self.gradTimes}
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -175,29 +187,89 @@ class Tracker:
         """
         with open(filename, 'rb') as f:
             data = pickle.load(f)
-        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes, self.gradTimes = data
+        keys = ['solveCount', 'gradSolveCount', 'costs', 'modelSolves', 'gradSolves', 'paramRMSE',
+                'paramIdentifiedCount', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
+                'gradTimes']
+        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
+            data[key] if key in data.keys() else None for key in keys]
 
-    def report_convergence(self):
+    def report_convergence(self, threshold):
         """
         Reports the performance metrics at the point of convergence, defined as the first point where there is an unbroken chain in the number of correctly identified parameters.
+
+        Parameters
+        ----------
+        threshold : float
+            The threshold to check if the cost was below.
 
         Returns
         -------
         None.
 
         """
-        finalParamId = self.paramIdentifiedCount[-1]
-        ifEqualFinalParamId = self.paramIdentifiedCount == finalParamId
-        ind = [i for i, x in enumerate(ifEqualFinalParamId) if
-               x]  # Indexes where number of parameters identified is equal to the final count
+        converged = False
         for i in ind:
-            if all(ifEqualFinalParamId[i:]):
+            if self.cost_threshold(threshold, i) or self.cost_unchanged(i):
+                converged = True
                 # All future points remain with this many parameters identified, therefore it is considered converged
                 print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
                 print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
                 print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
                 print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
+                print('Convergence reason:              ' + 'Cost threshold' if self.cost_threshold(threshold,
+                                                                                                    i) else 'Cost unchanged')
                 break
+        if not converged:
+            print('Convergence reason:              Did not converge.')
+
+
+    def cost_threshold(self, threshold, index=None):
+        """
+        Checks if the cost threshold was satisfied at the given index. If no index is given, the last index is used.
+
+        Parameters
+        ----------
+        threshold : float
+            The threshold to check if the cost was below.
+        index : int, optional
+            The index to check if the cost threshold was satisfied. The default is None, in which case it checks the most recent parameter vector.
+        Returns
+        -------
+        check : bool
+            True if the function threshold was satisfied, False otherwise.
+        """
+        if index is None:
+            index = len(self.bestCosts) - 1
+        return self.bestCosts[index] < threshold
+
+    def cost_unchanged(self, index=None):
+        """
+        Checks if the cost had converged (remained unchanged for XX iterations) by the given index. If no index is given, the last index is used.
+
+        Parameters
+        ----------
+        index : int, optional
+            The index to check if the function threshold was satisfied. The default is None, in which case it checks the most recent parameter vector.
+        Returns
+        -------
+        check : bool
+            True if the function threshold was satisfied, False otherwise.
+        """
+        if index is None:
+            index = len(self.bestCosts)
+        if index < 2500:
+            return False
+        fsig = np.inf
+        evalsUnchanged = 0
+        for i in range(index):
+            if np.abs(self.bestCosts[i] - fsig) > 1e-11:
+                evalsUnchanged = 0
+                fsig = self.bestCosts[i]
+            else:
+                evalsUnchanged += 1
+            if evalsUnchanged > 2500:
+                return True
+        return False
 
     def check_repeated_param(self, param, solveType):
         """

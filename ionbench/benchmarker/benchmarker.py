@@ -47,6 +47,8 @@ class Benchmarker:
             self.vLow = None
         if not hasattr(self, 'vHigh'):
             self.vHigh = None
+        if not hasattr(self, 'costThreshold'):
+            self.costThreshold = None
 
     def load_data(self, dataPath=''):
         """
@@ -437,7 +439,7 @@ class Benchmarker:
             for i in range(self.n_parameters()):
                 grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
             cost = float(penalty.data)
-            error = [float(penalty.data)]*len(self.data)
+            error = [float(penalty.data)] * len(self.data)
             J = np.zeros((len(self.data), self.n_parameters()))
             for i in range(len(self.data)):
                 J[i,] = grad
@@ -603,7 +605,7 @@ class Benchmarker:
                 npstate = np.array(state)
                 if np.all(np.abs(npstate[npstate < 0]) < 1e-12):
                     # If the negative values are very close to zero, then we can assume they are zero
-                    state = [max(0, s)/np.sum(npstate) for s in npstate]
+                    state = [max(0, s) / np.sum(npstate) for s in npstate]
                 else:
                     raise ValueError('Steady state contains significant (>1e-12) negative values. This needs fixing.')
             self.sim.set_state(state)
@@ -778,7 +780,16 @@ class Benchmarker:
         """
         return np.sqrt(np.mean((c1 - c2) ** 2))
 
+    def is_converged(self):
         """
+        Returns whether the optimisation has converged yet (satisfied cost threshold or number of unchanged costs).
+
+        Returns
+        -------
+        bool
+            True if the optimisation has converged, False if it has not.
+        """
+        return self.tracker.cost_threshold(threshold=self.costThreshold) or self.tracker.cost_unchanged()
 
     def evaluate(self):
         """
@@ -802,13 +813,8 @@ class Benchmarker:
         print('')
         print('Number of cost evaluations:      ' + str(self.tracker.solveCount))
         print('Number of grad evaluations:      ' + str(self.tracker.gradSolveCount))
-        cost = self.cost(parameters, incrementSolveCounter=False)
-        print('Final cost:                      {0:.6f}'.format(cost))
-        print('Parameter RMSRE:                 {0:.6f}'.format(self.tracker.paramRMSRE[-1]))
-        print('Number of identified parameters: ' + str(self.tracker.paramIdentifiedCount[-1]))
-        print('Total number of parameters:      ' + str(self.n_parameters()))
         print('Best cost:                       {0:.6f}'.format(self.tracker.bestCost))
-        self.tracker.report_convergence()
+        self.tracker.report_convergence(self.costThreshold)
         print('')
         if self.plotter:
             self.tracker.plot()

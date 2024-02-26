@@ -12,6 +12,7 @@ import csv
 
 class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
+        self.costThreshold = 0.01
         self.tmax = None
         self.rateMin = 1.67e-5
         self.rateMax = 1e3

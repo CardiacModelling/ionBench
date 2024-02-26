@@ -114,6 +114,7 @@ class HH(StaircaseBenchmarker):
                                                       parameters=[self._paramContainer + '.p' + str(i + 1) for i in
                                                                   range(self.n_parameters())], current=self._outputName,
                                                       vm='membrane.V')
+        self.costThreshold = 0.02
         super().__init__()
         print('Benchmarker initialised')
 
@@ -153,6 +154,7 @@ class MM(StaircaseBenchmarker):
                                                               parameters=[self._paramContainer + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
                                                               current=self._outputName, vm='Environment.V')
+        self.costThreshold = 0.0075
         super().__init__()
         print('Benchmarker initialised')
 

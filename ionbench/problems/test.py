@@ -15,6 +15,7 @@ import ionbench.tracker.tracker
 class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self._name = "test"
+        self.costThreshold = 0.001
         self.defaultParams = np.array([2, 4])
         self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V: p[2], 'independent'),
                                (lambda p, V: p[3] * np.exp(p[4] * V), 'positive'),
@@ -137,7 +138,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         # Not needed for test function. Override to avoid trying to access myokit objects
         pass
 
-    def evaluate(self, parameters):
+    def evaluate(self):
         # Not needed for test function. Override to avoid trying to access myokit objects
         pass
 
