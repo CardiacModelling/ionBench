@@ -23,6 +23,7 @@ class Model(pints.ForwardModel):
 
         """
         self.bm = bm
+        super().__init__()
 
     def n_parameters(self):
         """
@@ -58,6 +59,13 @@ class Model(pints.ForwardModel):
 
     @lru_cache(maxsize=None)
     def sim(self, p):
+        """
+        Simulate the model and return the model output. Cached to avoid double counting repeated calls.
+        Parameters
+        ----------
+        p : tuple
+            A tuple of parameter values, length n_parameters().
+        """
         return self.bm.simulate(p, np.arange(0, self.bm.tmax, self.bm.freq))
 
 
