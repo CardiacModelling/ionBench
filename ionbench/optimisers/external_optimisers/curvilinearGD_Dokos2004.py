@@ -6,7 +6,7 @@ import scipy
 from functools import lru_cache
 
 
-def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
+def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
     """
     Curvilinear gradient descent from Dokos 2004. This method was first introduced in Dokos 2003, with this implementation using the updated scheme which includes weighted residuals (Dokos 2004). It calculates a curved path which initially follows the steepest descent, but curves to finally converge towards a Gauss-Newton step (minimum of a locally defined quadratic). In order to optimise along this line, we use Scipy's implementation of Brent's method (an implementation based on Press et al. "Numerical Recipes in C").
 
@@ -15,7 +15,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter guess. If x0=[] (the default), then the population will be sampled from the benchmarker problems .sample() method.
+        Initial parameter guess. If x0=None (the default), then the population will be sampled from the benchmarker problems .sample() method.
     maxIter : int, optional
         Maximum number of iterations of curvilinear gradient descent, summed up over all reweighting restarts. The default is 1000.
     maxInnerIter : int, optional
@@ -64,7 +64,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
         return p
 
     # sample initial point
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
     # Transform to fitting space
     x0 = fitting_params(x0)

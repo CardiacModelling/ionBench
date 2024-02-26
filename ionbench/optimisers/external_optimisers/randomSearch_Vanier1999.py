@@ -2,7 +2,7 @@ import numpy as np
 import ionbench
 
 
-def run(bm, x0=[], maxIter=1000, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Random search from Vanier et al. 1999. This optimiser random sample maxIter parameters and reports the best one.
 
@@ -11,7 +11,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter guess.
+        Initial parameter guess. If x0=None (the default), then the population will be sampled from the benchmarker problems .sample() method.
     maxIter : int, optional
         Maximum number of iterations. The default is 1000.
     debug : bool, optional
@@ -24,7 +24,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
 
     """
 
-    if len(x0) == 0:
+    if x0 is None:
         # sample initial point
         x0 = bm.sample()
     x_best = x0

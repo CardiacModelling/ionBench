@@ -3,7 +3,7 @@ import ionbench
 from functools import lru_cache
 
 
-def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
+def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     """
     Implementation of SPSA from Spall 1998. There are few details on implementation in Maryak 1998, the paper which uses SPSA. Maryak cites Spall 1992, however this paper does not give recommendations for hyperparameters, in which case we use Spall 1998. The Maryak modifications do not use scaling factors or log transforms, which likely significantly hurts the SPSA algorithm which takes step sizes of identical magnitudes in all parameter directions.
 
@@ -12,7 +12,7 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter guess. If x0=[] (the default), then the population will be sampled from the benchmarker problems .sample() method.
+        Initial parameter guess. If x0=None (the default), then the population will be sampled from the benchmarker problems .sample() method.
     a : float, optional
         Hyperparameter to control the step size, ak. If no value is specified, an 'optimal' value will be approximated by finding a value of a which will produce step sizes of 0.1*geometric mean of x0.
     A : int, optional
@@ -38,7 +38,7 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     def cost(p):
         return bm.cost(p)
 
-    if len(x0) == 0:
+    if x0 is None:
         # sample initial point
         x0 = bm.sample()
 

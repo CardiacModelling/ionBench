@@ -3,7 +3,7 @@ from functools import lru_cache
 import numpy as np
 
 
-def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=20000, debug=False):
+def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=20000, debug=False):
     """
     Runs the pattern search algorithm from Kohjitani et al. 2022.
 
@@ -12,7 +12,7 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Maximum number of iterations before termination.
     CrtStp : float, optional
@@ -61,7 +61,7 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
                 NP[i] = home  # Restore center point
         return foundImprovement, NP
 
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
 
     BP = x0  # Set initial base point

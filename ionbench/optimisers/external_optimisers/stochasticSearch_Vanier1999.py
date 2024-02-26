@@ -2,7 +2,7 @@ import numpy as np
 import ionbench
 
 
-def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=False):
+def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=False):
     """
     Stochastic search from Vanier et al. 1999.
 
@@ -11,7 +11,7 @@ def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=F
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter guess.
+        Initial parameter guess. If x0=None (the default), then the population will be sampled from the benchmarker problems .sample() method.
     varInit : float, optional
         The initial variance. The default is 0.5.
     varMin : float, optional
@@ -30,7 +30,7 @@ def run(bm, x0=[], varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=F
 
     """
 
-    if len(x0) == 0:
+    if x0 is None:
         # sample initial point
         x0 = bm.sample()
     var = varInit

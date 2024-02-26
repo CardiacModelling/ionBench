@@ -4,7 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
-def run(bm, x0=[], maxIter=1000, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs SNES (Separable Natural Evolution Strategy) from Pints using a benchmarker.
 
@@ -13,7 +13,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Number of iterations of SNES to run. The default is 1000.
     debug : bool, optional
@@ -25,7 +25,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
         The best parameters identified by SNES.
 
     """
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
     model = classes_pints.Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.tmax, model.bm.freq), model.bm.data)
