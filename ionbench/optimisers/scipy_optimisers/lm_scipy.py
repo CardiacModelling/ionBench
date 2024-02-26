@@ -3,7 +3,7 @@ import scipy.optimize
 from functools import lru_cache
 
 
-def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs lm (Levenberg-Marquardt), the least squares optimiser from Scipy.
 
@@ -12,34 +12,44 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
-    diff_step : float, optional
-        Step size for finite difference calculation. The default is 1e-3.
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Maximum number of cost function evaluations. The default is 1000.
     debug : bool, optional
+        If True, prints out the cost and parameters found by the algorithm. The default is False.
 
     Returns
     -------
     xbest : list
         The best parameters identified by LM.
-
     """
     @lru_cache(maxsize=None)
     def grad(p):
+        """
+        Find the jacobian of the residuals. This function is cached so requires the input to be hashable (for example tuple).
+        """
         return bm.grad(p, residuals=True)
 
     @lru_cache(maxsize=None)
     def signed_error(p):
+        """
+        Find the jacobian of the residuals. This function is cached so requires the input to be hashable (for example tuple).
+        """
         return bm.signed_error(p)
 
     def grad_scipy(p):
+        """
+        Wrapper for the cached grad function. This is required as the scipy optimiser requires a function won't supply a hashable type as input.
+        """
         return grad(tuple(p))
 
     def signed_error_scipy(p):
+        """
+        Wrapper for the cached signed_error function. This is required as the scipy optimiser requires a function won't supply a hashable type as input.
+        """
         return signed_error(tuple(p))
 
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')

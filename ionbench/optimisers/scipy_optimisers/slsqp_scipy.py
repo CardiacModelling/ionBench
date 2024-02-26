@@ -3,7 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
-def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs Sequential Least SQuares Programming optimiser from Scipy. An example of a Sequential Quadratic Programming method which uses a quasi-newton update strategy to approximate the hessian.
 
@@ -12,28 +12,33 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
-    ftol : float, optional
-        Tolerance in for the cost function. Cost function must be less than ftol before algorithm successfully terminates. The default is 0.05.
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Maximum number of iterations of SLSQP to use. The default is 1000.
+    debug : bool, optional
+        If True, prints out the cost and parameters found by the algorithm. The default is False.
 
     Returns
     -------
     xbest : list
         The best parameters identified by SLSQP.
-
     """
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
             print(x0)
 
     def grad(p):
+        """
+        Return the gradient of the cost function.
+        """
         return bm.grad(p)
 
     def cost(p):
+        """
+        Return the cost of the parameters.
+        """
         return bm.cost(p)
 
     if bm._parameters_bounded:
@@ -53,9 +58,9 @@ def run(bm, x0=[], ftol=1e-6, maxIter=1000, debug=False):
             print(bm.ub)
             print('New bounds')
             print(bounds)
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': ftol, 'maxiter': maxIter}, bounds=bounds)
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': bm.costThreshold, 'maxiter': maxIter}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': ftol, 'maxiter': maxIter})
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': bm.costThreshold, 'maxiter': maxIter})
 
     if debug:
         print(f'Cost of {out.fun} found at:')

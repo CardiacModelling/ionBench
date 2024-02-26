@@ -4,7 +4,7 @@ import numpy as np
 from functools import lru_cache
 
 
-def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False):
+def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False):
     """
     Runs Powell's Simplex optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
 
@@ -13,7 +13,7 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     xtol : float, optional
         Tolerance in parameters. Used as a termination criterion. The default is 1e-4.
     ftol : float, optional
@@ -22,21 +22,28 @@ def run(bm, x0=[], xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False
         Maximum number of iterations of Powell's Simplex to use. The default is 1000.
     maxfev : int, optional
         Maximum number of cost function evaluations. The default is 20000.
+    debug : bool, optional
+        If True, prints out the cost and parameters found by the algorithm. The default is False.
 
     Returns
     -------
     xbest : list
         The best parameters identified by Powell's Simplex.
-
     """
     @lru_cache(maxsize=None)
     def cost(p):
+        """
+        Return the cost of the parameters. Cached so that the cost function is only evaluated once for each set of parameters. Requires inputs to be hashable (for example tuple).
+        """
         return bm.cost(p)
 
     def cost_scipy(p):
+        """
+        Wrapper for the cached cost function. This is required as the scipy optimiser requires a function that won't supply a hashable type as input.
+        """
         return cost(tuple(p))
 
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')

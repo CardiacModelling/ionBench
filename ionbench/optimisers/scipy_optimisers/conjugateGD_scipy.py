@@ -3,7 +3,7 @@ import scipy.optimize
 from functools import lru_cache
 
 
-def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
+def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
     """
     Runs Conjugate Gradient Descent optimiser from Scipy.
 
@@ -12,33 +12,46 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     gtol : float, optional
         Tolerance in for the gradient. Gradient norm must be less than gtol before algorithm successfully terminates. The default is 0.001.
     maxIter : int, optional
         Maximum number of iterations of Conjugate Gradient Descent to use. The default is 1000.
+    debug : bool, optional
+        If True, prints out the cost and parameters found by the algorithm. The default is False.
 
     Returns
     -------
     xbest : list
         The best parameters identified by Conjugate Gradient Descent.
-
     """
     @lru_cache(maxsize=None)
     def grad(p):
+        """
+        Return the gradient of the cost function. Cached so that the cost function is only evaluated once for each set of parameters. Requires inputs to be hashable (for example tuple).
+        """
         return bm.grad(p)
 
     @lru_cache(maxsize=None)
     def cost(p):
+        """
+        Return the cost of the parameters. Cached so that the cost function is only evaluated once for each set of parameters. Requires inputs to be hashable (for example tuple).
+        """
         return bm.cost(p)
 
     def grad_scipy(p):
+        """
+        Wrapper for the cached grad function. This is required as the scipy optimiser requires a function that won't supply a hashable type as input.
+        """
         return grad(tuple(p))
 
     def cost_scipy(p):
+        """
+        Wrapper for the cached cost function. This is required as the scipy optimiser requires a function that won't supply a hashable type as input.
+        """
         return cost(tuple(p))
 
-    if len(x0) == 0:
+    if x0 in None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')

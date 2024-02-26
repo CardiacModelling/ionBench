@@ -2,7 +2,7 @@ import ionbench.problems.staircase
 import scipy.optimize
 
 
-def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs Trust Region Reflective optimiser from Scipy.
 
@@ -11,22 +11,24 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
     bm : Benchmarker
         A benchmarker to evaluate the performance of the optimisation algorithm.
     x0 : list, optional
-        Initial parameter vector from which to start optimisation. Default is [], in which case a randomly sampled parameter vector is retrieved from bm.sample().
-    diff_step : float, optional
-        Step size for finite difference calculation. The default is 1e-3.
+        Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Maximum number of cost function evaluations. The default is 1000.
+    debug : bool, optional
+        If True, prints out the cost and parameters found by the algorithm. The default is False.
 
     Returns
     -------
     xbest : list
         The best parameters identified by Trust Region Reflective.
-
     """
     def grad(p):
+        """
+        Return the jacobian of the residuals.
+        """
         return bm.grad(p, residuals=True)
 
-    if len(x0) == 0:
+    if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
