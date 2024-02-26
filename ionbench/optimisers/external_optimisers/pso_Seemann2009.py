@@ -2,7 +2,7 @@ import numpy as np
 import ionbench
 
 
-def run(bm, x0=None, n=20, maxIter=1000, gmin=0.05, debug=False):
+def run(bm, x0=None, n=20, maxIter=1000, debug=False):
     """
     Runs the PSO algorithm defined by Seemann et al. 2022.
 
@@ -28,6 +28,8 @@ def run(bm, x0=None, n=20, maxIter=1000, gmin=0.05, debug=False):
     if x0 is None:
         x0 = bm.sample()
 
+    gmin = bm.costThreshold
+
     class Particle:
         def __init__(self):
             self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
@@ -52,6 +54,7 @@ def run(bm, x0=None, n=20, maxIter=1000, gmin=0.05, debug=False):
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
+    L = None
     for L in range(maxIter):
         if L > 0:
             Gcost[L] = Gcost[L - 1]

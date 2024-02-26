@@ -40,6 +40,22 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
     iterCounter = 0
 
     def explore(BP, Stp):
+        """
+        Explores neighbouring points to the base point BP.
+        Parameters
+        ----------
+        BP : numpy array
+            The base point around which to explore. Check cost by increasing and decreasing each parameter by Stp.
+        Stp : float
+            The step size.
+
+        Returns
+        -------
+        foundImprovement : bool
+            True if an improvement is found, False otherwise.
+        NP : numpy array
+            The new base point, if an improvement is found. Otherwise, the same as BP.
+        """
         foundImprovement = False
         NP = np.copy(BP)
         MSE = cost_func(tuple(BP))  # No real computation cost from this thanks to the cache
@@ -65,6 +81,7 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
         x0 = bm.sample()
 
     BP = x0  # Set initial base point
+    NP = np.copy(BP)
     funcCounter += 1
     while Stp > CrtStp:  # Stop when step size is sufficiently small
         # Explore neighbouring points

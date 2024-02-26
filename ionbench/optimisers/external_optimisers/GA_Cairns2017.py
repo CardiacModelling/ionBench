@@ -56,9 +56,10 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
     for i in range(popSize):
         pop[i] = Individual()
         pop[i].find_cost()
-
+    elite = None
     for gen in range(nGens):
         minCost = np.inf
+        elite = None
         for i in range(popSize):
             if pop[i].cost < minCost:
                 minCost = pop[i].cost
@@ -128,6 +129,7 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
             pop[i].find_cost()
         # Elitism
         maxCost = -np.inf
+        maxIndex = None
         for i in range(popSize):
             if pop[i].cost > maxCost:
                 maxCost = pop[i].cost

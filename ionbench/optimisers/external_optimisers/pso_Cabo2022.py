@@ -2,7 +2,7 @@ import numpy as np
 import ionbench
 
 
-def run(bm, x0=None, maxIter=1000, gmin=0.05, debug=False):
+def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs the PSO algorithm defined by Cabo 2022.
 
@@ -25,6 +25,7 @@ def run(bm, x0=None, maxIter=1000, gmin=0.05, debug=False):
     """
     if x0 is None:
         x0 = bm.sample()
+    gmin = bm.costThreshold
 
     class Particle:
         def __init__(self):
@@ -56,6 +57,7 @@ def run(bm, x0=None, maxIter=1000, gmin=0.05, debug=False):
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
+    L = None
     for L in range(maxIter):
         if L > 0:
             Gcost[L] = Gcost[L - 1]
@@ -131,4 +133,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
-    run(bm, maxIter=200, gmin=0.02, debug=True, **mod.kwargs)
+    run(bm, maxIter=200, debug=True, **mod.kwargs)

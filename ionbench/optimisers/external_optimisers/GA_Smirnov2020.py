@@ -8,7 +8,7 @@ from pymoo.core.individual import Individual as pymooInd
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.sbx import SBX
 
-
+# TODO: eta_mut is unused - needs fixing
 def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Smirnov et al. 2020.
@@ -116,6 +116,7 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
             pop[eliteIndices[i]] = copy.deepcopy(elites[i])
 
     minCost = np.inf
+    elite = None
     for i in range(popSize):
         if pop[i].cost < minCost:
             minCost = pop[i].cost

@@ -34,10 +34,6 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     def grad(p):
         return bm.grad(p)
 
-    @lru_cache(maxsize=None)
-    def cost(p):
-        return bm.cost(p)
-
     if x0 is None:
         # sample initial point
         x0 = bm.sample()

@@ -18,6 +18,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         Initial parameter vector from which to start optimisation. Default is None, in which case a randomly sampled parameter vector is retrieved from bm.sample().
     maxIter : int, optional
         Number of iterations of PSO and Nelder Mead to run. Maximum total number of iterations is 2*maxIter. The default is 1000.
+    debug : bool, optional
+        If True, debug information will be printed, reporting more optimisation information. The default is False.
 
     Returns
     -------

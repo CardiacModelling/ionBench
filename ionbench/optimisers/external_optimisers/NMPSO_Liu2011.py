@@ -159,6 +159,8 @@ def run(bm, x0=None, maxIter=1000, gmin=0.05, debug=False):
     def cost_func(x):
         return bm.cost(x)
 
+    L = None
+
     lb = bm.input_parameter_space(bm.lb)
     ub = bm.input_parameter_space(bm.ub)
 
