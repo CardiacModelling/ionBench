@@ -85,7 +85,7 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
             a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
 
             parents = [[a, b]]
-            off = SinglePointCrossover(prob=0.5).do(problem, parents)
+            off = SinglePointCrossover(prob=crossoverProb).do(problem, parents)
             Xp = off.get("X")
             newPop.append(Individual())
             newPop[-1].x = Xp[0]
