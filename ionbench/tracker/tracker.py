@@ -220,7 +220,7 @@ class Tracker:
                                                                                                     i) else 'Cost unchanged')
                 break
         if not converged:
-            print('Convergence reason:              Did not converge.')
+            print('Convergence reason:              Optimiser terminated early.')
 
     def cost_threshold(self, threshold, index=None):
         """
