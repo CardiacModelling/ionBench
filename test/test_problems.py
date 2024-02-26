@@ -54,6 +54,7 @@ class Problem:
         # Test plotting functionality runs for evaluate
         monkeypatch.setattr(plt, 'show', lambda: None)  # Disables plots from being shown
         self.bm.plotter = True
+        self.bm.cost(self.bm.sample())
         self.bm.evaluate()
         self.bm.plotter = False
 
@@ -178,6 +179,68 @@ class Problem:
             assert all(p2 == self.bm.tracker.bestParams)
         self.bm.cost(self.bm.defaultParams)
         assert all(self.bm.defaultParams == self.bm.tracker.bestParams)
+        self.bm.reset()
+
+    @pytest.mark.cheap
+    def test_convergence(self):
+        self.bm.reset()
+        p = self.bm.sample()
+        c = self.bm.cost(p)
+        if c < self.bm.costThreshold:
+            assert self.bm.is_converged()
+            assert self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        else:
+            assert not self.bm.is_converged()
+            assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+            self.bm.cost(self.bm.defaultParams * 1.0001)  # Test that non-default parameters give convergence
+            assert self.bm.is_converged()
+            assert self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        # Dropping the cost threshold means not converged
+        tmp = self.bm.costThreshold
+        self.bm.costThreshold = -1
+        assert not self.bm.is_converged()
+        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        self.bm.costThreshold = tmp
+        self.bm.reset()
+        # Tracker initially not converged
+        assert not self.bm.is_converged()
+        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        assert not self.bm.tracker.cost_unchanged()
+        # Cost convergence rather than threshold
+        self.bm.reset()
+        # Get a point that doesn't satisfy the cost threshold
+        p = self.bm.sample()
+        while self.bm.cost(p) <= self.bm.costThreshold:
+            p = self.bm.sample()
+        # Shouldn't be converged from this
+        assert not self.bm.is_converged()
+        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        self.bm.reset()
+        # First point is an improvement
+        self.bm.cost(p)
+        # 2 points without improvement aren't enough
+        [self.bm.cost(p) for _ in range(2)]
+        assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        # Third point is enough
+        self.bm.cost(p)
+        assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        # Sampling better points resets counter
+        self.bm.reset()
+        self.bm.cost(p)
+        assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        # Failing to improve here would converge so give better point
+        c1 = self.bm.cost(self.bm.defaultParams)
+        assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        # Three worse points from here needed to converge
+        [self.bm.cost(p) for _ in range(2)]
+        assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        self.bm.cost(p)
+        assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        # Sampling worse points doesn't undo convergence
+        c2 = self.bm.cost(p)
+        assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
+        assert c1 < c2
+        assert self.bm.is_converged()
         self.bm.reset()
 
     @pytest.mark.cheap
@@ -364,7 +427,8 @@ class Staircase(Problem):
         assert sampler_different(self.bm, self.bm.defaultParams)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
-        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard), self.bm.input_parameter_space(self.bm.ubStandard))
+        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
+                              self.bm.input_parameter_space(self.bm.ubStandard))
         assert sampler_different(self.bm, np.ones(self.bm.n_parameters()))
         self.bm._useScaleFactors = False
         # Same for log transformed space

@@ -208,7 +208,7 @@ class Tracker:
 
         """
         converged = False
-        for i in ind:
+        for i in range(len(self.costs)):
             if self.cost_threshold(threshold, i) or self.cost_unchanged(i):
                 converged = True
                 # All future points remain with this many parameters identified, therefore it is considered converged
@@ -221,7 +221,6 @@ class Tracker:
                 break
         if not converged:
             print('Convergence reason:              Did not converge.')
-
 
     def cost_threshold(self, threshold, index=None):
         """
@@ -240,9 +239,11 @@ class Tracker:
         """
         if index is None:
             index = len(self.bestCosts) - 1
+        if index < 0:
+            return False
         return self.bestCosts[index] < threshold
 
-    def cost_unchanged(self, index=None):
+    def cost_unchanged(self, index=None, max_unchanged_evals=2500):
         """
         Checks if the cost had converged (remained unchanged for XX iterations) by the given index. If no index is given, the last index is used.
 
@@ -250,6 +251,9 @@ class Tracker:
         ----------
         index : int, optional
             The index to check if the function threshold was satisfied. The default is None, in which case it checks the most recent parameter vector.
+        max_unchanged_evals : int, optional
+            The number of evaluations that the cost must remain unchanged for before it is considered converged. The default is 2500.
+
         Returns
         -------
         check : bool
@@ -257,7 +261,7 @@ class Tracker:
         """
         if index is None:
             index = len(self.bestCosts)
-        if index < 2500:
+        if index < max_unchanged_evals:
             return False
         fsig = np.inf
         evalsUnchanged = 0
@@ -267,7 +271,7 @@ class Tracker:
                 fsig = self.bestCosts[i]
             else:
                 evalsUnchanged += 1
-            if evalsUnchanged > 2500:
+            if evalsUnchanged >= max_unchanged_evals:
                 return True
         return False
 
