@@ -31,9 +31,17 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.tmax, model.bm.freq), model.bm.data)
     error = pints.RootMeanSquaredError(problem)
 
-    # Create an optimisation controller
     if bm._parameters_bounded:
-        boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
+        if bm._rates_bounded:
+            boundaries = classes_pints.AdvancedBoundaries(bm)
+        else:
+            boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
+        counter = 1
+        while not boundaries.check(x0):
+            x0 = bm.sample()
+            counter += 1
+        if counter > 10:
+            print(f'Struggled to find parameters in bounds. Required {counter} iterations.')
         opt = pints.OptimisationController(error, x0, method=pints.PSO, boundaries=boundaries)
     else:
         opt = pints.OptimisationController(error, x0, method=pints.PSO)
