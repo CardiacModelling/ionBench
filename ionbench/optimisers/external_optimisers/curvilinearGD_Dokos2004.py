@@ -34,6 +34,20 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
 
     # Update to the weight vector for the residuals
     def weight_update(wOld, r):
+        """
+        Update the weights for the residuals.
+        Parameters
+        ----------
+        wOld : numpy array
+            The previous weights.
+        r : numpy array
+            The residuals.
+
+        Returns
+        -------
+        w : numpy array
+            The updated weights.
+        """
         rAbs = np.abs(r)
         mu1 = np.random.rand() * min(np.max(rAbs), 2 * np.median(rAbs))
         mu2 = np.random.rand() * min(np.max(rAbs), 2 * np.mean(rAbs))
@@ -41,8 +55,9 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         sigma = np.std(rAbs)
         dw = np.zeros(len(wOld))
         for i in range(len(dw)):
-            dw[i] = np.exp(((rAbs[i] - mu1) / sigma)**2) + np.exp(((rAbs[i] - mu2) / sigma)**2) + np.exp(((rAbs[i] - mu3) / sigma)**2)
-        s = min(np.sqrt(10 * np.dot(wOld**2, r**2)), 1e5) / (np.sqrt(np.dot(dw**2, r**2)) + 1e-12)
+            dw[i] = np.exp(((rAbs[i] - mu1) / sigma) ** 2) + np.exp(((rAbs[i] - mu2) / sigma) ** 2) + np.exp(
+                ((rAbs[i] - mu3) / sigma) ** 2)
+        s = min(np.sqrt(10 * np.dot(wOld ** 2, r ** 2)), 1e5) / (np.sqrt(np.dot(dw ** 2, r ** 2)) + 1e-12)
         return wOld + s * dw
 
     # Set up transform functions to map between upper and lower bounds
@@ -52,15 +67,39 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
     lb = bm.input_parameter_space(bm.lb)
 
     def fitting_params(p):
+        """
+        Transform from model solve space to fitting space.
+        Parameters
+        ----------
+        p : numpy array
+            The parameters in model solve space.
+
+        Returns
+        -------
+        x : numpy array
+            The parameters in fitting space.
+        """
         x = np.zeros(len(p))
         for i in range(len(x)):
             x[i] = np.arcsin(np.sqrt((p[i] - lb[i]) / (ub[i] - lb[i])))
         return x
 
     def model_params(x):
+        """
+        Transform from fitting space to model solve space.
+        Parameters
+        ----------
+        x : numpy array
+            The parameters in fitting space.
+
+        Returns
+        -------
+        p : numpy array
+            The parameters in model solve space.
+        """
         p = np.zeros(len(x))
         for i in range(len(p)):
-            p[i] = lb[i] + (ub[i] - lb[i]) * np.sin(x[i])**2
+            p[i] = lb[i] + (ub[i] - lb[i]) * np.sin(x[i]) ** 2
         return p
 
     # sample initial point
@@ -77,13 +116,14 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
     iterCounter = 0  # Total number of curvilinear gradient descent iterations, compared against maxIter every time a local minimum is found to check for termination
     bestParams = x0  # Best params found so far
     bestCost = np.inf  # Best unweighted cost found so far
-
+    wInit = None  # Initial weights
+    w = None  # Current weights
     while True:
         # Initialisation routine for every weight update/reset
         falphaOld = np.inf  # Stores the weighted SSE from the previous iteration in curvilinear GD, for termination criteria of curvilinear gradient descent
         # find residuals and jacobian. Residuals will be used to find weights, J will be used in first iteration of curvilinear GD
         r0, J = bm.grad(model_params(x0), returnCost=True, residuals=True)
-        currentCost = np.sqrt(np.mean(r0**2))
+        currentCost = np.sqrt(np.mean(r0 ** 2))
         if debug:
             print(f'Starting out optimisation loop. Weight counter {weightCounter}')
 
@@ -108,18 +148,21 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         elif weightCounter == 1 and currentCost > bestCost:
             # Perturb the best parameters and make that the starting location. Perturbation chosen to match http://dx.doi.org/https://doi.org/10.26190/unsworks/21047
             if debug:
-                print(f'Current cost ({currentCost}) was actually worse than best so far ({bestCost}) so randomly perturbing parameters which gave best cost')
+                print(
+                    f'Current cost ({currentCost}) was actually worse than best so far ({bestCost}) so randomly perturbing parameters which gave best cost')
             x0 = bestParams * np.random.uniform(low=0.9, high=1.1, size=bm.n_parameters())
         elif np.dot(r0, r0) < 0.3 * weightedSSE:
             # Weighted SSE has decreased by 70% so reset weights
             if debug:
-                print(f'Weighted SSE significantly decreased. Original value was {weightedSSE} and it is now {np.dot(r0,r0)} after {weightCounter} new weights')
+                print(
+                    f'Weighted SSE significantly decreased. Original value was {weightedSSE} and it is now {np.dot(r0, r0)} after {weightCounter} new weights')
             weightCounter = 0
             continue  # Restart weights
         elif weightCounter >= reweightMaxIter:
             # Maximum number of reweights has been applied so reset weights
             if debug:
-                print(f'Maximum number of weight updates. Original weighted SSE was {weightedSSE} and it is now {np.dot(r0,r0)} after {weightCounter} new weights')
+                print(
+                    f'Maximum number of weight updates. Original weighted SSE was {weightedSSE} and it is now {np.dot(r0, r0)} after {weightCounter} new weights')
             weightCounter = 0
             continue  # Restart weights
         else:
@@ -186,6 +229,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             def SSE(alpha):
                 weightedr0 = np.diag(w) @ bm.signed_error(model_params(x0 + L(alpha)))
                 return np.dot(weightedr0, weightedr0)
+
             # Run Brent's method to optimise SSE with respect to alpha
             try:
                 out = scipy.optimize.brent(SSE, brack=(0, 1, 1e9), tol=1e-8, full_output=True)
@@ -202,7 +246,8 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                     # Error when SSE(1) is larger than one of SSE(0). In this case, it is likely that 1 is just too large a step size, so we probably have SSE(0)<SSE(1)<SSE(1e9). In which case, any tiny step size will be good enough to start brent optimisation
                     assert SSE(0) <= SSE(1e9)  # This shouldn't be triggered
                     if debug:
-                        print(f'SSE(0) {SSE(0)} seems to be smaller than SSE(1) {SSE(1)}, I am going to assume it is also smaller than SSE(1e9) {SSE(1e9)} and that SSE(1e-6) {SSE(1e-6)} is smaller than them all')
+                        print(
+                            f'SSE(0) {SSE(0)} seems to be smaller than SSE(1) {SSE(1)}, I am going to assume it is also smaller than SSE(1e9) {SSE(1e9)} and that SSE(1e-6) {SSE(1e-6)} is smaller than them all')
                     out = scipy.optimize.brent(SSE, brack=(0, 1e-6, 1e9), tol=1e-8, full_output=True)
                     alpha = out[0]
                     falphaNew = out[1]
@@ -237,7 +282,8 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             print(f'Weight counter incremented to {weightCounter}')
         if iterCounter >= maxIter:
             if debug:
-                print(f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
+                print(
+                    f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
             break
     x0 = model_params(x0)
     bm.evaluate()
