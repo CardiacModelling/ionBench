@@ -235,7 +235,7 @@ def run(bm, x0=[], groups=[], n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
-    bm.evaluate(transform(Gpos[L]))
+    bm.evaluate()
     return transform(Gpos[L])
 
 

@@ -240,7 +240,7 @@ def run(bm, x0=[], maxIter=1000, gmin=0.05, debug=False):
             Gcost[L] = cost
             Gpos[L] = np.copy(p.position)
 
-    bm.evaluate(Gpos[L])
+    bm.evaluate()
     return Gpos[L]
 
 

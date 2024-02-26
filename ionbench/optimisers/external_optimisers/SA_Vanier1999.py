@@ -215,7 +215,7 @@ def run(bm, x0=[], tempInitial=None, N=5, maxIter=1000, debug=False):
             print(f'Best cost so far is {bestCost}')
 
     # Return the best point in the final simplex
-    bm.evaluate(bestPos)
+    bm.evaluate()
     return bestPos
 
 

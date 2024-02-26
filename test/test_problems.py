@@ -54,7 +54,7 @@ class Problem:
         # Test plotting functionality runs for evaluate
         monkeypatch.setattr(plt, 'show', lambda: None)  # Disables plots from being shown
         self.bm.plotter = True
-        self.bm.evaluate(self.bm.defaultParams)
+        self.bm.evaluate()
         self.bm.plotter = False
 
     @pytest.mark.cheap
@@ -118,7 +118,7 @@ class Problem:
         self.bm.rateMin = tmp
 
     @pytest.mark.cheap
-    def test_tracker(self):
+    def test_tracker_solve_count(self):
         # Check solve count works with bounds and evaluate
         self.bm.reset()
         # Solve times are empty
@@ -150,7 +150,7 @@ class Problem:
         else:
             self.bm.cost(self.bm.defaultParams)
         # Solve count doesn't increment when evaluating
-        self.bm.evaluate(p)
+        self.bm.evaluate()
         assert self.bm.tracker.solveCount == 2
         # Only one cost time and no grad
         assert len(self.bm.tracker.costTimes) == 2

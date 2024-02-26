@@ -50,7 +50,7 @@ def run(bm, x0=[], gtol=0.001, maxIter=1000, debug=False):
         print(f'Cost of {out.fun} found at:')
         print(out.x)
 
-    bm.evaluate(out.x)
+    bm.evaluate()
     return out.x
 
 

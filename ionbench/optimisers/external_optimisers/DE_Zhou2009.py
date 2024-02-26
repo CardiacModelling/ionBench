@@ -121,7 +121,7 @@ def run(bm, x0=[], nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     for i in range(popSize):
         if pop[i].cost <= bestInd.cost:
             bestInd = pop[i]
-    bm.evaluate(bestInd.x)
+    bm.evaluate()
     return bestInd.x
 
 

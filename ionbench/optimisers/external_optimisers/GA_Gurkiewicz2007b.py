@@ -116,7 +116,7 @@ def run(bm, x0=[], nGens=1000, popSize=0, debug=False):
         if pop[i].cost < minCost:
             minCost = pop[i].cost
             elite = pop[i]
-    bm.evaluate(elite.x)
+    bm.evaluate()
     return elite.x
 
 

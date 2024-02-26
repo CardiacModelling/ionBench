@@ -222,7 +222,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
                 if debug:
                     print(f'Cost below threshold {costThreshold} found. falphaOld: {falphaOld}, falphaNew: {falphaNew}')
                 x0 = model_params(x0)
-                bm.evaluate(x0)
+                bm.evaluate()
                 return x0
 
             # Check for local minimum/slow convergence. From Dokos 2003.
@@ -240,7 +240,7 @@ def run(bm, x0=[], maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False)
                 print(f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
             break
     x0 = model_params(x0)
-    bm.evaluate(x0)
+    bm.evaluate()
     return x0
 
 

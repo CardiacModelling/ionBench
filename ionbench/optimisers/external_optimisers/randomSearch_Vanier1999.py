@@ -45,7 +45,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
         print('Complete')
         print(f'Final cost is {cost_best}')
 
-    bm.evaluate(x_best)
+    bm.evaluate()
     return x_best
 
 

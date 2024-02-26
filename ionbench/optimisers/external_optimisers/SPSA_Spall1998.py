@@ -81,7 +81,7 @@ def run(bm, x0=[], a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
             print(x0)
 
     # Return the best point in the final simplex
-    bm.evaluate(x0)
+    bm.evaluate()
     return x0
 
 

@@ -99,7 +99,7 @@ def run(bm, x0=[], n=20, maxIter=1000, gmin=0.05, debug=False):
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
-    bm.evaluate(Gpos[L])
+    bm.evaluate()
     return Gpos[L]
 
 

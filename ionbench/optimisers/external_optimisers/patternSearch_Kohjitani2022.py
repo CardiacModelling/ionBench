@@ -83,16 +83,16 @@ def run(bm, x0=[], maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=
             funcCounter += 4
             if funcCounter > maxfev:
                 print("Exceeded maximum number of function evaluations.")
-                bm.evaluate(NP)
+                bm.evaluate()
                 return NP
             if iterCounter > maxIter:
                 print("Exceeded maximum number of iterations.")
-                bm.evaluate(NP)
+                bm.evaluate()
                 return NP
 
         Stp *= RedFct  # Decrease step size if all neighbouring points are worse
 
-    bm.evaluate(NP)
+    bm.evaluate()
     return NP
 
 

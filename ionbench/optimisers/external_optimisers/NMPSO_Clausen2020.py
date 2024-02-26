@@ -50,7 +50,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     x, f = opt.run()
     if debug:
         print(f'Nelder Mead complete with best cost of {f}')
-    model.bm.evaluate(x)
+    model.bm.evaluate()
     return x
 
 

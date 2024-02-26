@@ -778,16 +778,17 @@ class Benchmarker:
         """
         return np.sqrt(np.mean((c1 - c2) ** 2))
 
-    def evaluate(self, parameters):
         """
-        Evaluates a final set of parameters.
 
-        This method reports the performance metrics for this parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If benchmarker.plotter = True, then it also plots the performance metrics over the course of the optimisation.
+    def evaluate(self):
+        """
+        Evaluates the best parameters.
+
+        This method reports the performance metrics for the best parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If benchmarker.plotter = True, then it also plots the performance metrics over the course of the optimisation.
 
         Parameters
         ----------
-        parameters : list or numpy array
-            Vector of parameters to solve the model, evaluating the performance of the final parameter vector.
+        None.
 
         Returns
         -------
@@ -795,9 +796,9 @@ class Benchmarker:
 
         """
         print('')
-        print('=========================================')
-        print('===    Evaluating Final Parameters    ===')
-        print('=========================================')
+        print('========================================')
+        print('===      Evaluating Performance      ===')
+        print('========================================')
         print('')
         print('Number of cost evaluations:      ' + str(self.tracker.solveCount))
         print('Number of grad evaluations:      ' + str(self.tracker.gradSolveCount))
@@ -816,8 +817,8 @@ class Benchmarker:
             self.set_steady_state(self.tracker.firstParams)
             firstOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
             self.sim.reset()
-            self.set_params(self.original_parameter_space(parameters))
-            self.set_steady_state(self.original_parameter_space(parameters))
+            self.set_params(self.original_parameter_space(self.tracker.bestParams))
+            self.set_steady_state(self.original_parameter_space(self.tracker.bestParams))
             lastOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
             plt.figure()
             if "moreno" in self._name:
@@ -831,6 +832,6 @@ class Benchmarker:
                 plt.plot(np.arange(0, self.tmax, self.freq), lastOut)
                 plt.ylabel('Current')
                 plt.xlabel('Time (ms)')
-            plt.legend(['Data', 'First Parameters', 'Final Parameters'])
+            plt.legend(['Data', 'First Parameters', 'Best Parameters'])
             plt.title('Improvement after fitting: ' + self._name)
             plt.show()

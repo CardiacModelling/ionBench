@@ -39,7 +39,7 @@ def run(bm, x0=[], maxIter=1000, debug=False):
     # Run the optimisation
     x, f = opt.run()
 
-    model.bm.evaluate(x)
+    model.bm.evaluate()
     return x
 
 

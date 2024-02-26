@@ -56,7 +56,7 @@ def run(bm, x0=[], diff_step=1e-3, maxIter=1000, debug=False):
         print(f'Cost of {out.cost} found at:')
         print(out.x)
 
-    bm.evaluate(out.x)
+    bm.evaluate()
     return out.x
 
 

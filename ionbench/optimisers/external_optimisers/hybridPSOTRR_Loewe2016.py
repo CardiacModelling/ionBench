@@ -75,9 +75,6 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     def trr_error(x):
         return signed_error(tuple(x))
 
-    def evaluate(x):
-        return bm.evaluate(transform(x))
-
     def transform(x):
         """
         Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
@@ -160,7 +157,7 @@ def run(bm, x0=[], n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
-    bm.evaluate(transform(Gpos[L]))
+    bm.evaluate()
     return transform(Gpos[L])
 
 
