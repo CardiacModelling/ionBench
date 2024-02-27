@@ -190,12 +190,17 @@ class Tracker:
         keys = ['solveCount', 'gradSolveCount', 'costs', 'modelSolves', 'gradSolves', 'paramRMSE',
                 'paramIdentifiedCount', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
                 'gradTimes']
-        self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
-            data[key] if key in data.keys() else None for key in keys]
+        try:
+            self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
+                data[key] if key in data.keys() else None for key in keys]
+        except AttributeError:
+            # Assume old (v0.3.4) format
+            self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes, self.gradTimes = data
+            self.bestCosts = np.minimum.accumulate(self.costs)
 
     def report_convergence(self, threshold):
         """
-        Reports the performance metrics at the point of convergence, defined as the first point where there is an unbroken chain in the number of correctly identified parameters.
+        Reports the performance metrics at the point of convergence, defined using the two termination criteria: cost threshold and cost unchanged.
 
         Parameters
         ----------
@@ -207,20 +212,46 @@ class Tracker:
         None.
 
         """
-        converged = False
-        for i in range(len(self.costs)):
-            if self.cost_threshold(threshold, i) or self.cost_unchanged(i):
-                converged = True
-                # All future points remain with this many parameters identified, therefore it is considered converged
-                print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
-                print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
-                print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
-                print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
-                print('Convergence reason:              ' + 'Cost threshold' if self.cost_threshold(threshold,
-                                                                                                    i) else 'Cost unchanged')
-                break
-        if not converged:
+        i = self.when_converged(threshold)
+        if i is None:
+            print('Optimiser has not converged.')
             print('Convergence reason:              Optimiser terminated early.')
+        else:
+            print('Convergence reason:              ' + 'Cost threshold' if self.cost_threshold(threshold,
+                                                                                                i) else 'Cost unchanged')
+            print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
+            print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
+            print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
+            print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
+
+    def when_converged(self, threshold):
+        """
+        Returns the tracking index at convergence, defined using the two termination criteria: cost threshold and cost unchanged. For example, tracker.bestCosts[tracker.when_converged(threshold)] will return the best cost at convergence.
+
+        Parameters
+        ----------
+        threshold : float
+            The threshold to check if the cost was below in the cost_threshold termination criteria.
+
+        Returns
+        -------
+        int
+            The number of model solves at convergence. Returns None if the optimisation has not converged.
+        """
+        # Find cost unchanged using bisection search
+        converged, unchangedIndex = self.cost_unchanged(returnIndex=True)
+        unchangedIndex = unchangedIndex if converged else np.inf
+        # Find cost threshold
+        if self.cost_threshold(threshold):
+            # First index where cost is below threshold
+            thresholdIndex = np.argmax(np.array(self.bestCosts) < threshold)
+        else:
+            thresholdIndex = np.inf
+        # Return the first index where one of the conditions is satisfied
+        convergedIndex = min(unchangedIndex, thresholdIndex)
+        if convergedIndex == np.inf:
+            return None
+        return convergedIndex
 
     def cost_threshold(self, threshold, index=None):
         """
@@ -243,7 +274,7 @@ class Tracker:
             return False
         return self.bestCosts[index] < threshold
 
-    def cost_unchanged(self, index=None, max_unchanged_evals=2500):
+    def cost_unchanged(self, index=None, max_unchanged_evals=2500, returnIndex=False):
         """
         Checks if the cost had converged (remained unchanged for XX iterations) by the given index. If no index is given, the last index is used.
 
@@ -253,6 +284,8 @@ class Tracker:
             The index to check if the function threshold was satisfied. The default is None, in which case it checks the most recent parameter vector.
         max_unchanged_evals : int, optional
             The number of evaluations that the cost must remain unchanged for before it is considered converged. The default is 2500.
+        returnIndex : bool, optional
+            If True, returns the index at which the cost first became unchanged. The default is False. If convergence is not achieved, returns (False, None).
 
         Returns
         -------
@@ -262,7 +295,7 @@ class Tracker:
         if index is None:
             index = len(self.bestCosts)
         if index < max_unchanged_evals:
-            return False
+            return False, None if returnIndex else False
         fsig = np.inf
         evalsUnchanged = 0
         for i in range(index):
@@ -272,8 +305,8 @@ class Tracker:
             else:
                 evalsUnchanged += 1
             if evalsUnchanged >= max_unchanged_evals:
-                return True
-        return False
+                return True, i if returnIndex else True
+        return False, None if returnIndex else False
 
     def check_repeated_param(self, param, solveType):
         """
