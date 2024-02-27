@@ -149,6 +149,8 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
             print(f'Finished population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
+        if bm.is_converged():
+            break
 
     # Iterations of TRR
     if debug:

@@ -236,6 +236,9 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gm
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
+        if bm.is_converged():
+            break
+
     bm.evaluate()
     return transform(Gpos[L])
 

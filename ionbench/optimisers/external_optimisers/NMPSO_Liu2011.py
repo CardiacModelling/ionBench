@@ -234,6 +234,9 @@ def run(bm, x0=None, maxIter=1000, gmin=0.05, debug=False):
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
+        if bm.is_converged():
+            break
+
     # If terminated by max iter, simplex or pso may have found a new best point
     for p in particleList:
         cost = cost_func(tuple(p.position))

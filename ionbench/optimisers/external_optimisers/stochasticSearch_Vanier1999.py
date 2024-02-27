@@ -51,6 +51,8 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
         var *= varCont
         if var < varMin:
             var = varInit
+        if bm.is_converged():
+            break
 
     if debug:
         print('Complete')

@@ -75,6 +75,8 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
         if debug:
             print('New x0')
             print(x0)
+        if bm.is_converged():
+            break
 
     # Return the best point in the final simplex
     bm.evaluate()

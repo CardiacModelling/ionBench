@@ -41,6 +41,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             x_best = x_new
             if debug:
                 print('Improvement found')
+        if bm.is_converged():
+            break
     if debug:
         print('Complete')
         print(f'Final cost is {cost_best}')

@@ -112,6 +112,9 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False
                 maxIndex = i
         pop[maxIndex] = copy.deepcopy(elite)
 
+        if bm.is_converged():
+            break
+
     minCost = np.inf
     for i in range(popSize):
         if pop[i].cost < minCost:

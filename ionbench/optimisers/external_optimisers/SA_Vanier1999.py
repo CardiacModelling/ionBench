@@ -213,6 +213,8 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
                 bestPos = np.copy(p.x)
         if debug:
             print(f'Best cost so far is {bestCost}')
+        if bm.is_converged():
+            break
 
     # Return the best point in the final simplex
     bm.evaluate()

@@ -107,6 +107,10 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
                 bm.evaluate()
                 return NP
 
+            if bm.is_converged():
+                bm.evaluate()
+                return NP
+
         Stp *= RedFct  # Decrease step size if all neighbouring points are worse
 
     bm.evaluate()

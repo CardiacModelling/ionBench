@@ -115,6 +115,9 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
                     print(f'Point accepted since trail cost is {trial.cost} and ith cost is {pop[i].cost}')
                 pop[i] = trial
 
+        if bm.is_converged():
+            break
+
     # Find best point in final pop
     bestInd = Individual()
     bestInd.cost = np.inf

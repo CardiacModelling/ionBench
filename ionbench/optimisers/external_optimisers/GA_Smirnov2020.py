@@ -115,6 +115,9 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
         for i in range(eliteCount):
             pop[eliteIndices[i]] = copy.deepcopy(elites[i])
 
+        if bm.is_converged():
+            break
+
     minCost = np.inf
     elite = None
     for i in range(popSize):

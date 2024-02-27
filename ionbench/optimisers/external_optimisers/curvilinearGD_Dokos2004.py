@@ -277,6 +277,10 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 break
 
             falphaOld = falphaNew
+
+            if bm.is_converged():
+                break
+
         weightCounter += 1
         if debug:
             print(f'Weight counter incremented to {weightCounter}')
@@ -285,6 +289,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 print(
                     f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
             break
+
     x0 = model_params(x0)
     bm.evaluate()
     return x0

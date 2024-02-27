@@ -111,6 +111,9 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
+        if bm.is_converged():
+            break
+
     bm.evaluate()
     return Gpos[L]
 
