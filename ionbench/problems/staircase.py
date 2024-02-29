@@ -26,10 +26,12 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(1e-9, 1e-9)
+            self.simSens.set_max_step_size(100)  # Avoids jumping over the voltage steps
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.set_tolerance(1e-9, 1e-9)
+        self.sim.set_max_step_size(100)  # Avoids jumping over the voltage steps
         self.freq = 0.5  # Timestep in data between points
         self.rateMin = 1.67e-5
         self.rateMax = 1e3

@@ -387,6 +387,7 @@ class Benchmarker:
                                              sensitivities=([self._outputName], paramNames))
             if 'staircase' in self._name:
                 self.simSens.set_tolerance(1e-9, 1e-9)
+                self.simSens.set_max_step_size(100)  # Avoids jumping over the voltage steps
             self.sensitivityCalc = True
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
