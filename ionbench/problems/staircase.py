@@ -16,6 +16,7 @@ import copy
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.tmax = None
+        self.tols = (1e-11, 1e-10)
         self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
@@ -25,12 +26,12 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
-            self.simSens.set_tolerance(1e-9, 1e-9)
+            self.simSens.set_tolerance(self.tols[0], self.tols[1])
             self.simSens.set_max_step_size(100)  # Avoids jumping over the voltage steps
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
-        self.sim.set_tolerance(1e-9, 1e-9)
+        self.sim.set_tolerance(self.tols[0], self.tols[1])
         self.sim.set_max_step_size(100)  # Avoids jumping over the voltage steps
         self.freq = 0.5  # Timestep in data between points
         self.rateMin = 1.67e-5

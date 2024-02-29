@@ -25,6 +25,7 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
             # ODE solver
             sens = ([self._outputName], parameters)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens.set_tolerance(self.tols[0], self.tols[1])
         else:
             self.simSens = None
         # analytical model
@@ -103,6 +104,7 @@ class IKr(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKr benchmark')
+        self.tols = (1e-7, 1e-7)
         self._name = "loewe2016.ikr"
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
@@ -129,6 +131,7 @@ class IKur(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKur benchmark')
+        self.tols = (1e-11, 1e-11)
         self._name = "loewe2016.ikur"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._outputName = 'ikur.IKur'

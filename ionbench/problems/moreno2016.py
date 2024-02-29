@@ -23,6 +23,7 @@ class INa(ionbench.benchmarker.Benchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Moreno 2016 INa benchmark')
         self.costThreshold = 0.01
+        self.tols = (1e-9,1e-9)
         self._name = "moreno2016.ina"
         self.tmax = None
         self._logTimes = None
@@ -69,6 +70,7 @@ class INa(ionbench.benchmarker.Benchmarker):
             # ODE solver
             sens = ([self._outputName], parameters)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens.set_tolerance(self.tols[0], self.tols[1])
         else:
             self.simSens = None
         self.freq = 0.5  # Timestep in data between points

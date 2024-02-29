@@ -385,8 +385,8 @@ class Benchmarker:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
                                              sensitivities=([self._outputName], paramNames))
+            self.simSens.set_tolerance(self.tols[0], self.tols[1])
             if 'staircase' in self._name:
-                self.simSens.set_tolerance(1e-9, 1e-9)
                 self.simSens.set_max_step_size(100)  # Avoids jumping over the voltage steps
             self.sensitivityCalc = True
 
