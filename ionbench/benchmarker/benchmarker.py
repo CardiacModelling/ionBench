@@ -723,18 +723,10 @@ class Benchmarker:
         # Penalty increases linearly with parameters out of bounds
         penalty = 0
         for i in range(self.n_parameters()):
-            if self.standardLogTransform[i]:
-                p = np.log(parameters[i])
-                lb = np.log(self.lb[i])
-                ub = np.log(self.ub[i])
-            else:
-                p = parameters[i]
-                lb = self.lb[i]
-                ub = self.ub[i]
             if parameters[i] < self.lb[i]:
-                penalty += 1e4 + 1e4 * np.abs(p - lb)
+                penalty += 1e4 + 1e4 * np.log(1+np.abs(parameters[i] - self.lb[i]))
             elif parameters[i] > self.ub[i]:
-                penalty += 1e4 + 1e4 * np.abs(p - ub)
+                penalty += 1e4 + 1e4 * np.log(1+np.abs(parameters[i] - self.ub[i]))
         return penalty
 
     def rate_penalty(self, parameters):
@@ -765,10 +757,10 @@ class Benchmarker:
                     "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
             if k < self.rateMin:
                 penalty += 1e4
-                penalty += 1e4 * np.abs(np.log(k) - np.log(self.rateMin))
+                penalty += 1e4 * np.log(1+np.abs(k - self.rateMin))
             elif k > self.rateMax:
                 penalty += 1e4
-                penalty += 1e4 * np.abs(np.log(k) - np.log(self.rateMax))
+                penalty += 1e4 * np.log(1+np.abs(k - self.rateMax))
         return penalty
 
     def rmse(self, c1, c2):
