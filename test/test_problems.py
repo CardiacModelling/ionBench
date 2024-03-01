@@ -68,23 +68,23 @@ class Problem:
         p[0] *= 0.98
         c = self.bm.signed_error(p)[0]
         c2 = self.bm.cost(p)
-        assert 1e4 < c < 2e4
-        assert 1e4 < c2 < 2e4
+        assert 1e5 < c < 2e5
+        assert 1e5 < c2 < 2e5
         # Check cost is small inside bounds when bounded
         p[0] = self.bm.defaultParams[0]
-        assert self.bm.cost(p) < 1e4
+        assert self.bm.cost(p) < 1e5
         # Check _parameters_bounded = False turns off bounds (unless staircase)
         self.bm._parameters_bounded = False
         p[0] *= 0.98
         if 'staircase' in self.bm._name:
-            assert self.bm.cost(p) > 1e4
+            assert self.bm.cost(p) > 1e5
         else:
-            assert self.bm.cost(p) < 1e4
+            assert self.bm.cost(p) < 1e5
         self.bm._parameters_bounded = True
         # Check penalty increases with more bound violations
         p = np.copy(self.bm.defaultParams) * 0.98
         c = self.bm.signed_error(p)[0]
-        assert c > 1e4 * self.bm.n_parameters()
+        assert c > 1e5 * self.bm.n_parameters()
         # Check penalty increases linearly as parameters move out of bounds
         p = np.copy(self.bm.defaultParams)
         p[2] *= 0.5  # Even if other parameters oob
@@ -105,17 +105,17 @@ class Problem:
         assert self.bm._rates_bounded is True
         tmp = self.bm.rateMin
         # Default params inside rate bounds always
-        assert self.bm.cost(self.bm.defaultParams) < 1e4
+        assert self.bm.cost(self.bm.defaultParams) < 1e5
         # Move rate bounds so default rates are outside
         self.bm.rateMin = self.bm.rateMax * 2
-        assert self.bm.cost(self.bm.defaultParams) > 1e4
+        assert self.bm.cost(self.bm.defaultParams) > 1e5
         # Turn off rate bounds should allow solving again (except for staircase)
         self.bm._rates_bounded = False
-        assert self.bm.cost(self.bm.defaultParams) < 1e4 or 'staircase' in self.bm._name
+        assert self.bm.cost(self.bm.defaultParams) < 1e5 or 'staircase' in self.bm._name
         if 'staircase' in self.bm._name:
-            assert self.bm.cost(self.bm.defaultParams) > 1e4
+            assert self.bm.cost(self.bm.defaultParams) > 1e5
             self.bm.rateMin = tmp
-            assert self.bm.cost(self.bm.defaultParams) < 1e4
+            assert self.bm.cost(self.bm.defaultParams) < 1e5
         self.bm.rateMin = tmp
 
     @pytest.mark.cheap

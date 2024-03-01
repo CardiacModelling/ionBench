@@ -710,7 +710,7 @@ class Benchmarker:
 
     def parameter_penalty(self, parameters):
         """
-        Penalty function for out of bound parameters. The penalty for each parameter p that is out of bounds is 1e4+1e4*|p-bound| where bound is either the upper or lower bound for p, whichever was violated.
+        Penalty function for out of bound parameters. The penalty for each parameter p that is out of bounds is 1e5+1e5*|p-bound| where bound is either the upper or lower bound for p, whichever was violated.
         Parameters
         ----------
         parameters : numpy array
@@ -724,14 +724,14 @@ class Benchmarker:
         penalty = 0
         for i in range(self.n_parameters()):
             if parameters[i] < self.lb[i]:
-                penalty += 1e4 + 1e4 * np.log(1+np.abs(parameters[i] - self.lb[i]))
+                penalty += 1e5 + 1e5 * np.log(1+np.abs(parameters[i] - self.lb[i]))
             elif parameters[i] > self.ub[i]:
-                penalty += 1e4 + 1e4 * np.log(1+np.abs(parameters[i] - self.ub[i]))
+                penalty += 1e5 + 1e5 * np.log(1+np.abs(parameters[i] - self.ub[i]))
         return penalty
 
     def rate_penalty(self, parameters):
         """
-        Penalty function for out of bound rates. The penalty for each rate r that is out of bounds is 1e4+1e4*|r-bound| where bound is either the upper or lower bound for r, whichever was violated.
+        Penalty function for out of bound rates. The penalty for each rate r that is out of bounds is 1e5+1e5*|r-bound| where bound is either the upper or lower bound for r, whichever was violated.
         Parameters
         ----------
         parameters : numpy array
@@ -756,11 +756,11 @@ class Benchmarker:
                 raise RuntimeError(
                     "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
             if k < self.rateMin:
-                penalty += 1e4
-                penalty += 1e4 * np.log(1+np.abs(k - self.rateMin))
+                penalty += 1e5
+                penalty += 1e5 * np.log(1+np.abs(k - self.rateMin))
             elif k > self.rateMax:
-                penalty += 1e4
-                penalty += 1e4 * np.log(1+np.abs(k - self.rateMax))
+                penalty += 1e5
+                penalty += 1e5 * np.log(1+np.abs(k - self.rateMax))
         return penalty
 
     def rmse(self, c1, c2):
