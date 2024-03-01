@@ -22,7 +22,7 @@ def staircase_plots(bm, paramPairs, nPoints):
         plt.contour(x, y, z, [1e4])
         plt.gca().set_xscale('log')
         plt.scatter(bm.defaultParams[i], bm.defaultParams[j], marker='*')
-        plt.title(f'Rate bounds - {modelType} Staircase - ($p_{i}$,$p_{j}$)')
+        plt.title(f'Rate bounds - {modelType} Staircase - ($p_{{{i}}}$,$p_{{{j}}}$)')
         plt.savefig(f'figures/rateBounds-{modelType}-{i}.png')
         plt.close()
         # Create a contour plot of the penalty function at multiple levels
@@ -32,7 +32,7 @@ def staircase_plots(bm, paramPairs, nPoints):
         z = vecF(x, y, i, j)
         CS = plt.contour(x, y, z, [1e4, 2e4, 5e4, 1e5])
         plt.gca().set_xscale('log')
-        plt.title(f'Penalty function - {modelType} Staircase - ($p_{i}$,$p_{j}$)')
+        plt.title(f'Penalty function - {modelType} Staircase - ($p_{{{i}}}$,$p_{{{j}}}$)')
         plt.clabel(CS, inline=1, fontsize=10)
         plt.scatter(bm.defaultParams[i], bm.defaultParams[j], marker='*')
         plt.savefig(f'figures/penalty-{modelType}-' + str(i) + '.png')
