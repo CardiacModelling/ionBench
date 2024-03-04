@@ -72,7 +72,7 @@ class Benchmarker:
                     tmp.append(float(row[0]))
             self.data = np.array(tmp)
 
-    def add_parameter_bounds(self, bounds, parameterSpace='original'):
+    def add_parameter_bounds(self):
         """
         Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
 
@@ -90,12 +90,8 @@ class Benchmarker:
         None.
 
         """
-        if parameterSpace.lower() == 'input':
-            self.lb = self.original_parameter_space(bounds[0])
-            self.ub = self.original_parameter_space(bounds[1])
-        elif parameterSpace.lower() == 'original':
-            self.lb = np.copy(bounds[0])
-            self.ub = np.copy(bounds[1])
+        self.lb = np.copy(self.lbStandard)
+        self.ub = np.copy(self.ubStandard)
         self._parameters_bounded = True
 
     def add_rate_bounds(self):

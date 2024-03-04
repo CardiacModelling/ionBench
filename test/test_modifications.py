@@ -12,14 +12,8 @@ class TestModifications:
         # Check bounds are correctly applied for all settings
         # No bounds initially
         assert not self.bm._parameters_bounded
-        # Positive
-        mod = modification.Modification(parameterBounds='positive')
-        mod.apply(self.bm)
-        assert self.bm._parameters_bounded
-        assert all(np.array(self.bm.lb) == 0)
-        assert all(np.array(self.bm.ub) == np.inf)
         # Sampler
-        mod = modification.Modification(parameterBounds='Sampler')
+        mod = modification.Modification(parameterBounds='on')
         mod.apply(self.bm)
         assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) > 0)
@@ -61,14 +55,10 @@ class TestModifications:
         # No log transform initially
         assert not any(self.bm._logTransformParams)
         # Standard log transform
-        mod = modification.Modification(logTransform='standard')
+        mod = modification.Modification(logTransform='on')
         mod.apply(self.bm)
         assert any(self.bm._logTransformParams)
         assert not all(self.bm._logTransformParams)
-        # Full log transform
-        mod = modification.Modification(logTransform='Full')
-        mod.apply(self.bm)
-        assert all(self.bm._logTransformParams)
         # Custom
         transforms = list(np.random.choice([True, False], self.bm.n_parameters() - 2)) + [True, False]  # Random true and falses in which the last two are True and False
         mod = modification.Modification(logTransform='custom', customLogTransform=transforms)
@@ -98,11 +88,12 @@ class TestModifications:
     @pytest.mark.cheap
     def test_multiple_settings(self):
         # Check multiple settings applied at once doesn't break anything and order in the .apply() method doesn't matter
-        mod = modification.Modification(logTransform='Full', parameterBounds='positive', scaleFactors='On')
+        mod = modification.Modification(logTransform='on', parameterBounds='on', scaleFactors='On')
+        mod.apply_rate_bounds(mod.dict['rateBounds'], self.bm)
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
         mod.apply_parameter_bounds(mod.dict['parameterBounds'], self.bm)
-        assert all(self.bm._logTransformParams)
+        assert any(self.bm._logTransformParams) and not all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
         assert self.bm._parameters_bounded
         lb = self.bm.lb
@@ -110,11 +101,11 @@ class TestModifications:
         # Check order of applying doesn't change bounds
         emptyMod = modification.Empty()
         emptyMod.apply(self.bm)
-        mod = modification.Modification(logTransform='Full', parameterBounds='positive', scaleFactors='on')
+        mod = modification.Modification(logTransform='on', parameterBounds='on', scaleFactors='on')
         mod.apply_parameter_bounds(mod.dict['parameterBounds'], self.bm)
         mod.apply_log_transforms(mod.dict['log transform'], self.bm)
         mod.apply_scale_factors(mod.dict['scale factors'], self.bm)
-        assert all(self.bm._logTransformParams)
+        assert any(self.bm._logTransformParams) and not all(self.bm._logTransformParams)
         assert self.bm._useScaleFactors
         assert self.bm._parameters_bounded
         assert all(np.array(self.bm.lb) == np.array(lb))
@@ -123,7 +114,7 @@ class TestModifications:
     @pytest.mark.cheap
     def test_other_problems(self):
         # Basic check for another benchmarker
-        mod = modification.Modification(logTransform='standard', parameterBounds='sampler', scaleFactors='On')
+        mod = modification.Modification(logTransform='on', parameterBounds='on', scaleFactors='On')
         newbm = ionbench.problems.loewe2016.IKr()
         mod.apply(newbm)
         assert newbm._useScaleFactors
