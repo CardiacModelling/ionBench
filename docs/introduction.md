@@ -6,30 +6,30 @@ There are currently four performance metrics in ***ionBench***. Each metric meas
 
 The first of these is the cost function. A good algorithm should result in a model which reproduces the data it was fitted to. This is tested by calculating the RMSE (Root Mean Squared Error) between the model predictions and the data. This is also typically the function that is minimised by these optimisers. 
 
-The second metric is the difference between the true and estimated parameters. Reproducing the data (or producing data that is similar) is not always sufficient. Generally, we wish to correctly identify the parameters which were used to generate a synthetic data set. We quantify this by calculating the RMSRE (Root Mean Squared Relative Error) in parameter space between the estimated and true parameters. 
+The second metric is the time spent solving the model. All algorithms are able to identify the true parameters if given an infinite amount of computation time (since any algorithm can be utilised in a multistart approach). To better compare algorithms, we want to identify how fast an algorithm can identify parameters which reproduce the data. While ideally, we would track the number of model solves to remove the variance from the run time, different approaches can lead to more or less stiff parameters being solved and this influences the solve time.
 
-The third metric is the number of correctly identified parameters. It identifies how many parameters are within 5% of their true values. 
-
-The fourth metric is the number of times the model is solved. All algorithms are able to identify the true parameters if given an infinite amount of computation time (since any algorithm can be utilised in a multistart approach). To better compare algorithms, we want to identify how fast an algorithm can identify parameters which reproduce the data or can identify the true parameters. A common metric for this is computation time. However, this is dependent on the machine the algorithm is run on, the precise implementation of the algorithm and other aspects that introduce noise. To resolve these issues, we track the number of times the model is solved. Solving an ODE model is by far the most computationally expensive part of ODE optimisation, where typically between 80% and 99% of the total computation time is dedicated to solving the model.
+Metrics for the accuracy of the estimated parameters are also tracked but not reported. While identification of the original parameters is important, it requires the underlying problem to be identifiable. This is not always the case, and so the accuracy of the estimated parameters is not always a good metric for algorithm performance.
 
 The model solves are separated into two groups, model solves for the cost function and model solves for a gradient calculation using myokit sensitivities.
 
-These performance metrics are tracked automatically when using ***ionBench***. They are stored in a __Tracker__ object associated with each benchmarker problem class. 
+These performance metrics are tracked automatically when using ***ionBench***. They are stored in a __Tracker__ object associated with each benchmarker problem object. 
 
 ## The Benchmarker class
-The __Benchmarker__ class contains the majority of the features needed to evaluate the performance of the optimisation algorithms. A __Benchmarker__ object should only be used as part of the construction of a specific problem. Each problem has its own __Benchmarker__ class that inherits all the methods and data from the main __Benchmarker__ class but also contains lots of problem-specific information. 
+The __Benchmarker__ class contains the majority of the features needed to evaluate the performance of the optimisation algorithms. A __Benchmarker__ object should only be used as part of the construction of a specific problem. Each problem has its own __Benchmarker__ subclass that inherits all the methods and data from the __Benchmarker__ class but also contains lots of problem-specific information. 
 
-The main feature of the __Benchmarker__ classes are there abstraction of the cost function, `benchmarker.cost(parameters)`. This evaluates a RMSE cost function at the inputted parameters compared with the __Benchmarkers__ pregenerated synthetic data (`benchmarker.signed_error(parameters)` and `benchmarker.squared_error(parameters)` are also available as alternative cost functions, returning vectors of residuals and squared residuals, respectively). Through the use of the __Tracker__ class, the benchmarker will also record the number of times the model has been solved, the evaluated cost at all the inputted parameters, the RMSRE in parameter space of all inputted parameters, and the number of correctly identified parameters (those within 5% of the true values) at all evaluated parameters. 
+The main feature of the __Benchmarker__ classes are there abstraction of the cost function, `benchmarker.cost(parameters)`. This evaluates a RMSE cost function at the inputted parameters compared with the __Benchmarkers__ pregenerated synthetic data (`benchmarker.signed_error(parameters)` and `benchmarker.squared_error(parameters)` are also available as alternative cost functions, returning vectors of residuals and squared residuals, respectively). Through the use of the __Tracker__ class, the benchmarker will also record the number of times the model has been solved, the time spent on each solve, the evaluated cost at all the inputted parameters, all evaluated parameters and whether they were solved with or without sensitivities, and error in parameter space at all evaluated parameters.
 
 In addition to evaluating the cost of a set of parameters, the benchmarkers can also evaluate the gradient of the cost function at a set of parameters. This can be done by calling `benchmarker.grad(parameters)` and can also be used to find the jacobian of the signed error.
 
-Once fitting is complete, `benchmarker.evaluate(parameters)` can be called with the fitted parameters. This will report the performance metrics like RMSRE in parameter space, cost, number of identified parameters, and number of model solves. In addition, calling this function will also plot these metrics as a function of time (the order the `benchmarker.cost()` was called), a plot of the model output compared with the data, and histograms of the time to solve the model. Plotting can be disabled by setting `benchmarker.plotter = False`. 
+Once fitting is complete, `benchmarker.evaluate()` can be called. This will report the performance metrics like best cost and number of model solves and time spent solving the model. In addition, calling this function will also plot some of these metrics over the course of the optimisation, a plot of the model output compared with the data, and histograms of the time to solve the model. Plotting can be disabled by setting `benchmarker.plotter = False`. 
 
-Log transforms can also be specified in the benchmarker using `benchmarker.log_transform()` and inputting a list of booleans indicating which parameters you wish to log transform (base e), all future inputted parameters in the benchmarker can then be in log-space (or a mix if only some parameters are log transformed), while the recorded RMSRE and number of identified parameters will use the original parameter space to ensure results are comparable between transformed and non-transformed optimisations.
+Log transforms can also be specified in the benchmarker using `benchmarker.log_transform()` and inputting a list of booleans indicating which parameters you wish to log transform (base e), all future inputted parameters in the benchmarker will then be interpreted in log-space (or a mixed space if only some parameters are log transformed). The information stored in the __Tracker__ does not use any transforms.
 
 When working with log transforms (or equivalently scale factor transforms using `benchmarker._useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
 
-Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds([lb,ub])` where `lb` and `ub` are lists of lower and upper bounds. This will result in `benchmarker.cost()` returning `inf` if any of the bounds are violated. Additionally, the number of solves will not be incremented (since the time taken to compare against bounds is negligible compared with the time to solve the model) but the trackers for cost, RMSE in parameter space, and number of identified parameters will include this point. More advanced options for bounds are still to come.
+Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds()`. This will set `bm.lb=bm.lbStandard`, `bm.ub=bm.ubStandard` and `benchmarker._bounded=True`. If an optimisers tries to find the cost of a parameter outside of these bounds, the model will not be solved and the cost will be given by the penalty function. The __Tracker__ will record these parameters but remember that the model was not solved.
+
+Similarly, rate bounds can be added with `benchmarker.add_rate_bounds()`.
 
 Other useful functions include:
 
@@ -37,33 +37,29 @@ Other useful functions include:
 * `benchmarker.n_parameters()` which returns the number of parameters in the model.
 
 ## Problems
-There are seven benchmarking problems currently in ***ionBench***. These are four problems from Loewe et al. 2016, one from Moreno et al. 2016 and two developed specifically for ***ionBench***. Each problem has an associated __Benchmarker__ class that inherits from the main __Benchmarker__ class described above. The problems store general information like log-transform status or parameter bounds, problem-specific information such as a problems Myokit model, the synthetic data and a parameter sampling method `benchmarker.sample()`, and run-specific information such as the __Tracker__ object which stores the evaluated performance metrics over time. 
+There are seven benchmarking problems currently in ***ionBench***. These are two problems from Loewe et al. 2016, one from Moreno et al. 2016 and two developed specifically for ***ionBench***, one of which is based on Clerx et al. 2019. Each problem has an associated __Benchmarker__ class that inherits from the main __Benchmarker__ class described above. The problems store general information like log-transform status or parameter bounds, problem-specific information such as a problems Myokit model, the synthetic data and a parameter sampling method `benchmarker.sample()`, and run-specific information such as the __Tracker__ object which stores the evaluated performance metrics over time. 
 
 Each problem also has an associated `generate_data()` method which will simulate the model and store the model output data in the __data__ directory. 
 
 ### Loewe 2016
-Four of the problems from Loewe et al. 2016 are implemented in ***ionBench***. These are IKr and IKur (defined in the paper as "easy" and "hard", respectively), both with the narrow and wide parameter spaces. For these test problems, the models are run using a step protocol (-80mV followed by a varying step height between +50mV and -70mV for 400ms and a step-down to -110mV) and the models are fitted to the resulting current trace.
+Two of the problems from Loewe et al. 2016 are implemented in ***ionBench***. These are IKr and IKur (defined in the paper as "easy" and "hard", respectively). For these problems, the models are run using a step protocol (-80mV followed by a varying step height between +50mV and -70mV for 400ms and a step-down to -110mV) and the models are fitted to the resulting current trace.
 
-By default `benchmarker.sample()` samples from the narrow space but this can be changed by setting `benchmarker.paramSpaceWidth = 2` to sample from the wide parameter space. Each parameter is either defined as multiplicative, in which case it is sampled between x0.1 and x10 in a log-uniform distribution, or as additive, in which case it is sampled between +-60, with these ranges doubling (x0.01 and x100 in the case of multiplicative parameters) for the wide parameter space. 
-
-One of the parameters in IKur has a true value of 0.005 and is additive, so is sampled between -59.995 and 60.005, which results in very large values of RMSRE in parameter space compared with the other models.
+Each parameter is either defined as multiplicative, in which case it is sampled between x0.1 and x10 in a log-uniform distribution, or as additive, in which case it is sampled between +-60.
 
 ### Moreno 2016
-This problem uses the INa model described in Moreno et al. 2016 and fits to a variety of summary curves measuring steady state activation and inactivation, recovery from inactivation, recovery from use-dependent block and time to decay 50%. 
+This problem uses the INa model described in Moreno et al. 2016 and fits to a variety of summary curves measuring steady state activation and inactivation, recovery from inactivation, and time to decay 50%. While the problem implemented in ***ionBench*** is based off the problem described in Moreno et al. 2016, our implementation measures fewer summary statistics in order to shorten the protocol and therefore the time spent solving the model.
 
-The parameters used in the model are as originally described in Moreno et al. 2016. This benchmarker's sampling function perturbs the true parameters between 95% and 105% (as with Loewe 2016, the width of this interval can be changed by setting `benchmarker.paramSpaceWidth`, with 5 (default), 10, and 25 being used in Moreno et al. 2016). 
+The parameters and model used in the model are as originally described in Moreno et al. 2016. This benchmarker's sampling function perturbs the true parameters between 25% and 125%.
 
 ### Staircase
-There are two Staircase test problems developed for ***ionBench***. The first is a Hodgkin-Huxley IKr model from Beattie et al. 2017 and the second is a Markov IKr model from Fink et al. 2008. Both models use the staircase protocol and fit the resulting current trace. 
+There are two Staircase problems developed for ***ionBench***. The first is a Hodgkin-Huxley IKr model from Beattie et al. 2017, and the second is a Markov IKr model from Fink et al. 2008. Both models use the staircase protocol and fit the resulting current trace. 
 
-The `benchmarker.sample()` method randomly perturbs the true parameters by +-50%.
+The `benchmarker.sample()` method samples parameters from within the parameter and rate bounds, sampling in a log transformed parameter space for some parameters. If parameters are evaluated outside the parameter or rate bounds, the penalty function is applied, regardless of if that approach used parameter or rate bounds. 
 
 The Staircase problems are also the only problems in the benchmarker to use noisy data for fitting.
 
-
-
 ## Optimisation Algorithms
-There are a wide variety of optimisation algorithms used for ion channel models. We have implementations of optimisation algorithms from Pints, Scipy, and paper specific algorithms implemented for ***ionBench***. All optimisers only require a benchmarker as an input, with hyperparameters and initial guesses being optional inputs (`benchmarker.sample()` is used if no initial guess is specified). 
+There are a wide variety of optimisation algorithms used for ion channel models. We have implementations of optimisation algorithms from Pints, Scipy, and paper specific algorithms implemented for ***ionBench***. All optimisers only require a benchmarker as an input, with hyperparameters and an initial parameter guess being optional inputs (`benchmarker.sample()` is used if no initial guess is specified). 
 
 Optimisers will automatically load parameter bounds from the benchmarker if they can be used in the algorithm. Each optimiser module has a `.run(bm=benchmarker)` method that runs the optimisation on a benchmarker.
 
@@ -71,12 +67,12 @@ Optimisers will automatically load parameter bounds from the benchmarker if they
 ### Pints
 The Pints optimisers currently available are CMA-ES, Nelder-Mead, PSO, SNES, and XNES. 
 
-For CMA-ES, if the benchmarker has active bounds, then CMA-ES will automatically use bound on the transition rates in addition to parameter bounds, defined in the __ionbench.optimisers.pints_optimisers.classes_pints.AdvancedBoundaries__ module. 
+The Pints optimisers are the only ones which can incorporate rate bounds into the optimisation. 
 
 ### Scipy
 The Scipy optimisers currently available are LM (Levenberg-Marquardt), Nelder-Mead, Powell's simplex method, Conjugate Gradient Descent, SLSQP, and Trust Region Reflective. 
 
-Both Trust Region Reflective and LM make use of the alternative cost functions, in this case `benchmarker.signed_error()` returning a vector of residuals rather than the RMSE cost. 
+Both Trust Region Reflective and LM make use of the alternative cost functions, in this case `benchmarker.signed_error()` returning a vector of residuals rather than the RMSE cost. In this case, `benchmarker.grad(residuals=True)` is used to calculate the jacobian of the residuals rather than the gradient of the RMSE cost function. 
 
 ### External Optimisers
 We currently have twenty-one optimisers defined from other papers for ion channel fitting.
@@ -89,4 +85,4 @@ They can be particularly useful if you want to apply problem-specific settings, 
 Each optimiser has a `.get_modification()` function which will get a modification relevant to that particular optimiser. The choice of modification can be changed by varying the optional input `modNum`.
 
 ## Uncertainty
-There are two uncertainty and unindentifiability tools built into ***ionBench***. The first is a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem. The second is a Fisher's Information Matrix calculator. This uses the curvature of the likelihood to find the FIM, but it will likely be switched over to a MCMC approach at some point, so it's a bit more reliable. 
+There are two uncertainty and unindentifiability tools built into ***ionBench***. The first is a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem. The second is a Fisher's Information Matrix calculator. This uses the curvature of the likelihood to find the FIM.
