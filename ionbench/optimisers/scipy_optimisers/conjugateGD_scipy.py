@@ -51,7 +51,7 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
         """
         return cost(tuple(p))
 
-    if x0 in None:
+    if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
