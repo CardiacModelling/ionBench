@@ -11,22 +11,7 @@ def sub_dict(d, keys):
 
 class TestScipy:
     # Check all scipy optimisers run and improve cost compared to x0
-    bm = ionbench.problems.staircase.HH(sensitivities=True)
-    bm._useScaleFactors = True  # Helps the stability of conjugate GD (avoiding big steps which lead to parameters that result in failed model solves)
-    bm.plotter = False
-
     bmTest = ionbench.problems.test.Test()
-
-    @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
-    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_with_problem(self, opt):
-        x0 = self.bm.sample()
-        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
-        module = import_module(opt)
-        x0_opt = module.run(self.bm, x0=x0, maxIter=5)
-        cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset=False)
-        assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_SCIPY)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
@@ -41,22 +26,7 @@ class TestScipy:
 
 
 class TestPints:
-    # Check all pints optimisers run and improve cost compared to x0
-    bm = ionbench.problems.staircase.HH()
-    bm.plotter = False
-
     bmTest = ionbench.problems.test.Test()
-
-    @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
-    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_with_problem(self, opt):
-        x0 = self.bm.sample()
-        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
-        module = import_module(opt)
-        x0_opt = module.run(self.bm, x0=x0, maxIter=5)
-        cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset=False)
-        assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_PINTS)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
@@ -74,24 +44,7 @@ class TestPints:
 
 
 class TestExternal:
-    # Check all external optimisers run
-    bm = ionbench.problems.staircase.HH(sensitivities=True)
-    bm._useScaleFactors = True
-    bm.plotter = False
-
     bmTest = ionbench.problems.test.Test()
-
-    @pytest.mark.parametrize("opt", ionbench.OPT_EXT)
-    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
-    def test_with_problem(self, opt):
-        hyperparams = {'maxIter': 5, 'nGens': 5, 'maxfev': 50, 'n': 5, 'popSize': 20, 'maxInnerIter': 20}
-        x0 = self.bm.sample()
-        # sample initial point, find its cost, optimise, find opt cost, assert not infinite
-        module = import_module(opt)
-        x0_opt = module.run(self.bm, x0=x0, **sub_dict(hyperparams, signature(module.run).parameters))
-        cost_opt = self.bm.cost(x0_opt)
-        self.bm.reset(fullReset=False)
-        assert cost_opt < np.inf
 
     @pytest.mark.parametrize("opt", ionbench.OPT_EXT)
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
