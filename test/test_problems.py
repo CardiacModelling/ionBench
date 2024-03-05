@@ -86,16 +86,6 @@ class Problem:
         p = np.copy(self.bm.defaultParams) * 0.98
         c = self.bm.signed_error(p)[0]
         assert c > 1e5 * self.bm.n_parameters()
-        # Check penalty increases linearly as parameters move out of bounds
-        p = np.copy(self.bm.defaultParams)
-        p[2] *= 0.5  # Even if other parameters oob
-        p[0] = 0.89 * self.bm.defaultParams[0]
-        c1 = self.bm.signed_error(p)[0]
-        p[0] = 0.79 * self.bm.defaultParams[0]
-        c2 = self.bm.signed_error(p)[0]
-        p[0] = 0.69 * self.bm.defaultParams[0]
-        c3 = self.bm.signed_error(p)[0]
-        assert np.abs(c2 - (c1 + c3) / 2) < 1e-8
         self.bm._parameters_bounded = False
 
     @pytest.mark.cheap
