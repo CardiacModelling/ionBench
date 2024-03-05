@@ -101,16 +101,20 @@ class Tracker:
         # Cost plot
         plt.figure()
         plt.scatter(range(len(self.costs)), self.costs, c="k", marker=".")
+        c = np.array(self.costs)
+        plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
         plt.xlabel('Model solves')
         plt.ylabel('RMSE cost')
-        plt.title('Data error')
+        plt.title('Evaluated Cost')
 
         # Best cost plot
         plt.figure()
         plt.scatter(range(len(self.bestCosts)), self.bestCosts, c="k", marker=".")
+        c = np.array(self.bestCosts)
+        plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
         plt.xlabel('Model solves')
         plt.ylabel('RMSE cost')
-        plt.title('Data error')
+        plt.title('Best Cost')
 
         # # Parameter RMSRE plot
         # plt.figure()
