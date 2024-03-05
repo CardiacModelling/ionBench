@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 import ionbench
 import numpy as np
@@ -53,10 +55,8 @@ class TestExternal:
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
-        if 'Loewe' in opt:
-            x0_opt = module.run(self.bmTest, maxIter=50)
-        elif 'Dokos' in opt:
-            x0_opt = module.run(self.bmTest, costThreshold=1e-4)
+        if 'maxIter' in inspect.signature(module.run).parameters:
+            x0_opt = module.run(self.bmTest, maxIter=10000)
         else:
             x0_opt = module.run(self.bmTest)
         cost_opt = self.bmTest.cost(x0_opt)
