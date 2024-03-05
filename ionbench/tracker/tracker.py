@@ -218,15 +218,17 @@ class Tracker:
         """
         i = self.when_converged(threshold)
         if i is None:
-            print('Optimiser has not converged.')
             print('Convergence reason:              Optimiser terminated early.')
+            i = len(self.bestCosts) - 1
         else:
             print('Convergence reason:              ' + 'Cost threshold' if self.cost_threshold(threshold,
                                                                                                 i) else 'Cost unchanged')
-            print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
-            print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
-            print('Cost at convergence:             {0:.6f}'.format(self.costs[i]))
-            print('Parameter RMSRE at convergence:  {0:.6f}'.format(self.paramRMSRE[i]))
+        print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
+        print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
+        print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i]))
+        costTime, gradTime = self.total_solve_time(i)
+        print('Model solve time at convergence: {0:.6f}'.format(costTime))
+        print('Grad solve time at convergence:  {0:.6f}'.format(gradTime))
 
     def when_converged(self, threshold):
         """
@@ -311,6 +313,26 @@ class Tracker:
             if evalsUnchanged >= max_unchanged_evals:
                 return True, i if returnIndex else True
         return False, None if returnIndex else False
+
+    def total_solve_time(self, i):
+        """
+        Returns the total time taken to solve the model up to the i-th solve, separated into model solves with and without sensitivities.
+
+        Parameters
+        ----------
+        i : int
+            The solve index up to which the solve times should be totaled (inclusive).
+
+        Returns
+        -------
+        costTime : float
+            The total time taken to solve the model (excluding solves with sensitivities) up to (and including) the i-th solve.
+        gradTime : float
+            The total time taken to solve the model (excluding solves without sensitivities) up to (and including) the i-th solve.
+        """
+        gradCount = self.gradSolves[i]
+        costCount = self.modelSolves[i]
+        return np.sum(self.costTimes[:costCount+1]), np.sum(self.gradTimes[:gradCount+1])
 
     def check_repeated_param(self, param, solveType):
         """
