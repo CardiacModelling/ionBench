@@ -4,7 +4,7 @@ import itertools
 # Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 
-def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gmin=0.05, w=0.6, debug=False):
+def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al. 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
@@ -26,8 +26,6 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gm
         Maximum number of iterations without improvement before perturbations. The default is 5.
     maxIter : int, optional
         Maximum number of iterations. The default is 1000.
-    gmin : float, optional
-        Target cost. Once the cost is reduced below gmin, the optimisation terminates. The default is 0.05.
     w : float, optional
         Initial value for the inertia of the particles. The default is 0.6.
     debug : bool, optional
@@ -47,6 +45,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, gm
             x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
         else:
             x0 = x0 / (2 * bm.defaultParams)
+    gmin = bm.costThreshold
 
     class Particle:
         def __init__(self, n_param):

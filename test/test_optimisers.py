@@ -55,8 +55,6 @@ class TestExternal:
         mod.apply(self.bmTest)
         if 'Loewe' in opt:
             x0_opt = module.run(self.bmTest, maxIter=50)
-        elif 'Liu' in opt or 'Chen' in opt or 'Cabo' in opt:
-            x0_opt = module.run(self.bmTest, gmin=5e-3)
         elif 'Dokos' in opt:
             x0_opt = module.run(self.bmTest, costThreshold=1e-4)
         else:
