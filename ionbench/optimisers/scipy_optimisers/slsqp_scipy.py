@@ -58,9 +58,9 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             print(bm.ub)
             print('New bounds')
             print(bounds)
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': bm.costThreshold, 'maxiter': maxIter}, bounds=bounds)
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'maxiter': maxIter}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'ftol': bm.costThreshold, 'maxiter': maxIter})
+        out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', options={'disp': debug, 'maxiter': maxIter})
 
     if debug:
         print(f'Cost of {out.fun} found at:')
