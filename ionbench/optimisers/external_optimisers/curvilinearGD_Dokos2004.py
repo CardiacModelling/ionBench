@@ -62,7 +62,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
 
     # Set up transform functions to map between upper and lower bounds
     if not bm._parameters_bounded:
-        bm.add_parameter_bounds([bm.defaultParams * 0, bm.defaultParams * 2])
+        bm.add_parameter_bounds()
     ub = bm.input_parameter_space(bm.ub)
     lb = bm.input_parameter_space(bm.lb)
 

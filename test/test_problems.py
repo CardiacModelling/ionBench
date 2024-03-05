@@ -62,7 +62,8 @@ class Problem:
     def test_parameter_bounds(self):
         self.bm.reset()
         # Check bounds give infinite cost outside and solve inside bounds
-        self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
+        self.bm.add_parameter_bounds()
+        self.bm.lb = 0.99*self.bm.defaultParams
         # Check bounds give penalty for 1 param out of bounds outside of bounds
         p = np.copy(self.bm.defaultParams)
         p[0] *= 0.98
@@ -131,7 +132,8 @@ class Problem:
         self.bm.cost(self.bm.defaultParams)
         assert self.bm.tracker.solveCount == 1
         # but not when out of bounds
-        self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, [np.inf] * self.bm.n_parameters()])
+        self.bm.add_parameter_bounds()
+        self.bm.lb = 0.99*self.bm.defaultParams
         p = np.copy(self.bm.defaultParams)
         p[0] = 0.98 * self.bm.defaultParams[0]
         self.bm.cost(p)
@@ -359,7 +361,8 @@ class Problem:
         self.bm.reset()
         # Check parameters that start out of bounds get clamped to inside bounds
         p = np.copy(self.bm.defaultParams)
-        self.bm.add_parameter_bounds([0.99 * self.bm.defaultParams, 1.01 * self.bm.defaultParams])
+        self.bm.add_parameter_bounds()
+        self.bm.lb = 0.99*self.bm.defaultParams
         assert self.bm.in_parameter_bounds(p)
         p[0] = 0.5 * self.bm.defaultParams[0]
         assert not self.bm.in_parameter_bounds(p)
