@@ -17,7 +17,6 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.tmax = None
         self.tols = (1e-11, 1e-10)
-        self._log = myokit.DataLog.load_csv(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-ramp.csv'))
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
         except FileNotFoundError:
@@ -27,17 +26,16 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(self.tols[0], self.tols[1])
-            self.simSens.set_max_step_size(100)  # Avoids jumping over the voltage steps
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self.model, protocol=self.protocol())
         self.sim.set_tolerance(self.tols[0], self.tols[1])
-        self.sim.set_max_step_size(100)  # Avoids jumping over the voltage steps
         self.freq = 0.5  # Timestep in data between points
         self.rateMin = 1.67e-5
         self.rateMax = 1e3
-        self.vLow = min(self._log['voltage'])
-        self.vHigh = max(self._log['voltage'])
+        p = self.protocol()
+        self.vLow = min(p.levels())
+        self.vHigh = max(p.levels())
         self.lbStandard = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
         self.ubStandard = np.array(
             [1e3 if self.standardLogTransform[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
@@ -85,9 +83,32 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         protocol : myokit.Protocol
             The staircase protocol.
         """
-        protocol = myokit.TimeSeriesProtocol(self._log.time(), self._log['voltage'])
-        self.tmax = self._log.time()[-1]
+        protocol = myokit.load_protocol(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-pace.mmt'))
+        self.tmax = protocol.characteristic_time()
         return protocol
+
+    def add_ramps(self):
+        """
+        Myokit protocols do not support ramps, so this method is used to add the staircase ramps to the myokit model.
+        """
+        c = self.model.get('membrane')
+        # Remove binding from membrane.V
+        v = c.get('V')
+        v.set_binding(None)
+
+        # Ramps
+        v1 = c.add_variable('v1')
+        v1.set_rhs('-150 + 0.1 * engine.time')
+        v2 = c.add_variable('v2')
+        v2.set_rhs('5694 - 0.4 * engine.time')
+
+        # membrane.V is pace with ramps
+        v.set_rhs("""
+            piecewise(
+                (engine.time >= 300 and engine.time < 700), v1, 
+                (engine.time >=14410 and engine.time < 14510), v2, 
+                engine.pace)
+        """)
 
 
 class HH(StaircaseBenchmarker):
@@ -103,6 +124,7 @@ class HH(StaircaseBenchmarker):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self._name = "staircase.hh"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
+        self.add_ramps()
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
@@ -135,6 +157,7 @@ class MM(StaircaseBenchmarker):
         print('Initialising Markov Model IKr benchmark')
         self._name = "staircase.mm"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
+        self.add_ramps()
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
@@ -156,7 +179,7 @@ class MM(StaircaseBenchmarker):
                                                                                          'Ir5']],
                                                               parameters=[self._paramContainer + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
-                                                              current=self._outputName, vm='Environment.V')
+                                                              current=self._outputName, vm='membrane.V')
         self.costThreshold = 0.0075
         super().__init__()
         print('Benchmarker initialised')

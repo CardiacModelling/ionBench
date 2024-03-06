@@ -19,19 +19,26 @@ R = 8314.472 [mJ/mol/K]
     in [mJ/mol/K]
 T = 310 [K]
     in [K]
-time = 0 [ms] bind time
-    in [ms]
 E_K = R * T / F * log(K_o / K_i)
     in [mV]
-V = -80 [mV] bind pace
+
+[engine]
+time = 0 [ms] bind time
+    in [ms]
+pace = -80 [mV] bind pace
+    in [mV]
+
+[membrane]
+V = engine.pace
+    desc: membrane potential
     in [mV]
 
 [IKr]
-i_Kr = iKr_Markov.p15 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (Environment.V - Environment.E_K)
+i_Kr = iKr_Markov.p15 * (Environment.T / 35 [K] - 55 / 7) * sqrt(Environment.K_o / 5.4 [mM]) * iKr_Markov.Or4 * (membrane.V - Environment.E_K)
     in [A/F]
 
 [iKr_Markov]
-use Environment.V
+use membrane.V
 dot(Cr1) = beta_xr1 * Cr2 - alpha_xr1 * Cr1
     in [1]
 dot(Cr2) = alpha_xr1 * Cr1 + beta_xr2 * Cr3 - (alpha_xr2 + beta_xr1) * Cr2
