@@ -56,7 +56,10 @@ class TestExternal:
         mod = module.get_modification()
         mod.apply(self.bmTest)
         if 'maxIter' in inspect.signature(module.run).parameters:
-            x0_opt = module.run(self.bmTest, maxIter=10000)
+            if 'loewe' in opt.lower():
+                x0_opt = module.run(self.bmTest, n=5, maxIter=10000)
+            else:
+                x0_opt = module.run(self.bmTest, maxIter=10000)
         else:
             x0_opt = module.run(self.bmTest)
         cost_opt = self.bmTest.cost(x0_opt)
