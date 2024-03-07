@@ -250,8 +250,8 @@ class Problem:
         self.bm.use_sensitivities()
         # Check gradient calculator is accurate
         a = grad_check(bm=self.bm, x0=self.bm.sample(),
-                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
-        assert a
+                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        assert a < 0.01
         # Same under log transforms
         self.bm.log_transform([True] + [False] * (self.bm.n_parameters() - 1))
         assert grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting) < 0.01
@@ -276,20 +276,20 @@ class Problem:
         self.bm.lb[2] = self.bm.ub[2]
         # Check gradient calculator is accurate when outside of bounds
         a = grad_check(bm=self.bm, x0=x0,
-                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
-        assert a
+                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        assert a < 0.01
         # Handles rate bounds as well
         self.bm.add_rate_bounds()
         self.bm.lb = np.copy(self.bm.lbStandard)
         tmp = self.bm.rateMin
         self.bm.rateMin = self.bm.rateMax
         a = grad_check(bm=self.bm, x0=x0,
-                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
-        assert a
+                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        assert a < 0.01
         self.bm._useScaleFactors = True
         a = grad_check(bm=self.bm, x0=self.bm.input_parameter_space(x0),
-                       plotting=plotting) < 0.01  # Within 1% to account for solver noise and finite difference error
-        assert a
+                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        assert a < 0.01
         self.bm.rateMin = tmp
 
     @pytest.mark.cheap
