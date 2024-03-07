@@ -17,12 +17,9 @@ class Test(ionbench.benchmarker.Benchmarker):
         self._name = "test"
         self.costThreshold = 0.001
         self.defaultParams = np.array([2, 4])
-        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'), (lambda p, V: p[2], 'independent'),
-                               (lambda p, V: p[3] * np.exp(p[4] * V), 'positive'),
-                               (lambda p, V: p[5] * np.exp(p[6] * V), 'positive'),
-                               (lambda p, V: p[7] * np.exp(-p[8] * V), 'negative'), (lambda p, V: p[9], 'independent'),
-                               (lambda p, V: p[10] * np.exp(-p[11] * V), 'negative'),
-                               (lambda p, V: p[12] * np.exp(-p[13] * V), 'negative')]  # Used for rate bounds
+        self._rateFunctions = []
+        self.rateMin = None
+        self.rateMax = None
         self.standardLogTransform = [False, True]
         self.sensitivityCalc = True
         self.tmax = 20
@@ -133,6 +130,15 @@ class Test(ionbench.benchmarker.Benchmarker):
 
     def reset(self, fullReset=True):
         self.tracker = ionbench.tracker.Tracker(self.defaultParams)
+        if fullReset:
+            self.log_transform([False] * self.n_parameters())
+            self._useScaleFactors = False
+            self._parameters_bounded = False
+            self._rates_bounded = False
+            self.lb = copy.copy(self.lbStandard)
+            self.ub = copy.copy(self.ubStandard)
+            self.rateMin = None
+            self.rateMax = None
 
     def use_sensitivities(self):
         # Not needed for test function. Override to avoid trying to access myokit objects
