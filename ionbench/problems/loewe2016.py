@@ -131,7 +131,7 @@ class IKur(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKur benchmark')
-        self.tols = (1e-11, 1e-11)
+        self.tols = (1e-6, 1e-4)
         self._name = "loewe2016.ikur"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._outputName = 'ikur.IKur'

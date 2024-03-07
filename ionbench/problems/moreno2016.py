@@ -23,7 +23,7 @@ class INa(ionbench.benchmarker.Benchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Moreno 2016 INa benchmark')
         self.costThreshold = 0.01
-        self.tols = (1e-9,1e-9)
+        self.tols = (1e-6, 1e-4)
         self._name = "moreno2016.ina"
         self.tmax = None
         self._logTimes = None
@@ -51,10 +51,10 @@ class INa(ionbench.benchmarker.Benchmarker):
                                (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'),
                                (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'),
                                (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (
-                               lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[
-                                   8] * np.exp(-V / p[9]) / (
+                                   lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[
+                                       8] * np.exp(-V / p[9]) / (
                                                         p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
-                               'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
+                                   'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
                                (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
