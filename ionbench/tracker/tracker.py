@@ -297,11 +297,13 @@ class Tracker:
         -------
         check : bool
             True if the function threshold was satisfied, False otherwise.
+        convergedIndex : int
+            The index at which the cost first became unchanged. Returns None if did not converge. Only returned if returnIndex is True.
         """
         if index is None:
             index = len(self.bestCosts)
         if index < max_unchanged_evals:
-            return False, None if returnIndex else False
+            return (False, None) if returnIndex else False
         fsig = np.inf
         evalsUnchanged = 0
         for i in range(index):
@@ -311,8 +313,8 @@ class Tracker:
             else:
                 evalsUnchanged += 1
             if evalsUnchanged >= max_unchanged_evals:
-                return True, i if returnIndex else True
-        return False, None if returnIndex else False
+                return (True, i) if returnIndex else True
+        return (False, None) if returnIndex else False
 
     def total_solve_time(self, i):
         """
