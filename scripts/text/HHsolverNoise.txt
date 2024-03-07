@@ -1,0 +1,36 @@
+Searching tolerance combinations for staircase.hh. Absolute tolerances between 1e-5 and 1e-8. Relative tolerances between 1e-5 and 1e-8.
+Fail. abstol: 1e-05, reltol: 1e-05, time: 20.00, median error: 1.13e-09, error 25th percentile: 6.95e-11, error 75th percentile: 1.33e-07
+Fail. abstol: 1e-05, reltol: 1e-06, time: 26.88, median error: 4.88e-09, error 25th percentile: 1.75e-10, error 75th percentile: 6.65e-08
+Fail. abstol: 1e-05, reltol: 1e-07, time: 20.98, median error: 4.68e-09, error 25th percentile: 3.32e-11, error 75th percentile: 7.74e-08
+Fail. abstol: 1e-05, reltol: 1e-08, time: 20.67, median error: 1.02e-09, error 25th percentile: 5.16e-11, error 75th percentile: 4.51e-08
+Fail. abstol: 1e-06, reltol: 1e-05, time: 19.69, median error: 1.48e-09, error 25th percentile: 1.14e-10, error 75th percentile: 2.02e-08
+Fail. abstol: 1e-06, reltol: 1e-06, time: 21.83, median error: 1.13e-09, error 25th percentile: 1.57e-10, error 75th percentile: 8.86e-09
+Fail. abstol: 1e-06, reltol: 1e-07, time: 21.90, median error: 1.22e-09, error 25th percentile: 7.54e-11, error 75th percentile: 1.51e-08
+Success. abstol: 1e-06, reltol: 1e-08, time: 21.56, median error: 2.81e-10, error 25th percentile: 1.44e-11, error 75th percentile: 4.40e-09
+Fail. abstol: 1e-07, reltol: 1e-05, time: 23.84, median error: 2.64e-10, error 25th percentile: 6.26e-11, error 75th percentile: 1.79e-08
+Fail. abstol: 1e-07, reltol: 1e-06, time: 22.05, median error: 1.93e-10, error 25th percentile: 5.87e-12, error 75th percentile: 1.00e-08
+Success. abstol: 1e-07, reltol: 1e-07, time: 20.87, median error: 1.02e-10, error 25th percentile: 4.44e-12, error 75th percentile: 2.00e-09
+Success. abstol: 1e-07, reltol: 1e-08, time: 22.93, median error: 2.13e-10, error 25th percentile: 3.73e-12, error 75th percentile: 2.79e-09
+Fail. abstol: 1e-08, reltol: 1e-05, time: 21.68, median error: 1.56e-09, error 25th percentile: 5.98e-10, error 75th percentile: 6.53e-08
+Success. abstol: 1e-08, reltol: 1e-06, time: 21.40, median error: 4.96e-10, error 25th percentile: 1.02e-11, error 75th percentile: 1.73e-09
+Success. abstol: 1e-08, reltol: 1e-07, time: 21.90, median error: 4.54e-11, error 25th percentile: 2.57e-12, error 75th percentile: 1.07e-09
+Success. abstol: 1e-08, reltol: 1e-08, time: 21.41, median error: 1.29e-11, error 25th percentile: 3.20e-12, error 75th percentile: 4.94e-10
+Tolerance Combinations that work:
+abstol: 1e-06, reltol: 1e-08, time: 21.56, median error: 2.81e-10, error 25th percentile: 1.44e-11, error 75th percentile: 4.40e-09
+abstol: 1e-07, reltol: 1e-07, time: 20.87, median error: 1.02e-10, error 25th percentile: 4.44e-12, error 75th percentile: 2.00e-09
+abstol: 1e-07, reltol: 1e-08, time: 22.93, median error: 2.13e-10, error 25th percentile: 3.73e-12, error 75th percentile: 2.79e-09
+abstol: 1e-08, reltol: 1e-06, time: 21.40, median error: 4.96e-10, error 25th percentile: 1.02e-11, error 75th percentile: 1.73e-09
+abstol: 1e-08, reltol: 1e-07, time: 21.90, median error: 4.54e-11, error 25th percentile: 2.57e-12, error 75th percentile: 1.07e-09
+abstol: 1e-08, reltol: 1e-08, time: 21.41, median error: 1.29e-11, error 25th percentile: 3.20e-12, error 75th percentile: 4.94e-10
+Choose an abstol:
+1e-7
+Choose a reltol:
+1e-7
+Checking timing.
+Gradient time: 0.6850
+Cost time: 0.2088
+Checking solver noise very carefully.
+Median error across parameter space: 1.99e-10, error 25th percentile: 9.87e-12, error 75th percentile: 4.70e-09
+Error successfully stayed below limits so these tolerances (1e-07, 1e-07) are acceptable.
+Checking solver noise at default parameters.
+Error at default parameters: 4.46e-11

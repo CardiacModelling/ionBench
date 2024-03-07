@@ -104,7 +104,7 @@ class IKr(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKr benchmark')
-        self.tols = (1e-7, 1e-7)
+        self.tols = (1e-5, 1e-5)
         self._name = "loewe2016.ikr"
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'

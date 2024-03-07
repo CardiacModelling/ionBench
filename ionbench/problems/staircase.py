@@ -16,7 +16,6 @@ import copy
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.tmax = None
-        self.tols = (1e-11, 1e-10)
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
         except FileNotFoundError:
@@ -124,6 +123,7 @@ class HH(StaircaseBenchmarker):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self._name = "staircase.hh"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
+        self.tols = (1e-7, 1e-7)
         self.add_ramps()
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
@@ -157,6 +157,7 @@ class MM(StaircaseBenchmarker):
         print('Initialising Markov Model IKr benchmark')
         self._name = "staircase.mm"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
+        self.tols = (1e-9, 1e-7)
         self.add_ramps()
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
