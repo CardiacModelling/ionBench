@@ -12,8 +12,8 @@ import csv
 
 class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
-        self.costThreshold = 0.01
-        self.tmax = None
+        self.COST_THRESHOLD = 0.01
+        self.T_MAX = None
         self.rateMin = 1.67e-5
         self.rateMax = 1e3
         self.vLow = None
@@ -87,7 +87,7 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         durations = [20, 400, 400] * 13
         for i in range(len(vsteps)):
             p.add_step(vsteps[i], durations[i])
-        self.tmax = sum(durations)
+        self.T_MAX = sum(durations)
         self.vLow = min(vsteps)
         self.vHigh = max(vsteps)
         return p
@@ -107,14 +107,14 @@ class IKr(LoeweBenchmarker):
         self._TOLERANCES = (1e-5, 1e-5)
         self.NAME = "loewe2016.ikr"
         self._OUTPUT_NAME = 'ikr.IKr'
-        self._paramContainer = 'ikr'
+        self._PARAMETER_CONTAINER = 'ikr'
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
         self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         states = ['ikr.xr']
-        self._rateFunctions = [(lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))), 'positive'),
-                               (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1), 'negative')]  # Used for rate bounds
+        self._RATE_FUNCTIONS = ((lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))), 'positive'),
+                                (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1), 'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         super().__init__(states)
         print('Benchmarker initialised')
@@ -135,7 +135,7 @@ class IKur(LoeweBenchmarker):
         self.NAME = "loewe2016.ikur"
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._OUTPUT_NAME = 'ikur.IKur'
-        self._paramContainer = 'ikur'
+        self._PARAMETER_CONTAINER = 'ikur'
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         states = ['ikur.ua', 'ikur.ui']
         self.defaultParams = np.array(
@@ -143,11 +143,11 @@ class IKur(LoeweBenchmarker):
              15, 13, 138.994])
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True,
                                True, False, True, True, True, False, False, True, False, True, False, False]
-        self._rateFunctions = [
+        self._RATE_FUNCTIONS = (
             (lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])), 'positive'),
             (lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])), 'negative'),
             (lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])), 'positive'),
-            (lambda p, V: np.exp((V - p[15]) / -p[16]), 'negative')]  # Used for rate bounds
+            (lambda p, V: np.exp((V - p[15]) / -p[16]), 'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         super().__init__(states)
         print('Benchmarker initialised')
@@ -174,7 +174,7 @@ def generate_data(modelType):
         bm = IKur()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
-    out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'loewe2016', modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

@@ -45,7 +45,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
             x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
         else:
             x0 = x0 / (2 * bm.defaultParams)
-    gmin = bm.costThreshold
+    gmin = bm.COST_THRESHOLD
 
     class Particle:
         def __init__(self, n_param):

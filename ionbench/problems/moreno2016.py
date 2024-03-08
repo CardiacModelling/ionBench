@@ -22,10 +22,10 @@ class INa(ionbench.benchmarker.Benchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Moreno 2016 INa benchmark')
-        self.costThreshold = 0.01
+        self.COST_THRESHOLD = 0.01
         self._TOLERANCES = (1e-6, 1e-4)
         self.NAME = "moreno2016.ina"
-        self.tmax = None
+        self.T_MAX = None
         self._logTimes = None
         self._ssiBounds = None
         self._actBounds = None
@@ -37,28 +37,28 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.vHigh = None
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._OUTPUT_NAME = 'ina.INa'
-        self._paramContainer = 'ina'
+        self._PARAMETER_CONTAINER = 'ina'
         self.paramSpaceWidth = 25  # 5, 10, or 25
         self.defaultParams = np.array(
             [7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771,
              2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
-        self._rateFunctions = [(lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'),
-                               (lambda p, V: p[2] / (p[0] * np.exp(-V / p[1])), 'negative'),
-                               (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])), 'negative'),
-                               (lambda p, V: 1 / (p[4] * np.exp(V / p[5])), 'positive'),
-                               (lambda p, V: p[6] / (p[4] * np.exp(V / p[5])), 'positive'),
-                               (lambda p, V: p[7] / (p[4] * np.exp(V / p[5])), 'positive'),
-                               (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'),
-                               (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'),
-                               (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (
+        self._RATE_FUNCTIONS = ((lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'),
+                                (lambda p, V: p[2] / (p[0] * np.exp(-V / p[1])), 'negative'),
+                                (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])), 'negative'),
+                                (lambda p, V: 1 / (p[4] * np.exp(V / p[5])), 'positive'),
+                                (lambda p, V: p[6] / (p[4] * np.exp(V / p[5])), 'positive'),
+                                (lambda p, V: p[7] / (p[4] * np.exp(V / p[5])), 'positive'),
+                                (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'),
+                                (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'),
+                                (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (
                                    lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[
                                        8] * np.exp(-V / p[9]) / (
                                                         p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
                                    'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
-                               (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative')]  # Used for rate bounds
+                                (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative'))  # Used for rate bounds
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
-        parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
                                                                                          ['ic3', 'ic2', 'if', 'c3', 'c2',
                                                                                          'c1', 'o', 'is']],
@@ -201,7 +201,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         protocolStartTimes.append(newProtocol.characteristic_time())
 
         # Store measurement windows
-        self.tmax = newProtocol.characteristic_time()
+        self.T_MAX = newProtocol.characteristic_time()
 
         self._logTimes = []
         self._ssiBounds = []
@@ -243,7 +243,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         sens : numpy array
             The summary statistic sensitivities of the solved current.
         """
-        log, sens = self.simSens.run(self.tmax + 1, log_times=self._logTimes)
+        log, sens = self.simSens.run(self.T_MAX + 1, log_times=self._logTimes)
         curr = np.array(log[self._OUTPUT_NAME])
         sens = np.array(sens)
         # Adjust sens to emulate moreno summary statistics
@@ -276,15 +276,15 @@ class INa(ionbench.benchmarker.Benchmarker):
         if continueOnError:
             try:
                 # Run a simulation
-                log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-                # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting output name only works for ODE sims, not analytical
+                log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes)
+                # log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting output name only works for ODE sims, not analytical
                 return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(self.data), dtype='float64')
         else:
-            log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-            # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting outputName only works for ODE sims, not analytical
+            log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes)
+            # log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting outputName only works for ODE sims, not analytical
             return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
 
     def rmse(self, c1, c2):
@@ -369,7 +369,7 @@ def generate_data():
     bm = INa()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
-    out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

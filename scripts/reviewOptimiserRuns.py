@@ -48,14 +48,14 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
             gradAverTime.append(np.mean(bm.tracker.gradTimes))
             bestCost.append(bm.tracker.bestCost)
             # Get data at convergence
-            i = bm.tracker.when_converged(bm.costThreshold)
+            i = bm.tracker.when_converged(bm.COST_THRESHOLD)
             i = -1 if i is None else i
             costAtConv.append(bm.tracker.costs[i])
             gradEvalsAtConv.append(bm.tracker.gradSolves[i])
             costEvalsAtConv.append(bm.tracker.modelSolves[i])
             bm.reset()
         # Calculate the success rate
-        successOrFail = np.array(bestCost) < bm.costThreshold
+        successOrFail = np.array(bestCost) < bm.COST_THRESHOLD
         successRate = np.mean(successOrFail)
         # Handle times if either grad or cost wasn't used
         if all(np.isnan(gradAverTime)):

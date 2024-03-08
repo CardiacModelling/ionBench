@@ -25,7 +25,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     """
     if x0 is None:
         x0 = bm.sample()
-    gmin = bm.costThreshold
+    gmin = bm.COST_THRESHOLD
 
     class Particle:
         def __init__(self):

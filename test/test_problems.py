@@ -25,9 +25,9 @@ class Problem:
         assert hasattr(self.bm, "NAME")
         assert hasattr(self.bm, "_MODEL")
         assert hasattr(self.bm, "_OUTPUT_NAME")
-        assert hasattr(self.bm, "_paramContainer")
+        assert hasattr(self.bm, "_PARAMETER_CONTAINER")
         assert hasattr(self.bm, "defaultParams")
-        assert hasattr(self.bm, "_rateFunctions")
+        assert hasattr(self.bm, "_RATE_FUNCTIONS")
         assert hasattr(self.bm, "standardLogTransform")
         assert hasattr(self.bm, "data")
         assert hasattr(self.bm, "sim")
@@ -38,7 +38,7 @@ class Problem:
         assert hasattr(self.bm, "tracker")
         assert hasattr(self.bm, "sensitivityCalc")
         assert hasattr(self.bm, "_analyticalModel")
-        assert hasattr(self.bm, "tmax")
+        assert hasattr(self.bm, "T_MAX")
         assert hasattr(self.bm, "simSens")
         assert hasattr(self.bm, "freq")
         assert hasattr(self.bm, "rateMin")
@@ -178,35 +178,35 @@ class Problem:
         self.bm.reset()
         p = self.bm.sample()
         c = self.bm.cost(p)
-        if c < self.bm.costThreshold:
+        if c < self.bm.COST_THRESHOLD:
             assert self.bm.is_converged()
-            assert self.bm.tracker.cost_threshold(self.bm.costThreshold)
+            assert self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         else:
             assert not self.bm.is_converged()
-            assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+            assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
             self.bm.cost(self.bm.defaultParams * 1.0001)  # Test that non-default parameters give convergence
             assert self.bm.is_converged()
-            assert self.bm.tracker.cost_threshold(self.bm.costThreshold)
+            assert self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         # Dropping the cost threshold means not converged
-        tmp = self.bm.costThreshold
-        self.bm.costThreshold = -1
+        tmp = self.bm.COST_THRESHOLD
+        self.bm.COST_THRESHOLD = -1
         assert not self.bm.is_converged()
-        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
-        self.bm.costThreshold = tmp
+        assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
+        self.bm.COST_THRESHOLD = tmp
         self.bm.reset()
         # Tracker initially not converged
         assert not self.bm.is_converged()
-        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         assert not self.bm.tracker.cost_unchanged()
         # Cost convergence rather than threshold
         self.bm.reset()
         # Get a point that doesn't satisfy the cost threshold
         p = self.bm.sample()
-        while self.bm.cost(p) <= self.bm.costThreshold:
+        while self.bm.cost(p) <= self.bm.COST_THRESHOLD:
             p = self.bm.sample()
         # Shouldn't be converged from this
         assert not self.bm.is_converged()
-        assert not self.bm.tracker.cost_threshold(self.bm.costThreshold)
+        assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         self.bm.reset()
         # First point is an improvement
         self.bm.cost(p)
@@ -301,7 +301,7 @@ class Problem:
             p = self.bm.sample()
             assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
             assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
-            out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.tmax, self.bm.freq))
+            out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.T_MAX, self.bm.freq))
             assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()
         p = self.bm.sample()

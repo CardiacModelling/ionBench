@@ -47,8 +47,8 @@ class Benchmarker:
             self.vLow = None
         if not hasattr(self, 'vHigh'):
             self.vHigh = None
-        if not hasattr(self, 'costThreshold'):
-            self.costThreshold = None
+        if not hasattr(self, 'COST_THRESHOLD'):
+            self.COST_THRESHOLD = None
 
     def load_data(self, dataPath=''):
         """
@@ -322,7 +322,7 @@ class Benchmarker:
 
         """
         testOutput = np.array(
-            self.simulate(parameters, np.arange(0, self.tmax, self.freq), incrementSolveCounter=incrementSolveCounter))
+            self.simulate(parameters, np.arange(0, self.T_MAX, self.freq), incrementSolveCounter=incrementSolveCounter))
         cost = self.rmse(testOutput, self.data)
         return cost
 
@@ -342,7 +342,7 @@ class Benchmarker:
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
         return testOutput - self.data
 
     def squared_error(self, parameters):
@@ -361,7 +361,7 @@ class Benchmarker:
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.tmax, self.freq)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
         return (testOutput - self.data) ** 2
 
     def use_sensitivities(self):
@@ -448,7 +448,7 @@ class Benchmarker:
             self.set_steady_state(parameters)
             start = time.monotonic()
             try:
-                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.tmax, self.freq))
+                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.T_MAX, self.freq))
                 sens = np.array(sens)
             except myokit.SimulationError:
                 # If the model fails to solve, we will assume the cost is infinite and the jacobian/gradient points back towards good parameters
@@ -622,7 +622,7 @@ class Benchmarker:
         sens : numpy array
             The sensitivities of the outputted current.
         """
-        log, e = self.simSens.run(self.tmax + 1, log_times=times)
+        log, e = self.simSens.run(self.T_MAX + 1, log_times=times)
         return np.array(log[self._OUTPUT_NAME]), e
 
     def solve_model(self, times, continueOnError=True):
@@ -644,13 +644,13 @@ class Benchmarker:
         """
         if continueOnError:
             try:
-                log = self.sim.run(self.tmax + 1, log_times=times)
+                log = self.sim.run(self.T_MAX + 1, log_times=times)
                 return np.array(log[self._OUTPUT_NAME])
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
-            log = self.sim.run(self.tmax + 1, log_times=times)
+            log = self.sim.run(self.T_MAX + 1, log_times=times)
             return np.array(log[self._OUTPUT_NAME])
 
     def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
@@ -736,7 +736,7 @@ class Benchmarker:
             The penalty to apply for rate bound violations.
         """
         penalty = 0
-        for rateFunc, rateType in self._rateFunctions:
+        for rateFunc, rateType in self._RATE_FUNCTIONS:
             if rateType == 'positive':
                 # check kHigh is in bounds
                 k = rateFunc(parameters, self.vHigh)
@@ -748,7 +748,7 @@ class Benchmarker:
                 k = rateFunc(parameters, 0)  # Voltage doesn't matter
             else:
                 raise RuntimeError(
-                    "Error in bm._rateFunctions. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
+                    "Error in bm._RATE_FUNCTIONS. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
             if k < self.rateMin:
                 penalty += 1e5
                 penalty += 1e5 * np.log(1+np.abs(k - self.rateMin))
@@ -784,7 +784,7 @@ class Benchmarker:
         bool
             True if the optimisation has converged, False if it has not.
         """
-        return self.tracker.cost_threshold(threshold=self.costThreshold) or self.tracker.cost_unchanged()
+        return self.tracker.cost_threshold(threshold=self.COST_THRESHOLD) or self.tracker.cost_unchanged()
 
     def evaluate(self):
         """
@@ -809,18 +809,18 @@ class Benchmarker:
         print('Number of cost evaluations:      ' + str(self.tracker.solveCount))
         print('Number of grad evaluations:      ' + str(self.tracker.gradSolveCount))
         print('Best cost:                       {0:.6f}'.format(self.tracker.bestCost))
-        self.tracker.report_convergence(self.costThreshold)
+        self.tracker.report_convergence(self.COST_THRESHOLD)
         print('')
         if self.plotter:
             self.tracker.plot()
             self.sim.reset()
             self.set_params(self.tracker.firstParams)
             self.set_steady_state(self.tracker.firstParams)
-            firstOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
+            firstOut = self.solve_model(np.arange(0, self.T_MAX, self.freq), continueOnError=True)
             self.sim.reset()
             self.set_params(self.original_parameter_space(self.tracker.bestParams))
             self.set_steady_state(self.original_parameter_space(self.tracker.bestParams))
-            lastOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
+            lastOut = self.solve_model(np.arange(0, self.T_MAX, self.freq), continueOnError=True)
             plt.figure()
             if "moreno" in self.NAME:
                 plt.plot(self.data)
@@ -828,9 +828,9 @@ class Benchmarker:
                 plt.plot(lastOut)
                 plt.ylabel('Summary Statistics')
             else:
-                plt.plot(np.arange(0, self.tmax, self.freq), self.data)
-                plt.plot(np.arange(0, self.tmax, self.freq), firstOut)
-                plt.plot(np.arange(0, self.tmax, self.freq), lastOut)
+                plt.plot(np.arange(0, self.T_MAX, self.freq), self.data)
+                plt.plot(np.arange(0, self.T_MAX, self.freq), firstOut)
+                plt.plot(np.arange(0, self.T_MAX, self.freq), lastOut)
                 plt.ylabel('Current')
                 plt.xlabel('Time (ms)')
             plt.legend(['Data', 'First Parameters', 'Best Parameters'])

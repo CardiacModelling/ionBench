@@ -15,9 +15,9 @@ import copy
 
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
-        self.tmax = None
+        self.T_MAX = None
         try:
-            self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + self._modelType + '.csv'))
+            self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + 'HH' if 'hh' in self.NAME else 'mm' + '.csv'))
         except FileNotFoundError:
             self.data = None
         if self.sensitivityCalc:
@@ -76,7 +76,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
 
     def protocol(self):
         """
-        Gets the staircase voltage protocol from the loaded log and returns it. Setting self.tmax to the length of the protocol.
+        Gets the staircase voltage protocol from the loaded log and returns it. Setting self.T_MAX to the length of the protocol.
 
         Returns
         -------
@@ -84,7 +84,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             The staircase protocol.
         """
         protocol = myokit.load_protocol(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-pace.mmt'))
-        self.tmax = protocol.characteristic_time()
+        self.T_MAX = protocol.characteristic_time()
         return protocol
 
     @staticmethod
@@ -139,20 +139,19 @@ class HH(StaircaseBenchmarker):
         model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self._MODEL = self.add_ramps(model)
         self._OUTPUT_NAME = 'ikr.IKr'
-        self._paramContainer = 'ikr'
-        self._modelType = 'HH'
+        self._PARAMETER_CONTAINER = 'ikr'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
-        self._rateFunctions = [(lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
-                               (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
-                               (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
-                               (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
+        self._RATE_FUNCTIONS = ((lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
+                                (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
+                                (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
+                                (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative'))  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
-                                                      parameters=[self._paramContainer + '.p' + str(i + 1) for i in
+                                                      parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
                                                                   range(self.n_parameters())], current=self._OUTPUT_NAME,
                                                       vm='membrane.V')
-        self.costThreshold = 0.02
+        self.COST_THRESHOLD = 0.02
         super().__init__()
         print('Benchmarker initialised')
 
@@ -173,28 +172,27 @@ class MM(StaircaseBenchmarker):
         self._TOLERANCES = (1e-9, 1e-7)
         self._MODEL = self.add_ramps(model)
         self._OUTPUT_NAME = 'IKr.i_Kr'
-        self._paramContainer = 'iKr_Markov'
-        self._modelType = 'MM'
+        self._PARAMETER_CONTAINER = 'iKr_Markov'
         self.defaultParams = np.array(
             [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
              0.04150, 0.0312, 0.024])
-        self._rateFunctions = [(lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
-                               (lambda p, v: p[2], 'independent'),
-                               (lambda p, v: p[3] * np.exp(p[4] * v), 'positive'),
-                               (lambda p, v: p[5] * np.exp(p[6] * v), 'positive'),
-                               (lambda p, v: p[7] * np.exp(-p[8] * v), 'negative'),
-                               (lambda p, v: p[9], 'independent'),
-                               (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
-                               (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative')]  # Used for rate bounds
+        self._RATE_FUNCTIONS = ((lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
+                                (lambda p, v: p[2], 'independent'),
+                                (lambda p, v: p[3] * np.exp(p[4] * v), 'positive'),
+                                (lambda p, v: p[5] * np.exp(p[6] * v), 'positive'),
+                                (lambda p, v: p[7] * np.exp(-p[8] * v), 'negative'),
+                                (lambda p, v: p[9], 'independent'),
+                                (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
+                                (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative'))  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2 + [False]
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
                                                                                          ['Cr1', 'Cr2', 'Cr3', 'Or4',
                                                                                          'Ir5']],
-                                                              parameters=[self._paramContainer + '.p' + str(i + 1) for i
+                                                              parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
                                                               current=self._OUTPUT_NAME, vm='membrane.V')
-        self.costThreshold = 0.0075
+        self.COST_THRESHOLD = 0.0075
         super().__init__()
         print('Benchmarker initialised')
 
@@ -220,7 +218,7 @@ def generate_data(modelType):
         bm = MM()
     bm.set_params(bm.defaultParams)
     bm.set_steady_state(bm.defaultParams)
-    out = bm.solve_model(np.arange(0, bm.tmax, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')

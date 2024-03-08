@@ -15,14 +15,14 @@ import ionbench.tracker.tracker
 class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.NAME = "test"
-        self.costThreshold = 0.001
+        self.COST_THRESHOLD = 0.001
         self.defaultParams = np.array([2, 4])
-        self._rateFunctions = []
+        self._RATE_FUNCTIONS = ()
         self.rateMin = None
         self.rateMax = None
         self.standardLogTransform = [False, True]
         self.sensitivityCalc = True
-        self.tmax = 20
+        self.T_MAX = 20
         self.freq = 1  # Timestep in data between points
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
@@ -80,7 +80,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         if not self.in_parameter_bounds(parameters):
             warnings.warn(
                 'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            error = np.array([np.inf] * len(np.arange(0, self.tmax, self.freq)))
+            error = np.array([np.inf] * len(np.arange(0, self.T_MAX, self.freq)))
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
             if residuals:
@@ -89,7 +89,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                     J[i,] = grad
         else:
             # Get sensitivities
-            curr = self.simulate(parameters, np.arange(0, self.tmax, self.freq))
+            curr = self.simulate(parameters, np.arange(0, self.T_MAX, self.freq))
             sens = np.zeros((len(curr), self.n_parameters()))
             for t in range(len(curr)):
                 sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
@@ -163,7 +163,7 @@ def generate_data():
 
     """
     bm = Test()
-    out = bm.simulate(bm.defaultParams, np.arange(0, bm.tmax, bm.freq), continueOnError=False)
+    out = bm.simulate(bm.defaultParams, np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
