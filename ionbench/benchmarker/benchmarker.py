@@ -77,21 +77,7 @@ class Benchmarker:
 
     def add_parameter_bounds(self):
         """
-        Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
-
-        The bounds are checked after reversing any log-transforms on parameters (ie on exp(inputted parameters)).
-
-        Parameters
-        ----------
-        bounds : list
-            A list of bounds. The list should contain two elements, the first is a list of lower bounds, the same length as a parameter vector and the second a similar list of upper bounds. Use -np.inf or np.inf to not include bounds on particular parameters.
-        parameterSpace : string
-            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if benchmarker.useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  benchmarker.useScaleFactors=True. The default is 'original'.
-
-        Returns
-        -------
-        None.
-
+        Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and a penalty cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
         """
         self.lb = np.copy(self._LOWER_BOUND)
         self.ub = np.copy(self._UPPER_BOUND)
