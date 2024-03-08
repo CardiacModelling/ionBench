@@ -119,7 +119,7 @@ def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
     """
     mat = np.zeros((bm.n_parameters(), bm.n_parameters()))
 
-    bm._useScaleFactors = True
+    bm.useScaleFactors = True
     # Search from the true parameters to find the actual MLE
     if preoptimise:
         out = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm, x0=bm.input_parameter_space(bm._TRUE_PARAMETERS), ftol=ftol)
@@ -158,7 +158,7 @@ def explore_solver_noise(bm):
     None.
 
     """
-    bm._useScaleFactors = True
+    bm.useScaleFactors = True
     p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
     params = [copy.copy(p) for _ in range(100)]
     for i in range(100):

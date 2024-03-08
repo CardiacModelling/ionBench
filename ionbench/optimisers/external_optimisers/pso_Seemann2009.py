@@ -124,5 +124,5 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
-    bm._useScaleFactors = True
+    bm.useScaleFactors = True
     run(bm, maxIter=5, debug=True, **mod.kwargs)

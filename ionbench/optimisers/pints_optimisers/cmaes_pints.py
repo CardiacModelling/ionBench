@@ -33,8 +33,8 @@ def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
     problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
     error = pints.RootMeanSquaredError(problem)
 
-    if bm._parameters_bounded:
-        if bm._rates_bounded:
+    if bm.parametersBounded:
+        if bm.ratesBounded:
             boundaries = classes_pints.AdvancedBoundaries(bm)
         else:
             boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))

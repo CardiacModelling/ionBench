@@ -39,7 +39,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     else:
         verbose = 1
 
-    if bm._parameters_bounded:
+    if bm.parametersBounded:
         bounds = (bm.lb, bm.ub)
         out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter, bounds=bounds)
     else:

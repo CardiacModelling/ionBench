@@ -23,10 +23,10 @@ class Benchmarker:
     """
 
     def __init__(self):
-        self._useScaleFactors = False
-        self._parameters_bounded = False  # Should the parameters be bounded
-        self._rates_bounded = False  # Should the rates be bounded
-        self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
+        self.useScaleFactors = False
+        self.parametersBounded = False  # Should the parameters be bounded
+        self.ratesBounded = False  # Should the rates be bounded
+        self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
         if not hasattr(self, 'DATA'):
@@ -83,7 +83,7 @@ class Benchmarker:
         bounds : list
             A list of bounds. The list should contain two elements, the first is a list of lower bounds, the same length as a parameter vector and the second a similar list of upper bounds. Use -np.inf or np.inf to not include bounds on particular parameters.
         parameterSpace : string
-            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if benchmarker._useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  benchmarker._useScaleFactors=True. The default is 'original'.
+            Specify the parameter space of the inputted bounds. The options are 'original', to specify the bounds in the original parameter space, using the parameters that will be evaluated in the model, or 'input' for the parameter space inputted by the cost function, meaning they will be scaled by the default parameters if benchmarker.useScaleFactors=True, and log transformed if any parameters are to be log transformed. This will only have a difference if parameters are log transformed or if  benchmarker.useScaleFactors=True. The default is 'original'.
 
         Returns
         -------
@@ -92,7 +92,7 @@ class Benchmarker:
         """
         self.lb = np.copy(self._LOWER_BOUND)
         self.ub = np.copy(self._UPPER_BOUND)
-        self._parameters_bounded = True
+        self.parametersBounded = True
 
     def add_rate_bounds(self):
         """
@@ -108,7 +108,7 @@ class Benchmarker:
         None.
 
         """
-        self._rates_bounded = True
+        self.ratesBounded = True
 
     def clamp_parameters(self, parameters):
         """
@@ -154,7 +154,7 @@ class Benchmarker:
         """
         if whichParams is None:  # Log-transform all parameters
             whichParams = [True] * self.n_parameters()
-        self._logTransformParams = whichParams
+        self.logTransformParams = whichParams
 
     def input_parameter_space(self, parameters):
         """
@@ -173,9 +173,9 @@ class Benchmarker:
         """
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
-            if self._useScaleFactors:
+            if self.useScaleFactors:
                 parameters[i] = parameters[i] / self._TRUE_PARAMETERS[i]
-            if self._logTransformParams[i]:
+            if self.logTransformParams[i]:
                 parameters[i] = np.log(parameters[i])
 
         return parameters
@@ -197,9 +197,9 @@ class Benchmarker:
         """
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
+            if self.logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])
-            if self._useScaleFactors:
+            if self.useScaleFactors:
                 parameters[i] = parameters[i] * self._TRUE_PARAMETERS[i]
 
         return parameters
@@ -221,23 +221,23 @@ class Benchmarker:
         """
         derivs = np.ones(self.n_parameters())
         for i in range(self.n_parameters()):
-            if self._logTransformParams[i]:
+            if self.logTransformParams[i]:
                 derivs[i] *= np.exp(parameters[i])
-            if self._useScaleFactors:
+            if self.useScaleFactors:
                 derivs[i] *= self._TRUE_PARAMETERS[i]
 
         return derivs
 
     def in_parameter_bounds(self, parameters, boundedCheck=True):
         """
-        Checks if parameters are inside any rectangular parameter bounds. If boundedCheck is True, then it will always return True if benchmarker._parameters_bounded = False.
+        Checks if parameters are inside any rectangular parameter bounds. If boundedCheck is True, then it will always return True if benchmarker.parametersBounded = False.
 
         Parameters
         ----------
         parameters : list or numpy array
             Vector of parameters (in original parameter space) to check against the bounds.
         boundedCheck : bool, optional
-            If True, and benchmarker._parameters_bounded=False, in_parameter_bounds will always return True. If False, it will ignore the value of bm._parameters_bounded and base the returned value only on the parameters and parameter bounds. The default is True.
+            If True, and benchmarker.parametersBounded=False, in_parameter_bounds will always return True. If False, it will ignore the value of bm.parametersBounded and base the returned value only on the parameters and parameter bounds. The default is True.
 
         Returns
         -------
@@ -245,20 +245,20 @@ class Benchmarker:
             True if parameters are inside the bounds or no bounds are specified, False if the parameters are outside the bounds.
 
         """
-        if not self._parameters_bounded and boundedCheck:
+        if not self.parametersBounded and boundedCheck:
             return True
         return self.parameter_penalty(parameters) == 0
 
     def in_rate_bounds(self, parameters, boundedCheck=True):
         """
-        Checks if rates are inside bounds. If boundedCheck is True, then it will always return True if benchmarker._parameters_bounded = False.
+        Checks if rates are inside bounds. If boundedCheck is True, then it will always return True if benchmarker.parametersBounded = False.
 
         Parameters
         ----------
         parameters : list or numpy array
             Vector of parameters (in original parameter space) to check against the bounds.
         boundedCheck : bool, optional
-            If True, and benchmarker._parameters_bounded=False, in_rate_bounds will always return True. If False, it will ignore the value of bm._parameters_bounded and base the returned value only on the parameters and rate bounds. The default is True.
+            If True, and benchmarker.parametersBounded=False, in_rate_bounds will always return True. If False, it will ignore the value of bm.parametersBounded and base the returned value only on the parameters and rate bounds. The default is True.
 
         Returns
         -------
@@ -266,7 +266,7 @@ class Benchmarker:
             True if rates are inside the bounds or no bounds are specified, False if the rates are outside the bounds.
 
         """
-        if not self._rates_bounded and boundedCheck:
+        if not self.ratesBounded and boundedCheck:
             return True
         return self.rate_penalty(parameters) == 0
 
@@ -296,9 +296,9 @@ class Benchmarker:
         self.tracker = Tracker(self._TRUE_PARAMETERS)
         if fullReset:
             self.log_transform([False] * self.n_parameters())
-            self._useScaleFactors = False
-            self._parameters_bounded = False
-            self._rates_bounded = False
+            self.useScaleFactors = False
+            self.parametersBounded = False
+            self.ratesBounded = False
             self.lb = copy.copy(self._LOWER_BOUND)
             self.ub = copy.copy(self._UPPER_BOUND)
             self.RATE_MIN = 1.67e-5
@@ -682,9 +682,9 @@ class Benchmarker:
 
         # Abort solving if the parameters are out of bounds
         penalty = 0
-        if self._parameters_bounded or 'staircase' in self.NAME:
+        if self.parametersBounded or 'staircase' in self.NAME:
             penalty += self.parameter_penalty(parameters)
-        if self._rates_bounded or 'staircase' in self.NAME:
+        if self.ratesBounded or 'staircase' in self.NAME:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)

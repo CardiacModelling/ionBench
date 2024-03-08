@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 bm = ionbench.problems.staircase.MM()
-bm._useScaleFactors = True
+bm.useScaleFactors = True
 bm.plotter = False
 data = bm.DATA
 noiseLevel = [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
@@ -40,7 +40,7 @@ for i in range(bm.n_parameters()):
 
 # %% Noise bias as a function of data frequency
 bm = ionbench.problems.staircase.MM()
-bm._useScaleFactors = True
+bm.useScaleFactors = True
 bm.plotter = False
 # Cant use simulate to get data as current data is different length to new data. Will need to use solve_model and add in the extra bits
 bm.TIMESTEP = 0.01
@@ -82,7 +82,7 @@ for i in range(bm.n_parameters()):
 
 # %% What does noise bias actually change in the current
 bm = ionbench.problems.staircase.MM()
-bm._useScaleFactors = True
+bm.useScaleFactors = True
 bm.plotter = False
 bm.TIMESTEP = 0.1
 bm.sim.reset()

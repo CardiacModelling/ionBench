@@ -167,7 +167,7 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
         bm = ionbench.problems.loewe2016.IKur()
     else:
         bm = None
-    bm._useScaleFactors = True
+    bm.useScaleFactors = True
     ymin = np.inf
     ymax = 0
     for i in range(numberToPlot):

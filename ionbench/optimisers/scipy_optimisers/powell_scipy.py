@@ -49,7 +49,7 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
             print('Sampling x0')
             print(x0)
 
-    if bm._parameters_bounded:
+    if bm.parametersBounded:
         lb = bm.input_parameter_space(bm.lb)
         ub = bm.input_parameter_space(bm.ub)
         bounds = []

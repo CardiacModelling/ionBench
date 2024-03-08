@@ -97,7 +97,7 @@ class Modification:
             A benchmarker problem to apply this modification.
         """
         if setting.lower() == 'off':
-            bm._parameters_bounded = False
+            bm.parametersBounded = False
         elif setting.lower() == 'on':
             bm.add_parameter_bounds()
         elif setting.lower() == 'custom':
@@ -121,7 +121,7 @@ class Modification:
             A benchmarker problem to apply this modification.
         """
         if setting.lower() == 'off':
-            bm._rates_bounded = False
+            bm.ratesBounded = False
         elif setting.lower() == 'on':
             bm.add_rate_bounds()
         else:
@@ -142,10 +142,10 @@ class Modification:
         """
         if setting.lower() == 'on':
             # Set use scale factors
-            bm._useScaleFactors = True
+            bm.useScaleFactors = True
         elif setting.lower() == 'off':
             # Disable scale factors
-            bm._useScaleFactors = False
+            bm.useScaleFactors = False
         else:
             print("'" + setting + "' is not a valid option for scale factors. Please use either 'on' or 'off'.")
 
