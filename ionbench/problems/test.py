@@ -16,7 +16,7 @@ class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.NAME = "test"
         self.COST_THRESHOLD = 0.001
-        self.defaultParams = np.array([2, 4])
+        self._TRUE_PARAMETERS = np.array([2, 4])
         self._RATE_FUNCTIONS = ()
         self.rateMin = None
         self.rateMax = None
@@ -28,8 +28,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
             self.data = None
-        self.lbStandard = self.defaultParams * 0.5
-        self.ubStandard = self.defaultParams * 1.5
+        self.lbStandard = self._TRUE_PARAMETERS * 0.5
+        self.ubStandard = self._TRUE_PARAMETERS * 1.5
         super().__init__()
 
     def sample(self, n=1):
@@ -50,7 +50,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         params = [None] * n
         for i in range(n):
             params[i] = self.input_parameter_space(
-                self.defaultParams * np.random.uniform(0.5, 1.5, self.n_parameters()))
+                self._TRUE_PARAMETERS * np.random.uniform(0.5, 1.5, self.n_parameters()))
         if n == 1:
             return params[0]
         else:
@@ -129,7 +129,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 return grad
 
     def reset(self, fullReset=True):
-        self.tracker = ionbench.tracker.Tracker(self.defaultParams)
+        self.tracker = ionbench.tracker.Tracker(self._TRUE_PARAMETERS)
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self._useScaleFactors = False
@@ -163,7 +163,7 @@ def generate_data():
 
     """
     bm = Test()
-    out = bm.simulate(bm.defaultParams, np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
+    out = bm.simulate(bm._TRUE_PARAMETERS, np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

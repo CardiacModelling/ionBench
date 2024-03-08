@@ -33,8 +33,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
                                                       current=self._OUTPUT_NAME, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.freq = 0.5  # Timestep in data between points
-        self.lbStandard = np.array([self.defaultParams[i] - 60 * self.paramSpaceWidth if self.additiveParams[i] else self.defaultParams[i] * 10 ** (-self.paramSpaceWidth) for i in range(self.n_parameters())])
-        self.ubStandard = np.array([self.defaultParams[i] + 60 * self.paramSpaceWidth if self.additiveParams[i] else self.defaultParams[i] * 10 ** self.paramSpaceWidth for i in range(self.n_parameters())])
+        self.lbStandard = np.array([self._TRUE_PARAMETERS[i] - 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** (-self.paramSpaceWidth) for i in range(self.n_parameters())])
+        self.ubStandard = np.array([self._TRUE_PARAMETERS[i] + 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** self.paramSpaceWidth for i in range(self.n_parameters())])
         super().__init__()
 
     def sample(self, n=1):
@@ -57,10 +57,10 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
                 if self.additiveParams[j]:
-                    param[j] = self.defaultParams[j] + np.random.uniform(-60 * self.paramSpaceWidth,
+                    param[j] = self._TRUE_PARAMETERS[j] + np.random.uniform(-60 * self.paramSpaceWidth,
                                                                          60 * self.paramSpaceWidth)
                 else:
-                    param[j] = self.defaultParams[j] * 10 ** np.random.uniform(-1 * self.paramSpaceWidth,
+                    param[j] = self._TRUE_PARAMETERS[j] * 10 ** np.random.uniform(-1 * self.paramSpaceWidth,
                                                                                1 * self.paramSpaceWidth)  # Log uniform distribution
             params[i] = self.input_parameter_space(param)  # Generates a copy
         if n == 1:
@@ -109,7 +109,7 @@ class IKr(LoeweBenchmarker):
         self._OUTPUT_NAME = 'ikr.IKr'
         self._PARAMETER_CONTAINER = 'ikr'
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
-        self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
+        self._TRUE_PARAMETERS = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         states = ['ikr.xr']
@@ -138,7 +138,7 @@ class IKur(LoeweBenchmarker):
         self._PARAMETER_CONTAINER = 'ikur'
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         states = ['ikur.ua', 'ikur.ui']
-        self.defaultParams = np.array(
+        self._TRUE_PARAMETERS = np.array(
             [0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05,
              15, 13, 138.994])
         self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True,
@@ -172,8 +172,8 @@ def generate_data(modelType):
         bm = IKr()
     else:
         bm = IKur()
-    bm.set_params(bm.defaultParams)
-    bm.set_steady_state(bm.defaultParams)
+    bm.set_params(bm._TRUE_PARAMETERS)
+    bm.set_steady_state(bm._TRUE_PARAMETERS)
     out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'loewe2016', modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')

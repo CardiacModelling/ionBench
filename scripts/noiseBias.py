@@ -18,7 +18,7 @@ for n in noiseLevel:
         bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
         plotPointsX.append(n * 100)
-        plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm.defaultParams)))
+        plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm._TRUE_PARAMETERS)))
         params.append(out)
         if n == 0:
             break
@@ -45,8 +45,8 @@ bm.plotter = False
 # Cant use simulate to get data as current data is different length to new data. Will need to use solve_model and add in the extra bits
 bm.freq = 0.01
 bm.sim.reset()
-bm.set_params(bm.defaultParams)
-bm.set_steady_state(bm.defaultParams)
+bm.set_params(bm._TRUE_PARAMETERS)
+bm.set_steady_state(bm._TRUE_PARAMETERS)
 data = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq))
 # noiseLevel = [0, 0.02, 0.1, 0.5, 1]
 noiseLevel = [0, 0.1, 1]
@@ -60,7 +60,7 @@ for n in noiseLevel:
         bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
         plotPointsX.append(n * 100)
-        plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm.defaultParams)))
+        plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm._TRUE_PARAMETERS)))
         params.append(out)
         if n == 0:
             break
@@ -86,8 +86,8 @@ bm._useScaleFactors = True
 bm.plotter = False
 bm.freq = 0.1
 bm.sim.reset()
-bm.set_params(bm.defaultParams)
-bm.set_steady_state(bm.defaultParams)
+bm.set_params(bm._TRUE_PARAMETERS)
+bm.set_steady_state(bm._TRUE_PARAMETERS)
 data = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq))
 p = np.ones(bm.n_parameters())
 bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05, len(data))
@@ -104,7 +104,7 @@ plt.show()
 
 # %% Sensitivity plots
 bm = ionbench.problems.staircase.MM(sensitivities=True)
-p = bm.defaultParams
+p = bm._TRUE_PARAMETERS
 # Get sensitivities
 bm.simSens.reset()
 bm.set_params(p)

@@ -18,16 +18,16 @@ lb = []
 ub = []
 for i in range(bmLoewe.n_parameters()):
     if bmLoewe.additiveParams[i]:
-        lb.append(bmLoewe.defaultParams[i] - 60 * bmLoewe.paramSpaceWidth)
-        ub.append(bmLoewe.defaultParams[i] + 60 * bmLoewe.paramSpaceWidth)
+        lb.append(bmLoewe._TRUE_PARAMETERS[i] - 60 * bmLoewe.paramSpaceWidth)
+        ub.append(bmLoewe._TRUE_PARAMETERS[i] + 60 * bmLoewe.paramSpaceWidth)
     else:
-        lb.append(bmLoewe.defaultParams[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
-        ub.append(bmLoewe.defaultParams[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
+        lb.append(bmLoewe._TRUE_PARAMETERS[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
+        ub.append(bmLoewe._TRUE_PARAMETERS[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
 bmLoewe.addBounds([lb, ub])
 
 bmHH._useScaleFactors = False
-lb = np.array(bmHH.defaultParams) * 0.5
-ub = np.array(bmHH.defaultParams) * 1.5
+lb = np.array(bmHH._TRUE_PARAMETERS) * 0.5
+ub = np.array(bmHH._TRUE_PARAMETERS) * 1.5
 bmHH.addBounds([lb, ub])
 
 # CMA-ES run
@@ -48,16 +48,16 @@ lb = []
 ub = []
 for i in range(bmLoewe.n_parameters()):
     if bmLoewe.additiveParams[i]:
-        lb.append(bmLoewe.defaultParams[i] - 60 * bmLoewe.paramSpaceWidth)
-        ub.append(bmLoewe.defaultParams[i] + 60 * bmLoewe.paramSpaceWidth)
+        lb.append(bmLoewe._TRUE_PARAMETERS[i] - 60 * bmLoewe.paramSpaceWidth)
+        ub.append(bmLoewe._TRUE_PARAMETERS[i] + 60 * bmLoewe.paramSpaceWidth)
     else:
-        lb.append(bmLoewe.defaultParams[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
-        ub.append(bmLoewe.defaultParams[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
+        lb.append(bmLoewe._TRUE_PARAMETERS[i] * 10 ** (-1 * bmLoewe.paramSpaceWidth))
+        ub.append(bmLoewe._TRUE_PARAMETERS[i] * 10 ** (1 * bmLoewe.paramSpaceWidth))
 bmLoewe.addBounds([lb, ub])
 
 bmHH._useScaleFactors = False
-lb = np.array(bmHH.defaultParams) * 0.5
-ub = np.array(bmHH.defaultParams) * 1.5
+lb = np.array(bmHH._TRUE_PARAMETERS) * 0.5
+ub = np.array(bmHH._TRUE_PARAMETERS) * 1.5
 bmHH.addBounds([lb, ub])
 
 # Hybrid PSO TRR run

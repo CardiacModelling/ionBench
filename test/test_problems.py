@@ -16,7 +16,7 @@ class Problem:
     def test_cost(self):
         self.bm.reset()
         # Check cost of default params is sufficiently low (0 for loewe)
-        assert self.bm.cost(self.bm.defaultParams) <= self.costBound
+        assert self.bm.cost(self.bm._TRUE_PARAMETERS) <= self.costBound
 
     @pytest.mark.cheap
     def test_hasattr(self):
@@ -26,7 +26,7 @@ class Problem:
         assert hasattr(self.bm, "_MODEL")
         assert hasattr(self.bm, "_OUTPUT_NAME")
         assert hasattr(self.bm, "_PARAMETER_CONTAINER")
-        assert hasattr(self.bm, "defaultParams")
+        assert hasattr(self.bm, "_TRUE_PARAMETERS")
         assert hasattr(self.bm, "_RATE_FUNCTIONS")
         assert hasattr(self.bm, "standardLogTransform")
         assert hasattr(self.bm, "data")
@@ -63,16 +63,16 @@ class Problem:
         self.bm.reset()
         # Check bounds give infinite cost outside and solve inside bounds
         self.bm.add_parameter_bounds()
-        self.bm.lb = 0.99*self.bm.defaultParams
+        self.bm.lb = 0.99*self.bm._TRUE_PARAMETERS
         # Check bounds give penalty for 1 param out of bounds outside of bounds
-        p = np.copy(self.bm.defaultParams)
+        p = np.copy(self.bm._TRUE_PARAMETERS)
         p[0] *= 0.98
         c = self.bm.signed_error(p)[0]
         c2 = self.bm.cost(p)
         assert 1e5 < c < 2e5
         assert 1e5 < c2 < 2e5
         # Check cost is small inside bounds when bounded
-        p[0] = self.bm.defaultParams[0]
+        p[0] = self.bm._TRUE_PARAMETERS[0]
         assert self.bm.cost(p) < 1e5
         # Check _parameters_bounded = False turns off bounds (unless staircase)
         self.bm._parameters_bounded = False
@@ -83,7 +83,7 @@ class Problem:
             assert self.bm.cost(p) < 1e5
         self.bm._parameters_bounded = True
         # Check penalty increases with more bound violations
-        p = np.copy(self.bm.defaultParams) * 0.98
+        p = np.copy(self.bm._TRUE_PARAMETERS) * 0.98
         c = self.bm.signed_error(p)[0]
         assert c > 1e5 * self.bm.n_parameters()
         self.bm._parameters_bounded = False
@@ -96,17 +96,17 @@ class Problem:
         assert self.bm._rates_bounded is True
         tmp = self.bm.rateMin
         # Default params inside rate bounds always
-        assert self.bm.cost(self.bm.defaultParams) < 1e5
+        assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
         # Move rate bounds so default rates are outside
         self.bm.rateMin = self.bm.rateMax * 2
-        assert self.bm.cost(self.bm.defaultParams) > 1e5
+        assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
         # Turn off rate bounds should allow solving again (except for staircase)
         self.bm._rates_bounded = False
-        assert self.bm.cost(self.bm.defaultParams) < 1e5 or 'staircase' in self.bm.NAME
+        assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5 or 'staircase' in self.bm.NAME
         if 'staircase' in self.bm.NAME:
-            assert self.bm.cost(self.bm.defaultParams) > 1e5
+            assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
             self.bm.rateMin = tmp
-            assert self.bm.cost(self.bm.defaultParams) < 1e5
+            assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
         self.bm.rateMin = tmp
 
     @pytest.mark.cheap
@@ -119,13 +119,13 @@ class Problem:
         # Solve count is 0 after reset
         assert self.bm.tracker.solveCount == 0
         # Solve count increments after solving
-        self.bm.cost(self.bm.defaultParams)
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
         assert self.bm.tracker.solveCount == 1
         # but not when out of bounds
         self.bm.add_parameter_bounds()
-        self.bm.lb = 0.99*self.bm.defaultParams
-        p = np.copy(self.bm.defaultParams)
-        p[0] = 0.98 * self.bm.defaultParams[0]
+        self.bm.lb = 0.99*self.bm._TRUE_PARAMETERS
+        p = np.copy(self.bm._TRUE_PARAMETERS)
+        p[0] = 0.98 * self.bm._TRUE_PARAMETERS[0]
         self.bm.cost(p)
         assert self.bm.tracker.solveCount == 1
         self.bm._parameters_bounded = False
@@ -134,14 +134,14 @@ class Problem:
             self.bm.add_rate_bounds()
             tmp = self.bm.rateMin
             self.bm.rateMin = self.bm.rateMax
-            self.bm.cost(self.bm.defaultParams)
+            self.bm.cost(self.bm._TRUE_PARAMETERS)
             assert self.bm.tracker.solveCount == 1
             self.bm.rateMin = tmp
-            self.bm.cost(self.bm.defaultParams)
+            self.bm.cost(self.bm._TRUE_PARAMETERS)
             assert self.bm.tracker.solveCount == 2
             self.bm._rates_bounded = False
         else:
-            self.bm.cost(self.bm.defaultParams)
+            self.bm.cost(self.bm._TRUE_PARAMETERS)
         # Solve count doesn't increment when evaluating
         self.bm.evaluate()
         assert self.bm.tracker.solveCount == 2
@@ -153,7 +153,7 @@ class Problem:
         assert self.bm.tracker.solveCount == 0
         self.bm._parameters_bounded = False
         # grad solve counter increments with grad but not normal solve counter
-        self.bm.grad(self.bm.defaultParams)
+        self.bm.grad(self.bm._TRUE_PARAMETERS)
         assert self.bm.tracker.solveCount == 0
         assert self.bm.tracker.gradSolveCount == 1
         assert len(self.bm.tracker.costTimes) == 0
@@ -169,8 +169,8 @@ class Problem:
         else:
             assert np.abs(c2 - self.bm.tracker.bestCost) < 1e-8
             assert all(p2 == self.bm.tracker.bestParams)
-        self.bm.cost(self.bm.defaultParams)
-        assert all(self.bm.defaultParams == self.bm.tracker.bestParams)
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
+        assert all(self.bm._TRUE_PARAMETERS == self.bm.tracker.bestParams)
         self.bm.reset()
 
     @pytest.mark.cheap
@@ -184,7 +184,7 @@ class Problem:
         else:
             assert not self.bm.is_converged()
             assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
-            self.bm.cost(self.bm.defaultParams * 1.0001)  # Test that non-default parameters give convergence
+            self.bm.cost(self.bm._TRUE_PARAMETERS * 1.0001)  # Test that non-default parameters give convergence
             assert self.bm.is_converged()
             assert self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         # Dropping the cost threshold means not converged
@@ -221,7 +221,7 @@ class Problem:
         self.bm.cost(p)
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
         # Failing to improve here would converge so give better point
-        c1 = self.bm.cost(self.bm.defaultParams)
+        c1 = self.bm.cost(self.bm._TRUE_PARAMETERS)
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
         # Three worse points from here needed to converge
         [self.bm.cost(p) for _ in range(2)]
@@ -239,10 +239,10 @@ class Problem:
     def test_repeated_params_warning(self):
         self.bm.reset()
         self.bm.reset(fullReset=True)
-        self.bm.cost(self.bm.defaultParams)
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
         self.bm.cost(self.bm.sample())
         with pytest.warns(UserWarning):
-            self.bm.cost(self.bm.defaultParams)
+            self.bm.cost(self.bm._TRUE_PARAMETERS)
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad(self, plotting=False):
@@ -350,11 +350,11 @@ class Problem:
     def test_clamp(self):
         self.bm.reset()
         # Check parameters that start out of bounds get clamped to inside bounds
-        p = np.copy(self.bm.defaultParams)
+        p = np.copy(self.bm._TRUE_PARAMETERS)
         self.bm.add_parameter_bounds()
-        self.bm.lb = 0.99*self.bm.defaultParams
+        self.bm.lb = 0.99*self.bm._TRUE_PARAMETERS
         assert self.bm.in_parameter_bounds(p)
-        p[0] = 0.5 * self.bm.defaultParams[0]
+        p[0] = 0.5 * self.bm._TRUE_PARAMETERS[0]
         assert not self.bm.in_parameter_bounds(p)
         assert self.bm.in_parameter_bounds(self.bm.clamp_parameters(p))
         # Check that they are at exactly the bounds and not in interior
@@ -367,7 +367,7 @@ class Problem:
         self.bm.reset()
         n = self.bm.n_parameters()
         assert n > 0
-        assert n == len(self.bm.defaultParams)
+        assert n == len(self.bm._TRUE_PARAMETERS)
         assert n == len(self.bm.standardLogTransform)
         assert n == len(self.bm.lbStandard)
         assert n == len(self.bm.ubStandard)
@@ -385,10 +385,10 @@ class Problem:
         self.bm._useScaleFactors = True
         if 'ikur' in self.bm.NAME:
             self.bm._rates_bounded = False
-            self.bm.cost(self.bm.input_parameter_space(self.bm.defaultParams))
+            self.bm.cost(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS))
             self.bm._rates_bounded = True
         else:
-            self.bm.cost(self.bm.input_parameter_space(self.bm.defaultParams))
+            self.bm.cost(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS))
         assert self.bm._parameters_bounded is True
         assert self.bm._rates_bounded is True
         assert any([self.bm._logTransformParams[i] is True for i in range(self.bm.n_parameters())])
@@ -417,7 +417,7 @@ class Staircase(Problem):
         p = self.bm.sample()
         assert self.bm.in_parameter_bounds(p, boundedCheck=False) and self.bm.in_rate_bounds(p, boundedCheck=False)
         # Sampled different to default
-        assert sampler_different(self.bm, self.bm.defaultParams)
+        assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
@@ -428,7 +428,7 @@ class Staircase(Problem):
         self.bm.log_transform()
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
                               self.bm.input_parameter_space(self.bm.ubStandard))
-        assert sampler_different(self.bm, np.log(self.bm.defaultParams))
+        assert sampler_different(self.bm, np.log(self.bm._TRUE_PARAMETERS))
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Same for scale factor and log transformed space
         self.bm.log_transform()
@@ -445,18 +445,18 @@ class Staircase(Problem):
         # Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform()
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.log(self.bm.defaultParams))
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.log(self.bm._TRUE_PARAMETERS))
         # Original space
-        assert param_equal(self.bm.original_parameter_space(np.log(self.bm.defaultParams)), self.bm.defaultParams)
+        assert param_equal(self.bm.original_parameter_space(np.log(self.bm._TRUE_PARAMETERS)), self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Scale factor default rates
         self.bm._useScaleFactors = True
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.ones(self.bm.n_parameters()))
-        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm.defaultParams)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.ones(self.bm.n_parameters()))
+        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         # Scale factor and log transformed space
         self.bm.log_transform()
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.zeros(self.bm.n_parameters()))
-        assert param_equal(self.bm.original_parameter_space(np.zeros(self.bm.n_parameters())), self.bm.defaultParams)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.zeros(self.bm.n_parameters()))
+        assert param_equal(self.bm.original_parameter_space(np.zeros(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         self.bm._useScaleFactors = False
         self.bm.log_transform([False] * self.bm.n_parameters())
 
@@ -475,7 +475,7 @@ class Loewe(Problem):
         # Sampler in bounds
         assert sampler_bounds(self.bm, lb, ub)
         # Sampled different to default
-        assert sampler_different(self.bm, self.bm.defaultParams)
+        assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(lb), self.bm.input_parameter_space(ub))
@@ -484,7 +484,7 @@ class Loewe(Problem):
         # Same for log transformed space
         self.bm.log_transform([not i for i in self.bm.additiveParams])
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(lb), self.bm.input_parameter_space(ub))
-        assert sampler_different(self.bm, np.log(self.bm.defaultParams))
+        assert sampler_different(self.bm, np.log(self.bm._TRUE_PARAMETERS))
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Same for scale factor and log transformed space
         self.bm.log_transform([not i for i in self.bm.additiveParams])
@@ -500,23 +500,23 @@ class Loewe(Problem):
         # Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform([not i for i in self.bm.additiveParams])
-        logDefault = [np.log(self.bm.defaultParams[i]) if self.bm.standardLogTransform[i] else self.bm.defaultParams[i]
+        logDefault = [np.log(self.bm._TRUE_PARAMETERS[i]) if self.bm.standardLogTransform[i] else self.bm._TRUE_PARAMETERS[i]
                       for i in range(self.bm.n_parameters())]
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), logDefault)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), logDefault)
         # Original space
-        assert param_equal(self.bm.original_parameter_space(logDefault), self.bm.defaultParams)
+        assert param_equal(self.bm.original_parameter_space(logDefault), self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Scale factor default rates
         self.bm._useScaleFactors = True
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.ones(self.bm.n_parameters()))
-        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm.defaultParams)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.ones(self.bm.n_parameters()))
+        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         # Scale factor and log transformed space
         self.bm.log_transform([not i for i in self.bm.additiveParams])
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams),
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS),
                            [0.0 if self.bm.standardLogTransform[i] else 1.0 for i in range(self.bm.n_parameters())])
         assert param_equal(self.bm.original_parameter_space(
             [0.0 if self.bm.standardLogTransform[i] else 1.0 for i in range(self.bm.n_parameters())]),
-            self.bm.defaultParams)
+            self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 
@@ -531,15 +531,15 @@ class TestMoreno(Problem):
         self.bm.reset()
         # Check sampler is inside the right bounds and doesn't just return default rates, across all transforms
         # Sampler in bounds
-        assert sampler_bounds(self.bm, 0.75 * self.bm.defaultParams, 1.25 * self.bm.defaultParams)
+        assert sampler_bounds(self.bm, 0.75 * self.bm._TRUE_PARAMETERS, 1.25 * self.bm._TRUE_PARAMETERS)
         # Sampled different to default
-        assert sampler_different(self.bm, self.bm.defaultParams)
+        assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for wider bounds
         self.bm.paramSpaceWidth = 90
-        assert sampler_bounds(self.bm, 0.1 * self.bm.defaultParams, 1.9 * self.bm.defaultParams)
+        assert sampler_bounds(self.bm, 0.1 * self.bm._TRUE_PARAMETERS, 1.9 * self.bm._TRUE_PARAMETERS)
         self.bm.paramSpaceWidth = 25
         # Sampled different to default
-        assert sampler_different(self.bm, self.bm.defaultParams)
+        assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
         assert sampler_bounds(self.bm, 0.75, 1.25)
@@ -547,9 +547,9 @@ class TestMoreno(Problem):
         self.bm._useScaleFactors = False
         # Same for log transformed space
         self.bm.log_transform()
-        assert sampler_bounds(self.bm, np.log(0.75) + np.log(self.bm.defaultParams),
-                              np.log(1.25) + np.log(self.bm.defaultParams))
-        assert sampler_different(self.bm, np.log(self.bm.defaultParams))
+        assert sampler_bounds(self.bm, np.log(0.75) + np.log(self.bm._TRUE_PARAMETERS),
+                              np.log(1.25) + np.log(self.bm._TRUE_PARAMETERS))
+        assert sampler_different(self.bm, np.log(self.bm._TRUE_PARAMETERS))
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Same for scale factor and log transformed space
         self.bm.log_transform()
@@ -565,18 +565,18 @@ class TestMoreno(Problem):
         # Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform()
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.log(self.bm.defaultParams))
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.log(self.bm._TRUE_PARAMETERS))
         # Original space
-        assert param_equal(self.bm.original_parameter_space(np.log(self.bm.defaultParams)), self.bm.defaultParams)
+        assert param_equal(self.bm.original_parameter_space(np.log(self.bm._TRUE_PARAMETERS)), self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Scale factor default rates
         self.bm._useScaleFactors = True
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.ones(self.bm.n_parameters()))
-        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm.defaultParams)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.ones(self.bm.n_parameters()))
+        assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         # Scale factor and log transformed space
         self.bm.log_transform()
-        assert param_equal(self.bm.input_parameter_space(self.bm.defaultParams), np.zeros(self.bm.n_parameters()))
-        assert param_equal(self.bm.original_parameter_space(np.zeros(self.bm.n_parameters())), self.bm.defaultParams)
+        assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.zeros(self.bm.n_parameters()))
+        assert param_equal(self.bm.original_parameter_space(np.zeros(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
 

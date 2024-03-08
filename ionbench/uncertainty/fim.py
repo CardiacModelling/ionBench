@@ -31,13 +31,13 @@ def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
     """
     if i == j:
         def f(x):
-            p = bm.input_parameter_space(bm.defaultParams)
+            p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = x
             return sse(bm, p)
         # fxx = f(x+h,y)-2f(x,y)+f(x-h,y) / h^2
         # Find h st f(x+h,y) < f(x,y)-buffer and f(x-h,y) < f(x,y)-buffer
         h = step
-        x = bm.input_parameter_space(bm.defaultParams)[i]
+        x = bm.input_parameter_space(bm._TRUE_PARAMETERS)[i]
         centre = f(x)
         up = f(x + x * h)
         down = f(x - x * h)
@@ -48,15 +48,15 @@ def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
         return (up - 2 * centre + down) / ((x * h)**2)
     else:
         def f(x, y):
-            p = bm.input_parameter_space(bm.defaultParams)
+            p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = x
             p[j] = y
             return sse(bm, p)
         # fxy = f(x+h,y+k)-f(x+h,y-k)-f(x-h,y+k)+f(x-h,y-k) / 4hk
         # Find h st all of f(x+h,y+h), f(x-h,y+h), f(x+h,y-h), f(x-h,y-h) < f(x,y)-buffer
         h = step
-        x = bm.input_parameter_space(bm.defaultParams)[i]
-        y = bm.input_parameter_space(bm.defaultParams)[j]
+        x = bm.input_parameter_space(bm._TRUE_PARAMETERS)[i]
+        y = bm.input_parameter_space(bm._TRUE_PARAMETERS)[j]
         centre = f(x, y)
         up_up = f(x + x * h, y + y * h)
         up_down = f(x + x * h, y - y * h)
@@ -122,10 +122,10 @@ def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
     bm._useScaleFactors = True
     # Search from the true parameters to find the actual MLE
     if preoptimise:
-        out = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm, x0=bm.input_parameter_space(bm.defaultParams), ftol=ftol)
-        bm.defaultParams = bm.original_parameter_space(out)
+        out = ionbench.optimisers.scipy_optimisers.nelderMead_scipy.run(bm, x0=bm.input_parameter_space(bm._TRUE_PARAMETERS), ftol=ftol)
+        bm._TRUE_PARAMETERS = bm.original_parameter_space(out)
         print('Identified MLE at:')
-        print(bm.defaultParams)
+        print(bm._TRUE_PARAMETERS)
         print('Storing in this benchmarker object as the true parameters')
     for i, j in itertools.combinations(range(bm.n_parameters()), 2):
         d = second_deriv(bm, i, j, step=step, buffer=buffer) * 1 / (2 * sigma ** 2)
@@ -159,7 +159,7 @@ def explore_solver_noise(bm):
 
     """
     bm._useScaleFactors = True
-    p = bm.input_parameter_space(bm.defaultParams)
+    p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
     params = [copy.copy(p) for _ in range(100)]
     for i in range(100):
         params[i][0] = 0.9999999**i

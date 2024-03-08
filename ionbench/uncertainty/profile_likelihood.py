@@ -116,19 +116,19 @@ def run(bm, variations, backwardPass=False, filename=''):
                 varIndex = j
             var = variations[i][varIndex]
             if j == 0:
-                pm = ProfileManager(bm, i, bm.defaultParams[i] * var, bm.defaultParams)
+                pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, bm._TRUE_PARAMETERS)
             else:
-                pm = ProfileManager(bm, i, bm.defaultParams[i] * var, out)
+                pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, out)
             if var == 1:
-                costs[varIndex] = bm.cost(bm.defaultParams)
+                costs[varIndex] = bm.cost(bm._TRUE_PARAMETERS)
                 out = pm.set_params(pm.sample())
             else:
                 try:
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
-                    pm.MLE = bm.defaultParams
+                    pm.MLE = bm._TRUE_PARAMETERS
                     if pm.cost(out) >= 0.99 * pm.cost(
                             pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
-                        pm.MLE = bm.defaultParams
+                        pm.MLE = bm._TRUE_PARAMETERS
                         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
                 except Exception as e:
                     print(e)
@@ -201,7 +201,7 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
         plt.semilogy(variations, costs, label='Optimised', zorder=1)
         costs = np.zeros(len(variations))
         for j in range(len(variations)):
-            p = bm.input_parameter_space(bm.defaultParams)
+            p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = variations[j]
             costs[j] = bm.cost(p)
         plt.semilogy(variations, costs, label='Unoptimised', zorder=0)

@@ -39,7 +39,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._OUTPUT_NAME = 'ina.INa'
         self._PARAMETER_CONTAINER = 'ina'
         self.paramSpaceWidth = 25  # 5, 10, or 25
-        self.defaultParams = np.array(
+        self._TRUE_PARAMETERS = np.array(
             [7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771,
              2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
         self._RATE_FUNCTIONS = ((lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'),
@@ -76,8 +76,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.freq = 0.5  # Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         self.weights = self.weights / np.sum(self.weights)
-        self.lbStandard = self.defaultParams * (1 - self.paramSpaceWidth)
-        self.ubStandard = self.defaultParams * (1 + self.paramSpaceWidth)
+        self.lbStandard = self._TRUE_PARAMETERS * (1 - self.paramSpaceWidth)
+        self.ubStandard = self._TRUE_PARAMETERS * (1 + self.paramSpaceWidth)
         super().__init__()
         print('Benchmarker initialised')
 
@@ -100,8 +100,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         for i in range(n):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
-                param[j] = self.defaultParams[j] * np.random.uniform(1 - self.paramSpaceWidth / 100,
-                                                                     1 + self.paramSpaceWidth / 100)
+                param[j] = self._TRUE_PARAMETERS[j] * np.random.uniform(1 - self.paramSpaceWidth / 100,
+                                                                        1 + self.paramSpaceWidth / 100)
             params[i] = self.input_parameter_space(param)
         if n == 1:
             return params[0]
@@ -249,7 +249,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         # Adjust sens to emulate moreno summary statistics
         sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
         for i in range(self.n_parameters()):
-            step = 1e-5 * self.defaultParams[i]
+            step = 1e-5 * self._TRUE_PARAMETERS[i]
             sens_SS[:, 0, i] = (self.sum_stats(curr + step * sens[:, 0, i]) - self.sum_stats(
                 curr - step * sens[:, 0, i])) / (2 * step)
         curr = self.sum_stats(curr)
@@ -367,8 +367,8 @@ def generate_data():
 
     """
     bm = INa()
-    bm.set_params(bm.defaultParams)
-    bm.set_steady_state(bm.defaultParams)
+    bm.set_params(bm._TRUE_PARAMETERS)
+    bm.set_steady_state(bm._TRUE_PARAMETERS)
     out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')

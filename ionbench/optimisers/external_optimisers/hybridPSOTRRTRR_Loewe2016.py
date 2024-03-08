@@ -44,7 +44,7 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
         if bm._parameters_bounded:
             x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
         else:
-            x0 = x0 / (2 * bm.defaultParams)
+            x0 = x0 / (2 * bm._TRUE_PARAMETERS)
 
     class Particle:
         def __init__(self):
@@ -84,8 +84,8 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
             lb = bm.lb
             ub = bm.ub
         else:
-            lb = 0 * bm.defaultParams
-            ub = 2 * bm.defaultParams
+            lb = 0 * bm._TRUE_PARAMETERS
+            ub = 2 * bm._TRUE_PARAMETERS
         xTrans = lb + x * (ub - lb)
         return bm.input_parameter_space(xTrans)
 

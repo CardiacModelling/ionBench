@@ -140,7 +140,7 @@ class HH(StaircaseBenchmarker):
         self._MODEL = self.add_ramps(model)
         self._OUTPUT_NAME = 'ikr.IKr'
         self._PARAMETER_CONTAINER = 'ikr'
-        self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
+        self._TRUE_PARAMETERS = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
         self._RATE_FUNCTIONS = ((lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
                                 (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
                                 (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
@@ -173,7 +173,7 @@ class MM(StaircaseBenchmarker):
         self._MODEL = self.add_ramps(model)
         self._OUTPUT_NAME = 'IKr.i_Kr'
         self._PARAMETER_CONTAINER = 'iKr_Markov'
-        self.defaultParams = np.array(
+        self._TRUE_PARAMETERS = np.array(
             [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
              0.04150, 0.0312, 0.024])
         self._RATE_FUNCTIONS = ((lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
@@ -216,8 +216,8 @@ def generate_data(modelType):
         bm = HH()
     else:
         bm = MM()
-    bm.set_params(bm.defaultParams)
-    bm.set_steady_state(bm.defaultParams)
+    bm.set_params(bm._TRUE_PARAMETERS)
+    bm.set_steady_state(bm._TRUE_PARAMETERS)
     out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
     out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:

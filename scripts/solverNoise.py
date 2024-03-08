@@ -128,5 +128,5 @@ while True:
 
 # Solver noise at the default parameters is important as it is influences the likelihood plots
 print('Checking solver noise at default parameters.')
-error = cost_noise(bm, bm.defaultParams, 100)
+error = cost_noise(bm, bm._TRUE_PARAMETERS, 100)
 print(f'Error at default parameters: {error:.2e}')

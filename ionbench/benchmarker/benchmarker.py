@@ -28,7 +28,7 @@ class Benchmarker:
         self._rates_bounded = False  # Should the rates be bounded
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
-        self.tracker = Tracker(self.defaultParams)  # Tracks the performance metrics
+        self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
         if not hasattr(self, 'data'):
             self.data = None
         if not hasattr(self, 'lb'):
@@ -174,7 +174,7 @@ class Benchmarker:
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
             if self._useScaleFactors:
-                parameters[i] = parameters[i] / self.defaultParams[i]
+                parameters[i] = parameters[i] / self._TRUE_PARAMETERS[i]
             if self._logTransformParams[i]:
                 parameters[i] = np.log(parameters[i])
 
@@ -200,7 +200,7 @@ class Benchmarker:
             if self._logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])
             if self._useScaleFactors:
-                parameters[i] = parameters[i] * self.defaultParams[i]
+                parameters[i] = parameters[i] * self._TRUE_PARAMETERS[i]
 
         return parameters
 
@@ -224,7 +224,7 @@ class Benchmarker:
             if self._logTransformParams[i]:
                 derivs[i] *= np.exp(parameters[i])
             if self._useScaleFactors:
-                derivs[i] *= self.defaultParams[i]
+                derivs[i] *= self._TRUE_PARAMETERS[i]
 
         return derivs
 
@@ -274,7 +274,7 @@ class Benchmarker:
         """
         Returns the number of parameters in the model.
         """
-        return len(self.defaultParams)
+        return len(self._TRUE_PARAMETERS)
 
     def reset(self, fullReset=True):
         """
@@ -293,7 +293,7 @@ class Benchmarker:
         self.sim.reset()
         if self.sensitivityCalc:
             self.simSens.reset()
-        self.tracker = Tracker(self.defaultParams)
+        self.tracker = Tracker(self._TRUE_PARAMETERS)
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self._useScaleFactors = False
