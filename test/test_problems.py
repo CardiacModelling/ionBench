@@ -37,7 +37,7 @@ class Problem:
         assert hasattr(self.bm, "plotter")
         assert hasattr(self.bm, "tracker")
         assert hasattr(self.bm, "sensitivityCalc")
-        assert hasattr(self.bm, "_analyticalModel")
+        assert hasattr(self.bm, "_ANALYTICAL_MODEL")
         assert hasattr(self.bm, "T_MAX")
         assert hasattr(self.bm, "simSens")
         assert hasattr(self.bm, "freq")

@@ -59,12 +59,12 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.STANDARD_LOG_TRANSFORM = (True, False, True, True) * 2 + (True, False) * 3 + (True,) * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
-                                                                                         ['ic3', 'ic2', 'if', 'c3', 'c2',
+        self._ANALYTICAL_MODEL = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
+                                                                                          ['ic3', 'ic2', 'if', 'c3', 'c2',
                                                                                          'c1', 'o', 'is']],
-                                                              parameters=parameters, current=self._OUTPUT_NAME,
-                                                              vm='membrane.V')
-        self.sim = myokit.lib.markov.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
+                                                               parameters=parameters, current=self._OUTPUT_NAME,
+                                                               vm='membrane.V')
+        self.sim = myokit.lib.markov.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
         self.sensitivityCalc = sensitivities
         if self.sensitivityCalc:
             # ODE solver

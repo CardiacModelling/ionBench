@@ -147,10 +147,10 @@ class HH(StaircaseBenchmarker):
                                 (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative'))  # Used for rate bounds
         self.STANDARD_LOG_TRANSFORM = (True, False) * 4 + (False,)
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
-                                                      parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
+        self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
+                                                       parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
                                                                   range(self.n_parameters())], current=self._OUTPUT_NAME,
-                                                      vm='membrane.V')
+                                                       vm='membrane.V')
         self.COST_THRESHOLD = 0.02
         super().__init__()
         print('Benchmarker initialised')
@@ -186,12 +186,12 @@ class MM(StaircaseBenchmarker):
                                 (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative'))  # Used for rate bounds
         self.STANDARD_LOG_TRANSFORM = (True, False, True) * 2 + (False, True) * 2 + (True, False) * 2 + (False,)
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
-                                                                                         ['Cr1', 'Cr2', 'Cr3', 'Or4',
+        self._ANALYTICAL_MODEL = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
+                                                                                          ['Cr1', 'Cr2', 'Cr3', 'Or4',
                                                                                          'Ir5']],
-                                                              parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i
+                                                               parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
-                                                              current=self._OUTPUT_NAME, vm='membrane.V')
+                                                               current=self._OUTPUT_NAME, vm='membrane.V')
         self.COST_THRESHOLD = 0.0075
         super().__init__()
         print('Benchmarker initialised')

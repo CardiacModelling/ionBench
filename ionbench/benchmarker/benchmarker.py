@@ -547,9 +547,9 @@ class Benchmarker:
         else:
             V = -80
 
-        if 'hh' in str(type(self._analyticalModel)):
+        if 'hh' in str(type(self._ANALYTICAL_MODEL)):
             t = [mg.tensor(a, dtype=np.double) for a in parameters]
-            state = self._analyticalModel._steady_state_function(V, *t)
+            state = self._ANALYTICAL_MODEL._steady_state_function(V, *t)
             s_state = np.zeros((len(parameters), len(state)))
             for j in range(len(state)):
                 state[j].backward()
@@ -560,9 +560,9 @@ class Benchmarker:
             state = [float(state[i]) for i in range(len(state))]
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
         else:
-            assert 'markov' in str(type(self._analyticalModel))
-            n = len(self._analyticalModel._states)
-            f = ionbench.utils.autodiff.get_matrix_function(self._analyticalModel)
+            assert 'markov' in str(type(self._ANALYTICAL_MODEL))
+            n = len(self._ANALYTICAL_MODEL._states)
+            f = ionbench.utils.autodiff.get_matrix_function(self._ANALYTICAL_MODEL)
 
             state = np.zeros((len(parameters), n))
             s_state = np.zeros((len(parameters), n))
@@ -584,7 +584,7 @@ class Benchmarker:
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
         # Check our steady state calculations don't differ from myokit
         try:
-            myokitState = self._analyticalModel.steady_state(V, parameters)
+            myokitState = self._ANALYTICAL_MODEL.steady_state(V, parameters)
             if np.linalg.norm(np.subtract(myokitState, state)) > 1e-6:
                 raise RuntimeError(
                     f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState - state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
