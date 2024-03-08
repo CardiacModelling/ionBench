@@ -25,14 +25,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         The best parameters identified by Nelder-Mead.
 
     """
-    if x0 is None:
-        x0 = bm.sample()
-    model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
-    error = pints.RootMeanSquaredError(problem)
-
-    # Create an optimisation controller
-    opt = pints.OptimisationController(error, x0, method=pints.NelderMead)
+    model, opt = classes_pints.pints_setup(bm, x0, pints.NelderMead, forceUnbounded=True)
     opt.set_max_iterations(maxIter)
     if debug:
         opt.set_log_interval(iters=1)

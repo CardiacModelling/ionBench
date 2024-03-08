@@ -25,26 +25,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         The best parameters identified by XNES.
 
     """
-    if x0 is None:
-        x0 = bm.sample()
-    model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
-    error = pints.RootMeanSquaredError(problem)
-
-    if bm.parametersBounded:
-        if bm.ratesBounded:
-            boundaries = classes_pints.AdvancedBoundaries(bm)
-        else:
-            boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
-        counter = 1
-        while not boundaries.check(x0):
-            x0 = bm.sample()
-            counter += 1
-        if counter > 10:
-            print(f'Struggled to find parameters in bounds. Required {counter} iterations.')
-        opt = pints.OptimisationController(error, x0, method=pints.XNES, boundaries=boundaries)
-    else:
-        opt = pints.OptimisationController(error, x0, method=pints.XNES)
+    model, opt = classes_pints.pints_setup(bm, x0, pints.XNES)
     opt.set_max_iterations(maxIter)
     if debug:
         opt.set_log_interval(iters=1)

@@ -28,14 +28,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
 
     """
 
-    if x0 is None:
-        x0 = bm.sample()
-    model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
-    error = pints.RootMeanSquaredError(problem)
-    bounds = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
-    # Create an optimisation controller
-    opt = pints.OptimisationController(error, x0, method=pints.PSO, boundaries=bounds)
+    model, opt = classes_pints.pints_setup(bm, x0, pints.PSO)
     opt.set_max_iterations(maxIter)
     if debug:
         print('Beginning PSO')
@@ -44,7 +37,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     if debug:
         print(f'PSO complete with best cost of {f}')
     # Create an optimisation controller
-    opt = pints.OptimisationController(error, x, method=pints.NelderMead)
+    model, opt = classes_pints.pints_setup(bm, x, pints.NelderMead, forceUnbounded=True)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     if debug:
