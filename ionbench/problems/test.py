@@ -109,24 +109,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 else:
                     grad[i] = 0
 
-        # Map derivatives to input space
-        if inInputSpace:
-            derivs = self.transform_jacobian(self.input_parameter_space(parameters))
-            if residuals:
-                J *= derivs
-            else:
-                grad *= derivs
-
-        if returnCost:
-            if residuals:
-                return error, J
-            else:
-                return cost, grad
-        else:
-            if residuals:
-                return J
-            else:
-                return grad
+        return self.map_derivative(J, grad, inInputSpace, returnCost, residuals)
 
     def reset(self, fullReset=True):
         self.tracker = ionbench.tracker.Tracker(self._TRUE_PARAMETERS)
