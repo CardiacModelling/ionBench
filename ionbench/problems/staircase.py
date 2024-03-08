@@ -24,11 +24,11 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._outputName], paramNames)
             self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
-            self.simSens.set_tolerance(self.tols[0], self.tols[1])
+            self.simSens.set_tolerance(*self._TOLERANCES)
         else:
             self.simSens = None
         self.sim = myokit.Simulation(self._MODEL, protocol=self.protocol())
-        self.sim.set_tolerance(self.tols[0], self.tols[1])
+        self.sim.set_tolerance(*self._TOLERANCES)
         self.freq = 0.5  # Timestep in data between points
         self.rateMin = 1.67e-5
         self.rateMax = 1e3
@@ -123,7 +123,7 @@ class HH(StaircaseBenchmarker):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self.NAME = "staircase.hh"
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
-        self.tols = (1e-7, 1e-7)
+        self._TOLERANCES = (1e-7, 1e-7)
         self.add_ramps()
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
@@ -157,7 +157,7 @@ class MM(StaircaseBenchmarker):
         print('Initialising Markov Model IKr benchmark')
         self.NAME = "staircase.mm"
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
-        self.tols = (1e-9, 1e-7)
+        self._TOLERANCES = (1e-9, 1e-7)
         self.add_ramps()
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'

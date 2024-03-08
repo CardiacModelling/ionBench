@@ -97,7 +97,7 @@ while True:
     n = 20
     bm.reset()
     bm.use_sensitivities()
-    bm.simSens.set_tolerance(bestTol[0], bestTol[1])
+    bm.simSens.set_tolerance(*bestTol)
     p = bm.sample(n)
     start = time.time()
     for i in p:
@@ -106,7 +106,7 @@ while True:
     end = time.time()
     print(f'Gradient time: {(end - start) / n:.4f}')
 
-    bm.sim.set_tolerance(bestTol[0], bestTol[1])
+    bm.sim.set_tolerance(*bestTol)
     start = time.time()
     for i in p:
         bm.cost(i)
