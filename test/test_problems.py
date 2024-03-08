@@ -533,10 +533,6 @@ class TestMoreno(Problem):
         assert sampler_bounds(self.bm, 0.75 * self.bm._TRUE_PARAMETERS, 1.25 * self.bm._TRUE_PARAMETERS)
         # Sampled different to default
         assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
-        # Same for wider bounds
-        self.bm.paramSpaceWidth = 90
-        assert sampler_bounds(self.bm, 0.1 * self.bm._TRUE_PARAMETERS, 1.9 * self.bm._TRUE_PARAMETERS)
-        self.bm.paramSpaceWidth = 25
         # Sampled different to default
         assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for scale factor parameter space

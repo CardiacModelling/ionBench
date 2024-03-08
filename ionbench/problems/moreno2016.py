@@ -4,11 +4,11 @@ generate_data() will generate the data the INa problem and store it in the data 
 """
 import ionbench
 import myokit
-import myokit.lib.markov
 import os
 import numpy as np
 import csv
 import warnings
+from myokit.lib.markov import LinearModel
 
 
 class INa(ionbench.benchmarker.Benchmarker):
@@ -22,26 +22,12 @@ class INa(ionbench.benchmarker.Benchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Moreno 2016 INa benchmark')
-        self.COST_THRESHOLD = 0.01
-        self._TOLERANCES = (1e-6, 1e-4)
+        # Benchmarker
         self.NAME = "moreno2016.ina"
-        self.T_MAX = None
-        self._logTimes = None
-        self._ssiBounds = None
-        self._actBounds = None
-        self._rfiBounds = None
-        self._tauBounds = None
-        self.RATE_MIN = 1.67e-5
-        self.RATE_MAX = 1e3
-        self.V_LOW = None
-        self.V_HIGH = None
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
-        self._OUTPUT_NAME = 'ina.INa'
-        self._PARAMETER_CONTAINER = 'ina'
-        self.paramSpaceWidth = 25  # 5, 10, or 25
         self._TRUE_PARAMETERS = np.array(
             [7.6178e-3, 3.2764e1, 5.8871e-1, 1.5422e-1, 2.5898, 8.5072, 1.3760e-3, 2.888, 3.2459e-5, 9.5951, 1.3771,
              2.1126e1, 1.1086e1, 4.3725e1, 4.1476e-2, 2.0802e-2])
+        self.STANDARD_LOG_TRANSFORM = (True, False, True, True) * 2 + (True, False) * 3 + (True,) * 2
         self._RATE_FUNCTIONS = ((lambda p, V: 1 / (p[0] * np.exp(-V / p[1])), 'negative'),
                                 (lambda p, V: p[2] / (p[0] * np.exp(-V / p[1])), 'negative'),
                                 (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])), 'negative'),
@@ -50,22 +36,44 @@ class INa(ionbench.benchmarker.Benchmarker):
                                 (lambda p, V: p[7] / (p[4] * np.exp(V / p[5])), 'positive'),
                                 (lambda p, V: p[8] * np.exp(-V / p[9]), 'negative'),
                                 (lambda p, V: p[10] * np.exp(V / p[11]), 'positive'),
-                                (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'), (
-                                   lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[
-                                       8] * np.exp(-V / p[9]) / (
-                                                        p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
-                                   'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
+                                (lambda p, V: p[12] * np.exp(V / p[13]), 'negative'),
+                                (lambda p, V: p[3] / (p[0] * np.exp(-V / p[1])) * p[12] * np.exp(V / p[13]) * p[8] * np.exp(-V / p[9]) / (
+                                                      p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
+                                 'positive'),
+                                (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
                                 (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative'))  # Used for rate bounds
-        self.STANDARD_LOG_TRANSFORM = (True, False, True, True) * 2 + (True, False) * 3 + (True,) * 2
-        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
-        parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self._ANALYTICAL_MODEL = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
-                                                                                          ['ic3', 'ic2', 'if', 'c3', 'c2',
-                                                                                         'c1', 'o', 'is']],
-                                                               parameters=parameters, current=self._OUTPUT_NAME,
-                                                               vm='membrane.V')
-        self.sim = myokit.lib.markov.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
         self.sensitivityCalc = sensitivities
+        self.COST_THRESHOLD = 0.01
+        p = self.protocol()
+        self.TIMESTEP = 0.5  # Timestep in data between points
+        self.T_MAX = p.characteristic_time()
+        self._logTimes = None
+        self._ssiBounds = None
+        self._actBounds = None
+        self._rfiBounds = None
+        self._tauBounds = None
+        self._LOWER_BOUND = self._TRUE_PARAMETERS * 0.75
+        self._UPPER_BOUND = self._TRUE_PARAMETERS * 1.25
+        self.lb = np.copy(self._LOWER_BOUND)
+        self.ub = np.copy(self._UPPER_BOUND)
+        self.RATE_MIN = 1.67e-5
+        self.RATE_MAX = 1e3
+        self.V_LOW = min(p.levels())
+        self.V_HIGH = max(p.levels())
+        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
+        w = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
+        self.WEIGHTS = w / np.sum(w)
+
+        # Myokit
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
+        self._OUTPUT_NAME = 'ina.INa'
+        self._PARAMETER_CONTAINER = 'ina'
+        parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        self._ANALYTICAL_MODEL = LinearModel(model=self._MODEL, parameters=parameters, current=self._OUTPUT_NAME,
+                                             states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o',
+                                                                          'is']], vm='membrane.V')
+        self._TOLERANCES = (1e-6, 1e-4)
+        self.sim = myokit.lib.markov.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
         if self.sensitivityCalc:
             # ODE solver
             sens = ([self._OUTPUT_NAME], parameters)
@@ -73,17 +81,12 @@ class INa(ionbench.benchmarker.Benchmarker):
             self.simSens.set_tolerance(*self._TOLERANCES)
         else:
             self.simSens = None
-        self.TIMESTEP = 0.5  # Timestep in data between points
-        w = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
-        self.WEIGHTS = w / np.sum(w)
-        self._LOWER_BOUND = self._TRUE_PARAMETERS * (1 - self.paramSpaceWidth)
-        self._UPPER_BOUND = self._TRUE_PARAMETERS * (1 + self.paramSpaceWidth)
         super().__init__()
         print('Benchmarker initialised')
 
     def sample(self, n=1):
         """
-        Sample parameters for the Moreno 2016 problems. The sampling width can be changed by setting bm.paramSpaceWidth. The values used in Moreno et al. 2016 are 5, 10, and 25. The default used is 5.
+        Sample parameters for the Moreno 2016 problems.
 
         Parameters
         ----------
@@ -100,8 +103,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         for i in range(n):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
-                param[j] = self._TRUE_PARAMETERS[j] * np.random.uniform(1 - self.paramSpaceWidth / 100,
-                                                                        1 + self.paramSpaceWidth / 100)
+                param[j] = self._TRUE_PARAMETERS[j] * np.random.uniform(0.75, 1.25)
             params[i] = self.input_parameter_space(param)
         if n == 1:
             return params[0]
@@ -201,8 +203,6 @@ class INa(ionbench.benchmarker.Benchmarker):
         protocolStartTimes.append(newProtocol.characteristic_time())
 
         # Store measurement windows
-        self.T_MAX = newProtocol.characteristic_time()
-
         self._logTimes = []
         self._ssiBounds = []
         self._actBounds = []
@@ -224,8 +224,6 @@ class INa(ionbench.benchmarker.Benchmarker):
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb, ub])
         self._logTimes = np.array(self._logTimes)
-        self.V_LOW = min(newProtocol.levels())
-        self.V_HIGH = max(newProtocol.levels())
         return newProtocol
 
     def solve_with_sensitivities(self, times):
