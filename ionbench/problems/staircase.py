@@ -6,40 +6,44 @@ import os
 import numpy as np
 import csv
 import myokit
-import myokit.lib.markov
-import myokit.lib.hh
 import ionbench
 import scipy.stats
 import copy
+from myokit.lib.hh import HHModel
+from myokit.lib.markov import LinearModel
 
 
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
-        self.T_MAX = None
-        try:
-            self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + 'HH' if 'hh' in self.NAME else 'mm' + '.csv'))
-        except FileNotFoundError:
-            self.DATA = None
-        if self.sensitivityCalc:
-            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-            sens = ([self._OUTPUT_NAME], paramNames)
-            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
-            self.simSens.set_tolerance(*self._TOLERANCES)
-        else:
-            self.simSens = None
-        self.sim = myokit.Simulation(self._MODEL, protocol=self.protocol())
-        self.sim.set_tolerance(*self._TOLERANCES)
-        self.TIMESTEP = 0.5  # Timestep in data between points
-        self.RATE_MIN = 1.67e-5
-        self.RATE_MAX = 1e3
+        # Benchmarker
         p = self.protocol()
-        self.V_LOW = min(p.levels())
-        self.V_HIGH = max(p.levels())
+        self.TIMESTEP = 0.5  # Timestep in data between points
+        self.T_MAX = p.characteristic_time()
         self._LOWER_BOUND = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
         self._UPPER_BOUND = np.array(
             [1e3 if self.STANDARD_LOG_TRANSFORM[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
         self.lb = np.copy(self._LOWER_BOUND)
         self.ub = np.copy(self._UPPER_BOUND)
+        self.RATE_MIN = 1.67e-5
+        self.RATE_MAX = 1e3
+        self.V_LOW = min(p.levels())
+        self.V_HIGH = max(p.levels())
+        try:
+            self.load_data(
+                os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + 'HH' if 'hh' in self.NAME else 'mm' + '.csv'))
+        except FileNotFoundError:
+            self.DATA = None
+
+        # Myokit
+        self.sim = myokit.Simulation(self._MODEL, protocol=p)
+        self.sim.set_tolerance(*self._TOLERANCES)
+        if self.sensitivityCalc:
+            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+            sens = ([self._OUTPUT_NAME], paramNames)
+            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=p)
+            self.simSens.set_tolerance(*self._TOLERANCES)
+        else:
+            self.simSens = None
         super().__init__()
 
     def sample(self, n=1):
@@ -74,7 +78,8 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         else:
             return params
 
-    def protocol(self):
+    @staticmethod
+    def protocol():
         """
         Gets the staircase voltage protocol from the loaded log and returns it. Setting self.T_MAX to the length of the protocol.
 
@@ -84,7 +89,6 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             The staircase protocol.
         """
         protocol = myokit.load_protocol(os.path.join(ionbench.DATA_DIR, 'staircase', 'staircase-pace.mmt'))
-        self.T_MAX = protocol.characteristic_time()
         return protocol
 
     @staticmethod
@@ -134,24 +138,27 @@ class HH(StaircaseBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Hodgkin-Huxley IKr benchmark')
+        # Benchmarker
         self.NAME = "staircase.hh"
-        self._TOLERANCES = (1e-7, 1e-7)
-        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
-        self._MODEL = self.add_ramps(model)
-        self._OUTPUT_NAME = 'ikr.IKr'
-        self._PARAMETER_CONTAINER = 'ikr'
         self._TRUE_PARAMETERS = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
+        self.STANDARD_LOG_TRANSFORM = (True, False) * 4 + (False,)
         self._RATE_FUNCTIONS = ((lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
                                 (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
                                 (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
                                 (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative'))  # Used for rate bounds
-        self.STANDARD_LOG_TRANSFORM = (True, False) * 4 + (False,)
         self.sensitivityCalc = sensitivities
-        self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
-                                                       parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
-                                                                  range(self.n_parameters())], current=self._OUTPUT_NAME,
-                                                       vm='membrane.V')
         self.COST_THRESHOLD = 0.02
+
+        # Myokit
+        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
+        self._MODEL = self.add_ramps(model)
+        self._OUTPUT_NAME = 'ikr.IKr'
+        self._PARAMETER_CONTAINER = 'ikr'
+        self._ANALYTICAL_MODEL = HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'], current=self._OUTPUT_NAME,
+                                         parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
+                                                     range(self.n_parameters())], vm='membrane.V')
+        self._TOLERANCES = (1e-7, 1e-7)
+
         super().__init__()
         print('Benchmarker initialised')
 
@@ -167,15 +174,12 @@ class MM(StaircaseBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Markov Model IKr benchmark')
+        # Benchmarker
         self.NAME = "staircase.mm"
-        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
-        self._TOLERANCES = (1e-9, 1e-7)
-        self._MODEL = self.add_ramps(model)
-        self._OUTPUT_NAME = 'IKr.i_Kr'
-        self._PARAMETER_CONTAINER = 'iKr_Markov'
         self._TRUE_PARAMETERS = np.array(
             [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
              0.04150, 0.0312, 0.024])
+        self.STANDARD_LOG_TRANSFORM = (True, False, True) * 2 + (False, True) * 2 + (True, False) * 2 + (False,)
         self._RATE_FUNCTIONS = ((lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
                                 (lambda p, v: p[2], 'independent'),
                                 (lambda p, v: p[3] * np.exp(p[4] * v), 'positive'),
@@ -184,15 +188,19 @@ class MM(StaircaseBenchmarker):
                                 (lambda p, v: p[9], 'independent'),
                                 (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
                                 (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative'))  # Used for rate bounds
-        self.STANDARD_LOG_TRANSFORM = (True, False, True) * 2 + (False, True) * 2 + (True, False) * 2 + (False,)
         self.sensitivityCalc = sensitivities
-        self._ANALYTICAL_MODEL = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
-                                                                                          ['Cr1', 'Cr2', 'Cr3', 'Or4',
-                                                                                         'Ir5']],
-                                                               parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i
-                                                                          in range(self.n_parameters())],
-                                                               current=self._OUTPUT_NAME, vm='membrane.V')
         self.COST_THRESHOLD = 0.0075
+
+        # Myokit
+        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
+        self._MODEL = self.add_ramps(model)
+        self._OUTPUT_NAME = 'IKr.i_Kr'
+        self._PARAMETER_CONTAINER = 'iKr_Markov'
+        self._ANALYTICAL_MODEL = LinearModel(model=self._MODEL, current=self._OUTPUT_NAME, vm='membrane.V',
+                                             states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Or4', 'Ir5']],
+                                             parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
+                                                         range(self.n_parameters())])
+        self._TOLERANCES = (1e-9, 1e-7)
         super().__init__()
         print('Benchmarker initialised')
 
