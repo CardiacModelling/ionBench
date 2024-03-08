@@ -1,6 +1,5 @@
 import numpy as np
 import ionbench
-import copy
 from functools import lru_cache
 import scipy.optimize
 
@@ -98,7 +97,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
                 print('Perturbed point (nu)')
                 print(nu)
             # Do crossover
-            trial.x = copy.copy(pop[i].x)
+            trial.x = np.copy(pop[i].x)
             L = get_L()
             n = np.random.choice(range(bm.n_parameters()))
             for j in range(bm.n_parameters()):

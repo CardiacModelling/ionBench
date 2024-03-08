@@ -1,7 +1,6 @@
 import pytest
 import ionbench
 import numpy as np
-import copy
 import matplotlib.pyplot as plt
 import myokit
 

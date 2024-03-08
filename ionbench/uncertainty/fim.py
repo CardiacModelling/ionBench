@@ -1,7 +1,6 @@
 import numpy as np
 import ionbench
 import itertools
-import copy
 import matplotlib.pyplot as plt
 import pickle
 
@@ -160,7 +159,7 @@ def explore_solver_noise(bm):
     """
     bm.useScaleFactors = True
     p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
-    params = [copy.copy(p) for _ in range(100)]
+    params = [np.copy(p) for _ in range(100)]
     for i in range(100):
         params[i][0] = 0.9999999**i
     # print(params)

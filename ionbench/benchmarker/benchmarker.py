@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import warnings
 import time
 import mygrad as mg
-import copy
 
 from ionbench.tracker import Tracker
 
@@ -49,6 +48,10 @@ class Benchmarker:
             self.V_HIGH = None
         if not hasattr(self, 'COST_THRESHOLD'):
             self.COST_THRESHOLD = None
+        # Set numpy writeable flags
+        self._TRUE_PARAMETERS.flags['WRITEABLE'] = False
+        self._LOWER_BOUND.flags['WRITEABLE'] = False
+        self._UPPER_BOUND.flags['WRITEABLE'] = False
 
     def load_data(self, dataPath=''):
         """
@@ -299,8 +302,8 @@ class Benchmarker:
             self.useScaleFactors = False
             self.parametersBounded = False
             self.ratesBounded = False
-            self.lb = copy.copy(self._LOWER_BOUND)
-            self.ub = copy.copy(self._UPPER_BOUND)
+            self.lb = np.copy(self._LOWER_BOUND)
+            self.ub = np.copy(self._UPPER_BOUND)
             self.RATE_MIN = 1.67e-5
             self.RATE_MAX = 1e3
 

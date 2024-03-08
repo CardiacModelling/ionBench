@@ -135,8 +135,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self._useScaleFactors = False
             self._parameters_bounded = False
             self._rates_bounded = False
-            self.lb = copy.copy(self._LOWER_BOUND)
-            self.ub = copy.copy(self._UPPER_BOUND)
+            self.lb = np.copy(self._LOWER_BOUND)
+            self.ub = np.copy(self._UPPER_BOUND)
             self.RATE_MIN = None
             self.RATE_MAX = None
 
