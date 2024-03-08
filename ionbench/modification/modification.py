@@ -152,418 +152,239 @@ class Modification:
 
 class Abed2013(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'  # Technically upper and lower bounds are done through a custom transformation
-        scaleFactors = 'off'
-        name = 'Abed2013'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        # Technically upper and lower bounds are done through a custom transformation
+        super().__init__(name='Abed2013', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Achard2006(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Achard2006'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Achard2006', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Balser1990(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Balser1990'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Balser1990', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Belletti2021(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'on'
-        name = 'Belletti2021'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Belletti2021', logTransform='off', parameterBounds='off', scaleFactors='on')
 
 
 class BenShalom2012(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'BenShalom2012'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='BenShalom2012', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Bot2012(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Bot2012'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Bot2012', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
 class BuenoOrovio2008(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'BuenoOrovio2008'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='BuenoOrovio2008', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Cabo2022(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Cabo2022'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Cabo2022', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Cairns2017(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Cairns2017'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Cairns2017', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Chen2012(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Chen2012'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Chen2012', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Clancy1999(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Clancy1999'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Clancy1999', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Clausen2020(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'  # Bounds should actually change between PSO and Nelder Mead
-        scaleFactors = 'off'
-        name = 'Clausen2020'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        # Bounds should actually change between PSO and Nelder Mead
+        super().__init__(name='Clausen2020', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Clerx2019(Modification):
     def __init__(self):
-        logTransform = 'on'
-        parameterBounds = 'on'
-        rateBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Clerx2019'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, rateBounds=rateBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Clerx2019', logTransform='on', parameterBounds='on', rateBounds='on', scaleFactors='off')
 
 
 class Davies2011(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Davies2011'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Davies2011', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
 class Dokos2004(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'  # Technically upper and lower bounds are done through a custom transformation
-        scaleFactors = 'off'
-        name = 'Dokos2004'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        # Technically upper and lower bounds are done through a custom transformation
+        super().__init__(name='Dokos2004', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Druckmann2007(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Druckmann2007'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Druckmann2007', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Du2014(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Du2014'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Du2014', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Epstein2016(Modification):
     def __init__(self):
-        logTransform = 'on'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Epstein2016'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Epstein2016', logTransform='on', parameterBounds='on', scaleFactors='on')
 
 
 class Groenendaal2015(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Groenendaal2015'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors,
+        super().__init__(name='Groenendaal2015', logTransform='off', parameterBounds='on', scaleFactors='on',
                          kwargs={'nGens': 100, 'popSize': 500})
 
 
 class Guo2010(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'  # Technically upper and lower bounds are done through a custom transformation
-        scaleFactors = 'off'
-        name = 'Guo2010'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        # Technically upper and lower bounds are done through a custom transformation
+        super().__init__(name='Guo2010', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Gurkiewicz2007(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Gurkiewicz2007'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Gurkiewicz2007', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Hendrikson2011(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Hendrikson2011'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Hendrikson2011', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Houston2020(Modification):
     def __init__(self):
-        logTransform = 'on'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Houston2020'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Houston2020', logTransform='on', parameterBounds='on', scaleFactors='off')
 
 
 class JedrzejewskiSzmek2018(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'JedrzejewskiSzmek2018'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors,
+        super().__init__(name='JedrzejewskiSzmek2018', logTransform='off', parameterBounds='on', scaleFactors='off',
                          kwargs={'popSize': 8})
 
 
 class Kaur2014(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Kaur2014'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Kaur2014', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Kohjitani2022(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'on'
-        name = 'Kohjitani2022'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Kohjitani2022', logTransform='off', parameterBounds='off', scaleFactors='on')
 
 
 class Liu2011(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Liu2011'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Liu2011', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Loewe2016(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Loewe2012'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Loewe2012', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Maryak1998(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Maryak1998'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Maryak1998', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Meliza2014(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Meliza2014'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Meliza2014', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Moreno2016(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Moreno2016'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Moreno2016', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Munch2022(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Munch2022'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Munch2022', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Nogaret2016(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Nogaret2016'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Nogaret2016', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Nogaret2022(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Nogaret2022'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Nogaret2022', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Sachse2003(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Sachse2003'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Sachse2003', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Seemann2009(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Seemann2009'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Seemann2009', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Smirnov2020(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Smirnov2020'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Smirnov2020', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
 class Syed2005(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Syed2005'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Syed2005', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Taylor2020(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Taylor2020'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Taylor2020', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Vanier1999(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Vanier1999'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Vanier1999', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
 class Vavoulis2012(Modification):
     def __init__(self):
-        logTransform = 'on'
-        parameterBounds = 'on'
-        scaleFactors = 'on'
-        name = 'Vavoulis2012'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Vavoulis2012', logTransform='on', parameterBounds='on', scaleFactors='on')
 
 
 class Weber2008(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Weber2008'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Weber2008', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Wilhelms2012a(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Wilhelms2012a'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Wilhelms2012a', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Wilhelms2012b(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'on'
-        scaleFactors = 'off'
-        name = 'Wilhelms2012b'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Wilhelms2012b', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Zhou2009(Modification):
     def __init__(self):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        name = 'Zhou2009'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name='Zhou2009', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Empty(Modification):
     """
     A modification with default settings.
     """
+
     def __init__(self, name=""):
-        logTransform = 'off'
-        parameterBounds = 'off'
-        scaleFactors = 'off'
-        super().__init__(name=name, logTransform=logTransform, parameterBounds=parameterBounds, scaleFactors=scaleFactors)
+        super().__init__(name=name, logTransform='off', parameterBounds='off', scaleFactors='off')
