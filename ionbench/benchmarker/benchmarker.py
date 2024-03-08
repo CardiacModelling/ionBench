@@ -29,8 +29,8 @@ class Benchmarker:
         self._logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
-        if not hasattr(self, 'data'):
-            self.data = None
+        if not hasattr(self, 'DATA'):
+            self.DATA = None
         if not hasattr(self, 'lb'):
             self.lb = None
         if not hasattr(self, 'ub'):
@@ -70,7 +70,7 @@ class Benchmarker:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     tmp.append(float(row[0]))
-            self.data = np.array(tmp)
+            self.DATA = np.array(tmp)
 
     def add_parameter_bounds(self):
         """
@@ -323,7 +323,7 @@ class Benchmarker:
         """
         testOutput = np.array(
             self.simulate(parameters, np.arange(0, self.T_MAX, self.freq), incrementSolveCounter=incrementSolveCounter))
-        cost = self.rmse(testOutput, self.data)
+        cost = self.rmse(testOutput, self.DATA)
         return cost
 
     def signed_error(self, parameters):
@@ -343,7 +343,7 @@ class Benchmarker:
         """
         # Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
-        return testOutput - self.data
+        return testOutput - self.DATA
 
     def squared_error(self, parameters):
         """
@@ -362,7 +362,7 @@ class Benchmarker:
         """
         # Calculate cost for a given set of parameters
         testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
-        return (testOutput - self.data) ** 2
+        return (testOutput - self.DATA) ** 2
 
     def use_sensitivities(self):
         """
@@ -434,9 +434,9 @@ class Benchmarker:
             for i in range(self.n_parameters()):
                 grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
             cost = float(penalty.data)
-            error = [float(penalty.data)] * len(self.data)
-            J = np.zeros((len(self.data), self.n_parameters()))
-            for i in range(len(self.data)):
+            error = [float(penalty.data)] * len(self.DATA)
+            J = np.zeros((len(self.DATA), self.n_parameters()))
+            for i in range(len(self.DATA)):
                 J[i,] = grad
             self.tracker.update(parameters, incrementSolveCounter=False, solveType='grad', cost=cost,
                                 solveTime=0)
@@ -457,7 +457,7 @@ class Benchmarker:
                     'Tried to evaluate gradient but model failed to solve, likely poor choice of parameters. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
                 self.tracker.update(parameters, incrementSolveCounter=False, solveType='grad',
                                     solveTime=end - start)
-                curr = np.array([np.inf] * len(self.data))
+                curr = np.array([np.inf] * len(self.DATA))
                 # use grad to point back to reasonable parameter space
                 # Define jacobian
                 J = np.zeros((len(curr), self.n_parameters()))
@@ -474,13 +474,13 @@ class Benchmarker:
                         J[i, j] = sens[i, 0, j]
             # Calculate the gradient from the jacobian
             grad = []
-            error = curr - self.data
-            cost = self.rmse(curr, self.data)
+            error = curr - self.DATA
+            cost = self.rmse(curr, self.DATA)
             for i in range(self.n_parameters()):
                 if 'moreno' in self.NAME:
                     grad.append(np.dot(error * self.weights, J[:, i]) / cost)
                 else:
-                    grad.append(np.dot(error, J[:, i]) / (len(self.data) * cost))
+                    grad.append(np.dot(error, J[:, i]) / (len(self.DATA) * cost))
             self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
                                 solveType='grad',
                                 solveTime=end - start)
@@ -688,7 +688,7 @@ class Benchmarker:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)
-            return np.add(penalty, self.data)
+            return np.add(penalty, self.DATA)
 
         # Set the parameters in the simulation object
         self.set_params(parameters)
@@ -698,7 +698,7 @@ class Benchmarker:
         start = time.monotonic()
         out = self.solve_model(times, continueOnError=continueOnError)
         end = time.monotonic()
-        self.tracker.update(parameters, cost=self.rmse(out, self.data), incrementSolveCounter=incrementSolveCounter,
+        self.tracker.update(parameters, cost=self.rmse(out, self.DATA), incrementSolveCounter=incrementSolveCounter,
                             solveTime=end - start)
         return out
 
@@ -823,12 +823,12 @@ class Benchmarker:
             lastOut = self.solve_model(np.arange(0, self.T_MAX, self.freq), continueOnError=True)
             plt.figure()
             if "moreno" in self.NAME:
-                plt.plot(self.data)
+                plt.plot(self.DATA)
                 plt.plot(firstOut)
                 plt.plot(lastOut)
                 plt.ylabel('Summary Statistics')
             else:
-                plt.plot(np.arange(0, self.T_MAX, self.freq), self.data)
+                plt.plot(np.arange(0, self.T_MAX, self.freq), self.DATA)
                 plt.plot(np.arange(0, self.T_MAX, self.freq), firstOut)
                 plt.plot(np.arange(0, self.T_MAX, self.freq), lastOut)
                 plt.ylabel('Current')

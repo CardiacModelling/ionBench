@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
-data = bm.data
+data = bm.DATA
 noiseLevel = [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
 nPoints = 10
 params = []  # Full optimised parameter vectors
@@ -15,7 +15,7 @@ plotPointsC = []  # Colour of plot points, better cost than default params
 p = np.ones(bm.n_parameters())
 for n in noiseLevel:
     for j in range(nPoints):
-        bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
+        bm.DATA = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
         plotPointsX.append(n * 100)
         plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm._TRUE_PARAMETERS)))
@@ -57,7 +57,7 @@ plotPointsC = []  # Colour of plot points, better cost than default params
 p = np.ones(bm.n_parameters())
 for n in noiseLevel:
     for j in range(nPoints):
-        bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
+        bm.DATA = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05 * n, len(data))
         out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
         plotPointsX.append(n * 100)
         plotPointsC.append(bm.cost(out) < bm.cost(bm.input_parameter_space(bm._TRUE_PARAMETERS)))
@@ -90,7 +90,7 @@ bm.set_params(bm._TRUE_PARAMETERS)
 bm.set_steady_state(bm._TRUE_PARAMETERS)
 data = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq))
 p = np.ones(bm.n_parameters())
-bm.data = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05, len(data))
+bm.DATA = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05, len(data))
 out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
 
 optCurrent = bm.simulate(out, np.arange(0, bm.T_MAX, bm.freq))  # Noise optimised current

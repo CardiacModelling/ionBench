@@ -89,7 +89,7 @@ def sse(bm, params):
 
     """
     cost = bm.cost(params)
-    return -cost**2 * len(bm.data)  # Sum of squared errors
+    return -cost**2 * len(bm.DATA)  # Sum of squared errors
 
 
 def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):

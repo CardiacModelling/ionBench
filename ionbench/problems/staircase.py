@@ -19,7 +19,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + 'HH' if 'hh' in self.NAME else 'mm' + '.csv'))
         except FileNotFoundError:
-            self.data = None
+            self.DATA = None
         if self.sensitivityCalc:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._OUTPUT_NAME], paramNames)

@@ -27,7 +27,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
-            self.data = None
+            self.DATA = None
         self.lbStandard = self._TRUE_PARAMETERS * 0.5
         self.ubStandard = self._TRUE_PARAMETERS * 1.5
         super().__init__()
@@ -96,7 +96,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 sens[t, 1] = curr[t] * ((t - parameters[0]) ** 2 / parameters[1] ** 3 - 1 / parameters[1])
 
         # Convert to cost derivative or residual jacobian
-        error = curr - self.data
+        error = curr - self.DATA
         cost = np.sqrt(np.mean(error ** 2))
 
         if residuals:

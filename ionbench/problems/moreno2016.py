@@ -247,7 +247,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         curr = np.array(log[self._OUTPUT_NAME])
         sens = np.array(sens)
         # Adjust sens to emulate moreno summary statistics
-        sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
+        sens_SS = np.zeros((len(self.DATA), 1, self.n_parameters()))
         for i in range(self.n_parameters()):
             step = 1e-5 * self._TRUE_PARAMETERS[i]
             sens_SS[:, 0, i] = (self.sum_stats(curr + step * sens[:, 0, i]) - self.sum_stats(
@@ -281,7 +281,7 @@ class INa(ionbench.benchmarker.Benchmarker):
                 return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
-                return np.array([np.inf] * len(self.data), dtype='float64')
+                return np.array([np.inf] * len(self.DATA), dtype='float64')
         else:
             log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes)
             # log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting outputName only works for ODE sims, not analytical

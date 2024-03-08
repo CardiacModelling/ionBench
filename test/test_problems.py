@@ -29,7 +29,7 @@ class Problem:
         assert hasattr(self.bm, "_TRUE_PARAMETERS")
         assert hasattr(self.bm, "_RATE_FUNCTIONS")
         assert hasattr(self.bm, "STANDARD_LOG_TRANSFORM")
-        assert hasattr(self.bm, "data")
+        assert hasattr(self.bm, "DATA")
         assert hasattr(self.bm, "sim")
         assert hasattr(self.bm, "_useScaleFactors")
         assert hasattr(self.bm, "_parameters_bounded")
