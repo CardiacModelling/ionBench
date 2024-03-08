@@ -27,7 +27,7 @@ Log transforms can also be specified in the benchmarker using `benchmarker.log_t
 
 When working with log transforms (or equivalently scale factor transforms using `benchmarker._useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
 
-Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds()`. This will set `bm.lb=bm.lbStandard`, `bm.ub=bm.ubStandard` and `benchmarker._bounded=True`. If an optimisers tries to find the cost of a parameter outside of these bounds, the model will not be solved and the cost will be given by the penalty function. The __Tracker__ will record these parameters but remember that the model was not solved.
+Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds()`. This will set `bm.lb=bm._LOWER_BOUND`, `bm.ub=bm._UPPER_BOUND` and `benchmarker._bounded=True`. If an optimisers tries to find the cost of a parameter outside of these bounds, the model will not be solved and the cost will be given by the penalty function. The __Tracker__ will record these parameters but remember that the model was not solved.
 
 Similarly, rate bounds can be added with `benchmarker.add_rate_bounds()`.
 

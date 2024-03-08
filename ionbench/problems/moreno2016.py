@@ -74,10 +74,10 @@ class INa(ionbench.benchmarker.Benchmarker):
         else:
             self.simSens = None
         self.TIMESTEP = 0.5  # Timestep in data between points
-        self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
-        self.weights = self.weights / np.sum(self.weights)
-        self.lbStandard = self._TRUE_PARAMETERS * (1 - self.paramSpaceWidth)
-        self.ubStandard = self._TRUE_PARAMETERS * (1 + self.paramSpaceWidth)
+        w = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
+        self.WEIGHTS = w / np.sum(w)
+        self._LOWER_BOUND = self._TRUE_PARAMETERS * (1 - self.paramSpaceWidth)
+        self._UPPER_BOUND = self._TRUE_PARAMETERS * (1 + self.paramSpaceWidth)
         super().__init__()
         print('Benchmarker initialised')
 
@@ -303,7 +303,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         rmse : float
             The weighted RMSE between c1 and c2.
         """
-        return np.sqrt(np.average((c1 - c2) ** 2, weights=self.weights))
+        return np.sqrt(np.average((c1 - c2) ** 2, weights=self.WEIGHTS))
 
     def sum_stats(self, inaOut):
         """

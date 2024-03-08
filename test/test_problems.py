@@ -45,8 +45,8 @@ class Problem:
         assert hasattr(self.bm, "RATE_MAX")
         assert hasattr(self.bm, "V_LOW")
         assert hasattr(self.bm, "V_HIGH")
-        assert hasattr(self.bm, "lbStandard")
-        assert hasattr(self.bm, "ubStandard")
+        assert hasattr(self.bm, "_LOWER_BOUND")
+        assert hasattr(self.bm, "_UPPER_BOUND")
 
     @pytest.mark.cheap
     def test_plotter(self, monkeypatch):
@@ -280,7 +280,7 @@ class Problem:
         assert a < 0.01
         # Handles rate bounds as well
         self.bm.add_rate_bounds()
-        self.bm.lb = np.copy(self.bm.lbStandard)
+        self.bm.lb = np.copy(self.bm._LOWER_BOUND)
         tmp = self.bm.RATE_MIN
         self.bm.RATE_MIN = self.bm.RATE_MAX
         a = grad_check(bm=self.bm, x0=x0,
@@ -369,8 +369,8 @@ class Problem:
         assert n > 0
         assert n == len(self.bm._TRUE_PARAMETERS)
         assert n == len(self.bm.STANDARD_LOG_TRANSFORM)
-        assert n == len(self.bm.lbStandard)
-        assert n == len(self.bm.ubStandard)
+        assert n == len(self.bm._LOWER_BOUND)
+        assert n == len(self.bm._UPPER_BOUND)
 
     @pytest.mark.cheap
     def test_reset(self):
@@ -420,21 +420,21 @@ class Staircase(Problem):
         assert sampler_different(self.bm, self.bm._TRUE_PARAMETERS)
         # Same for scale factor parameter space
         self.bm._useScaleFactors = True
-        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
-                              self.bm.input_parameter_space(self.bm.ubStandard))
+        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm._LOWER_BOUND),
+                              self.bm.input_parameter_space(self.bm._UPPER_BOUND))
         assert sampler_different(self.bm, np.ones(self.bm.n_parameters()))
         self.bm._useScaleFactors = False
         # Same for log transformed space
         self.bm.log_transform()
-        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
-                              self.bm.input_parameter_space(self.bm.ubStandard))
+        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm._LOWER_BOUND),
+                              self.bm.input_parameter_space(self.bm._UPPER_BOUND))
         assert sampler_different(self.bm, np.log(self.bm._TRUE_PARAMETERS))
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Same for scale factor and log transformed space
         self.bm.log_transform()
         self.bm._useScaleFactors = True
-        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm.lbStandard),
-                              self.bm.input_parameter_space(self.bm.ubStandard))
+        assert sampler_bounds(self.bm, self.bm.input_parameter_space(self.bm._LOWER_BOUND),
+                              self.bm.input_parameter_space(self.bm._UPPER_BOUND))
         assert sampler_different(self.bm, np.zeros(self.bm.n_parameters()))
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False
@@ -482,12 +482,12 @@ class Loewe(Problem):
         assert sampler_different(self.bm, np.ones(self.bm.n_parameters()))
         self.bm._useScaleFactors = False
         # Same for log transformed space
-        self.bm.log_transform([not i for i in self.bm.additiveParams])
+        self.bm.log_transform(self.bm.STANDARD_LOG_TRANSFORM)
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(lb), self.bm.input_parameter_space(ub))
         assert sampler_different(self.bm, np.log(self.bm._TRUE_PARAMETERS))
         self.bm.log_transform([False] * self.bm.n_parameters())
         # Same for scale factor and log transformed space
-        self.bm.log_transform([not i for i in self.bm.additiveParams])
+        self.bm.log_transform(self.bm.STANDARD_LOG_TRANSFORM)
         self.bm._useScaleFactors = True
         assert sampler_bounds(self.bm, self.bm.input_parameter_space(lb), self.bm.input_parameter_space(ub))
         assert sampler_different(self.bm, np.zeros(self.bm.n_parameters()))
@@ -499,7 +499,7 @@ class Loewe(Problem):
         self.bm.reset()
         # Check transforms map as expected
         # Log transform default rates
-        self.bm.log_transform([not i for i in self.bm.additiveParams])
+        self.bm.log_transform(self.bm.STANDARD_LOG_TRANSFORM)
         logDefault = [np.log(self.bm._TRUE_PARAMETERS[i]) if self.bm.STANDARD_LOG_TRANSFORM[i] else self.bm._TRUE_PARAMETERS[i]
                       for i in range(self.bm.n_parameters())]
         assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), logDefault)
@@ -511,7 +511,7 @@ class Loewe(Problem):
         assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), np.ones(self.bm.n_parameters()))
         assert param_equal(self.bm.original_parameter_space(np.ones(self.bm.n_parameters())), self.bm._TRUE_PARAMETERS)
         # Scale factor and log transformed space
-        self.bm.log_transform([not i for i in self.bm.additiveParams])
+        self.bm.log_transform(self.bm.STANDARD_LOG_TRANSFORM)
         assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS),
                            [0.0 if self.bm.STANDARD_LOG_TRANSFORM[i] else 1.0 for i in range(self.bm.n_parameters())])
         assert param_equal(self.bm.original_parameter_space(

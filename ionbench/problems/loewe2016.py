@@ -19,7 +19,6 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self.V_LOW = None
         self.V_HIGH = None
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
-        self.STANDARD_LOG_TRANSFORM = tuple(not i for i in self.additiveParams)
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
         if self.sensitivityCalc:
             # ODE solver
@@ -33,8 +32,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
                                                        current=self._OUTPUT_NAME, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
         self.TIMESTEP = 0.5  # Timestep in data between points
-        self.lbStandard = np.array([self._TRUE_PARAMETERS[i] - 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** (-self.paramSpaceWidth) for i in range(self.n_parameters())])
-        self.ubStandard = np.array([self._TRUE_PARAMETERS[i] + 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** self.paramSpaceWidth for i in range(self.n_parameters())])
+        self._LOWER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 ** (-self.paramSpaceWidth) if self.STANDARD_LOG_TRANSFORM[i] else self._TRUE_PARAMETERS[i] - 60 * self.paramSpaceWidth for i in range(self.n_parameters())])
+        self._UPPER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 ** self.paramSpaceWidth if self.STANDARD_LOG_TRANSFORM[i] else self._TRUE_PARAMETERS[i] + 60 * self.paramSpaceWidth for i in range(self.n_parameters())])
         super().__init__()
 
     def sample(self, n=1):
@@ -56,12 +55,12 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         for i in range(n):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
-                if self.additiveParams[j]:
-                    param[j] = self._TRUE_PARAMETERS[j] + np.random.uniform(-60 * self.paramSpaceWidth,
-                                                                         60 * self.paramSpaceWidth)
-                else:
+                if self.STANDARD_LOG_TRANSFORM[j]:
                     param[j] = self._TRUE_PARAMETERS[j] * 10 ** np.random.uniform(-1 * self.paramSpaceWidth,
-                                                                               1 * self.paramSpaceWidth)  # Log uniform distribution
+                                                                                  1 * self.paramSpaceWidth)  # Log uniform distribution
+                else:
+                    param[j] = self._TRUE_PARAMETERS[j] + np.random.uniform(-60 * self.paramSpaceWidth,
+                                                                            60 * self.paramSpaceWidth)
             params[i] = self.input_parameter_space(param)  # Generates a copy
         if n == 1:
             return params[0]
@@ -110,11 +109,12 @@ class IKr(LoeweBenchmarker):
         self._PARAMETER_CONTAINER = 'ikr'
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
         self._TRUE_PARAMETERS = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
-        self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
+        self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, True, False, True, False, True, True, True)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         states = ['ikr.xr']
         self._RATE_FUNCTIONS = ((lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))), 'positive'),
-                                (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1), 'negative'))  # Used for rate bounds
+                                (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1),
+                                 'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         super().__init__(states)
         print('Benchmarker initialised')
@@ -141,8 +141,7 @@ class IKur(LoeweBenchmarker):
         self._TRUE_PARAMETERS = np.array(
             [0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05,
              15, 13, 138.994])
-        self.additiveParams = [False, True, False, True, False, True, True, False, True, False, False, False, True,
-                               True, False, True, True, True, False, False, True, False, True, False, False]
+        self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, False, False, True, False, True, True, True, False, False, True, False, False, False, True, True, False, True, False, True, True)
         self._RATE_FUNCTIONS = (
             (lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])), 'positive'),
             (lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])), 'negative'),

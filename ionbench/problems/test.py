@@ -28,8 +28,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
             self.DATA = None
-        self.lbStandard = self._TRUE_PARAMETERS * 0.5
-        self.ubStandard = self._TRUE_PARAMETERS * 1.5
+        self._LOWER_BOUND = self._TRUE_PARAMETERS * 0.5
+        self._UPPER_BOUND = self._TRUE_PARAMETERS * 1.5
         super().__init__()
 
     def sample(self, n=1):
@@ -135,8 +135,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self._useScaleFactors = False
             self._parameters_bounded = False
             self._rates_bounded = False
-            self.lb = copy.copy(self.lbStandard)
-            self.ub = copy.copy(self.ubStandard)
+            self.lb = copy.copy(self._LOWER_BOUND)
+            self.ub = copy.copy(self._UPPER_BOUND)
             self.RATE_MIN = None
             self.RATE_MAX = None
 

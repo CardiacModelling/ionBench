@@ -35,11 +35,11 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         p = self.protocol()
         self.V_LOW = min(p.levels())
         self.V_HIGH = max(p.levels())
-        self.lbStandard = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
-        self.ubStandard = np.array(
+        self._LOWER_BOUND = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
+        self._UPPER_BOUND = np.array(
             [1e3 if self.STANDARD_LOG_TRANSFORM[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
-        self.lb = copy.copy(self.lbStandard)
-        self.ub = copy.copy(self.ubStandard)
+        self.lb = np.copy(self._LOWER_BOUND)
+        self.ub = np.copy(self._UPPER_BOUND)
         super().__init__()
 
     def sample(self, n=1):
@@ -63,9 +63,9 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
                 p = []
                 for j in range(self.n_parameters()):
                     if self.STANDARD_LOG_TRANSFORM[j]:
-                        p.append(scipy.stats.loguniform.rvs(self.lbStandard[j], self.ubStandard[j]))
+                        p.append(scipy.stats.loguniform.rvs(self._LOWER_BOUND[j], self._UPPER_BOUND[j]))
                     else:
-                        p.append(np.random.uniform(self.lbStandard[j], self.ubStandard[j]))
+                        p.append(np.random.uniform(self._LOWER_BOUND[j], self._UPPER_BOUND[j]))
                 if self.in_rate_bounds(p, boundedCheck=False):
                     break
             params[i] = self.input_parameter_space(p)

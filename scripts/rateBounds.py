@@ -15,8 +15,8 @@ def staircase_plots(bm, paramPairs, nPoints):
     vecF = np.vectorize(f)
     for i, j in paramPairs:
         # Create a contour plot of the penalty function to show the bounds
-        x = np.logspace(np.log10(bm.lbStandard[i] * 0.3), np.log10(bm.ubStandard[i] * 3), nPoints)
-        y = np.linspace(-0.1, bm.ubStandard[j] * 1.2, nPoints)
+        x = np.logspace(np.log10(bm._LOWER_BOUND[i] * 0.3), np.log10(bm._UPPER_BOUND[i] * 3), nPoints)
+        y = np.linspace(-0.1, bm._UPPER_BOUND[j] * 1.2, nPoints)
         x, y = np.meshgrid(x, y)
         z = vecF(x, y, i, j)
         plt.contour(x, y, z, [1e5])
@@ -26,8 +26,8 @@ def staircase_plots(bm, paramPairs, nPoints):
         plt.savefig(f'figures/rateBounds-{modelType}-{i}.png')
         plt.close()
         # Create a contour plot of the penalty function at multiple levels
-        x = np.logspace(np.log10(bm.lbStandard[i] * 0.01), np.log10(bm.ubStandard[i] * 10), nPoints)
-        y = np.linspace(-0.2, bm.ubStandard[j] * 1.75, nPoints)
+        x = np.logspace(np.log10(bm._LOWER_BOUND[i] * 0.01), np.log10(bm._UPPER_BOUND[i] * 10), nPoints)
+        y = np.linspace(-0.2, bm._UPPER_BOUND[j] * 1.75, nPoints)
         x, y = np.meshgrid(x, y)
         z = vecF(x, y, i, j)
         CS = plt.contour(x, y, z, [1e5, 2e5, 5e5, 1e6])

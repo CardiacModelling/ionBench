@@ -90,8 +90,8 @@ class Benchmarker:
         None.
 
         """
-        self.lb = np.copy(self.lbStandard)
-        self.ub = np.copy(self.ubStandard)
+        self.lb = np.copy(self._LOWER_BOUND)
+        self.ub = np.copy(self._UPPER_BOUND)
         self._parameters_bounded = True
 
     def add_rate_bounds(self):
@@ -299,8 +299,8 @@ class Benchmarker:
             self._useScaleFactors = False
             self._parameters_bounded = False
             self._rates_bounded = False
-            self.lb = copy.copy(self.lbStandard)
-            self.ub = copy.copy(self.ubStandard)
+            self.lb = copy.copy(self._LOWER_BOUND)
+            self.ub = copy.copy(self._UPPER_BOUND)
             self.RATE_MIN = 1.67e-5
             self.RATE_MAX = 1e3
 
