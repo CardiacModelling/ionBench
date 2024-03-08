@@ -20,7 +20,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         self._RATE_FUNCTIONS = ()
         self.rateMin = None
         self.rateMax = None
-        self.standardLogTransform = [False, True]
+        self.STANDARD_LOG_TRANSFORM = (False, True)
         self.sensitivityCalc = True
         self.T_MAX = 20
         self.freq = 1  # Timestep in data between points

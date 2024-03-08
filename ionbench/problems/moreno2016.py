@@ -56,7 +56,7 @@ class INa(ionbench.benchmarker.Benchmarker):
                                                         p[7] / (p[4] * np.exp(V / p[5])) * p[10] * np.exp(V / p[11])),
                                    'positive'), (lambda p, V: p[14] * p[12] * np.exp(V / p[13]), 'positive'),
                                 (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative'))  # Used for rate bounds
-        self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
+        self.STANDARD_LOG_TRANSFORM = (True, False, True, True) * 2 + (True, False) * 3 + (True,) * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in

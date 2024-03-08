@@ -19,7 +19,7 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self.vLow = None
         self.vHigh = None
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
-        self.standardLogTransform = [not i for i in self.additiveParams]
+        self.STANDARD_LOG_TRANSFORM = tuple(not i for i in self.additiveParams)
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
         if self.sensitivityCalc:
             # ODE solver

@@ -28,7 +28,7 @@ class Problem:
         assert hasattr(self.bm, "_PARAMETER_CONTAINER")
         assert hasattr(self.bm, "_TRUE_PARAMETERS")
         assert hasattr(self.bm, "_RATE_FUNCTIONS")
-        assert hasattr(self.bm, "standardLogTransform")
+        assert hasattr(self.bm, "STANDARD_LOG_TRANSFORM")
         assert hasattr(self.bm, "data")
         assert hasattr(self.bm, "sim")
         assert hasattr(self.bm, "_useScaleFactors")
@@ -368,7 +368,7 @@ class Problem:
         n = self.bm.n_parameters()
         assert n > 0
         assert n == len(self.bm._TRUE_PARAMETERS)
-        assert n == len(self.bm.standardLogTransform)
+        assert n == len(self.bm.STANDARD_LOG_TRANSFORM)
         assert n == len(self.bm.lbStandard)
         assert n == len(self.bm.ubStandard)
 
@@ -500,7 +500,7 @@ class Loewe(Problem):
         # Check transforms map as expected
         # Log transform default rates
         self.bm.log_transform([not i for i in self.bm.additiveParams])
-        logDefault = [np.log(self.bm._TRUE_PARAMETERS[i]) if self.bm.standardLogTransform[i] else self.bm._TRUE_PARAMETERS[i]
+        logDefault = [np.log(self.bm._TRUE_PARAMETERS[i]) if self.bm.STANDARD_LOG_TRANSFORM[i] else self.bm._TRUE_PARAMETERS[i]
                       for i in range(self.bm.n_parameters())]
         assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS), logDefault)
         # Original space
@@ -513,9 +513,9 @@ class Loewe(Problem):
         # Scale factor and log transformed space
         self.bm.log_transform([not i for i in self.bm.additiveParams])
         assert param_equal(self.bm.input_parameter_space(self.bm._TRUE_PARAMETERS),
-                           [0.0 if self.bm.standardLogTransform[i] else 1.0 for i in range(self.bm.n_parameters())])
+                           [0.0 if self.bm.STANDARD_LOG_TRANSFORM[i] else 1.0 for i in range(self.bm.n_parameters())])
         assert param_equal(self.bm.original_parameter_space(
-            [0.0 if self.bm.standardLogTransform[i] else 1.0 for i in range(self.bm.n_parameters())]),
+            [0.0 if self.bm.STANDARD_LOG_TRANSFORM[i] else 1.0 for i in range(self.bm.n_parameters())]),
             self.bm._TRUE_PARAMETERS)
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm._useScaleFactors = False

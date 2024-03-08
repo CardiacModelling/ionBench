@@ -78,7 +78,7 @@ class Modification:
             bm.log_transform([False] * bm.n_parameters())
         elif setting.lower() == 'on':
             # Load standard log transforms from benchmarker
-            bm.log_transform(bm.standardLogTransform)
+            bm.log_transform(bm.STANDARD_LOG_TRANSFORM)
         elif setting.lower() == 'custom':
             bm.log_transform(self.customLogTransform)
         else:

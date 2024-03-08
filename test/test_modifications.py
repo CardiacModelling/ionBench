@@ -118,7 +118,7 @@ class TestModifications:
         newbm = ionbench.problems.loewe2016.IKr()
         mod.apply(newbm)
         assert newbm._useScaleFactors
-        assert all(np.array(newbm._logTransformParams) == np.array(newbm.standardLogTransform))
+        assert all(np.array(newbm._logTransformParams) == np.array(newbm.STANDARD_LOG_TRANSFORM))
         assert any(newbm._logTransformParams)
         assert not all(newbm._logTransformParams)
         assert newbm._parameters_bounded

@@ -37,7 +37,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.vHigh = max(p.levels())
         self.lbStandard = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
         self.ubStandard = np.array(
-            [1e3 if self.standardLogTransform[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
+            [1e3 if self.STANDARD_LOG_TRANSFORM[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])
         self.lb = copy.copy(self.lbStandard)
         self.ub = copy.copy(self.ubStandard)
         super().__init__()
@@ -62,7 +62,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             while True:
                 p = []
                 for j in range(self.n_parameters()):
-                    if self.standardLogTransform[j]:
+                    if self.STANDARD_LOG_TRANSFORM[j]:
                         p.append(scipy.stats.loguniform.rvs(self.lbStandard[j], self.ubStandard[j]))
                     else:
                         p.append(np.random.uniform(self.lbStandard[j], self.ubStandard[j]))
@@ -145,7 +145,7 @@ class HH(StaircaseBenchmarker):
                                 (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
                                 (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
                                 (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative'))  # Used for rate bounds
-        self.standardLogTransform = [True, False] * 4 + [False]
+        self.STANDARD_LOG_TRANSFORM = (True, False) * 4 + (False,)
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
                                                       parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
@@ -184,7 +184,7 @@ class MM(StaircaseBenchmarker):
                                 (lambda p, v: p[9], 'independent'),
                                 (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
                                 (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative'))  # Used for rate bounds
-        self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2 + [False]
+        self.STANDARD_LOG_TRANSFORM = (True, False, True) * 2 + (False, True) * 2 + (True, False) * 2 + (False,)
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
                                                                                          ['Cr1', 'Cr2', 'Cr3', 'Or4',
