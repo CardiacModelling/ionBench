@@ -33,8 +33,8 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
         p = self.protocol()
-        self.vLow = min(p.levels())
-        self.vHigh = max(p.levels())
+        self.V_LOW = min(p.levels())
+        self.V_HIGH = max(p.levels())
         self.lbStandard = np.array([1e-7] * (self.n_parameters() - 1) + [0.02])
         self.ubStandard = np.array(
             [1e3 if self.STANDARD_LOG_TRANSFORM[i] else 0.4 for i in range(self.n_parameters() - 1)] + [0.2])

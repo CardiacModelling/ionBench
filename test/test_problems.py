@@ -43,8 +43,8 @@ class Problem:
         assert hasattr(self.bm, "TIMESTEP")
         assert hasattr(self.bm, "RATE_MIN")
         assert hasattr(self.bm, "RATE_MAX")
-        assert hasattr(self.bm, "vLow")
-        assert hasattr(self.bm, "vHigh")
+        assert hasattr(self.bm, "V_LOW")
+        assert hasattr(self.bm, "V_HIGH")
         assert hasattr(self.bm, "lbStandard")
         assert hasattr(self.bm, "ubStandard")
 

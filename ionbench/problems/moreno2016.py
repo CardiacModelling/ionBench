@@ -33,8 +33,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._tauBounds = None
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.vLow = None
-        self.vHigh = None
+        self.V_LOW = None
+        self.V_HIGH = None
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._OUTPUT_NAME = 'ina.INa'
         self._PARAMETER_CONTAINER = 'ina'
@@ -224,8 +224,8 @@ class INa(ionbench.benchmarker.Benchmarker):
                 elif i[-1] == 'tau':
                     self._tauBounds.append([lb, ub])
         self._logTimes = np.array(self._logTimes)
-        self.vLow = min(newProtocol.levels())
-        self.vHigh = max(newProtocol.levels())
+        self.V_LOW = min(newProtocol.levels())
+        self.V_HIGH = max(newProtocol.levels())
         return newProtocol
 
     def solve_with_sensitivities(self, times):

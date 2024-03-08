@@ -43,10 +43,10 @@ class Benchmarker:
             self.RATE_MIN = None
         if not hasattr(self, 'RATE_MAX'):
             self.RATE_MAX = None
-        if not hasattr(self, 'vLow'):
-            self.vLow = None
-        if not hasattr(self, 'vHigh'):
-            self.vHigh = None
+        if not hasattr(self, 'V_LOW'):
+            self.V_LOW = None
+        if not hasattr(self, 'V_HIGH'):
+            self.V_HIGH = None
         if not hasattr(self, 'COST_THRESHOLD'):
             self.COST_THRESHOLD = None
 
@@ -739,10 +739,10 @@ class Benchmarker:
         for rateFunc, rateType in self._RATE_FUNCTIONS:
             if rateType == 'positive':
                 # check kHigh is in bounds
-                k = rateFunc(parameters, self.vHigh)
+                k = rateFunc(parameters, self.V_HIGH)
             elif rateType == 'negative':
                 # check kLow is in bounds
-                k = rateFunc(parameters, self.vLow)
+                k = rateFunc(parameters, self.V_LOW)
             elif rateType == 'independent':
                 # check rate in bounds
                 k = rateFunc(parameters, 0)  # Voltage doesn't matter

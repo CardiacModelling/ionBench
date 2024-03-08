@@ -16,8 +16,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self.T_MAX = None
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.vLow = None
-        self.vHigh = None
+        self.V_LOW = None
+        self.V_HIGH = None
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
         self.STANDARD_LOG_TRANSFORM = tuple(not i for i in self.additiveParams)
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
@@ -88,8 +88,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         for i in range(len(vsteps)):
             p.add_step(vsteps[i], durations[i])
         self.T_MAX = sum(durations)
-        self.vLow = min(vsteps)
-        self.vHigh = max(vsteps)
+        self.V_LOW = min(vsteps)
+        self.V_HIGH = max(vsteps)
         return p
 
 
