@@ -242,6 +242,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
     return transform(Gpos[L])
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Chen2012
@@ -261,4 +262,4 @@ if __name__ == '__main__':
     bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
-    run(bm, groups=groups, debug=True, gmin=0.01, **mod.kwargs)
+    run(bm, groups=groups, debug=True, **mod.kwargs)

@@ -125,6 +125,7 @@ def run(bm, x0=None, nGens=1000, popSize=0, debug=False):
     return elite.x
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Gurkiewicz2007

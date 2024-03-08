@@ -148,6 +148,7 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
     return elite.x
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Cairns2017

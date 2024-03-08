@@ -209,6 +209,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 print(d)
 
             # Generate function of the curved path from starting point (no step, L(0)=[0,0,0,...]), initially moving in the steepest descent direction, converging towards Gauss Newton step at alpha=inf
+            # noinspection PyPep8Naming
             def L(alpha):
                 m = np.zeros(len(d))
                 for i in range(len(d)):
@@ -225,6 +226,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             # Minimise bm.SSE(x0+L(alpha)) with respect to alpha using Brent's method
             # Define function to find weighted SSE from alpha
             # Cache SSE function to help make the code to handle the brent method more robust without needing repeated function evaluations
+            # noinspection PyPep8Naming
             @lru_cache(maxsize=None)
             def SSE(alpha):
                 weightedr0 = np.diag(w) @ bm.signed_error(model_params(x0 + L(alpha)))

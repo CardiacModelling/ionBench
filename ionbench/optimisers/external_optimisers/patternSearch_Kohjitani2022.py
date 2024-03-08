@@ -117,6 +117,7 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
     return NP
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Kohjitani2022

@@ -221,6 +221,7 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
     return bestPos
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Vanier1999

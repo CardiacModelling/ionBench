@@ -8,6 +8,7 @@ from pymoo.core.individual import Individual as pymooInd
 from pymoo.core.problem import Problem
 from pymoo.operators.crossover.sbx import SBX
 
+
 # TODO: eta_mut is unused - needs fixing
 def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
     """
@@ -38,12 +39,14 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
         The best parameters identified.
 
     """
+
     class Individual:
         def __init__(self):
             if x0 is None:
                 self.x = bm.sample()
             else:
-                self.x = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
+                self.x = bm.input_parameter_space(
+                    bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             self.x = bm.clamp_parameters(self.x)
             self.cost = None
 
@@ -83,7 +86,8 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
         pop = newPop  # Population of parents
         # Crossover SBX
         newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
+        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb),
+                          xu=bm.input_parameter_space(bm.ub))
         for i in range(popSize // 2):
             a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
 
@@ -128,6 +132,7 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
     return elite.x
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Smirnov2020

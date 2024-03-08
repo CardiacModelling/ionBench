@@ -83,6 +83,7 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     return x0
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Maryak1998

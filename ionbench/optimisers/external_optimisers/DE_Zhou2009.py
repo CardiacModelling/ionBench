@@ -43,6 +43,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         def find_cost(self):
             self.cost = cost_func(tuple(self.x))
 
+    # noinspection PyPep8Naming
     def get_L():
         # Get the number of parameters to perturb in crossover
         L = 1
@@ -127,6 +128,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     return bestInd.x
 
 
+# noinspection PyUnusedLocal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Zhou2009
