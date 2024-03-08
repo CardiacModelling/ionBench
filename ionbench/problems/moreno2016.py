@@ -35,7 +35,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.rateMax = 1e3
         self.vLow = None
         self.vHigh = None
-        self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
         self._outputName = 'ina.INa'
         self._paramContainer = 'ina'
         self.paramSpaceWidth = 25  # 5, 10, or 25
@@ -59,8 +59,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.standardLogTransform = [True, False, True, True] * 2 + [True, False] * 3 + [True] * 2
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['ina.' + s for s in
-                                                                                        ['ic3', 'ic2', 'if', 'c3', 'c2',
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
+                                                                                         ['ic3', 'ic2', 'if', 'c3', 'c2',
                                                                                          'c1', 'o', 'is']],
                                                               parameters=parameters, current=self._outputName,
                                                               vm='membrane.V')
@@ -69,7 +69,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         if self.sensitivityCalc:
             # ODE solver
             sens = ([self._outputName], parameters)
-            self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(self.tols[0], self.tols[1])
         else:
             self.simSens = None

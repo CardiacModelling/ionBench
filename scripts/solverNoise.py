@@ -62,7 +62,7 @@ print(
     f'Searching tolerance combinations for {bm.NAME}. Absolute tolerances between 1e-{abstolBounds[0]} and 1e-{abstolBounds[1]}. Relative tolerances between 1e-{reltolBounds[0]} and 1e-{reltolBounds[1]}.')
 
 if 'loewe' in bm.NAME or 'moreno' in bm.NAME:
-    bm.sim = myokit.Simulation(bm.model, bm.protocol())
+    bm.sim = myokit.Simulation(bm._MODEL, bm.protocol())
 if 'moreno' in bm.NAME:
     bm.NAME = ''  # This is a hack to avoid moreno set_parameters doing something that assumes it's an analytical simulation.
 

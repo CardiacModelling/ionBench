@@ -23,7 +23,7 @@ class Problem:
         self.bm.reset()
         # Check all necessary variables in problems are defined
         assert hasattr(self.bm, "NAME")
-        assert hasattr(self.bm, "model")
+        assert hasattr(self.bm, "_MODEL")
         assert hasattr(self.bm, "_outputName")
         assert hasattr(self.bm, "_paramContainer")
         assert hasattr(self.bm, "defaultParams")

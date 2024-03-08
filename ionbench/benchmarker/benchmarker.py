@@ -379,7 +379,7 @@ class Benchmarker:
         """
         if not self.sensitivityCalc:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-            self.simSens = myokit.Simulation(self.model, protocol=self.protocol(),
+            self.simSens = myokit.Simulation(self._MODEL, protocol=self.protocol(),
                                              sensitivities=([self._outputName], paramNames))
             self.simSens.set_tolerance(self.tols[0], self.tols[1])
             self.sensitivityCalc = True

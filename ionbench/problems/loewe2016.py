@@ -24,12 +24,12 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         if self.sensitivityCalc:
             # ODE solver
             sens = ([self._outputName], parameters)
-            self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(self.tols[0], self.tols[1])
         else:
             self.simSens = None
         # analytical model
-        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=states, parameters=parameters,
+        self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=states, parameters=parameters,
                                                       current=self._outputName, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.freq = 0.5  # Timestep in data between points
@@ -108,7 +108,7 @@ class IKr(LoeweBenchmarker):
         self.NAME = "loewe2016.ikr"
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
-        self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
         self.defaultParams = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.additiveParams = [False, True, False, True, False, False, True, False, True, False, False, False]
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
@@ -133,7 +133,7 @@ class IKur(LoeweBenchmarker):
         print('Initialising Loewe 2016 IKur benchmark')
         self.tols = (1e-6, 1e-4)
         self.NAME = "loewe2016.ikur"
-        self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._outputName = 'ikur.IKur'
         self._paramContainer = 'ikur'
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))

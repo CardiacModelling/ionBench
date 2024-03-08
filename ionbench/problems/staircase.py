@@ -23,11 +23,11 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         if self.sensitivityCalc:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._outputName], paramNames)
-            self.simSens = myokit.Simulation(self.model, sensitivities=sens, protocol=self.protocol())
+            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(self.tols[0], self.tols[1])
         else:
             self.simSens = None
-        self.sim = myokit.Simulation(self.model, protocol=self.protocol())
+        self.sim = myokit.Simulation(self._MODEL, protocol=self.protocol())
         self.sim.set_tolerance(self.tols[0], self.tols[1])
         self.freq = 0.5  # Timestep in data between points
         self.rateMin = 1.67e-5
@@ -90,7 +90,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         """
         Myokit protocols do not support ramps, so this method is used to add the staircase ramps to the myokit model.
         """
-        c = self.model.get('membrane')
+        c = self._MODEL.get('membrane')
         # Remove binding from membrane.V
         v = c.get('V')
         v.set_binding(None)
@@ -122,7 +122,7 @@ class HH(StaircaseBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self.NAME = "staircase.hh"
-        self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self.tols = (1e-7, 1e-7)
         self.add_ramps()
         self._outputName = 'ikr.IKr'
@@ -135,7 +135,7 @@ class HH(StaircaseBenchmarker):
                                (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False] * 4 + [False]
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.hh.HHModel(model=self.model, states=['ikr.act', 'ikr.rec'],
+        self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
                                                       parameters=[self._paramContainer + '.p' + str(i + 1) for i in
                                                                   range(self.n_parameters())], current=self._outputName,
                                                       vm='membrane.V')
@@ -156,7 +156,7 @@ class MM(StaircaseBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Markov Model IKr benchmark')
         self.NAME = "staircase.mm"
-        self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
         self.tols = (1e-9, 1e-7)
         self.add_ramps()
         self._outputName = 'IKr.i_Kr'
@@ -175,8 +175,8 @@ class MM(StaircaseBenchmarker):
                                (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative')]  # Used for rate bounds
         self.standardLogTransform = [True, False, True] * 2 + [False, True] * 2 + [True, False] * 2 + [False]
         self.sensitivityCalc = sensitivities
-        self._analyticalModel = myokit.lib.markov.LinearModel(model=self.model, states=['iKr_Markov.' + s for s in
-                                                                                        ['Cr1', 'Cr2', 'Cr3', 'Or4',
+        self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['iKr_Markov.' + s for s in
+                                                                                         ['Cr1', 'Cr2', 'Cr3', 'Or4',
                                                                                          'Ir5']],
                                                               parameters=[self._paramContainer + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
