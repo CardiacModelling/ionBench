@@ -71,8 +71,10 @@ class Tracker:
         # Cast to numpy arrays
         estimatedParams = np.array(estimatedParams)
         # Update performance metrics
-        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) ** 2)))
-        self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) < 0.05))
+        self.paramRMSRE.append(
+            np.sqrt(np.mean(((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) ** 2)))
+        self.paramIdentifiedCount.append(
+            np.sum(np.abs((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) < 0.05))
         self.costs.append(cost)
         if incrementSolveCounter:
             if solveType == 'cost':
@@ -99,59 +101,53 @@ class Tracker:
         None.
 
         """
+
+        def plot_times(times, name):
+            """
+            Plot the histograms of solve times.
+            Parameters
+            ----------
+            times : list
+                List of times to plot.
+            name : string
+                Name for title. Either 'cost' or 'gradient'
+            """
+            if len(times) > 0:
+                plt.figure()
+                n, _, _ = plt.hist(times)
+                plt.vlines(x=np.mean(times), ymin=0, ymax=np.max(n), colors=['k'],
+                           label=f'Mean: {np.mean(times):.3f}')
+                plt.xlabel('Time (sec)')
+                plt.ylabel('Frequency')
+                plt.title(f'Histogram of {name} evaluation times')
+                plt.legend()
+                plt.show()
+
+        def plot_costs(costs, title):
+            """
+            Plot the costs.
+            Parameters
+            ----------
+            costs : list
+                List of costs to plot.
+            title : string
+                Title for the plot.
+            """
+            plt.figure()
+            plt.scatter(range(len(costs)), costs, c="k", marker=".")
+            c = np.array(costs)
+            plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
+            plt.xlabel('Model solves')
+            plt.ylabel('RMSE cost')
+            plt.title(title)
+
         # Cost plot
-        plt.figure()
-        plt.scatter(range(len(self.costs)), self.costs, c="k", marker=".")
-        c = np.array(self.costs)
-        plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
-        plt.xlabel('Model solves')
-        plt.ylabel('RMSE cost')
-        plt.title('Evaluated Cost')
+        plot_costs(self.costs, 'Evaluated Cost')
+        plot_costs(self.bestCosts, 'Best Costs')
 
-        # Best cost plot
-        plt.figure()
-        plt.scatter(range(len(self.bestCosts)), self.bestCosts, c="k", marker=".")
-        c = np.array(self.bestCosts)
-        plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
-        plt.xlabel('Model solves')
-        plt.ylabel('RMSE cost')
-        plt.title('Best Cost')
-
-        # # Parameter RMSRE plot
-        # plt.figure()
-        # plt.scatter(range(len(self.paramRMSRE)), self.paramRMSRE, c="k", marker=".")
-        # plt.xlabel('Model solves')
-        # plt.ylabel('Parameter RMSRE')
-        # plt.title('Parameter error')
-        #
-        # # Number of identified parameters plot
-        # plt.figure()
-        # plt.scatter(range(len(self.paramIdentifiedCount)), self.paramIdentifiedCount, c="k", marker=".")
-        # plt.xlabel('Model solves')
-        # plt.ylabel('Number of parameters identified')
-        # plt.title('Number of parameters identified')
-
-        # Plot cost times
-        if len(self.costTimes) > 0:
-            plt.figure()
-            n, _, _ = plt.hist(self.costTimes)
-            plt.vlines(x=np.mean(self.costTimes), ymin=0, ymax=np.max(n), colors=['k'],
-                       label=f'Mean: {np.mean(self.costTimes):.3f}')
-            plt.xlabel('Time (sec)')
-            plt.ylabel('Frequency')
-            plt.title('Histogram of cost evaluation times')
-            plt.legend()
-
-        # Plot grad times
-        if len(self.gradTimes) > 0:
-            plt.figure()
-            n, _, _ = plt.hist(self.gradTimes)
-            plt.vlines(x=np.mean(self.gradTimes), ymin=0, ymax=np.max(n), colors=['k'],
-                       label=f'Mean: {np.mean(self.gradTimes):.3f}')
-            plt.xlabel('Time (sec)')
-            plt.ylabel('Frequency')
-            plt.title('Histogram of gradient evaluation times')
-            plt.legend()
+        # Plot cost and grad times
+        plot_times(self.costTimes, 'cost')
+        plot_times(self.gradTimes, 'gradient')
 
     def save(self, filename):
         """
@@ -335,7 +331,7 @@ class Tracker:
         """
         gradCount = self.gradSolves[i]
         costCount = self.modelSolves[i]
-        return np.sum(self.costTimes[:costCount+1]), np.sum(self.gradTimes[:gradCount+1])
+        return np.sum(self.costTimes[:costCount + 1]), np.sum(self.gradTimes[:gradCount + 1])
 
     def check_repeated_param(self, param, solveType):
         """
