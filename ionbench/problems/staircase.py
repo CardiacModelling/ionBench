@@ -77,6 +77,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def protocol(self):
         """
         Gets the staircase voltage protocol from the loaded log and returns it. Setting self.tmax to the length of the protocol.
+
         Returns
         -------
         protocol : myokit.Protocol
@@ -86,11 +87,22 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.tmax = protocol.characteristic_time()
         return protocol
 
-    def add_ramps(self):
+    @staticmethod
+    def add_ramps(model):
         """
-        Myokit protocols do not support ramps, so this method is used to add the staircase ramps to the myokit model.
+        Myokit protocols do not support ramps, so this method is used to add the staircase ramps to the myokit model. This does not copy the model and will modify the input.
+
+        Parameters
+        ----------
+        model : myokit.Model
+            The model to add the ramps to.
+
+        Returns
+        -------
+        model : myokit.Model
+            The model with the ramps added.
         """
-        c = self._MODEL.get('membrane')
+        c = model.get('membrane')
         # Remove binding from membrane.V
         v = c.get('V')
         v.set_binding(None)
@@ -108,6 +120,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
                 (engine.time >=14410 and engine.time < 14510), v2, 
                 engine.pace)
         """)
+        return model
 
 
 class HH(StaircaseBenchmarker):
@@ -122,9 +135,9 @@ class HH(StaircaseBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Hodgkin-Huxley IKr benchmark')
         self.NAME = "staircase.hh"
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self._TOLERANCES = (1e-7, 1e-7)
-        self.add_ramps()
+        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
+        self._MODEL = self.add_ramps(model)
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
@@ -156,9 +169,9 @@ class MM(StaircaseBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Markov Model IKr benchmark')
         self.NAME = "staircase.mm"
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
+        model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
         self._TOLERANCES = (1e-9, 1e-7)
-        self.add_ramps()
+        self._MODEL = self.add_ramps(model)
         self._outputName = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
