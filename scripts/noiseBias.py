@@ -112,7 +112,7 @@ bm.set_steady_state(p)
 
 log, e = bm.simSens.run(bm.tmax + 1, log_times=np.arange(0, bm.tmax, bm.freq))
 
-curr, sens = np.array(log[bm._outputName]), e
+curr, sens = np.array(log[bm._OUTPUT_NAME]), e
 sens = np.array(sens)
 
 plt.figure(figsize=(16, 9), dpi=300)

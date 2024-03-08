@@ -380,7 +380,7 @@ class Benchmarker:
         if not self.sensitivityCalc:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
             self.simSens = myokit.Simulation(self._MODEL, protocol=self.protocol(),
-                                             sensitivities=([self._outputName], paramNames))
+                                             sensitivities=([self._OUTPUT_NAME], paramNames))
             self.simSens.set_tolerance(*self._TOLERANCES)
             self.sensitivityCalc = True
 
@@ -623,7 +623,7 @@ class Benchmarker:
             The sensitivities of the outputted current.
         """
         log, e = self.simSens.run(self.tmax + 1, log_times=times)
-        return np.array(log[self._outputName]), e
+        return np.array(log[self._OUTPUT_NAME]), e
 
     def solve_model(self, times, continueOnError=True):
         """
@@ -645,13 +645,13 @@ class Benchmarker:
         if continueOnError:
             try:
                 log = self.sim.run(self.tmax + 1, log_times=times)
-                return np.array(log[self._outputName])
+                return np.array(log[self._OUTPUT_NAME])
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
             log = self.sim.run(self.tmax + 1, log_times=times)
-            return np.array(log[self._outputName])
+            return np.array(log[self._OUTPUT_NAME])
 
     def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
         """

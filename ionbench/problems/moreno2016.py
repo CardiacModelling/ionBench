@@ -36,7 +36,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.vLow = None
         self.vHigh = None
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
-        self._outputName = 'ina.INa'
+        self._OUTPUT_NAME = 'ina.INa'
         self._paramContainer = 'ina'
         self.paramSpaceWidth = 25  # 5, 10, or 25
         self.defaultParams = np.array(
@@ -62,13 +62,13 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._analyticalModel = myokit.lib.markov.LinearModel(model=self._MODEL, states=['ina.' + s for s in
                                                                                          ['ic3', 'ic2', 'if', 'c3', 'c2',
                                                                                          'c1', 'o', 'is']],
-                                                              parameters=parameters, current=self._outputName,
+                                                              parameters=parameters, current=self._OUTPUT_NAME,
                                                               vm='membrane.V')
         self.sim = myokit.lib.markov.AnalyticalSimulation(self._analyticalModel, protocol=self.protocol())
         self.sensitivityCalc = sensitivities
         if self.sensitivityCalc:
             # ODE solver
-            sens = ([self._outputName], parameters)
+            sens = ([self._OUTPUT_NAME], parameters)
             self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(*self._TOLERANCES)
         else:
@@ -244,7 +244,7 @@ class INa(ionbench.benchmarker.Benchmarker):
             The summary statistic sensitivities of the solved current.
         """
         log, sens = self.simSens.run(self.tmax + 1, log_times=self._logTimes)
-        curr = np.array(log[self._outputName])
+        curr = np.array(log[self._OUTPUT_NAME])
         sens = np.array(sens)
         # Adjust sens to emulate moreno summary statistics
         sens_SS = np.zeros((len(self.data), 1, self.n_parameters()))
@@ -277,15 +277,15 @@ class INa(ionbench.benchmarker.Benchmarker):
             try:
                 # Run a simulation
                 log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-                # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting output name only works for ODE sims, not analytical
-                return self.sum_stats(np.array(log[self._outputName], dtype='float64'))
+                # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting output name only works for ODE sims, not analytical
+                return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(self.data), dtype='float64')
         else:
             log = self.sim.run(self.tmax + 1, log_times=self._logTimes)
-            # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._outputName]) # Setting outputName only works for ODE sims, not analytical
-            return self.sum_stats(np.array(log[self._outputName], dtype='float64'))
+            # log = self.sim.run(self.tmax + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting outputName only works for ODE sims, not analytical
+            return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
 
     def rmse(self, c1, c2):
         """

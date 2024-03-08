@@ -22,7 +22,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             self.data = None
         if self.sensitivityCalc:
             paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
-            sens = ([self._outputName], paramNames)
+            sens = ([self._OUTPUT_NAME], paramNames)
             self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
             self.simSens.set_tolerance(*self._TOLERANCES)
         else:
@@ -138,7 +138,7 @@ class HH(StaircaseBenchmarker):
         self._TOLERANCES = (1e-7, 1e-7)
         model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self._MODEL = self.add_ramps(model)
-        self._outputName = 'ikr.IKr'
+        self._OUTPUT_NAME = 'ikr.IKr'
         self._paramContainer = 'ikr'
         self._modelType = 'HH'
         self.defaultParams = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
@@ -150,7 +150,7 @@ class HH(StaircaseBenchmarker):
         self.sensitivityCalc = sensitivities
         self._analyticalModel = myokit.lib.hh.HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'],
                                                       parameters=[self._paramContainer + '.p' + str(i + 1) for i in
-                                                                  range(self.n_parameters())], current=self._outputName,
+                                                                  range(self.n_parameters())], current=self._OUTPUT_NAME,
                                                       vm='membrane.V')
         self.costThreshold = 0.02
         super().__init__()
@@ -172,7 +172,7 @@ class MM(StaircaseBenchmarker):
         model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
         self._TOLERANCES = (1e-9, 1e-7)
         self._MODEL = self.add_ramps(model)
-        self._outputName = 'IKr.i_Kr'
+        self._OUTPUT_NAME = 'IKr.i_Kr'
         self._paramContainer = 'iKr_Markov'
         self._modelType = 'MM'
         self.defaultParams = np.array(
@@ -193,7 +193,7 @@ class MM(StaircaseBenchmarker):
                                                                                          'Ir5']],
                                                               parameters=[self._paramContainer + '.p' + str(i + 1) for i
                                                                           in range(self.n_parameters())],
-                                                              current=self._outputName, vm='membrane.V')
+                                                              current=self._OUTPUT_NAME, vm='membrane.V')
         self.costThreshold = 0.0075
         super().__init__()
         print('Benchmarker initialised')

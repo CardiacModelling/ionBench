@@ -24,7 +24,7 @@ class Problem:
         # Check all necessary variables in problems are defined
         assert hasattr(self.bm, "NAME")
         assert hasattr(self.bm, "_MODEL")
-        assert hasattr(self.bm, "_outputName")
+        assert hasattr(self.bm, "_OUTPUT_NAME")
         assert hasattr(self.bm, "_paramContainer")
         assert hasattr(self.bm, "defaultParams")
         assert hasattr(self.bm, "_rateFunctions")
