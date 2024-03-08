@@ -12,33 +12,38 @@ import csv
 
 class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
-        self.COST_THRESHOLD = 0.01
-        self.T_MAX = None
+        # Benchmarker
+        p = self.protocol()
+        self.TIMESTEP = 0.5  # Timestep in data between points
+        self.T_MAX = p.characteristic_time()
+        self._LOWER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 0.1 if self.STANDARD_LOG_TRANSFORM[i] else
+                                      self._TRUE_PARAMETERS[i] - 60 for i in range(self.n_parameters())])
+        self._UPPER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 if self.STANDARD_LOG_TRANSFORM[i] else
+                                      self._TRUE_PARAMETERS[i] + 60 for i in range(self.n_parameters())])
+        self.lb = np.copy(self._LOWER_BOUND)
+        self.ub = np.copy(self._UPPER_BOUND)
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.V_LOW = None
-        self.V_HIGH = None
-        self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
+        self.V_LOW = min(p.levels())
+        self.V_HIGH = max(p.levels())
+
+        # Myokit
         parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=states, parameters=parameters,
+                                                       current=self._OUTPUT_NAME, vm='membrane.V')
+        self.sim = myokit.lib.hh.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=p)
         if self.sensitivityCalc:
             # ODE solver
             sens = ([self._OUTPUT_NAME], parameters)
-            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=self.protocol())
+            self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=p)
             self.simSens.set_tolerance(*self._TOLERANCES)
         else:
             self.simSens = None
-        # analytical model
-        self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=states, parameters=parameters,
-                                                       current=self._OUTPUT_NAME, vm='membrane.V')
-        self.sim = myokit.lib.hh.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
-        self.TIMESTEP = 0.5  # Timestep in data between points
-        self._LOWER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 ** (-self.paramSpaceWidth) if self.STANDARD_LOG_TRANSFORM[i] else self._TRUE_PARAMETERS[i] - 60 * self.paramSpaceWidth for i in range(self.n_parameters())])
-        self._UPPER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 ** self.paramSpaceWidth if self.STANDARD_LOG_TRANSFORM[i] else self._TRUE_PARAMETERS[i] + 60 * self.paramSpaceWidth for i in range(self.n_parameters())])
         super().__init__()
 
     def sample(self, n=1):
         """
-        Sample parameters for the Loewe 2016 problems. By default, the sampling using the narrow parameter space but this can be changed by setting benchmarker.paramSpaceWidth = 2 to use the wide parameter space.
+        Sample parameters for the Loewe 2016 problems.
 
         Parameters
         ----------
@@ -56,18 +61,17 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
             param = [None] * self.n_parameters()
             for j in range(self.n_parameters()):
                 if self.STANDARD_LOG_TRANSFORM[j]:
-                    param[j] = self._TRUE_PARAMETERS[j] * 10 ** np.random.uniform(-1 * self.paramSpaceWidth,
-                                                                                  1 * self.paramSpaceWidth)  # Log uniform distribution
+                    param[j] = self._TRUE_PARAMETERS[j] * 10 ** np.random.uniform(-1, 1)
                 else:
-                    param[j] = self._TRUE_PARAMETERS[j] + np.random.uniform(-60 * self.paramSpaceWidth,
-                                                                            60 * self.paramSpaceWidth)
+                    param[j] = self._TRUE_PARAMETERS[j] + np.random.uniform(-60, 60)
             params[i] = self.input_parameter_space(param)  # Generates a copy
         if n == 1:
             return params[0]
         else:
             return params
 
-    def protocol(self):
+    @staticmethod
+    def protocol():
         """
         Add the protocol from Loewe et al. 2016. This protocol consists of 20ms at -80mV, a variable height step between 50mV and -70mV (in steps of 10mV) for 400ms and then 400ms at -110mV before repeating with a new height for the central step (in order of decreasing voltage).
 
@@ -86,9 +90,6 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         durations = [20, 400, 400] * 13
         for i in range(len(vsteps)):
             p.add_step(vsteps[i], durations[i])
-        self.T_MAX = sum(durations)
-        self.V_LOW = min(vsteps)
-        self.V_HIGH = max(vsteps)
         return p
 
 
@@ -103,20 +104,23 @@ class IKr(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKr benchmark')
-        self._TOLERANCES = (1e-5, 1e-5)
+        # Benchmarker
         self.NAME = "loewe2016.ikr"
-        self._OUTPUT_NAME = 'ikr.IKr'
-        self._PARAMETER_CONTAINER = 'ikr'
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
         self._TRUE_PARAMETERS = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, True, False, True, False, True, True, True)
-        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
-        states = ['ikr.xr']
         self._RATE_FUNCTIONS = ((lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))), 'positive'),
                                 (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1),
                                  'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        super().__init__(states)
+        self.COST_THRESHOLD = 0.01
+
+        # Myokit
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
+        self._OUTPUT_NAME = 'ikr.IKr'
+        self._PARAMETER_CONTAINER = 'ikr'
+        self._TOLERANCES = (1e-5, 1e-5)
+        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
+        super().__init__(states=['ikr.xr'])
         print('Benchmarker initialised')
 
 
@@ -131,24 +135,29 @@ class IKur(LoeweBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKur benchmark')
-        self._TOLERANCES = (1e-6, 1e-4)
+        # Benchmarker
         self.NAME = "loewe2016.ikur"
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
-        self._OUTPUT_NAME = 'ikur.IKur'
-        self._PARAMETER_CONTAINER = 'ikur'
-        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
-        states = ['ikur.ua', 'ikur.ui']
         self._TRUE_PARAMETERS = np.array(
             [0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05,
              15, 13, 138.994])
-        self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, False, False, True, False, True, True, True, False, False, True, False, False, False, True, True, False, True, False, True, True)
+        self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, False, False, True, False, True, True, True,
+                                       False, False, True, False, False, False, True, True, False, True, False, True,
+                                       True)
         self._RATE_FUNCTIONS = (
             (lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])), 'positive'),
             (lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])), 'negative'),
             (lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])), 'positive'),
             (lambda p, V: np.exp((V - p[15]) / -p[16]), 'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        super().__init__(states)
+        self.COST_THRESHOLD = 0.01
+
+        # Myokit
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
+        self._OUTPUT_NAME = 'ikur.IKur'
+        self._PARAMETER_CONTAINER = 'ikur'
+        self._TOLERANCES = (1e-6, 1e-4)
+        self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
+        super().__init__(states=['ikur.ua', 'ikur.ui'])
         print('Benchmarker initialised')
 
 
