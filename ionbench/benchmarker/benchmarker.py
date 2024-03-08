@@ -711,9 +711,9 @@ class Benchmarker:
         penalty = 0
         for i in range(self.n_parameters()):
             if parameters[i] < self.lb[i]:
-                penalty += 1e5 + 1e5 * np.log(1+np.abs(parameters[i] - self.lb[i]))
+                penalty += 1e5 + 1e5 * np.log(1 + np.abs(parameters[i] - self.lb[i]))
             elif parameters[i] > self.ub[i]:
-                penalty += 1e5 + 1e5 * np.log(1+np.abs(parameters[i] - self.ub[i]))
+                penalty += 1e5 + 1e5 * np.log(1 + np.abs(parameters[i] - self.ub[i]))
         return penalty
 
     def rate_penalty(self, parameters):
