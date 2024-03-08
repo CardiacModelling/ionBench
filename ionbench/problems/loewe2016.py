@@ -14,8 +14,8 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self, states):
         self.COST_THRESHOLD = 0.01
         self.T_MAX = None
-        self.rateMin = 1.67e-5
-        self.rateMax = 1e3
+        self.RATE_MIN = 1.67e-5
+        self.RATE_MAX = 1e3
         self.vLow = None
         self.vHigh = None
         self.paramSpaceWidth = 1  # 1 for narrow, 2 for wide
@@ -32,7 +32,7 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=states, parameters=parameters,
                                                        current=self._OUTPUT_NAME, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
-        self.freq = 0.5  # Timestep in data between points
+        self.TIMESTEP = 0.5  # Timestep in data between points
         self.lbStandard = np.array([self._TRUE_PARAMETERS[i] - 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** (-self.paramSpaceWidth) for i in range(self.n_parameters())])
         self.ubStandard = np.array([self._TRUE_PARAMETERS[i] + 60 * self.paramSpaceWidth if self.additiveParams[i] else self._TRUE_PARAMETERS[i] * 10 ** self.paramSpaceWidth for i in range(self.n_parameters())])
         super().__init__()
@@ -174,7 +174,7 @@ def generate_data(modelType):
         bm = IKur()
     bm.set_params(bm._TRUE_PARAMETERS)
     bm.set_steady_state(bm._TRUE_PARAMETERS)
-    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'loewe2016', modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

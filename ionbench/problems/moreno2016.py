@@ -31,8 +31,8 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._actBounds = None
         self._rfiBounds = None
         self._tauBounds = None
-        self.rateMin = 1.67e-5
-        self.rateMax = 1e3
+        self.RATE_MIN = 1.67e-5
+        self.RATE_MAX = 1e3
         self.vLow = None
         self.vHigh = None
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'moreno2016.mmt'))
@@ -73,7 +73,7 @@ class INa(ionbench.benchmarker.Benchmarker):
             self.simSens.set_tolerance(*self._TOLERANCES)
         else:
             self.simSens = None
-        self.freq = 0.5  # Timestep in data between points
+        self.TIMESTEP = 0.5  # Timestep in data between points
         self.weights = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         self.weights = self.weights / np.sum(self.weights)
         self.lbStandard = self._TRUE_PARAMETERS * (1 - self.paramSpaceWidth)
@@ -369,7 +369,7 @@ def generate_data():
     bm = INa()
     bm.set_params(bm._TRUE_PARAMETERS)
     bm.set_steady_state(bm._TRUE_PARAMETERS)
-    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

@@ -66,7 +66,7 @@ class Model(pints.ForwardModel):
         p : tuple
             A tuple of parameter values, length n_parameters().
         """
-        return self.bm.simulate(p, np.arange(0, self.bm.T_MAX, self.bm.freq))
+        return self.bm.simulate(p, np.arange(0, self.bm.T_MAX, self.bm.TIMESTEP))
 
 
 class AdvancedBoundaries(pints.Boundaries):

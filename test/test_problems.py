@@ -40,9 +40,9 @@ class Problem:
         assert hasattr(self.bm, "_ANALYTICAL_MODEL")
         assert hasattr(self.bm, "T_MAX")
         assert hasattr(self.bm, "simSens")
-        assert hasattr(self.bm, "freq")
-        assert hasattr(self.bm, "rateMin")
-        assert hasattr(self.bm, "rateMax")
+        assert hasattr(self.bm, "TIMESTEP")
+        assert hasattr(self.bm, "RATE_MIN")
+        assert hasattr(self.bm, "RATE_MAX")
         assert hasattr(self.bm, "vLow")
         assert hasattr(self.bm, "vHigh")
         assert hasattr(self.bm, "lbStandard")
@@ -94,20 +94,20 @@ class Problem:
         assert self.bm._rates_bounded is False
         self.bm.add_rate_bounds()
         assert self.bm._rates_bounded is True
-        tmp = self.bm.rateMin
+        tmp = self.bm.RATE_MIN
         # Default params inside rate bounds always
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
         # Move rate bounds so default rates are outside
-        self.bm.rateMin = self.bm.rateMax * 2
+        self.bm.RATE_MIN = self.bm.RATE_MAX * 2
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
         # Turn off rate bounds should allow solving again (except for staircase)
         self.bm._rates_bounded = False
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5 or 'staircase' in self.bm.NAME
         if 'staircase' in self.bm.NAME:
             assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
-            self.bm.rateMin = tmp
+            self.bm.RATE_MIN = tmp
             assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
-        self.bm.rateMin = tmp
+        self.bm.RATE_MIN = tmp
 
     @pytest.mark.cheap
     def test_tracker_solve_count(self):
@@ -132,11 +132,11 @@ class Problem:
         if 'ikur' not in self.bm.NAME:
             # or out of rate bounds
             self.bm.add_rate_bounds()
-            tmp = self.bm.rateMin
-            self.bm.rateMin = self.bm.rateMax
+            tmp = self.bm.RATE_MIN
+            self.bm.RATE_MIN = self.bm.RATE_MAX
             self.bm.cost(self.bm._TRUE_PARAMETERS)
             assert self.bm.tracker.solveCount == 1
-            self.bm.rateMin = tmp
+            self.bm.RATE_MIN = tmp
             self.bm.cost(self.bm._TRUE_PARAMETERS)
             assert self.bm.tracker.solveCount == 2
             self.bm._rates_bounded = False
@@ -281,8 +281,8 @@ class Problem:
         # Handles rate bounds as well
         self.bm.add_rate_bounds()
         self.bm.lb = np.copy(self.bm.lbStandard)
-        tmp = self.bm.rateMin
-        self.bm.rateMin = self.bm.rateMax
+        tmp = self.bm.RATE_MIN
+        self.bm.RATE_MIN = self.bm.RATE_MAX
         a = grad_check(bm=self.bm, x0=x0,
                        plotting=plotting)  # Within 1% to account for solver noise and finite difference error
         assert a < 0.01
@@ -290,7 +290,7 @@ class Problem:
         a = grad_check(bm=self.bm, x0=self.bm.input_parameter_space(x0),
                        plotting=plotting)  # Within 1% to account for solver noise and finite difference error
         assert a < 0.01
-        self.bm.rateMin = tmp
+        self.bm.RATE_MIN = tmp
 
     @pytest.mark.cheap
     def test_steady_state(self):
@@ -301,7 +301,7 @@ class Problem:
             p = self.bm.sample()
             assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
             assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
-            out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.T_MAX, self.bm.freq))
+            out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.T_MAX, self.bm.TIMESTEP))
             assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()
         p = self.bm.sample()

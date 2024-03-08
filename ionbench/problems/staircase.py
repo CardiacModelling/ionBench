@@ -29,9 +29,9 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
             self.simSens = None
         self.sim = myokit.Simulation(self._MODEL, protocol=self.protocol())
         self.sim.set_tolerance(*self._TOLERANCES)
-        self.freq = 0.5  # Timestep in data between points
-        self.rateMin = 1.67e-5
-        self.rateMax = 1e3
+        self.TIMESTEP = 0.5  # Timestep in data between points
+        self.RATE_MIN = 1.67e-5
+        self.RATE_MAX = 1e3
         p = self.protocol()
         self.vLow = min(p.levels())
         self.vHigh = max(p.levels())
@@ -218,7 +218,7 @@ def generate_data(modelType):
         bm = MM()
     bm.set_params(bm._TRUE_PARAMETERS)
     bm.set_steady_state(bm._TRUE_PARAMETERS)
-    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
+    out = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
     out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')

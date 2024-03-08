@@ -39,10 +39,10 @@ class Benchmarker:
             self.simSens = None
         if not hasattr(self, 'sensitivityCalc'):
             self.sensitivityCalc = None
-        if not hasattr(self, 'rateMin'):
-            self.rateMin = None
-        if not hasattr(self, 'rateMax'):
-            self.rateMax = None
+        if not hasattr(self, 'RATE_MIN'):
+            self.RATE_MIN = None
+        if not hasattr(self, 'RATE_MAX'):
+            self.RATE_MAX = None
         if not hasattr(self, 'vLow'):
             self.vLow = None
         if not hasattr(self, 'vHigh'):
@@ -301,8 +301,8 @@ class Benchmarker:
             self._rates_bounded = False
             self.lb = copy.copy(self.lbStandard)
             self.ub = copy.copy(self.ubStandard)
-            self.rateMin = 1.67e-5
-            self.rateMax = 1e3
+            self.RATE_MIN = 1.67e-5
+            self.RATE_MAX = 1e3
 
     def cost(self, parameters, incrementSolveCounter=True):
         """
@@ -749,12 +749,12 @@ class Benchmarker:
             else:
                 raise RuntimeError(
                     "Error in bm._RATE_FUNCTIONS. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
-            if k < self.rateMin:
+            if k < self.RATE_MIN:
                 penalty += 1e5
-                penalty += 1e5 * np.log(1+np.abs(k - self.rateMin))
-            elif k > self.rateMax:
+                penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
+            elif k > self.RATE_MAX:
                 penalty += 1e5
-                penalty += 1e5 * np.log(1+np.abs(k - self.rateMax))
+                penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MAX))
         return penalty
 
     def rmse(self, c1, c2):

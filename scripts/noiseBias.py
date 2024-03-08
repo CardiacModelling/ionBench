@@ -43,11 +43,11 @@ bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
 # Cant use simulate to get data as current data is different length to new data. Will need to use solve_model and add in the extra bits
-bm.freq = 0.01
+bm.TIMESTEP = 0.01
 bm.sim.reset()
 bm.set_params(bm._TRUE_PARAMETERS)
 bm.set_steady_state(bm._TRUE_PARAMETERS)
-data = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq))
+data = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP))
 # noiseLevel = [0, 0.02, 0.1, 0.5, 1]
 noiseLevel = [0, 0.1, 1]
 nPoints = 10
@@ -74,7 +74,7 @@ for i in range(bm.n_parameters()):
     plt.plot([0, 100], [1.05, 1.05], linestyle=':', color='r', linewidth=1)
     plt.plot([0, 100], [1, 1], color='k', linewidth=1)
     plt.scatter(plotPointsX, plotPointsY, c=['blue' if k else 'red' for k in plotPointsC], marker='.')
-    plt.title(f'Effect of {1 / bm.freq}kHz data on noise bias - Markov Model')
+    plt.title(f'Effect of {1 / bm.TIMESTEP}kHz data on noise bias - Markov Model')
     plt.ylabel(f'Optimised Value of parameter {i}')
     plt.xlabel('Noise Strength (%)')
     plt.ylim((ymin, ymax))
@@ -84,22 +84,22 @@ for i in range(bm.n_parameters()):
 bm = ionbench.problems.staircase.MM()
 bm._useScaleFactors = True
 bm.plotter = False
-bm.freq = 0.1
+bm.TIMESTEP = 0.1
 bm.sim.reset()
 bm.set_params(bm._TRUE_PARAMETERS)
 bm.set_steady_state(bm._TRUE_PARAMETERS)
-data = bm.solve_model(np.arange(0, bm.T_MAX, bm.freq))
+data = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP))
 p = np.ones(bm.n_parameters())
 bm.DATA = data + np.random.normal(0, np.mean(np.abs(data)) * 0.05, len(data))
 out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(bm, x0=p)
 
-optCurrent = bm.simulate(out, np.arange(0, bm.T_MAX, bm.freq))  # Noise optimised current
-defCurrent = bm.simulate(p, np.arange(0, bm.T_MAX, bm.freq))  # Default current
+optCurrent = bm.simulate(out, np.arange(0, bm.T_MAX, bm.TIMESTEP))  # Noise optimised current
+defCurrent = bm.simulate(p, np.arange(0, bm.T_MAX, bm.TIMESTEP))  # Default current
 plt.figure()
 plt.title('Difference between optimised and default current')
 plt.xlabel('Time (ms)')
 plt.ylabel('Current Difference')
-plt.plot(np.arange(0, bm.T_MAX, bm.freq), optCurrent - defCurrent)
+plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), optCurrent - defCurrent)
 plt.show()
 
 # %% Sensitivity plots
@@ -110,7 +110,7 @@ bm.simSens.reset()
 bm.set_params(p)
 bm.set_steady_state(p)
 
-log, e = bm.simSens.run(bm.T_MAX + 1, log_times=np.arange(0, bm.T_MAX, bm.freq))
+log, e = bm.simSens.run(bm.T_MAX + 1, log_times=np.arange(0, bm.T_MAX, bm.TIMESTEP))
 
 curr, sens = np.array(log[bm._OUTPUT_NAME]), e
 sens = np.array(sens)
@@ -118,11 +118,11 @@ sens = np.array(sens)
 plt.figure(figsize=(16, 9), dpi=300)
 for i in range(bm.n_parameters()):
     if i in [0, 1, 7]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), sens[:, 0, i], label=f'p{i}', linestyle=':')
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), sens[:, 0, i], label=f'p{i}', linestyle=':')
     elif i in [2, 3, 4, 8, 9]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), sens[:, 0, i], label=f'p{i}', linestyle='--')
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), sens[:, 0, i], label=f'p{i}', linestyle='--')
     else:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), sens[:, 0, i], label=f'p{i}')
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), sens[:, 0, i], label=f'p{i}')
 plt.title('Sensitivities')
 plt.xlabel('Time (ms)')
 plt.ylabel('dIKr/dpi(t)')
@@ -132,11 +132,11 @@ plt.show()
 plt.figure(figsize=(16, 9), dpi=300)
 for i in range(bm.n_parameters()):
     if i in [0, 1, 7]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), p[i] * sens[:, 0, i], label=f'p{i}', linestyle=':', zorder=3)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), p[i] * sens[:, 0, i], label=f'p{i}', linestyle=':', zorder=3)
     elif i in [2, 3, 4, 8, 9]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), p[i] * sens[:, 0, i], label=f'p{i}', linestyle='--', zorder=2)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), p[i] * sens[:, 0, i], label=f'p{i}', linestyle='--', zorder=2)
     else:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), p[i] * sens[:, 0, i], label=f'p{i}', zorder=1)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), p[i] * sens[:, 0, i], label=f'p{i}', zorder=1)
 plt.title('Scaled sensitivities')
 plt.xlabel('Time (ms)')
 plt.ylabel('pi*dIKr/dpi(t)')
@@ -146,11 +146,11 @@ plt.show()
 plt.figure(figsize=(16, 9), dpi=300)
 for i in range(bm.n_parameters()):
     if i in [0, 1, 7]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', linestyle=':', zorder=3)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', linestyle=':', zorder=3)
     elif i in [2, 3, 4, 8, 9]:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', linestyle='--', zorder=2)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', linestyle='--', zorder=2)
     else:
-        plt.plot(np.arange(0, bm.T_MAX, bm.freq), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', zorder=1)
+        plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), np.abs(p[i] * sens[:, 0, i]), label=f'p{i}', zorder=1)
 plt.title('Scaled sensitivity magnitudes')
 plt.xlabel('Time (ms)')
 plt.ylabel('|pi*dIKr/dpi(t)|')
@@ -159,7 +159,7 @@ plt.show()
 
 plt.figure(figsize=(16, 9), dpi=300)
 for i in range(bm.n_parameters()):
-    plt.plot(np.arange(0, bm.T_MAX, bm.freq), log['Environment.V'])
+    plt.plot(np.arange(0, bm.T_MAX, bm.TIMESTEP), log['Environment.V'])
 plt.title('Staircase Protocol')
 plt.xlabel('Time (ms)')
 plt.ylabel('Voltage (mV)')

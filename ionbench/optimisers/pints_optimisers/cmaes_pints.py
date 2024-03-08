@@ -30,7 +30,7 @@ def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
     if x0 is None:
         x0 = bm.sample()
     model = classes_pints.Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.freq), model.bm.DATA)
+    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
     error = pints.RootMeanSquaredError(problem)
 
     if bm._parameters_bounded:

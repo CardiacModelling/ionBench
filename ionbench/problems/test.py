@@ -18,8 +18,8 @@ class Test(ionbench.benchmarker.Benchmarker):
         self.COST_THRESHOLD = 0.001
         self._TRUE_PARAMETERS = np.array([2, 4])
         self._RATE_FUNCTIONS = ()
-        self.rateMin = None
-        self.rateMax = None
+        self.RATE_MIN = None
+        self.RATE_MAX = None
         self.STANDARD_LOG_TRANSFORM = (False, True)
         self.sensitivityCalc = True
         self.T_MAX = 20
@@ -137,8 +137,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self._rates_bounded = False
             self.lb = copy.copy(self.lbStandard)
             self.ub = copy.copy(self.ubStandard)
-            self.rateMin = None
-            self.rateMax = None
+            self.RATE_MIN = None
+            self.RATE_MAX = None
 
     def use_sensitivities(self):
         # Not needed for test function. Override to avoid trying to access myokit objects
