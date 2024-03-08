@@ -132,9 +132,9 @@ class Test(ionbench.benchmarker.Benchmarker):
         self.tracker = ionbench.tracker.Tracker(self._TRUE_PARAMETERS)
         if fullReset:
             self.log_transform([False] * self.n_parameters())
-            self._useScaleFactors = False
-            self._parameters_bounded = False
-            self._rates_bounded = False
+            self.useScaleFactors = False
+            self.parametersBounded = False
+            self.ratesBounded = False
             self.lb = np.copy(self._LOWER_BOUND)
             self.ub = np.copy(self._UPPER_BOUND)
             self.RATE_MIN = None
