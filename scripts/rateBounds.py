@@ -11,7 +11,7 @@ def staircase_plots(bm, paramPairs, nPoints):
         p[j] = y
         return bm.parameter_penalty(p) + bm.rate_penalty(p)
 
-    modelType = 'HH' if 'hh' in bm._name else 'MM'
+    modelType = 'HH' if 'hh' in bm.NAME else 'MM'
     vecF = np.vectorize(f)
     for i, j in paramPairs:
         # Create a contour plot of the penalty function to show the bounds

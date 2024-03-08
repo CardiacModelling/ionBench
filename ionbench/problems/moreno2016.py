@@ -24,7 +24,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         print('Initialising Moreno 2016 INa benchmark')
         self.costThreshold = 0.01
         self.tols = (1e-6, 1e-4)
-        self._name = "moreno2016.ina"
+        self.NAME = "moreno2016.ina"
         self.tmax = None
         self._logTimes = None
         self._ssiBounds = None

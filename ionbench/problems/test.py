@@ -14,7 +14,7 @@ import ionbench.tracker.tracker
 
 class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
-        self._name = "test"
+        self.NAME = "test"
         self.costThreshold = 0.001
         self.defaultParams = np.array([2, 4])
         self._rateFunctions = []

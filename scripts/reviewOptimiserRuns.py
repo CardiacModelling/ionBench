@@ -37,7 +37,7 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
             optimiserName = app['module'].split('.')[-1]
             modNum = app['modNum']
             mod = importlib.import_module(app['module']).get_modification(app['modNum'])
-            row = [optimiserName, modNum, mod._name]
+            row = [optimiserName, modNum, mod.NAME]
             row += [np.nan] * (len(titles) - 3)
             writer.writerow(row)
             continue
@@ -117,7 +117,7 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
         optimiserName = app['module'].split('.')[-1]
         modNum = app['modNum']
         mod = importlib.import_module(app['module']).get_modification(app['modNum'])
-        row = [optimiserName, modNum, mod._name]
+        row = [optimiserName, modNum, mod.NAME]
         for i in range(5):
             row += [costAtConv[i], bestCost[i], costEvalsAtConv[i], gradEvalsAtConv[i], costAverTime[i],
                     gradAverTime[i], successOrFail[i]]

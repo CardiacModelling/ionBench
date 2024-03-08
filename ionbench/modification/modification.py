@@ -43,9 +43,9 @@ class Modification:
         self.customLogTransform = customLogTransform
         self.customBounds = customBounds
         if len(name) > 0:
-            self._name = name
+            self.NAME = name
         else:
-            self._name = None
+            self.NAME = None
         self.kwargs = kwargs
 
     def apply(self, bm):

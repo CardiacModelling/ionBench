@@ -121,7 +121,7 @@ class HH(StaircaseBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Hodgkin-Huxley IKr benchmark')
-        self._name = "staircase.hh"
+        self.NAME = "staircase.hh"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
         self.tols = (1e-7, 1e-7)
         self.add_ramps()
@@ -155,7 +155,7 @@ class MM(StaircaseBenchmarker):
 
     def __init__(self, sensitivities=False):
         print('Initialising Markov Model IKr benchmark')
-        self._name = "staircase.mm"
+        self.NAME = "staircase.mm"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))
         self.tols = (1e-9, 1e-7)
         self.add_ramps()

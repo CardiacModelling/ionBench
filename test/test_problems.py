@@ -22,7 +22,7 @@ class Problem:
     def test_hasattr(self):
         self.bm.reset()
         # Check all necessary variables in problems are defined
-        assert hasattr(self.bm, "_name")
+        assert hasattr(self.bm, "NAME")
         assert hasattr(self.bm, "model")
         assert hasattr(self.bm, "_outputName")
         assert hasattr(self.bm, "_paramContainer")
@@ -77,7 +77,7 @@ class Problem:
         # Check _parameters_bounded = False turns off bounds (unless staircase)
         self.bm._parameters_bounded = False
         p[0] *= 0.98
-        if 'staircase' in self.bm._name:
+        if 'staircase' in self.bm.NAME:
             assert self.bm.cost(p) > 1e5
         else:
             assert self.bm.cost(p) < 1e5
@@ -102,8 +102,8 @@ class Problem:
         assert self.bm.cost(self.bm.defaultParams) > 1e5
         # Turn off rate bounds should allow solving again (except for staircase)
         self.bm._rates_bounded = False
-        assert self.bm.cost(self.bm.defaultParams) < 1e5 or 'staircase' in self.bm._name
-        if 'staircase' in self.bm._name:
+        assert self.bm.cost(self.bm.defaultParams) < 1e5 or 'staircase' in self.bm.NAME
+        if 'staircase' in self.bm.NAME:
             assert self.bm.cost(self.bm.defaultParams) > 1e5
             self.bm.rateMin = tmp
             assert self.bm.cost(self.bm.defaultParams) < 1e5
@@ -129,7 +129,7 @@ class Problem:
         self.bm.cost(p)
         assert self.bm.tracker.solveCount == 1
         self.bm._parameters_bounded = False
-        if 'ikur' not in self.bm._name:
+        if 'ikur' not in self.bm.NAME:
             # or out of rate bounds
             self.bm.add_rate_bounds()
             tmp = self.bm.rateMin
@@ -296,11 +296,11 @@ class Problem:
     def test_steady_state(self):
         self.bm.reset()
         # Test steady state is right for random parameters
-        if 'moreno' not in self.bm._name:
+        if 'moreno' not in self.bm.NAME:
             self.bm.reset()
             p = self.bm.sample()
-            assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm._name)
-            assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm._name)
+            assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
+            assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
             out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.tmax, self.bm.freq))
             assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()
@@ -328,7 +328,7 @@ class Problem:
         self.bm.set_steady_state(p)
         self.bm.set_params(p)
         initSens = self.bm.simSens._s_state
-        if 'loewe' in self.bm._name:
+        if 'loewe' in self.bm.NAME:
             self.bm.simSens.set_tolerance(1e-7, 1e-7)
         self.bm.simSens.run(5)
         newSens = self.bm.simSens._s_state
@@ -343,7 +343,7 @@ class Problem:
         _, e = self.bm.simSens.run(6, log_times=[0, 5])
         e = np.array(e)
         assert all(e[0, 0, :] - e[1, 0, :] < 1e-5)
-        if 'loewe' in self.bm._name:
+        if 'loewe' in self.bm.NAME:
             self.bm.simSens.set_tolerance()
 
     @pytest.mark.cheap
@@ -383,7 +383,7 @@ class Problem:
         mod = ionbench.modification.Clerx2019()
         mod.apply(self.bm)
         self.bm._useScaleFactors = True
-        if 'ikur' in self.bm._name:
+        if 'ikur' in self.bm.NAME:
             self.bm._rates_bounded = False
             self.bm.cost(self.bm.input_parameter_space(self.bm.defaultParams))
             self.bm._rates_bounded = True

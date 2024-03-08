@@ -421,8 +421,8 @@ class Benchmarker:
         # Now to find grad, cost, J (jacobian) and error (residuals)
         # First check if the parameters are out of bounds
         # Abort solving if the parameters are out of bounds (if staircase, don't check bounded)
-        inParameterBounds = self.in_parameter_bounds(parameters, boundedCheck='staircase' not in self._name)
-        inRateBounds = self.in_rate_bounds(parameters, boundedCheck='staircase' not in self._name)
+        inParameterBounds = self.in_parameter_bounds(parameters, boundedCheck='staircase' not in self.NAME)
+        inRateBounds = self.in_rate_bounds(parameters, boundedCheck='staircase' not in self.NAME)
         if not inParameterBounds or not inRateBounds:
             # Gradient out of bounds so use penalty function
             # Calculate gradient of penalty function
@@ -477,7 +477,7 @@ class Benchmarker:
             error = curr - self.data
             cost = self.rmse(curr, self.data)
             for i in range(self.n_parameters()):
-                if 'moreno' in self._name:
+                if 'moreno' in self.NAME:
                     grad.append(np.dot(error * self.weights, J[:, i]) / cost)
                 else:
                     grad.append(np.dot(error, J[:, i]) / (len(self.data) * cost))
@@ -524,7 +524,7 @@ class Benchmarker:
             if self.sensitivityCalc:
                 self.simSens.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
         # Workaround for myokit bug
-        if 'moreno' in self._name:
+        if 'moreno' in self.NAME:
             self.sim.set_parameters(self.sim.parameters())
 
     # noinspection PyProtectedMember
@@ -542,7 +542,7 @@ class Benchmarker:
         None.
 
         """
-        if 'moreno' in self._name:
+        if 'moreno' in self.NAME:
             V = -120
         else:
             V = -80
@@ -682,9 +682,9 @@ class Benchmarker:
 
         # Abort solving if the parameters are out of bounds
         penalty = 0
-        if self._parameters_bounded or 'staircase' in self._name:
+        if self._parameters_bounded or 'staircase' in self.NAME:
             penalty += self.parameter_penalty(parameters)
-        if self._rates_bounded or 'staircase' in self._name:
+        if self._rates_bounded or 'staircase' in self.NAME:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)
@@ -822,7 +822,7 @@ class Benchmarker:
             self.set_steady_state(self.original_parameter_space(self.tracker.bestParams))
             lastOut = self.solve_model(np.arange(0, self.tmax, self.freq), continueOnError=True)
             plt.figure()
-            if "moreno" in self._name:
+            if "moreno" in self.NAME:
                 plt.plot(self.data)
                 plt.plot(firstOut)
                 plt.plot(lastOut)
@@ -834,5 +834,5 @@ class Benchmarker:
                 plt.ylabel('Current')
                 plt.xlabel('Time (ms)')
             plt.legend(['Data', 'First Parameters', 'Best Parameters'])
-            plt.title('Improvement after fitting: ' + self._name)
+            plt.title('Improvement after fitting: ' + self.NAME)
             plt.show()

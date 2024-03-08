@@ -105,7 +105,7 @@ class IKr(LoeweBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKr benchmark')
         self.tols = (1e-5, 1e-5)
-        self._name = "loewe2016.ikr"
+        self.NAME = "loewe2016.ikr"
         self._outputName = 'ikr.IKr'
         self._paramContainer = 'ikr'
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
@@ -132,7 +132,7 @@ class IKur(LoeweBenchmarker):
     def __init__(self, sensitivities=False):
         print('Initialising Loewe 2016 IKur benchmark')
         self.tols = (1e-6, 1e-4)
-        self._name = "loewe2016.ikur"
+        self.NAME = "loewe2016.ikur"
         self.model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._outputName = 'ikur.IKur'
         self._paramContainer = 'ikur'

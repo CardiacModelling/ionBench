@@ -59,12 +59,12 @@ bm = ionbench.problems.staircase.HH()
 abstolBounds = (5, 8)
 reltolBounds = (5, 8)
 print(
-    f'Searching tolerance combinations for {bm._name}. Absolute tolerances between 1e-{abstolBounds[0]} and 1e-{abstolBounds[1]}. Relative tolerances between 1e-{reltolBounds[0]} and 1e-{reltolBounds[1]}.')
+    f'Searching tolerance combinations for {bm.NAME}. Absolute tolerances between 1e-{abstolBounds[0]} and 1e-{abstolBounds[1]}. Relative tolerances between 1e-{reltolBounds[0]} and 1e-{reltolBounds[1]}.')
 
-if 'loewe' in bm._name or 'moreno' in bm._name:
+if 'loewe' in bm.NAME or 'moreno' in bm.NAME:
     bm.sim = myokit.Simulation(bm.model, bm.protocol())
-if 'moreno' in bm._name:
-    bm._name = ''  # This is a hack to avoid moreno set_parameters doing something that assumes it's an analytical simulation.
+if 'moreno' in bm.NAME:
+    bm.NAME = ''  # This is a hack to avoid moreno set_parameters doing something that assumes it's an analytical simulation.
 
 # Loop through lots of tolerance combinations and see what works
 points = bm.sample(25)

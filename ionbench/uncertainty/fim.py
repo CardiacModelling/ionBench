@@ -137,9 +137,9 @@ def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
     plt.eventplot(-eigs, orientation='vertical')
     plt.yscale('log')
     plt.xticks(ticks=[])
-    plt.title('FIM Eigenspectrum: ' + bm._name)
+    plt.title('FIM Eigenspectrum: ' + bm.NAME)
     data = (eigs, mat)
-    with open(bm._name + '_fim.pickle', 'wb') as f:
+    with open(bm.NAME + '_fim.pickle', 'wb') as f:
         pickle.dump(data, f)
     return mat
 

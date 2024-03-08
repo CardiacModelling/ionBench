@@ -13,7 +13,7 @@ def maximum_cost(bm):
         if maxCost < cost:
             maxCost = cost
             maxP = p
-    print(f'Finished {bm._name}. Max cost: {maxCost}, at parameters: {maxP}')
+    print(f'Finished {bm.NAME}. Max cost: {maxCost}, at parameters: {maxP}')
 
 
 bm = ionbench.problems.staircase.HH()
