@@ -33,7 +33,8 @@ class Tracker:
         self.firstParams = []
         self.modelSolves = []
         self.gradSolves = []
-        self._trueParams = trueParams
+        self._TRUE_PARAMETERS = np.copy(trueParams)
+        self._TRUE_PARAMETERS.flags['WRITEABLE'] = False
         self.evals = []
         self.bestParams = []
         self.bestCost = np.inf
@@ -66,12 +67,12 @@ class Tracker:
         """
         if len(self.firstParams) == 0:
             self.firstParams = np.copy(estimatedParams)
+            self.firstParams.flags['WRITEABLE'] = False
         # Cast to numpy arrays
-        trueParams = np.array(self._trueParams)
         estimatedParams = np.array(estimatedParams)
         # Update performance metrics
-        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams - trueParams) / trueParams) ** 2)))
-        self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams - trueParams) / trueParams) < 0.05))
+        self.paramRMSRE.append(np.sqrt(np.mean(((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) ** 2)))
+        self.paramIdentifiedCount.append(np.sum(np.abs((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) < 0.05))
         self.costs.append(cost)
         if incrementSolveCounter:
             if solveType == 'cost':
