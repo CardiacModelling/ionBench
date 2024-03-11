@@ -466,7 +466,7 @@ class Benchmarker:
             cost = self.rmse(curr, self.DATA)
             for i in range(self.n_parameters()):
                 if 'moreno' in self.NAME:
-                    grad.append(np.dot(error * self.weights, J[:, i]) / cost)
+                    grad.append(np.dot(error * self.WEIGHTS, J[:, i]) / cost)
                 else:
                     grad.append(np.dot(error, J[:, i]) / (len(self.DATA) * cost))
             self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
