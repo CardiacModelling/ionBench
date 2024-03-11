@@ -472,9 +472,9 @@ class Benchmarker:
             self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
                                 solveType='grad',
                                 solveTime=end - start)
-        return self.map_derivative(J, grad, inInputSpace, returnCost, residuals)
+        return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals)
 
-    def map_derivative(self, J, grad, inInputSpace, returnCost, residuals):
+    def map_derivative(self, J, grad, parameters, inInputSpace, returnCost, residuals):
         """
         Map the derivatives (J/jacobian and grad/gradient) onto the correct parameter space and then return the specified outputs. Outputs are described in the docstring for grad.
         """

@@ -109,7 +109,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                 else:
                     grad[i] = 0
 
-        return self.map_derivative(J, grad, inInputSpace, returnCost, residuals)
+        return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals)
 
     def reset(self, fullReset=True):
         self.tracker = ionbench.tracker.Tracker(self._TRUE_PARAMETERS)
