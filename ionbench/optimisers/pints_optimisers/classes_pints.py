@@ -26,12 +26,12 @@ def pints_setup(bm, x0, method, forceUnbounded=False):
     """
     if x0 is None:
         x0 = bm.sample()
-    model = classes_pints.Model(bm)
+    model = Model(bm)
     problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
     error = pints.RootMeanSquaredError(problem)
     if bm.parametersBounded and not forceUnbounded:
         if bm.ratesBounded:
-            boundaries = classes_pints.AdvancedBoundaries(bm)
+            boundaries = AdvancedBoundaries(bm)
         else:
             boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
         counter = 1
