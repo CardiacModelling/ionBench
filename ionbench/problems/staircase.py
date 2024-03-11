@@ -38,7 +38,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.sim = myokit.Simulation(self._MODEL, protocol=p)
         self.sim.set_tolerance(*self._TOLERANCES)
         if self.sensitivityCalc:
-            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+            paramNames = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
             sens = ([self._OUTPUT_NAME], paramNames)
             self.simSens = myokit.Simulation(self._MODEL, sensitivities=sens, protocol=p)
             self.simSens.set_tolerance(*self._TOLERANCES)

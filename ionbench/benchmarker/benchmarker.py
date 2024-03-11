@@ -311,7 +311,7 @@ class Benchmarker:
 
         """
         testOutput = np.array(
-            self.simulate(parameters, np.arange(0, self.T_MAX, self.freq), incrementSolveCounter=incrementSolveCounter))
+            self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP), incrementSolveCounter=incrementSolveCounter))
         cost = self.rmse(testOutput, self.DATA)
         return cost
 
@@ -331,7 +331,7 @@ class Benchmarker:
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP)))
         return testOutput - self.DATA
 
     def squared_error(self, parameters):
@@ -350,7 +350,7 @@ class Benchmarker:
 
         """
         # Calculate cost for a given set of parameters
-        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.freq)))
+        testOutput = np.array(self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP)))
         return (testOutput - self.DATA) ** 2
 
     def use_sensitivities(self):
@@ -367,7 +367,7 @@ class Benchmarker:
 
         """
         if not self.sensitivityCalc:
-            paramNames = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+            paramNames = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
             self.simSens = myokit.Simulation(self._MODEL, protocol=self.protocol(),
                                              sensitivities=([self._OUTPUT_NAME], paramNames))
             self.simSens.set_tolerance(*self._TOLERANCES)
@@ -436,7 +436,7 @@ class Benchmarker:
             self.set_steady_state(parameters)
             start = time.monotonic()
             try:
-                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.T_MAX, self.freq))
+                curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.T_MAX, self.TIMESTEP))
                 sens = np.array(sens)
             except myokit.SimulationError:
                 # If the model fails to solve, we will assume the cost is infinite and the jacobian/gradient points back towards good parameters
@@ -513,9 +513,9 @@ class Benchmarker:
         """
         # Update the parameters
         for i in range(self.n_parameters()):
-            self.sim.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
+            self.sim.set_constant(self._PARAMETER_CONTAINER + '.p' + str(i + 1), parameters[i])
             if self.sensitivityCalc:
-                self.simSens.set_constant(self._paramContainer + '.p' + str(i + 1), parameters[i])
+                self.simSens.set_constant(self._PARAMETER_CONTAINER + '.p' + str(i + 1), parameters[i])
         # Workaround for myokit bug
         if 'moreno' in self.NAME:
             self.sim.set_parameters(self.sim.parameters())
@@ -809,11 +809,11 @@ class Benchmarker:
             self.sim.reset()
             self.set_params(self.tracker.firstParams)
             self.set_steady_state(self.tracker.firstParams)
-            firstOut = self.solve_model(np.arange(0, self.T_MAX, self.freq), continueOnError=True)
+            firstOut = self.solve_model(np.arange(0, self.T_MAX, self.TIMESTEP), continueOnError=True)
             self.sim.reset()
             self.set_params(self.original_parameter_space(self.tracker.bestParams))
             self.set_steady_state(self.original_parameter_space(self.tracker.bestParams))
-            lastOut = self.solve_model(np.arange(0, self.T_MAX, self.freq), continueOnError=True)
+            lastOut = self.solve_model(np.arange(0, self.T_MAX, self.TIMESTEP), continueOnError=True)
             plt.figure()
             if "moreno" in self.NAME:
                 plt.plot(self.DATA)
@@ -821,9 +821,9 @@ class Benchmarker:
                 plt.plot(lastOut)
                 plt.ylabel('Summary Statistics')
             else:
-                plt.plot(np.arange(0, self.T_MAX, self.freq), self.DATA)
-                plt.plot(np.arange(0, self.T_MAX, self.freq), firstOut)
-                plt.plot(np.arange(0, self.T_MAX, self.freq), lastOut)
+                plt.plot(np.arange(0, self.T_MAX, self.TIMESTEP), self.DATA)
+                plt.plot(np.arange(0, self.T_MAX, self.TIMESTEP), firstOut)
+                plt.plot(np.arange(0, self.T_MAX, self.TIMESTEP), lastOut)
                 plt.ylabel('Current')
                 plt.xlabel('Time (ms)')
             plt.legend(['Data', 'First Parameters', 'Best Parameters'])

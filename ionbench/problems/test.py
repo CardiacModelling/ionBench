@@ -23,7 +23,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         self.STANDARD_LOG_TRANSFORM = (False, True)
         self.sensitivityCalc = True
         self.T_MAX = 20
-        self.freq = 1  # Timestep in data between points
+        self.TIMESTEP = 1  # Timestep in data between points
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
         except FileNotFoundError:
@@ -80,7 +80,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         if not self.in_parameter_bounds(parameters):
             warnings.warn(
                 'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            error = np.array([np.inf] * len(np.arange(0, self.T_MAX, self.freq)))
+            error = np.array([np.inf] * len(np.arange(0, self.T_MAX, self.TIMESTEP)))
             # use grad to point back to reasonable parameter space
             grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
             if residuals:
@@ -89,7 +89,7 @@ class Test(ionbench.benchmarker.Benchmarker):
                     J[i,] = grad
         else:
             # Get sensitivities
-            curr = self.simulate(parameters, np.arange(0, self.T_MAX, self.freq))
+            curr = self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP))
             sens = np.zeros((len(curr), self.n_parameters()))
             for t in range(len(curr)):
                 sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
@@ -146,7 +146,7 @@ def generate_data():
 
     """
     bm = Test()
-    out = bm.simulate(bm._TRUE_PARAMETERS, np.arange(0, bm.T_MAX, bm.freq), continueOnError=False)
+    out = bm.simulate(bm._TRUE_PARAMETERS, np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
     with open(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))

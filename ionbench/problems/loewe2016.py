@@ -28,7 +28,7 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self.V_HIGH = max(p.levels())
 
         # Myokit
-        parameters = [self._paramContainer + '.p' + str(i + 1) for i in range(self.n_parameters())]
+        parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
         self._ANALYTICAL_MODEL = myokit.lib.hh.HHModel(model=self._MODEL, states=states, parameters=parameters,
                                                        current=self._OUTPUT_NAME, vm='membrane.V')
         self.sim = myokit.lib.hh.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=p)
