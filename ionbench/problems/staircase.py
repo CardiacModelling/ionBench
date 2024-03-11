@@ -30,7 +30,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.V_HIGH = max(p.levels())
         try:
             self.load_data(
-                os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + 'HH' if 'hh' in self.NAME else 'mm' + '.csv'))
+                os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + ('HH' if 'hh' in self.NAME else 'MM') + '.csv'))
         except FileNotFoundError:
             self.DATA = None
 
