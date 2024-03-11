@@ -423,6 +423,7 @@ class Benchmarker:
             for i in range(self.n_parameters()):
                 grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
             cost = float(penalty.data)
+            error = cost*np.array(len(self.DATA))
             J = np.zeros((len(self.DATA), self.n_parameters()))
             for i in range(len(self.DATA)):
                 J[i,] = grad
@@ -472,9 +473,9 @@ class Benchmarker:
             self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
                                 solveType='grad',
                                 solveTime=end - start)
-        return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals)
+        return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals, cost, error)
 
-    def map_derivative(self, J, grad, parameters, inInputSpace, returnCost, residuals):
+    def map_derivative(self, J, grad, parameters, inInputSpace, returnCost, residuals, cost, error):
         """
         Map the derivatives (J/jacobian and grad/gradient) onto the correct parameter space and then return the specified outputs. Outputs are described in the docstring for grad.
         """
