@@ -115,7 +115,7 @@ class IKr(LoeweBenchmarker):
         self.COST_THRESHOLD = 0.01
 
         # Myokit
-        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-IKr.mmt'))
+        self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
         self._OUTPUT_NAME = 'ikr.IKr'
         self._PARAMETER_CONTAINER = 'ikr'
         self._TOLERANCES = (1e-5, 1e-5)
