@@ -2,6 +2,7 @@
 
 import numpy as np
 import ionbench
+import ionbench.utils.population_optimisers as pop_opt
 import copy
 from functools import lru_cache
 
@@ -31,42 +32,22 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
         The best parameters identified.
 
     """
+    @lru_cache(maxsize=None)
+    def cost_func(x):
+        return bm.cost(x)
+
     if not bm.parametersBounded:
         raise RuntimeError('Cairns et al 2017 GA optimiser requires bounds.')
 
     boundsRange = bm.input_parameter_space(bm.ub) - bm.input_parameter_space(bm.lb)
 
-    class Individual:
-        def __init__(self):
-            if x0 is None:
-                self.x = bm.sample()
-            else:
-                self.x = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.x = bm.clamp_parameters(self.x)
-            self.cost = None
+    pop = pop_opt.get_pop(bm, x0, popSize, cost_func)
 
-        def find_cost(self):
-            self.cost = cost_func(tuple(self.x))
-
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
-
-    pop = [None] * popSize
-    for i in range(popSize):
-        pop[i] = Individual()
-        pop[i].find_cost()
-    elite = None
     for gen in range(nGens):
-        minCost = np.inf
-        elite = None
-        for i in range(popSize):
-            if pop[i].cost < minCost:
-                minCost = pop[i].cost
-                elite = copy.deepcopy(pop[i])
+        elites = pop_opt.get_elites(pop, 1)
         if debug:
             print("------------")
-            print(f'Gen {gen}, Best cost: {minCost}')
+            print(f'Gen {gen}, Best cost: {elites[0].cost}')
 
         # Tournament selection
         parents = []
@@ -89,7 +70,7 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
             par1 = parents[2 * j]
             par2 = parents[2 * j + 1]
             # Construct child
-            child = Individual()
+            child = pop_opt.Individual(bm, bm.sample(), cost_func)
             for i in range(bm.n_parameters()):
                 # Get parameter i from parents 1 and 2
                 num1 = par1.x[i]
@@ -122,30 +103,22 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
                     else:
                         newPop[j].x[i] -= perturb
         pop = newPop
+
         if debug:
             print(f'Finishing gen {gen}')
+
         # Find costs
-        for i in range(popSize):
-            pop[i].find_cost()
+        pop = pop_opt.find_pop_costs(pop)
+
         # Elitism
-        maxCost = -np.inf
-        maxIndex = None
-        for i in range(popSize):
-            if pop[i].cost > maxCost:
-                maxCost = pop[i].cost
-                maxIndex = i
-        pop[maxIndex] = copy.deepcopy(elite)
+        pop = pop_opt.set_elites(pop, elites)
 
         if bm.is_converged():
             break
 
-    minCost = np.inf
-    for i in range(popSize):
-        if pop[i].cost < minCost:
-            minCost = pop[i].cost
-            elite = pop[i]
+    elites = pop_opt.get_elites(pop, 1)
     bm.evaluate()
-    return elite.x
+    return elites[0].x
 
 
 # noinspection PyUnusedLocal

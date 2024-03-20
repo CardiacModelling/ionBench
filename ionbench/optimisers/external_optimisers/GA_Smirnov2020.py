@@ -1,12 +1,9 @@
 import numpy as np
 import scipy
 import ionbench
+import ionbench.utils.population_optimisers as pop_opt
 import copy
 from functools import lru_cache
-
-from pymoo.core.individual import Individual as pymooInd
-from pymoo.core.problem import Problem
-from pymoo.operators.crossover.sbx import SBX
 
 
 # TODO: eta_mut is unused - needs fixing
@@ -39,66 +36,25 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
         The best parameters identified.
 
     """
-
-    class Individual:
-        def __init__(self):
-            if x0 is None:
-                self.x = bm.sample()
-            else:
-                self.x = bm.input_parameter_space(
-                    bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.x = bm.clamp_parameters(self.x)
-            self.cost = None
-
-        def find_cost(self):
-            self.cost = cost_func(tuple(self.x))
-
     @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(x)
 
     eliteCount = int(np.round(popSize * elitePercentage))
-    pop = [None] * popSize
-    for i in range(popSize):
-        pop[i] = Individual()
-        pop[i].find_cost()
+    pop = pop_opt.get_pop(bm, x0, popSize, cost_func)
 
     for gen in range(nGens):
-        costVec = [0] * popSize
-        for i in range(popSize):
-            costVec[i] = pop[i].cost
-        eliteIndices = np.argsort(costVec)[:eliteCount]
-        elites = [None] * eliteCount
-        for i in range(eliteCount):
-            elites[i] = copy.deepcopy(pop[eliteIndices[i]])
+        elites = pop_opt.get_elites(pop, eliteCount)
         if debug:
             print("------------")
-            print(f'Gen {gen}, Best cost: {min(costVec)}, Average cost: {np.mean(costVec)}')
-        # Tournament selection
-        newPop = []
-        for j in range(2):
-            perm = np.random.permutation(popSize)
-            for i in range(popSize // 2):
-                if pop[perm[2 * i]].cost < pop[perm[2 * i + 1]].cost:
-                    newPop.append(copy.deepcopy(pop[perm[2 * i]]))
-                else:
-                    newPop.append(copy.deepcopy(pop[perm[2 * i + 1]]))
-        pop = newPop  # Population of parents
-        # Crossover SBX
-        newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb),
-                          xu=bm.input_parameter_space(bm.ub))
-        for i in range(popSize // 2):
-            a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
+            print(f'Gen {gen}, Best cost: {elites[0].cost}')
 
-            parents = [[a, b]]
-            off = SBX(prob=0.9, prob_var=0.5, eta=eta_cross).do(problem, parents)
-            Xp = off.get("X")
-            newPop.append(Individual())
-            newPop[-1].x = Xp[0]
-            newPop.append(Individual())
-            newPop[-1].x = Xp[1]  # Can this be done in one line
-        pop = newPop
+        # Tournament selection
+        pop = pop_opt.tournament_selection(pop)
+
+        # Crossover SBX
+        pop = pop_opt.sbx_crossover(pop, bm, cost_func, eta_cross)
+
         # Mutation
         for i in range(popSize):
             if np.random.rand() < 0.9:
@@ -106,30 +62,22 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
                 direc = direc / np.linalg.norm(direc)
                 mag = scipy.stats.cauchy.rvs(loc=0, scale=0.18)
                 pop[i].x += mag * direc
+
         if debug:
             print(f'Finishing gen {gen}')
+
         # Find costs
-        for i in range(popSize):
-            pop[i].find_cost()
+        pop = pop_opt.find_pop_costs(pop)
+
         # Elitism
-        costVec = [0] * popSize
-        for i in range(popSize):
-            costVec[i] = pop[i].cost
-        eliteIndices = np.argsort(costVec)[-eliteCount:]
-        for i in range(eliteCount):
-            pop[eliteIndices[i]] = copy.deepcopy(elites[i])
+        pop = pop_opt.set_elites(pop, elites)
 
         if bm.is_converged():
             break
 
-    minCost = np.inf
-    elite = None
-    for i in range(popSize):
-        if pop[i].cost < minCost:
-            minCost = pop[i].cost
-            elite = pop[i]
+    elites = pop_opt.get_elites(pop, 1)
     bm.evaluate()
-    return elite.x
+    return elites[0].x
 
 
 # noinspection PyUnusedLocal

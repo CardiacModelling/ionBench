@@ -1,12 +1,9 @@
 import numpy as np
 import ionbench
+import ionbench.utils.population_optimisers as pop_opt
 import copy
 import warnings
 from functools import lru_cache
-
-from pymoo.core.individual import Individual as pymooInd
-from pymoo.core.problem import Problem
-from pymoo.operators.crossover.pntx import SinglePointCrossover
 
 
 def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
@@ -34,65 +31,29 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
         The best parameters identified.
 
     """
-    class Individual:
-        def __init__(self):
-            if x0 is None:
-                self.x = bm.sample()
-            else:
-                self.x = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.x = bm.clamp_parameters(self.x)
-            self.cost = None
-
-        def find_cost(self):
-            self.cost = cost_func(tuple(self.x))
 
     @lru_cache(maxsize=None)
     def cost_func(x):
         return bm.cost(x)
 
     if popSize < 20 * bm.n_parameters():
-        warnings.warn('Too small a value specified for popSize. Gurkiewicz recommends using at least 20 times the number of parameters. popSize will be increased to this value.')
+        warnings.warn(
+            'Too small a value specified for popSize. Gurkiewicz recommends using at least 20 times the number of parameters. popSize will be increased to this value.')
         popSize = 20 * bm.n_parameters()
 
-    pop = [None] * popSize
-    for i in range(popSize):
-        pop[i] = Individual()
-        pop[i].find_cost()
-    elite = None
+    pop = pop_opt.get_pop(bm, x0, popSize, cost_func)
+
     for gen in range(nGens):
-        minCost = np.inf
-        elite = None
-        for i in range(popSize):
-            if pop[i].cost < minCost:
-                minCost = pop[i].cost
-                elite = copy.deepcopy(pop[i])
+        elites = pop_opt.get_elites(pop, 1)
         if debug:
             print("------------")
-            print(f'Gen {gen}, Best cost: {minCost}')
-        # Tournament selection
-        newPop = []
-        for j in range(2):
-            perm = np.random.permutation(popSize)
-            for i in range(popSize // 2):
-                if pop[perm[2 * i]].cost < pop[perm[2 * i + 1]].cost:
-                    newPop.append(copy.deepcopy(pop[perm[2 * i]]))
-                else:
-                    newPop.append(copy.deepcopy(pop[perm[2 * i + 1]]))
-        pop = newPop  # Population of parents
-        # One Point Crossover
-        newPop = []
-        problem = Problem(n_var=bm.n_parameters(), xl=bm.input_parameter_space(bm.lb), xu=bm.input_parameter_space(bm.ub))
-        for i in range(popSize // 2):
-            a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
+            print(f'Gen {gen}, Best cost: {elites[0].cost}')
 
-            parents = [[a, b]]
-            off = SinglePointCrossover(prob=crossoverProb).do(problem, parents)
-            Xp = off.get("X")
-            newPop.append(Individual())
-            newPop[-1].x = Xp[0]
-            newPop.append(Individual())
-            newPop[-1].x = Xp[1]
-        pop = newPop
+        # Tournament selection
+        pop = pop_opt.tournament_selection(pop)
+
+        # One Point Crossover
+        pop = pop_opt.one_point_crossover(pop, bm, cost_func, crossoverProb=crossoverProb)
 
         # Mutation
         for i in range(popSize):
@@ -102,28 +63,19 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
 
         if debug:
             print(f'Finishing gen {gen}')
+
         # Find costs
-        for i in range(popSize):
-            pop[i].find_cost()
+        pop = pop_opt.find_pop_costs(pop)
+
         # Elitism
-        maxCost = -np.inf
-        maxIndex = None
-        for i in range(popSize):
-            if pop[i].cost > maxCost:
-                maxCost = pop[i].cost
-                maxIndex = i
-        pop[maxIndex] = copy.deepcopy(elite)
+        pop = pop_opt.set_elites(pop, elites)
 
         if bm.is_converged():
             break
 
-    minCost = np.inf
-    for i in range(popSize):
-        if pop[i].cost < minCost:
-            minCost = pop[i].cost
-            elite = pop[i]
+    elites = pop_opt.get_elites(pop, 1)
     bm.evaluate()
-    return elite.x
+    return elites[0].x
 
 
 def get_modification(modNum=1):
