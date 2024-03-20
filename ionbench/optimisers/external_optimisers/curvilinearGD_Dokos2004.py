@@ -3,7 +3,6 @@
 import numpy as np
 import ionbench
 import scipy
-from functools import lru_cache
 
 
 def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
@@ -101,6 +100,8 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         for i in range(len(p)):
             p[i] = lb[i] + (ub[i] - lb[i]) * np.sin(x[i]) ** 2
         return p
+
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
 
     # sample initial point
     if x0 is None:
@@ -227,9 +228,8 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             # Define function to find weighted SSE from alpha
             # Cache SSE function to help make the code to handle the brent method more robust without needing repeated function evaluations
             # noinspection PyPep8Naming
-            @lru_cache(maxsize=None)
             def SSE(alpha):
-                weightedr0 = np.diag(w) @ bm.signed_error(model_params(x0 + L(alpha)))
+                weightedr0 = np.diag(w) @ signed_error(model_params(x0 + L(alpha)))
                 return np.dot(weightedr0, weightedr0)
 
             # Run Brent's method to optimise SSE with respect to alpha

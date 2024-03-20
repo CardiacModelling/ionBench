@@ -1,6 +1,8 @@
 import numpy as np
 import ionbench
 import itertools
+
+
 # Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 
@@ -67,8 +69,10 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
 
+    cached_cost = ionbench.utils.cache.get_cached_cost(bm)
+
     def cost_func(x):
-        return bm.cost(transform(x))
+        return cached_cost(transform(x))
 
     def transform(x):
         """

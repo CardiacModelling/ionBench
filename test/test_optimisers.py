@@ -1,14 +1,8 @@
-import inspect
-
 import pytest
 import ionbench
 import numpy as np
 from importlib import import_module
 from inspect import signature
-
-
-def sub_dict(d, keys):
-    return dict((k, d[k]) for k in keys if k in d)
 
 
 class TestScipy:
@@ -55,7 +49,7 @@ class TestExternal:
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
-        if 'maxIter' in inspect.signature(module.run).parameters:
+        if 'maxIter' in signature(module.run).parameters:
             if 'loewe' in opt.lower():
                 x0_opt = module.run(self.bmTest, n=5, maxIter=10000)
             else:

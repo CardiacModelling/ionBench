@@ -29,6 +29,7 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
         The best parameters found.
 
     """
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     if x0 is None:
         # sample initial point
@@ -40,7 +41,7 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
     for i in range(maxIter):
 
         trial = x0 + np.random.normal(loc=0, scale=np.sqrt(x0 * var))
-        trial_cost = bm.cost(trial)
+        trial_cost = cost_func(trial)
         if debug:
             print(f'var: {var}, trial cost: {trial_cost}')
         if trial_cost < x0_cost:

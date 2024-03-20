@@ -1,7 +1,6 @@
 import numpy as np
 import scipy
 import ionbench
-from functools import lru_cache
 
 
 def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
@@ -65,15 +64,13 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
 
-    @lru_cache(maxsize=None)
+    cached_error = ionbench.utils.cache.get_cached_signed_error(bm)
+
     def signed_error(x):
-        return bm.signed_error(transform(x))
+        return cached_error(transform(x))
 
     def cost_func(x):
-        return bm.rmse(signed_error(tuple(x)) + bm.DATA, bm.DATA)
-
-    def trr_error(x):
-        return signed_error(tuple(x))
+        return bm.rmse(signed_error(x) + bm.DATA, bm.DATA)
 
     def transform(x):
         """
@@ -149,7 +146,7 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
             print("Beginning TRR")
         bounds = ([0] * bm.n_parameters(), [1] * bm.n_parameters())
         for p in particleList:
-            out = scipy.optimize.least_squares(trr_error, p.position, method='trf', diff_step=1e-3, max_nfev=2 * K, bounds=bounds, verbose=verbose)
+            out = scipy.optimize.least_squares(signed_error, p.position, method='trf', diff_step=1e-3, max_nfev=2 * K, bounds=bounds, verbose=verbose)
             p.velocity = out.x - p.position
             p.position = out.x
 

@@ -2,7 +2,6 @@ import numpy as np
 import ionbench
 import ionbench.utils.population_optimisers as pop_opt
 import copy
-from functools import lru_cache
 
 
 def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
@@ -33,9 +32,7 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False
 
     """
 
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     pop = pop_opt.get_pop(bm, x0, popSize, cost_func)
 

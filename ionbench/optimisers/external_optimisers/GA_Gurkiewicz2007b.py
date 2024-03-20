@@ -3,7 +3,6 @@ import ionbench
 import ionbench.utils.population_optimisers as pop_opt
 import copy
 import warnings
-from functools import lru_cache
 
 
 def run(bm, x0=None, nGens=1000, popSize=0, debug=False):
@@ -29,9 +28,7 @@ def run(bm, x0=None, nGens=1000, popSize=0, debug=False):
         The best parameters identified.
 
     """
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     if popSize < 20 * bm.n_parameters():
         warnings.warn('Too small a value specified for popSize. Gurkiewicz recommends using at least 20 times the number of parameters. popSize will be increased to this value.')

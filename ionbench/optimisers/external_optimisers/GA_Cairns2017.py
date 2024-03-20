@@ -4,7 +4,6 @@ import numpy as np
 import ionbench
 import ionbench.utils.population_optimisers as pop_opt
 import copy
-from functools import lru_cache
 
 
 def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
@@ -32,9 +31,7 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
         The best parameters identified.
 
     """
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     if not bm.parametersBounded:
         raise RuntimeError('Cairns et al 2017 GA optimiser requires bounds.')

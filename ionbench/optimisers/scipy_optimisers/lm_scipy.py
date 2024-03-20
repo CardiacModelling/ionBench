@@ -1,6 +1,5 @@
 import ionbench.problems.staircase
 import scipy.optimize
-from functools import lru_cache
 
 
 def run(bm, x0=None, maxIter=1000, debug=False):
@@ -23,31 +22,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by LM.
     """
-    @lru_cache(maxsize=None)
-    def grad(p):
-        """
-        Find the jacobian of the residuals. This function is cached so requires the input to be hashable (for example tuple).
-        """
-        return bm.grad(p, residuals=True)
-
-    @lru_cache(maxsize=None)
-    def signed_error(p):
-        """
-        Find the jacobian of the residuals. This function is cached so requires the input to be hashable (for example tuple).
-        """
-        return bm.signed_error(p)
-
-    def grad_scipy(p):
-        """
-        Wrapper for the cached grad function. This is required as the scipy optimiser requires a function won't supply a hashable type as input.
-        """
-        return grad(tuple(p))
-
-    def signed_error_scipy(p):
-        """
-        Wrapper for the cached signed_error function. This is required as the scipy optimiser requires a function won't supply a hashable type as input.
-        """
-        return signed_error(tuple(p))
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
 
     if x0 is None:
         x0 = bm.sample()
@@ -60,7 +36,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     else:
         verbose = 1
 
-    out = scipy.optimize.least_squares(signed_error_scipy, x0, method='lm', jac=grad_scipy, verbose=verbose, max_nfev=maxIter)
+    out = scipy.optimize.least_squares(signed_error, x0, method='lm', jac=grad, verbose=verbose, max_nfev=maxIter)
 
     if debug:
         print(f'Cost of {out.cost} found at:')

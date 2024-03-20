@@ -2,7 +2,6 @@ import pints
 import ionbench
 import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
-from functools import lru_cache
 # Limited information on the implementation given in Clausen 2020.
 
 

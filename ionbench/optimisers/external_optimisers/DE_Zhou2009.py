@@ -1,6 +1,5 @@
 import numpy as np
 import ionbench
-from functools import lru_cache
 import scipy.optimize
 
 
@@ -51,9 +50,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             L += 1
         return L
 
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     # Ensure popSize is defined
     if popSize is None:

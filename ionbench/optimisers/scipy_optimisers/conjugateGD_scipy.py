@@ -1,6 +1,5 @@
 import ionbench.problems.staircase
 import scipy.optimize
-from functools import lru_cache
 
 
 def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
@@ -25,31 +24,8 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by Conjugate Gradient Descent.
     """
-    @lru_cache(maxsize=None)
-    def grad(p):
-        """
-        Return the gradient of the cost function. Cached so that the cost function is only evaluated once for each set of parameters. Requires inputs to be hashable (for example tuple).
-        """
-        return bm.grad(p)
-
-    @lru_cache(maxsize=None)
-    def cost(p):
-        """
-        Return the cost of the parameters. Cached so that the cost function is only evaluated once for each set of parameters. Requires inputs to be hashable (for example tuple).
-        """
-        return bm.cost(p)
-
-    def grad_scipy(p):
-        """
-        Wrapper for the cached grad function. This is required as the scipy optimiser requires a function that won't supply a hashable type as input.
-        """
-        return grad(tuple(p))
-
-    def cost_scipy(p):
-        """
-        Wrapper for the cached cost function. This is required as the scipy optimiser requires a function that won't supply a hashable type as input.
-        """
-        return cost(tuple(p))
+    cost = ionbench.utils.cache.get_cached_cost(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm)
 
     if x0 is None:
         x0 = bm.sample()
@@ -57,7 +33,7 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
             print('Sampling x0')
             print(x0)
 
-    out = scipy.optimize.minimize(cost_scipy, x0, jac=grad_scipy, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
+    out = scipy.optimize.minimize(cost, x0, jac=grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
 
     if debug:
         print(f'Cost of {out.fun} found at:')

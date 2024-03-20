@@ -2,7 +2,6 @@
 
 import numpy as np
 import ionbench
-from functools import lru_cache
 
 
 def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
@@ -30,9 +29,7 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
         The best parameters in the final simplex.
 
     """
-    @lru_cache(maxsize=None)
-    def cost(p):
-        return bm.cost(p)
+    cost = ionbench.utils.cache.get_cached_cost(bm)
 
     def wrap_around_boundaries(xOld):
         x = np.copy(xOld)

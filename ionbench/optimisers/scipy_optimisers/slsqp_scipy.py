@@ -23,23 +23,14 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by SLSQP.
     """
+    cost = ionbench.utils.cache.get_cached_cost(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm)
+
     if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
             print(x0)
-
-    def grad(p):
-        """
-        Return the gradient of the cost function.
-        """
-        return bm.grad(p)
-
-    def cost(p):
-        """
-        Return the cost of the parameters.
-        """
-        return bm.cost(p)
 
     if bm.parametersBounded:
         lb = bm.input_parameter_space(bm.lb)

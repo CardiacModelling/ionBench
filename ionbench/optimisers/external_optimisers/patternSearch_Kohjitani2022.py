@@ -1,5 +1,4 @@
 import ionbench
-from functools import lru_cache
 import numpy as np
 
 
@@ -32,9 +31,7 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
         The best parameters identified.
 
     """
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     funcCounter = 0
     iterCounter = 0

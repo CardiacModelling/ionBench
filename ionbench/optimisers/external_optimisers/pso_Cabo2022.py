@@ -42,8 +42,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
 
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     lb = bm.input_parameter_space(bm.lb)
     ub = bm.input_parameter_space(bm.ub)

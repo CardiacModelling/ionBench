@@ -22,11 +22,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by Trust Region Reflective.
     """
-    def grad(p):
-        """
-        Return the jacobian of the residuals.
-        """
-        return bm.grad(p, residuals=True)
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
 
     if x0 is None:
         x0 = bm.sample()
@@ -41,9 +38,9 @@ def run(bm, x0=None, maxIter=1000, debug=False):
 
     if bm.parametersBounded:
         bounds = (bm.lb, bm.ub)
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter, bounds=bounds)
+        out = scipy.optimize.least_squares(signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter, bounds=bounds)
     else:
-        out = scipy.optimize.least_squares(bm.signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter)
+        out = scipy.optimize.least_squares(signed_error, x0, method='trf', jac=grad, verbose=verbose, max_nfev=maxIter)
 
     if debug:
         print(f'Cost of {out.cost} found at:')

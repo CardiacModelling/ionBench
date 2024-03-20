@@ -1,6 +1,7 @@
 import pints
 import numpy as np
 from functools import lru_cache
+import ionbench
 
 
 def pints_setup(bm, x0, method, forceUnbounded=False):
@@ -66,6 +67,7 @@ class Model(pints.ForwardModel):
 
         """
         self.bm = bm
+        self.cached_error = ionbench.utils.cache.get_cached_signed_error(self.bm)
         super().__init__()
 
     def n_parameters(self):
@@ -98,18 +100,7 @@ class Model(pints.ForwardModel):
 
         """
         # Reset the simulation
-        return self.sim(tuple(parameters))
-
-    @lru_cache(maxsize=None)
-    def sim(self, p):
-        """
-        Simulate the model and return the model output. Cached to avoid double counting repeated calls.
-        Parameters
-        ----------
-        p : tuple
-            A tuple of parameter values, length n_parameters().
-        """
-        return self.bm.simulate(p, np.arange(0, self.bm.T_MAX, self.bm.TIMESTEP))
+        return self.cached_error(parameters)+self.bm.DATA
 
 
 class AdvancedBoundaries(pints.Boundaries):

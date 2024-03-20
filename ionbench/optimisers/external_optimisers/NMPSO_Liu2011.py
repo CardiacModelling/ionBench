@@ -1,6 +1,5 @@
 import numpy as np
 import ionbench
-from functools import lru_cache
 # Velocity of new points from NM is undefined. New particles from NM (either accepting or shrinking) maintain their old locally best position and previous velocity. We don't update the velocity of particles which underwent a NM step
 
 
@@ -154,9 +153,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
                     self.particles[i].set_cost(cost_func(tuple(self.particles[i].position)))
             return
 
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     L = None
 

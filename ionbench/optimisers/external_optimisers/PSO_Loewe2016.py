@@ -1,6 +1,5 @@
 import numpy as np
 import ionbench
-from functools import lru_cache
 
 
 def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
@@ -62,9 +61,10 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
                 self.bestCost = cost
                 self.bestPosition = np.copy(self.position)
 
-    @lru_cache(maxsize=None)
+    cached_cost = ionbench.utils.cache.get_cached_cost(bm)
+
     def cost_func(x):
-        return bm.cost(transform(x))
+        return cached_cost(transform(x))
 
     def transform(x):
         """
@@ -81,12 +81,13 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
     L = None
 
-    if (phi1 + phi2)**2 - 4 * (phi1 + phi2) < 0:
-        print("Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
+    if (phi1 + phi2) ** 2 - 4 * (phi1 + phi2) < 0:
+        print(
+            "Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
         phi1 = 2.05
         phi2 = 2.05
     phi = phi1 + phi2
-    constFactor = 2 / (phi - 2 + np.sqrt(phi**2 - 4 * phi))
+    constFactor = 2 / (phi - 2 + np.sqrt(phi ** 2 - 4 * phi))
 
     particleList = []
     for i in range(n):

@@ -1,6 +1,5 @@
 import numpy as np
 import ionbench
-from functools import lru_cache
 
 
 def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
@@ -30,9 +29,7 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
         The best parameters identified.
 
     """
-    @lru_cache(maxsize=None)
-    def grad(p):
-        return bm.grad(p)
+    grad = ionbench.utils.cache.get_cached_grad(bm)
 
     if x0 is None:
         # sample initial point

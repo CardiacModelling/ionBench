@@ -3,7 +3,6 @@ import ionbench
 import ionbench.utils.population_optimisers as pop_opt
 import copy
 import warnings
-from functools import lru_cache
 
 
 def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
@@ -32,9 +31,7 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
 
     """
 
-    @lru_cache(maxsize=None)
-    def cost_func(x):
-        return bm.cost(x)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
     if popSize < 20 * bm.n_parameters():
         warnings.warn(
