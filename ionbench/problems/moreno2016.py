@@ -58,8 +58,6 @@ class INa(ionbench.benchmarker.Benchmarker):
         self.ub = np.copy(self._UPPER_BOUND)
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.V_LOW = min(p.levels())
-        self.V_HIGH = max(p.levels())
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'moreno2016', 'ina.csv'))
         w = np.array([1 / 9] * 9 + [1 / 20] * 20 + [1 / 10] * 10 + [1 / 9] * 9)
         self.WEIGHTS = w / np.sum(w)

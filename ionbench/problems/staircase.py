@@ -26,8 +26,6 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         self.ub = np.copy(self._UPPER_BOUND)
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.V_LOW = min(p.levels())
-        self.V_HIGH = max(p.levels())
         try:
             self.load_data(
                 os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + ('HH' if 'hh' in self.NAME else 'MM') + '.csv'))

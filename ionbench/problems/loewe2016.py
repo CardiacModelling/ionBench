@@ -24,8 +24,6 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         self.ub = np.copy(self._UPPER_BOUND)
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
-        self.V_LOW = min(p.levels())
-        self.V_HIGH = max(p.levels())
 
         # Myokit
         parameters = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]

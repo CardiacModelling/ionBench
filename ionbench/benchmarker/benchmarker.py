@@ -28,6 +28,8 @@ class Benchmarker:
         self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
+        self.V_LOW = -120
+        self.V_HIGH = 60
         if not hasattr(self, 'DATA'):
             self.DATA = None
         if not hasattr(self, 'lb'):
@@ -42,10 +44,6 @@ class Benchmarker:
             self.RATE_MIN = None
         if not hasattr(self, 'RATE_MAX'):
             self.RATE_MAX = None
-        if not hasattr(self, 'V_LOW'):
-            self.V_LOW = None
-        if not hasattr(self, 'V_HIGH'):
-            self.V_HIGH = None
         if not hasattr(self, 'COST_THRESHOLD'):
             self.COST_THRESHOLD = None
         # Set numpy writeable flags
