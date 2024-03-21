@@ -4,7 +4,7 @@ from functools import lru_cache
 import ionbench
 
 
-def pints_setup(bm, x0, method, forceUnbounded=False):
+def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     """
     Set up a Pints model and optimisation controller for a benchmarker.
     Parameters
@@ -15,6 +15,10 @@ def pints_setup(bm, x0, method, forceUnbounded=False):
         Initial parameter vector from which to start optimisation. If x0=None, a randomly sampled parameter vector is retrieved from bm.sample().
     method : pints.Optimiser
         A Pints optimiser to use. For example, pints.CMAES, pints.PSO, or pints.NelderMead.
+    maxIter : int
+        The maximum number of iterations to run for.
+    debug : bool
+        If debug is True, will increase the logging frequency.
     forceUnbounded : bool, optional
         If True, the optimisation will be forced to be unbounded. Default is False.
 
@@ -44,6 +48,9 @@ def pints_setup(bm, x0, method, forceUnbounded=False):
         opt = pints.OptimisationController(error, x0, method=method, boundaries=boundaries)
     else:
         opt = pints.OptimisationController(error, x0, method=method)
+    opt.set_max_iterations(maxIter)
+    if debug:
+        opt.set_log_interval(iters=1)
     return model, opt
 
 

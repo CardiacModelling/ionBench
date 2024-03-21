@@ -28,14 +28,9 @@ def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
         The best parameters identified by CMA-ES.
 
     """
-    model, opt = classes_pints.pints_setup(bm, x0, pints.CMAES)
+    model, opt = classes_pints.pints_setup(bm, x0, pints.CMAES, maxIter, debug)
     opt.optimiser().set_population_size(popSize)
-    if debug:
-        opt.set_log_interval(iters=1)
-    opt.set_max_iterations(maxIter)
-    # Run the optimisation
     x, f = opt.run()
-
     model.bm.evaluate()
     return x
 

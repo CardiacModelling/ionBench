@@ -27,13 +27,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
 
     """
 
-    model, opt = classes_pints.pints_setup(bm, x0, pints.PSO)
-    opt.set_max_iterations(maxIter)
-    if debug:
-        opt.set_log_interval(iters=1)
-    # Run the optimisation
+    model, opt = classes_pints.pints_setup(bm, x0, pints.PSO, maxIter, debug)
     x, f = opt.run()
-
     model.bm.evaluate()
     return x
 
