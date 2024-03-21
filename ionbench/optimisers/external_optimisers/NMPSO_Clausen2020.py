@@ -1,7 +1,8 @@
 import pints
 import ionbench
-import numpy as np
-from ionbench.optimisers.pints_optimisers import classes_pints
+from ionbench.utils import classes_pints
+
+
 # Limited information on the implementation given in Clausen 2020.
 
 
