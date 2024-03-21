@@ -6,6 +6,7 @@ import itertools
 # Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al. 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
@@ -49,6 +50,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
             x0 = x0 / (2 * bm._TRUE_PARAMETERS)
     gmin = bm.COST_THRESHOLD
 
+    # noinspection PyShadowingNames
     class Particle:
         def __init__(self, n_param):
             self.velocity = 0.1 * np.random.rand(n_param)
@@ -246,7 +248,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
     return transform(Gpos[L])
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Chen2012

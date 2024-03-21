@@ -3,6 +3,7 @@ import scipy.optimize
 import numpy as np
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=False):
     """
     Runs Powell's Simplex optimiser from Scipy. Bounds are automatically loaded from the benchmarker if present.
@@ -66,6 +67,7 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
     return out.x
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Sachse2003

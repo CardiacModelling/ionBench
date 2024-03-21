@@ -4,6 +4,7 @@ Contains the Tracker class which is stored as an attribute in each benchmarker a
 """
 import numpy as np
 import myokit
+import myokit.lib.markov
 import csv
 import ionbench
 import matplotlib.pyplot as plt
@@ -22,20 +23,17 @@ class Benchmarker:
     """
 
     def __init__(self):
-        self.useScaleFactors = False
-        self.parametersBounded = False  # Should the parameters be bounded
-        self.ratesBounded = False  # Should the rates be bounded
-        self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
-        self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
-        self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
-        self.V_LOW = -120
-        self.V_HIGH = 60
+        # Ensure any undefined attributes (those defined by subclasses) are defined if missing
         if not hasattr(self, 'DATA'):
-            self.DATA = None
+            self.DATA = np.array(None)
+        if not hasattr(self, '_LOWER_BOUND'):
+            self._LOWER_BOUND = np.array(None)
+        if not hasattr(self, '_UPPER_BOUND'):
+            self._UPPER_BOUND = np.array(None)
         if not hasattr(self, 'lb'):
-            self.lb = None
+            self.lb = np.array(None)
         if not hasattr(self, 'ub'):
-            self.ub = None
+            self.ub = np.array(None)
         if not hasattr(self, 'simSens'):
             self.simSens = None
         if not hasattr(self, 'sensitivityCalc'):
@@ -46,6 +44,40 @@ class Benchmarker:
             self.RATE_MAX = None
         if not hasattr(self, 'COST_THRESHOLD'):
             self.COST_THRESHOLD = None
+        if not hasattr(self, '_TRUE_PARAMETERS'):
+            self._TRUE_PARAMETERS = np.array(None)
+        if not hasattr(self, 'sim'):
+            self.sim = None
+        if not hasattr(self, 'T_MAX'):
+            self.T_MAX = None
+        if not hasattr(self, 'TIMESTEP'):
+            self.TIMESTEP = None
+        if not hasattr(self, '_PARAMETER_CONTAINER'):
+            self._PARAMETER_CONTAINER = ''
+        if not hasattr(self, '_OUTPUT_NAME'):
+            self._OUTPUT_NAME = ''
+        if not hasattr(self, '_TOLERANCES'):
+            self._TOLERANCES = None
+        if not hasattr(self, 'NAME'):
+            self.NAME = ''
+        if not hasattr(self, '_MODEL'):
+            self._MODEL = None
+        if not hasattr(self, 'WEIGHTS'):
+            self.WEIGHTS = None
+        if not hasattr(self, '_ANALYTICAL_MODEL'):
+            self._ANALYTICAL_MODEL = None
+        if not hasattr(self, '_RATE_FUNCTIONS'):
+            self._RATE_FUNCTIONS = None
+
+        self.useScaleFactors = False
+        self.parametersBounded = False  # Should the parameters be bounded
+        self.ratesBounded = False  # Should the rates be bounded
+        self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
+        self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
+        self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
+        self.V_LOW = -120
+        self.V_HIGH = 60
+
         # Set numpy writeable flags
         self._TRUE_PARAMETERS.flags['WRITEABLE'] = False
         self._LOWER_BOUND.flags['WRITEABLE'] = False
@@ -73,6 +105,13 @@ class Benchmarker:
                     tmp.append(float(row[0]))
             self.DATA = np.array(tmp)
 
+    def sample(self, n=1):
+        raise NotImplementedError
+
+    @staticmethod
+    def protocol():
+        raise NotImplementedError
+
     def add_parameter_bounds(self):
         """
         Add bounds to the parameters. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and a penalty cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
@@ -86,14 +125,6 @@ class Benchmarker:
         Add bounds to the rates. The bounds will be checked whenever the model is about to be solved, if they are violated then the model will not be solved and an infinite cost will be reported. The model solve count will not be incremented if the bounds are violated but the parameter vector will still be tracked for the other metrics.
 
         The bounds are checked after reversing any log-transforms on parameters (ie on exp(inputted parameters)).
-
-        Parameters
-        ----------
-        None.
-        Returns
-        -------
-        None.
-
         """
         self.ratesBounded = True
 
@@ -154,7 +185,7 @@ class Benchmarker:
 
         Returns
         -------
-        parameters : list
+        parameters : np.ndarray
             Parameter vector mapped to input space.
 
         """
@@ -178,7 +209,7 @@ class Benchmarker:
 
         Returns
         -------
-        parameters : list
+        parameters : np.ndarray
             Parameter vector mapped to the original parameter space.
 
         """
@@ -271,11 +302,6 @@ class Benchmarker:
         ----------
         fullReset : bool, optional
             If True, transforms and bounds will be reset (turned off). The default is True.
-
-        Returns
-        -------
-        None.
-
         """
         self.sim.reset()
         if self.sensitivityCalc:
@@ -354,15 +380,6 @@ class Benchmarker:
     def use_sensitivities(self):
         """
         Turn on sensitivities for a benchmarker. Also sets the parameter self.sensitivityCalc to True. If sensitivities are already enabled (by checking bm.sensitivityCalc), then this method will do nothing.
-
-        Parameters
-        ----------
-        None.
-
-        Returns
-        -------
-        None.
-
         """
         if not self.sensitivityCalc:
             paramNames = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
@@ -504,11 +521,6 @@ class Benchmarker:
         ----------
         parameters : list or numpy array
             Vector of parameters to solve the model.
-
-        Returns
-        -------
-        None.
-
         """
         # Update the parameters
         for i in range(self.n_parameters()):
@@ -526,13 +538,8 @@ class Benchmarker:
 
         Parameters
         ----------
-        parameters : list
+        parameters : list or numpy array
             Vector of parameters to use for the calculation of the steady state.
-
-        Returns
-        -------
-        None.
-
         """
         if 'moreno' in self.NAME:
             V = -120
@@ -697,13 +704,15 @@ class Benchmarker:
     def parameter_penalty(self, parameters):
         """
         Penalty function for out of bound parameters. The penalty for each parameter p that is out of bounds is 1e5+1e5*|p-bound| where bound is either the upper or lower bound for p, whichever was violated.
+
         Parameters
         ----------
-        parameters : numpy array
+        parameters : numpy array or mygrad.Tensor
             A possibly out-of-bounds parameter vector to penalise.
+
         Returns
         -------
-        penalty : float
+        penalty : float or mygrad.Tensor
             The penalty to apply for parameter bound violations.
         """
         # Penalty increases linearly with parameters out of bounds
@@ -718,13 +727,15 @@ class Benchmarker:
     def rate_penalty(self, parameters):
         """
         Penalty function for out of bound rates. The penalty for each rate r that is out of bounds is 1e5+1e5*|r-bound| where bound is either the upper or lower bound for r, whichever was violated.
+
         Parameters
         ----------
-        parameters : numpy array
+        parameters : numpy array or mygrad.Tensor
             A possibly out-of-bounds parameter vector to penalise.
+
         Returns
         -------
-        penalty : float
+        penalty : float or mygrad.Tensor
             The penalty to apply for rate bound violations.
         """
         penalty = 0
@@ -783,15 +794,6 @@ class Benchmarker:
         Evaluates the best parameters.
 
         This method reports the performance metrics for the best parameter vector (calling evaluate() does NOT increase the number of cost function evaluations). If benchmarker.plotter = True, then it also plots the performance metrics over the course of the optimisation.
-
-        Parameters
-        ----------
-        None.
-
-        Returns
-        -------
-        None.
-
         """
         print('')
         print('========================================')

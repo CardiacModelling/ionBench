@@ -4,6 +4,7 @@ Functions for compatibility with MyGrad to allow automatic differentiation. Incl
     linalg_solve() which is a mygrad compatible matrix Ax=b equation solver.
 """
 import myokit
+import myokit.lib.markov
 import numpy as np
 import mygrad as mg
 

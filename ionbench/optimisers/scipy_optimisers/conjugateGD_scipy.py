@@ -2,6 +2,7 @@ import ionbench.problems.staircase
 import scipy.optimize
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
     """
     Runs Conjugate Gradient Descent optimiser from Scipy.
@@ -43,6 +44,7 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
     return out.x
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Sachse2003

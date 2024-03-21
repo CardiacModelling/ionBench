@@ -6,7 +6,7 @@ import os
 import numpy as np
 import csv
 import ionbench
-import scipy.stats
+from scipy.stats import norm
 import warnings
 
 import ionbench.tracker.tracker
@@ -61,7 +61,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         parameters = self.original_parameter_space(parameters)
         if not self.in_parameter_bounds(parameters):
             return [np.inf for _ in times]
-        return scipy.stats.norm(parameters[0], parameters[1]).pdf(times)
+        return norm(parameters[0], parameters[1]).pdf(times)
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         # Calculate gradient wrt parameters
@@ -132,6 +132,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         pass
 
 
+# noinspection PyProtectedMember
 def generate_data():
     """
     Generate the data files for the test benchmarker problem.

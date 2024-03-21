@@ -4,6 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs PSO (Particle Swarm Optimisation) from Pints using a benchmarker.
@@ -37,7 +38,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     return x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     No modification for this optimiser. Will use an empty modification.

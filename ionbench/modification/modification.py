@@ -1,8 +1,6 @@
 """
 Contains the main Modification class and all the paper-specific modification subclasses.
 """
-import ionbench
-import numpy as np
 
 
 # noinspection PyProtectedMember

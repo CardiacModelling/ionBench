@@ -2,6 +2,7 @@ import numpy as np
 import ionbench
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug=False):
     """
     Stochastic search from Vanier et al. 1999.
@@ -63,7 +64,7 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
     return x0
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Vanier1999

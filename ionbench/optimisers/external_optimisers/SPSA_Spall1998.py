@@ -2,6 +2,7 @@ import numpy as np
 import ionbench
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     """
     Implementation of SPSA from Spall 1998. There are few details on implementation in Maryak 1998, the paper which uses SPSA. Maryak cites Spall 1992, however this paper does not give recommendations for hyperparameters, in which case we use Spall 1998. The Maryak modifications do not use scaling factors or log transforms, which likely significantly hurts the SPSA algorithm which takes step sizes of identical magnitudes in all parameter directions.
@@ -80,7 +81,7 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
     return x0
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Maryak1998

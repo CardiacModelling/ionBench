@@ -1,4 +1,3 @@
-import ionbench
 import numpy as np
 import copy
 
@@ -66,8 +65,7 @@ def get_pop(bm, x0, n, cost_func):
     pop = [None] * n
     for i in range(n):
         pop[i] = Individual(bm, x0, cost_func)
-        pop[i].find_cost()
-    return pop
+    return find_pop_costs(pop)
 
 
 def find_pop_costs(pop):

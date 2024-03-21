@@ -6,6 +6,7 @@ import copy
 
 
 # TODO: eta_mut is unused - needs fixing
+# noinspection PyShadowingNames
 def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Smirnov et al. 2020.
@@ -77,7 +78,7 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
     return elites[0].x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Smirnov2020

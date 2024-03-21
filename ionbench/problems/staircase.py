@@ -2,17 +2,19 @@
 Contains the two staircase benchmarker problems, HH and MM. These both inherit from StaircaseBenchmarker which itself inherits from benchmarker.Benchmarker.
 generate_data(modelType) will generate the data for either the HH or MM problem and store it in the data directory.
 """
-import os
-import numpy as np
 import csv
+import os
+
 import myokit
-import ionbench
-import scipy.stats
-import copy
+import numpy as np
+from scipy.stats import loguniform
 from myokit.lib.hh import HHModel
 from myokit.lib.markov import LinearModel
 
+import ionbench
 
+
+# noinspection PyUnresolvedReferences
 class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         # Benchmarker
@@ -65,7 +67,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
                 p = []
                 for j in range(self.n_parameters()):
                     if self.STANDARD_LOG_TRANSFORM[j]:
-                        p.append(scipy.stats.loguniform.rvs(self._LOWER_BOUND[j], self._UPPER_BOUND[j]))
+                        p.append(loguniform.rvs(self._LOWER_BOUND[j], self._UPPER_BOUND[j]))
                     else:
                         p.append(np.random.uniform(self._LOWER_BOUND[j], self._UPPER_BOUND[j]))
                 if self.in_rate_bounds(p, boundedCheck=False):
@@ -203,6 +205,7 @@ class MM(StaircaseBenchmarker):
         print('Benchmarker initialised')
 
 
+# noinspection PyProtectedMember
 def generate_data(modelType):
     """
     Generate the data files for the staircase benchmarker problems.

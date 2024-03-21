@@ -6,6 +6,7 @@ import ionbench.utils.population_optimisers as pop_opt
 import copy
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
     """
     Runs the genetic algorithm from Cairns et al. 2017.
@@ -118,7 +119,7 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
     return elites[0].x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Cairns2017

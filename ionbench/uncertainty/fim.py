@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 
+# noinspection PyProtectedMember
 def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
     """
     Calculate the second order partial derivative of the log likelihood (specifically the negative of the sum of squared errors) in parameters i and j.
@@ -29,6 +30,7 @@ def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
 
     """
     if i == j:
+        # noinspection PyProtectedMember,PyShadowingNames
         def f(x):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = x
@@ -46,6 +48,7 @@ def second_deriv(bm, i, j, step=1e-4, buffer=1e-4):
             down = f(x - x * h)
         return (up - 2 * centre + down) / ((x * h)**2)
     else:
+        # noinspection PyProtectedMember,PyShadowingNames
         def f(x, y):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = x
@@ -91,6 +94,7 @@ def sse(bm, params):
     return -cost**2 * len(bm.DATA)  # Sum of squared errors
 
 
+# noinspection PyProtectedMember
 def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
     """
     Calculate the Fisher's Information Matrix for a benchmarker problem. Also plots the eigenspectrum of the FIM.
@@ -143,6 +147,7 @@ def run(bm, sigma=1, preoptimise=True, ftol=3e-6, step=1e-4, buffer=1e-4):
     return mat
 
 
+# noinspection PyProtectedMember
 def explore_solver_noise(bm):
     """
     Identify the scale of noise in the solver cost function.

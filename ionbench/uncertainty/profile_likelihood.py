@@ -81,7 +81,7 @@ class ProfileManager:
         pass
 
 
-# noinspection PyUnboundLocalVariable
+# noinspection PyUnboundLocalVariable,PyProtectedMember
 def run(bm, variations, backwardPass=False, filename=''):
     """
     Generate a profile likelihood style plot, reporting the fitted cost as a function of each fixed parameter.
@@ -144,6 +144,7 @@ def run(bm, variations, backwardPass=False, filename=''):
                 pickle.dump(data, f)
 
 
+# noinspection PyProtectedMember
 def plot_profile_likelihood(modelType, numberToPlot, debug=False):
     """
     Plot profile likelihood plots based on the pickled data in the current working directory.

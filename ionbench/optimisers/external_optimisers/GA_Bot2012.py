@@ -4,6 +4,7 @@ import ionbench.utils.population_optimisers as pop_opt
 import copy
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Bot et al. 2012.
@@ -68,6 +69,7 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, popSize=50, debug=False
     return elites[0].x
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Bot2012

@@ -3,6 +3,7 @@ import ionbench
 # Velocity of new points from NM is undefined. New particles from NM (either accepting or shrinking) maintain their old locally best position and previous velocity. We don't update the velocity of particles which underwent a NM step
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Run the hybrid Nelder-Mead and PSO optimiser from Liu et al. 2011.
@@ -28,10 +29,12 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         x0 = bm.sample()
     gmin = bm.COST_THRESHOLD
 
+    # noinspection PyShadowingNames
     class Particle:
         def __init__(self, position=None):
             if position is None:
-                self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
+                self.position = bm.input_parameter_space(
+                    bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
             else:
                 self.position = position
             self.position = bm.clamp_parameters(self.position)
@@ -47,6 +50,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
                 self.bestPosition = np.copy(self.position)
 
     # class for the simplex
+    # noinspection PyShadowingNames
     class Simplex:
         def __init__(self, particles):
             self.particles = particles
@@ -245,7 +249,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     return Gpos[L]
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Liu2011

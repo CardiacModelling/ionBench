@@ -3,6 +3,7 @@ import ionbench
 import scipy.optimize
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     """
     Run differential evolution, as defined by Zhou et al. 2009. This algorithm is based on scheme DE/rand/1 of Storn 1999.
@@ -42,7 +43,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         def find_cost(self):
             self.cost = cost_func(tuple(self.x))
 
-    # noinspection PyPep8Naming
+    # noinspection PyPep8Naming,PyShadowingNames
     def get_L():
         # Get the number of parameters to perturb in crossover
         L = 1
@@ -125,7 +126,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     return bestInd.x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Zhou2009

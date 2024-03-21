@@ -5,6 +5,7 @@ import ionbench
 import scipy
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=False):
     """
     Curvilinear gradient descent from Dokos 2004. This method was first introduced in Dokos 2003, with this implementation using the updated scheme which includes weighted residuals (Dokos 2004). It calculates a curved path which initially follows the steepest descent, but curves to finally converge towards a Gauss-Newton step (minimum of a locally defined quadratic). In order to optimise along this line, we use Scipy's implementation of Brent's method (an implementation based on Press et al. "Numerical Recipes in C").
@@ -32,6 +33,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
     """
 
     # Update to the weight vector for the residuals
+    # noinspection PyShadowingNames
     def weight_update(wOld, r):
         """
         Update the weights for the residuals.
@@ -65,6 +67,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
     ub = bm.input_parameter_space(bm.ub)
     lb = bm.input_parameter_space(bm.lb)
 
+    # noinspection PyShadowingNames
     def fitting_params(p):
         """
         Transform from model solve space to fitting space.
@@ -83,6 +86,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             x[i] = np.arcsin(np.sqrt((p[i] - lb[i]) / (ub[i] - lb[i])))
         return x
 
+    # noinspection PyShadowingNames
     def model_params(x):
         """
         Transform from fitting space to model solve space.
@@ -210,7 +214,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 print(d)
 
             # Generate function of the curved path from starting point (no step, L(0)=[0,0,0,...]), initially moving in the steepest descent direction, converging towards Gauss Newton step at alpha=inf
-            # noinspection PyPep8Naming
+            # noinspection PyPep8Naming,PyShadowingNames
             def L(alpha):
                 m = np.zeros(len(d))
                 for i in range(len(d)):
@@ -227,7 +231,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             # Minimise bm.SSE(x0+L(alpha)) with respect to alpha using Brent's method
             # Define function to find weighted SSE from alpha
             # Cache SSE function to help make the code to handle the brent method more robust without needing repeated function evaluations
-            # noinspection PyPep8Naming
+            # noinspection PyPep8Naming,PyShadowingNames
             def SSE(alpha):
                 weightedr0 = np.diag(w) @ signed_error(model_params(x0 + L(alpha)))
                 return np.dot(weightedr0, weightedr0)
@@ -297,6 +301,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
     return x0
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Dokos2004

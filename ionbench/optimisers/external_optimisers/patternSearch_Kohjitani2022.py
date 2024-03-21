@@ -2,6 +2,7 @@ import ionbench
 import numpy as np
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfev=20000, debug=False):
     """
     Runs the pattern search algorithm from Kohjitani et al. 2022.
@@ -36,6 +37,7 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
     funcCounter = 0
     iterCounter = 0
 
+    # noinspection PyShadowingNames
     def explore(BP, Stp):
         """
         Explores neighbouring points to the base point BP.
@@ -114,7 +116,7 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
     return NP
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Kohjitani2022

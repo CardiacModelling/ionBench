@@ -2,6 +2,7 @@ import numpy as np
 import ionbench
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Random search from Vanier et al. 1999. This optimiser random sample maxIter parameters and reports the best one.
@@ -52,7 +53,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     return x_best
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Vanier1999

@@ -2,6 +2,7 @@ import numpy as np
 import ionbench
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, n=20, maxIter=1000, debug=False):
     """
     Runs the PSO algorithm defined by Seemann et al. 2022.
@@ -30,6 +31,7 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
 
     gmin = bm.COST_THRESHOLD
 
+    # noinspection PyShadowingNames
     class Particle:
         def __init__(self):
             self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
@@ -105,7 +107,7 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
     return Gpos[L]
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Seemann2009

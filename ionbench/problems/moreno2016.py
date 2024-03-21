@@ -44,9 +44,9 @@ class INa(ionbench.benchmarker.Benchmarker):
                                 (lambda p, V: p[15] * p[8] * np.exp(-V / p[9]), 'negative'))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.01
-        p = self.protocol()
+        protocol = self.protocol()
         self.TIMESTEP = 0.5  # Timestep in data between points
-        self.T_MAX = p.characteristic_time()
+        self.T_MAX = protocol.characteristic_time()
         self._logTimes = None
         self._ssiBounds = None
         self._actBounds = None
@@ -349,6 +349,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         return np.array(ssi + act + rfi + tau)
 
 
+# noinspection PyProtectedMember
 def generate_data():
     """
     Generate the data files for the Moreno 2016 benchmarker problems. The true parameters are the same as the default for this benchmark problem.

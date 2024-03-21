@@ -5,6 +5,7 @@ import copy
 import warnings
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, nGens=1000, popSize=0, debug=False):
     """
     Runs the genetic algorithm from Gurkiewicz et al. 2007. This uses tournament selection (tournament size of 2) and single point crossover. This version of the algorithm, labelled version b, uses gaussian perturbations as the mutation method.
@@ -71,7 +72,7 @@ def run(bm, x0=None, nGens=1000, popSize=0, debug=False):
     return elites[0].x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Gurkiewicz2007

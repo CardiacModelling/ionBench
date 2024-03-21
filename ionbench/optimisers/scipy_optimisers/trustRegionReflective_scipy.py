@@ -2,6 +2,7 @@ import ionbench.problems.staircase
 import scipy.optimize
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs Trust Region Reflective optimiser from Scipy.
@@ -50,6 +51,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     return out.x
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Du2014

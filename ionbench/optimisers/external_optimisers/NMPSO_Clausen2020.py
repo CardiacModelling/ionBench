@@ -5,6 +5,7 @@ from ionbench.optimisers.pints_optimisers import classes_pints
 # Limited information on the implementation given in Clausen 2020.
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
     Runs PSO (Particle Swarm Optimisation) from Pints and then Nelder Mead from Pints.
@@ -48,7 +49,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     return x
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Clausen2020

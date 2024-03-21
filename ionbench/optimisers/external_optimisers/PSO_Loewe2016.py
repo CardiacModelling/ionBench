@@ -2,6 +2,7 @@ import numpy as np
 import ionbench
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     """
     Runs the particle swarm optimisation from Loewe et al. 2016. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
@@ -41,6 +42,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
         else:
             x0 = x0 / (2 * bm._TRUE_PARAMETERS)
 
+    # noinspection PyShadowingNames
     class Particle:
         def __init__(self):
             self.velocity = np.zeros(bm.n_parameters())
@@ -144,7 +146,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     return transform(Gpos[L])
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Loewe2016

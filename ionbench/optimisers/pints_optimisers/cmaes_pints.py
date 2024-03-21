@@ -4,6 +4,7 @@ import numpy as np
 from ionbench.optimisers.pints_optimisers import classes_pints
 
 
+# noinspection PyShadowingNames
 def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
     """
     Runs CMA-ES from Pints using a benchmarker.
@@ -39,6 +40,7 @@ def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
     return x
 
 
+# noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
     modNum = 1 -> Clerx2019
