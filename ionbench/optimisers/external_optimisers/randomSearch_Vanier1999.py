@@ -5,7 +5,7 @@ import ionbench
 # noinspection PyShadowingNames
 def run(bm, x0=None, maxIter=1000, debug=False):
     """
-    Random search from Vanier et al. 1999. This optimiser random sample maxIter parameters and reports the best one.
+    Random search from Vanier et al. 1999. This optimiser randomly samples maxIter parameters and reports the best one.
 
     Parameters
     ----------
