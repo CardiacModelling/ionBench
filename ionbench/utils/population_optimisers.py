@@ -138,12 +138,32 @@ def one_point_crossover(pop, bm, cost_func, crossoverProb=0.5):
         a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
         parents = [[a, b]]
         off = SinglePointCrossover(prob=crossoverProb).do(problem, parents)
-        Xp = off.get("X")
-        newPop.append(Individual(bm, bm.sample(), cost_func))
-        newPop[-1].x = Xp[0]
-        newPop.append(Individual(bm, bm.sample(), cost_func))
-        newPop[-1].x = Xp[1]
+        newPop = add_pymoo(newPop, off, cost_func)
     return newPop
+
+
+def add_pymoo(pop, off, cost_func):
+    """
+    Add the pymoo population to the ionbench population list.
+    Parameters
+    ----------
+    pop : list
+        List of individuals (ionbench population)
+    off : pymoo.core.population.Population
+        Population of individuals (pymoo population)
+    cost_func : function
+        A cost function to use for the ionbench individuals.
+
+    Returns
+    -------
+    pop : list
+        List of individuals (ionbench population) with the new individuals added.
+    """
+    Xp = off.get("X")
+    for i in range(len(Xp)):
+        pop.append(Individual(bm, bm.sample(), cost_func))
+        pop[-1].x = Xp[i]
+    return pop
 
 
 def sbx_crossover(pop, bm, cost_func, eta_cross):
@@ -172,11 +192,7 @@ def sbx_crossover(pop, bm, cost_func, eta_cross):
         a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
         parents = [[a, b]]
         off = SBX(prob=0.9, prob_var=0.5, eta=eta_cross).do(problem, parents)
-        Xp = off.get("X")
-        newPop.append(Individual(bm, bm.sample(), cost_func))
-        newPop[-1].x = Xp[0]
-        newPop.append(Individual(bm, bm.sample(), cost_func))
-        newPop[-1].x = Xp[1]
+        newPop = add_pymoo(newPop, off, cost_func)
     return newPop
 
 
