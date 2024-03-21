@@ -5,9 +5,8 @@ import ionbench.utils.population_optimisers as pop_opt
 import copy
 
 
-# TODO: eta_mut is unused - needs fixing
 # noinspection PyShadowingNames
-def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, popSize=50, debug=False):
+def run(bm, x0=None, nGens=50, eta_cross=10, elitePercentage=0.066, popSize=50, debug=False):
     """
     Runs the genetic algorithm from Smirnov et al. 2020.
 
@@ -21,8 +20,6 @@ def run(bm, x0=None, nGens=50, eta_cross=10, eta_mut=20, elitePercentage=0.066, 
         The number of generations to run the optimisation algorithm for. The default is 50.
     eta_cross : float, optional
         Crossover parameter. The default is 10.
-    eta_mut : float, optional
-        Mutation parameter. The default is 20.
     elitePercentage : float, optional
         The percentage of the population that are considered elites to move into the next generation. This will be multiplied by popSize and then rounded to the nearest integer. The default is 0.066.
     popSize : int, optional
