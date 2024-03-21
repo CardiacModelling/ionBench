@@ -41,13 +41,14 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
 
     """
 
+    if not bm.parametersBounded:
+        raise RuntimeError('This optimiser requires bounds.')
+
     if x0 is not None:
         # Map from input parameter space to [0,1]
         x0 = bm.original_parameter_space(x0)
-        if bm.parametersBounded:
-            x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
-        else:
-            x0 = x0 / (2 * bm._TRUE_PARAMETERS)
+        x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
+
     gmin = bm.COST_THRESHOLD
 
     # noinspection PyShadowingNames
@@ -80,13 +81,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
         """
         Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
         """
-        if bm.parametersBounded:
-            lb = bm.lb
-            ub = bm.ub
-        else:
-            lb = 0 * bm._TRUE_PARAMETERS
-            ub = 2 * bm._TRUE_PARAMETERS
-        xTrans = lb + x * (ub - lb)
+        xTrans = bm.lb + x * (bm.ub - bm.lb)
         return bm.input_parameter_space(xTrans)
 
     if groups is None:
