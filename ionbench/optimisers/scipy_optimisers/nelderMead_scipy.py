@@ -1,6 +1,6 @@
 import ionbench.problems.staircase
 import scipy.optimize
-import numpy as np
+from ionbench.utils.scipy_setup import minimize_bounds
 
 
 # noinspection PyShadowingNames
@@ -39,22 +39,7 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
             print(x0)
 
     if bm.parametersBounded:
-        lb = list(bm.input_parameter_space(bm.lb))
-        ub = list(bm.input_parameter_space(bm.ub))
-        bounds = []
-        for i in range(bm.n_parameters()):
-            if lb[i] == np.inf or lb[i] == np.nan:
-                lb[i] = None
-            if ub[i] == np.inf or ub[i] == np.nan:
-                ub[i] = None
-            bounds.append((lb[i], ub[i]))
-        if debug:
-            print('Bounds transformed')
-            print('Old Bounds:')
-            print(bm.lb)
-            print(bm.ub)
-            print('New bounds')
-            print(bounds)
+        bounds = minimize_bounds(bm, debug)
         out = scipy.optimize.minimize(cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
         out = scipy.optimize.minimize(cost, x0, method='nelder-mead', options={'disp': debug, 'xatol': xtol, 'fatol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})

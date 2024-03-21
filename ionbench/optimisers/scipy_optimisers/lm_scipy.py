@@ -1,5 +1,5 @@
 import ionbench.problems.staircase
-import scipy.optimize
+from ionbench.utils.scipy_setup import least_squares
 
 
 # noinspection PyShadowingNames
@@ -23,25 +23,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by LM.
     """
-    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
-    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
-
-    if x0 is None:
-        x0 = bm.sample()
-        if debug:
-            print('Sampling x0')
-            print(x0)
-
-    if debug:
-        verbose = 2
-    else:
-        verbose = 1
-
-    out = scipy.optimize.least_squares(signed_error, x0, method='lm', jac=grad, verbose=verbose, max_nfev=maxIter)
-
-    if debug:
-        print(f'Cost of {out.cost} found at:')
-        print(out.x)
+    ionbench.utils.scipy_setup.least_squares(bm, x0, debug, method='lm', maxIter=maxIter)
 
     bm.evaluate()
     return out.x
