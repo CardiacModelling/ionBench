@@ -106,9 +106,8 @@ class IKr(LoeweBenchmarker):
         self.NAME = "loewe2016.ikr"
         self._TRUE_PARAMETERS = np.array([3e-4, 14.1, 5, 3.3328, 5.1237, 1, 14.1, 6.5, 15, 22.4, 0.029411765, 138.994])
         self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, True, False, True, False, True, True, True)
-        self._RATE_FUNCTIONS = ((lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))), 'positive'),
-                                (lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1),
-                                 'negative'))  # Used for rate bounds
+        self._RATE_FUNCTIONS = (lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))),
+                                lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.01
 
@@ -142,10 +141,10 @@ class IKur(LoeweBenchmarker):
                                        False, False, True, False, False, False, True, True, False, True, False, True,
                                        True)
         self._RATE_FUNCTIONS = (
-            (lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])), 'positive'),
-            (lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])), 'negative'),
-            (lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])), 'positive'),
-            (lambda p, V: np.exp((V - p[15]) / -p[16]), 'negative'))  # Used for rate bounds
+            lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])),
+            lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])),
+            lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])),
+            lambda p, V: np.exp((V - p[15]) / -p[16]))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.01
 

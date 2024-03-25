@@ -142,10 +142,10 @@ class HH(StaircaseBenchmarker):
         self.NAME = "staircase.hh"
         self._TRUE_PARAMETERS = np.array([2.26e-4, 0.0699, 3.45e-5, 0.05462, 0.0873, 8.91e-3, 5.15e-3, 0.03158, 0.1524])
         self.STANDARD_LOG_TRANSFORM = (True, False) * 4 + (False,)
-        self._RATE_FUNCTIONS = ((lambda p, V: p[0] * np.exp(p[1] * V), 'positive'),
-                                (lambda p, V: p[2] * np.exp(-p[3] * V), 'negative'),
-                                (lambda p, V: p[4] * np.exp(p[5] * V), 'positive'),
-                                (lambda p, V: p[6] * np.exp(-p[7] * V), 'negative'))  # Used for rate bounds
+        self._RATE_FUNCTIONS = (lambda p, V: p[0] * np.exp(p[1] * V),
+                                lambda p, V: p[2] * np.exp(-p[3] * V),
+                                lambda p, V: p[4] * np.exp(p[5] * V),
+                                lambda p, V: p[6] * np.exp(-p[7] * V))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.02
 
@@ -180,14 +180,14 @@ class MM(StaircaseBenchmarker):
             [0.20618, 0.0112, 0.04209, 0.02202, 0.0365, 0.41811, 0.0223, 0.13279, 0.0603, 0.08094, 0.0002262, 0.0399,
              0.04150, 0.0312, 0.024])
         self.STANDARD_LOG_TRANSFORM = (True, False, True) * 2 + (False, True) * 2 + (True, False) * 2 + (False,)
-        self._RATE_FUNCTIONS = ((lambda p, v: p[0] * np.exp(p[1] * v), 'positive'),
-                                (lambda p, v: p[2], 'independent'),
-                                (lambda p, v: p[3] * np.exp(p[4] * v), 'positive'),
-                                (lambda p, v: p[5] * np.exp(p[6] * v), 'positive'),
-                                (lambda p, v: p[7] * np.exp(-p[8] * v), 'negative'),
-                                (lambda p, v: p[9], 'independent'),
-                                (lambda p, v: p[10] * np.exp(-p[11] * v), 'negative'),
-                                (lambda p, v: p[12] * np.exp(-p[13] * v), 'negative'))  # Used for rate bounds
+        self._RATE_FUNCTIONS = (lambda p, V: p[0] * np.exp(p[1] * V),
+                                lambda p, V: p[2],
+                                lambda p, V: p[3] * np.exp(p[4] * V),
+                                lambda p, V: p[5] * np.exp(p[6] * V),
+                                lambda p, V: p[7] * np.exp(-p[8] * V),
+                                lambda p, V: p[9],
+                                lambda p, V: p[10] * np.exp(-p[11] * V),
+                                lambda p, V: p[12] * np.exp(-p[13] * V))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.0075
 

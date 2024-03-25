@@ -739,19 +739,8 @@ class Benchmarker:
             The penalty to apply for rate bound violations.
         """
         penalty = 0
-        for rateFunc, rateType in self._RATE_FUNCTIONS:
-            if rateType == 'positive':
-                # check kHigh is in bounds
-                k = rateFunc(parameters, self.V_HIGH)
-            elif rateType == 'negative':
-                # check kLow is in bounds
-                k = rateFunc(parameters, self.V_LOW)
-            elif rateType == 'independent':
-                # check rate in bounds
-                k = rateFunc(parameters, 0)  # Voltage doesn't matter
-            else:
-                raise RuntimeError(
-                    "Error in bm._RATE_FUNCTIONS. Doesn't contain 'positive', 'negative', or 'independent' in at least one position. Check for typos.")
+        for rateFunc in self._RATE_FUNCTIONS:
+            k = max(rateFunc(parameters, self.V_HIGH), rateFunc(parameters, self.V_LOW))
             if k < self.RATE_MIN:
                 penalty += 1e5
                 penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
