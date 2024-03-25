@@ -138,15 +138,17 @@ def one_point_crossover(pop, bm, cost_func, crossoverProb=0.5):
         a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
         parents = [[a, b]]
         off = SinglePointCrossover(prob=crossoverProb).do(problem, parents)
-        newPop = add_pymoo(newPop, off, cost_func)
+        newPop = add_pymoo(bm, newPop, off, cost_func)
     return newPop
 
 
-def add_pymoo(pop, off, cost_func):
+def add_pymoo(bm, pop, off, cost_func):
     """
     Add the pymoo population to the ionbench population list.
     Parameters
     ----------
+    bm : ionbench.Benchmarker
+        Benchmarker object
     pop : list
         List of individuals (ionbench population)
     off : pymoo.core.population.Population
@@ -192,7 +194,7 @@ def sbx_crossover(pop, bm, cost_func, eta_cross):
         a, b = pymooInd(X=np.array(pop[2 * i].x)), pymooInd(X=np.array(pop[2 * i + 1].x))
         parents = [[a, b]]
         off = SBX(prob=0.9, prob_var=0.5, eta=eta_cross).do(problem, parents)
-        newPop = add_pymoo(newPop, off, cost_func)
+        newPop = add_pymoo(bm, newPop, off, cost_func)
     return newPop
 
 
