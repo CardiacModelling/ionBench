@@ -1,13 +1,17 @@
+"""
+This module provides the perturbed PSO from Chen et al. 2012.
+The implementation of the algorithm is clear, so we don't need to make any assumptions.
+The position sampling does not allow the use of an initial guess x0, so we do not use it with ionBench. Instead, using the ionBench default.
+The initial velocity sampling can be used, however.
+If the groups are not specified, the case for the presented results, then each parameter is in its own group.
+"""
 import numpy as np
 import ionbench
 import itertools
 
 
-# Notes: The algorithm defines parameters between 0 and 1, this is mapped to 0 to 2 when the cost function is called
-
-
 # noinspection PyShadowingNames
-def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=0.6, debug=False):
+def run(bm, x0=None, groups=None, n=6, c1=1.4, c2=1.4, qmax=4, maxIter=1000, w=0.6, debug=False):
     """
     Runs the perturbed particle swarm optimisation algorithm from Chen et al. 2012. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default]
 
@@ -20,13 +24,13 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
     groups : list, optional
         Groupings of parameters to use in the algorithm. Default is None, in which case every parameter will be in its own group.
     n : int, optional
-        Number of particles. The default is 20.
+        Number of particles. The default is 6.
     c1 : float, optional
         Scale of the acceleration towards a particle's best positions. The default is 1.4.
     c2 : float, optional
         Scale of the acceleration towards the best point seen across all particles. The default is 1.4.
     qmax : int, optional
-        Maximum number of iterations without improvement before perturbations. The default is 5.
+        Maximum number of iterations without improvement before perturbations. The default is 4.
     maxIter : int, optional
         Maximum number of iterations. The default is 1000.
     w : float, optional
@@ -44,45 +48,18 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
     if not bm.parametersBounded:
         raise RuntimeError('This optimiser requires bounds.')
 
-    if x0 is not None:
-        # Map from input parameter space to [0,1]
-        x0 = bm.original_parameter_space(x0)
-        x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
+    cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
-    gmin = bm.COST_THRESHOLD
+    if x0 is None:
+        x0 = bm.sample()
 
     # noinspection PyShadowingNames
-    class Particle:
-        def __init__(self, n_param):
-            self.velocity = 0.1 * np.random.rand(n_param)
-            if x0 is not None:
-                self.position = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
-                for i in range(bm.n_parameters()):
-                    if self.position[i] > 1:
-                        self.position[i] = 1
-            else:
-                self.position = np.random.rand(n_param)
-            self.bestCost = np.inf  # Best cost of this particle
-            self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
-            self.currentCost = None
+    class Particle(ionbench.utils.particle_optimisers.Particle):
+        def __init__(self):
+            super().__init__(bm, cost_func, x0)
 
-        def set_cost(self, cost):
-            self.currentCost = cost
-            if cost < self.bestCost:
-                self.bestCost = cost
-                self.bestPosition = np.copy(self.position)
-
-    cached_cost = ionbench.utils.cache.get_cached_cost(bm)
-
-    def cost_func(x):
-        return cached_cost(transform(x))
-
-    def transform(x):
-        """
-        Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
-        """
-        xTrans = bm.lb + x * (bm.ub - bm.lb)
-        return bm.input_parameter_space(xTrans)
+        def set_velocity(self):
+            self.velocity = 0.1 * np.random.rand(bm.n_parameters())
 
     if groups is None:
         groups = [[i] for i in range(bm.n_parameters())]
@@ -100,7 +77,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
 
     particleList = []
     for i in range(n):
-        particleList.append(Particle(bm.n_parameters()))
+        particleList.append(Particle())
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
@@ -119,10 +96,9 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
 
         foundImprovement = False
         for p in particleList:
-            cost = cost_func(p.position)
-            p.set_cost(cost)
-            if cost < Gcost[L]:
-                Gcost[L] = cost
+            p.set_cost()
+            if p.currentCost < Gcost[L]:
+                Gcost[L] = p.currentCost
                 Gpos[L] = np.copy(p.position)
                 foundImprovement = True
 
@@ -138,10 +114,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
                 print("Didn't find an improvement")
                 print(f'Current value of q: {q}')
 
-        if Gcost[L] < gmin:
-            print("Cost successfully minimised")
-            print(f'Final cost of {Gcost[L]} found at:')
-            print(Gpos[L])
+        if bm.is_converged():
             break
 
         if q > 5 * qmax:
@@ -160,16 +133,14 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
             bestNewCost = np.inf
             bestNewPosition = None
             for i in range(N):
-                newParticle = Particle(bm.n_parameters())
+                newParticle = Particle()
                 newParticle.position = np.copy(Gpos[L])
                 for j in patterns[i]:
                     newParticle.position[j] *= 1 + (np.random.rand() - 0.5) / 40
-                    if newParticle.position[j] > 1:
-                        newParticle.position[j] = 1
-                cost = cost_func(newParticle.position)
-                newParticle.set_cost(cost)
-                if cost < bestNewCost:
-                    bestNewCost = cost
+                newParticle.clamp()
+                newParticle.set_cost()
+                if newParticle.currentCost < bestNewCost:
+                    bestNewCost = newParticle.currentCost
                     bestNewPosition = np.copy(newParticle.position)
                 newParticleList.append(newParticle)
             if debug:
@@ -182,13 +153,14 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
                 q = 0
                 Gcost[L] = bestNewCost
                 Gpos[L] = np.copy(bestNewPosition)
+                # Find worst cost and position
                 worstCost = -np.inf
                 worstPosition = None
                 for p in particleList:
                     if p.currentCost > worstCost:
                         worstCost = p.currentCost
                         worstPosition = p.position
-                # Found worst cost and position, now to find that particle
+                # Found worst cost and position, now to find that particle and set it to the best position
                 if debug:
                     print("Adjusting worst particle")
                 for p in particleList:
@@ -224,11 +196,7 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
         # Move positions according to (15) while maintaining [0,1] bounds
         for p in particleList:
             p.position += p.velocity
-            for i in range(bm.n_parameters()):
-                if p.position[i] < 0:
-                    p.position[i] = 0
-                elif p.position[i] > 1:
-                    p.position[i] = 1
+            p.clamp()
 
         if debug:
             print("Positions renewed")
@@ -236,11 +204,8 @@ def run(bm, x0=None, groups=None, n=20, c1=1.4, c2=1.4, qmax=5, maxIter=1000, w=
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
-        if bm.is_converged():
-            break
-
     bm.evaluate()
-    return transform(Gpos[L])
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames

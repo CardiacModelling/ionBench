@@ -29,7 +29,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
 
     """
 
-    model, opt = classes_pints.pints_setup(bm, x0, pints.PSO)
+    model, opt = classes_pints.pints_setup(bm, x0, pints.PSO, maxIter, debug)
     opt.set_max_iterations(maxIter)
     if debug:
         print('Beginning PSO')
@@ -38,7 +38,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     if debug:
         print(f'PSO complete with best cost of {f}')
     # Create an optimisation controller
-    model, opt = classes_pints.pints_setup(bm, x, pints.NelderMead, forceUnbounded=True)
+    model, opt = classes_pints.pints_setup(bm, x, pints.NelderMead, maxIter, debug, forceUnbounded=True)
     opt.set_max_iterations(maxIter)
     # Run the optimisation
     if debug:

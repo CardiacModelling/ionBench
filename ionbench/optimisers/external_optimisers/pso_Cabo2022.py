@@ -1,5 +1,18 @@
+"""
+This module contains the PSO optimiser from Cabo 2022.
+Little information on the algorithm is given in the paper but the code that was used is provided at https://github.com/kkentzo/pso
+The code provides many options for the algorithm, which are not described in the paper. We use the defaults, also stated here.
+There is a choice of topologies for determining the global acceleration term, in which case we use the ring topology (PSO_NHOOD_RING)
+There is a choice of inertia weights, either linearly decreasing (user specified limits) or constant (0.7298). We use linearly decreasing from 0.7298 to 0.3 over maxIter iterations.
+We use the internally calculated population size formula.
+We assume the coefficients c1 and c2 are maintained at their defaults (1.496).
+We assume the particle positions are clamped to the bounds.
+The initial position sampling described would ignore the point x0 so cannot be used in ionBench. We use the ionBench default instead.
+The initial velocity sampling can be used.
+"""
 import numpy as np
 import ionbench
+import copy
 
 
 # noinspection PyShadowingNames
@@ -26,35 +39,72 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     """
     if x0 is None:
         x0 = bm.sample()
-    gmin = bm.COST_THRESHOLD
-
-    # noinspection PyShadowingNames
-    class Particle:
-        def __init__(self):
-            self.position = bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters()))
-            self.position = bm.clamp_parameters(self.position)
-            self.velocity = (bm.input_parameter_space(bm.original_parameter_space(x0) * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())) - self.position) / 2
-            self.bestCost = np.inf  # Best cost of this particle
-            self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
-            self.currentCost = None
-
-        def set_cost(self, cost):
-            self.currentCost = cost
-            if cost < self.bestCost:
-                self.bestCost = cost
-                self.bestPosition = np.copy(self.position)
 
     cost_func = ionbench.utils.cache.get_cached_cost(bm)
 
-    lb = bm.input_parameter_space(bm.lb)
-    ub = bm.input_parameter_space(bm.ub)
+    # noinspection PyShadowingNames
+    class Particle(ionbench.utils.particle_optimisers.Particle):
+        def __init__(self):
+            self.x0 = x0
+            super().__init__(bm, cost_func, x0)
+
+        def set_velocity(self):
+            """
+            The velocity algorithm used by Cabo 2022 takes two sampled positions. Sets the particle position to one of them, set the velocity to point away from the other.
+            """
+            copied_position = np.copy(self.position)
+            self.set_position(self.x0)
+            self.velocity = (self.position - copied_position) / 2
+            # Reset position
+            self.position = copied_position
+
+        def clamp(self):
+            """
+            Clamp parameters to the input parameter space. Also sets the velocity to 0 in any clamped parameters.
+            """
+            for i in range(len(self.position)):
+                if self.position[i] < 0:
+                    self.position[i] = 0
+                    self.velocity[i] = 0
+                elif self.position[i] > 1:
+                    self.position[i] = 1
+                    print(self.velocity)
+                    print(i)
+                    self.velocity[i] = 0
+
+    # noinspection PyShadowingNames
+    def best_in_ring(particleList):
+        """
+        Finds the best cost and position in the ring topology for each particle. Returns the positions of the best neighbouring particle that each particle can see.
+
+        Parameters
+        ----------
+        particleList : list
+            List of particles.
+
+        Returns
+        -------
+        ringPos : list
+            List of positions of the best neighbouring particle that each particle can see.
+        """
+        costs = [p.bestCost for p in particleList]
+        ringPos = [p.bestPosition for p in particleList]
+        ringCosts = copy.copy(costs)
+        for i in range(len(particleList)):
+            costLow = costs[(i - 1) % len(particleList)]
+            costHigh = costs[(i + 1) % len(particleList)]
+            if costLow < ringCosts[i]:
+                ringCosts[i] = costLow
+                ringPos[i] = particleList[(i - 1) % len(particleList)].bestPosition
+            if costHigh < ringCosts[i]:
+                ringCosts[i] = costHigh
+                ringPos[i] = particleList[(i + 1) % len(particleList)].bestPosition
+        return ringPos
 
     # Set population size n
     n = int(10 + 2 * np.sqrt(bm.n_parameters()))
     # Initial population
-    particleList = []
-    for i in range(n):
-        particleList.append(Particle())
+    particleList = [Particle() for _ in range(n)]
 
     Gcost = [np.inf] * maxIter  # Best cost ever
     Gpos = [None] * maxIter  # Position of best cost ever
@@ -71,40 +121,26 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             print(f'Found at position: {Gpos[L]}')
 
         for p in particleList:
-            cost = cost_func(p.position)
-            p.set_cost(cost)
-            if cost < Gcost[L]:
-                Gcost[L] = cost
+            p.set_cost()
+            if p.currentCost < Gcost[L]:
+                Gcost[L] = p.currentCost
                 Gpos[L] = np.copy(p.position)
 
-        if Gcost[L] < gmin:
-            print("Cost successfully minimised")
-            print(f'Final cost of {Gcost[L]} found at:')
-            print(Gpos[L])
-            break
-
         # Renew velocities
-        c1 = 1.496  # Assume they used the fixed value
-        c2 = 1.496  # Assume they used the fixed value
-        w = 0.7298  # Assume they used the fixed value
-        for p in particleList:
+        c1 = 1.496
+        c2 = 1.496
+        w = 0.7298 - (0.7298-0.3)*L/maxIter
+        ringPos = best_in_ring(particleList)
+        for i, p in enumerate(particleList):
             localAcc = c1 * np.random.rand() * (p.bestPosition - p.position)
-            globalAcc = c2 * np.random.rand() * (Gpos[L] - p.position)
+            globalAcc = c2 * np.random.rand() * (ringPos[i] - p.position)
             p.velocity = w * p.velocity + localAcc + globalAcc
         if debug:
             print("Velocities renewed")
         # Move positions
         for p in particleList:
             p.position += p.velocity
-            # Enforce bounds by clamping
-            if not bm.in_parameter_bounds(bm.original_parameter_space(p.position)):
-                for i in range(bm.n_parameters()):
-                    if p.position[i] > ub[i]:
-                        p.position[i] = ub[i]
-                        p.velocity[i] = 0
-                    elif p.position[i] < lb[i]:
-                        p.position[i] = lb[i]
-                        p.velocity[i] = 0
+            p.clamp()
 
         if debug:
             print("Positions renewed")
@@ -116,7 +152,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             break
 
     bm.evaluate()
-    return Gpos[L]
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
@@ -135,7 +171,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH()
+    bm = ionbench.problems.loewe2016.IKr()
     mod = get_modification()
     mod.apply(bm)
     run(bm, maxIter=200, debug=True, **mod.kwargs)

@@ -136,7 +136,11 @@ class Tracker:
             plt.figure()
             plt.scatter(range(len(costs)), costs, c="k", marker=".")
             c = np.array(costs)
-            plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
+            try:
+                plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
+            except ValueError:
+                # All points out of bounds
+                pass
             plt.xlabel('Model solves')
             plt.ylabel('RMSE cost')
             plt.title(title)

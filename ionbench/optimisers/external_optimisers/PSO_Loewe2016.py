@@ -1,3 +1,8 @@
+"""
+The module provides the PSO algorithm given by Loewe et al. 2016.
+The particles are clamped differently to other PSO algorithms.
+No initial position or velocity sampling given, so we assume ionBench defaults.
+"""
 import numpy as np
 import ionbench
 
@@ -36,43 +41,31 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     if not bm.parametersBounded:
         raise RuntimeError('This optimiser requires bounds.')
 
-    if x0 is not None:
-        # Map from input parameter space to [0,1]
-        x0 = bm.original_parameter_space(x0)
-        x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
+    if x0 is None:
+        x0 = bm.sample()
 
-    # noinspection PyShadowingNames
-    class Particle:
-        def __init__(self):
-            self.velocity = np.zeros(bm.n_parameters())
-            if x0 is not None:
-                self.position = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
-                for i in range(bm.n_parameters()):
-                    if self.position[i] > 1:
-                        self.position[i] = 1
-            else:
-                self.position = np.random.rand(bm.n_parameters())
-            self.bestCost = np.inf  # Best cost of this particle
-            self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
-            self.currentCost = None
-
-        def set_cost(self, cost):
-            self.currentCost = cost
-            if cost < self.bestCost:
-                self.bestCost = cost
-                self.bestPosition = np.copy(self.position)
-
-    cached_cost = ionbench.utils.cache.get_cached_cost(bm)
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
 
     def cost_func(x):
-        return cached_cost(transform(x))
+        """
+        Cost function needs to use the signed_error function so that they use the same cache.
+        """
+        return bm.rmse(signed_error(x) + bm.DATA, bm.DATA)
 
-    def transform(x):
-        """
-        Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
-        """
-        xTrans = bm.lb + x * (bm.ub - bm.lb)
-        return bm.input_parameter_space(xTrans)
+    # noinspection PyShadowingNames
+    class Particle(ionbench.utils.particle_optimisers.Particle):
+        def __init__(self):
+            super().__init__(bm, cost_func, x0)
+
+        def clamp(self):
+            """
+            Clamp parameters to the input parameter space.
+            """
+            for i in range(bm.n_parameters()):
+                if self.position[i] < 0:
+                    self.position[i] = np.random.rand() / 4
+                elif self.position[i] > 1:
+                    self.position[i] = np.random.rand() / 4
 
     L = None
 
@@ -103,28 +96,23 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
 
         # Find best positions, both globally and locally
         for p in particleList:
-            cost = cost_func(tuple(p.position))
-            p.set_cost(cost)
-            if cost < Gcost[L]:
-                Gcost[L] = cost
+            p.set_cost()
+            if p.currentCost < Gcost[L]:
+                Gcost[L] = p.currentCost
                 Gpos[L] = np.copy(p.position)
 
         # Update velocities
         for p in particleList:
+            # Update velocity
             localAcc = phi1 * np.random.rand() * (p.bestPosition - p.position)
             globalAcc = phi2 * np.random.rand() * (Gpos[L] - p.position)
             p.velocity = constFactor * (p.velocity + localAcc + globalAcc)
-        if debug:
-            print("Velocities renewed")
 
-        # Enforce bounds
-        for p in particleList:
+            # Move particle
             p.position += p.velocity
-            for i in range(bm.n_parameters()):
-                if p.position[i] < 0:
-                    p.position[i] = np.random.rand() / 4
-                elif p.position[i] > 1:
-                    p.position[i] = 1 - np.random.rand() / 4
+
+            # Clamp
+            p.clamp()
 
         if debug:
             print("Positions renewed")
@@ -136,7 +124,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
             break
 
     bm.evaluate()
-    return transform(Gpos[L])
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames

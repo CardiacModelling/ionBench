@@ -1,10 +1,17 @@
+"""
+The module provides the PSO followed by TRR algorithm given by Loewe et al. 2016.
+It runs PSO followed by TRR once complete on the best M particles.
+The particles are clamped differently to other PSO algorithms.
+No initial position or velocity sampling given, so we assume ionBench defaults.
+The maximum number of TRR iterations to run on the final M particles is undefined, so we do not set a limit.
+"""
 import numpy as np
 import scipy
 import ionbench
 
 
 # noinspection PyShadowingNames
-def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
+def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=False):
     """
     Runs the particle swarm optimisation from Loewe et al. 2016 followed by trust region reflective. If the benchmarker is bounded, the solver will search in the interval [lb,ub], otherwise the solver will search in the interval [0,2*default].
 
@@ -28,6 +35,8 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
         Scale of the acceleration towards a particle's best positions. The default is 2.05.
     phi2 : float, optional
         Scale of the acceleration towards the best point seen across all particles. The default is 2.05.
+    M : int, optional
+        The number of particles to run TRR on once PSO has completed. The default is 12.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 
@@ -40,55 +49,42 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
     if not bm.parametersBounded:
         raise RuntimeError('This optimiser requires bounds.')
 
-    if x0 is not None:
-        # Map from input parameter space to [0,1]
-        x0 = bm.original_parameter_space(x0)
-        x0 = (x0 - bm.lb) / (bm.ub - bm.lb)
+    if x0 is None:
+        x0 = bm.sample()
 
-    # noinspection PyShadowingNames
-    class Particle:
-        def __init__(self):
-            self.velocity = np.zeros(bm.n_parameters())
-            if x0 is not None:
-                self.position = x0 * np.random.uniform(low=0.5, high=1.5, size=bm.n_parameters())
-                for i in range(bm.n_parameters()):
-                    if self.position[i] > 1:
-                        self.position[i] = 1
-            else:
-                self.position = np.random.rand(bm.n_parameters())
-            self.bestCost = np.inf  # Best cost of this particle
-            self.bestPosition = np.copy(self.position)  # Position of best cost for this particle
-            self.currentCost = None
-
-        def set_cost(self, cost):
-            self.currentCost = cost
-            if cost < self.bestCost:
-                self.bestCost = cost
-                self.bestPosition = np.copy(self.position)
-
-    cached_error = ionbench.utils.cache.get_cached_signed_error(bm)
-
-    def signed_error(x):
-        return cached_error(transform(x))
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
 
     def cost_func(x):
+        """
+        Cost function needs to use the signed_error function so that they use the same cache.
+        """
         return bm.rmse(signed_error(x) + bm.DATA, bm.DATA)
 
-    def transform(x):
-        """
-        Map from [0,1] to [lb,ub] then input parameter space accounting for transforms.
-        """
-        xTrans = bm.lb + x * (bm.ub - bm.lb)
-        return bm.input_parameter_space(xTrans)
+    # noinspection PyShadowingNames
+    class Particle(ionbench.utils.particle_optimisers.Particle):
+        def __init__(self):
+            super().__init__(bm, cost_func, x0)
+
+        def clamp(self):
+            """
+            Clamp parameters to the input parameter space.
+            """
+            for i in range(bm.n_parameters()):
+                if self.position[i] < 0:
+                    self.position[i] = np.random.rand() / 4
+                elif self.position[i] > 1:
+                    self.position[i] = np.random.rand() / 4
 
     L = None
 
-    if (phi1 + phi2)**2 - 4 * (phi1 + phi2) < 0:
-        print("Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
+    if (phi1 + phi2) ** 2 - 4 * (phi1 + phi2) < 0:
+        print(
+            "Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
         phi1 = 2.05
         phi2 = 2.05
     phi = phi1 + phi2
-    constFactor = 2 / (phi - 2 + np.sqrt(phi**2 - 4 * phi))
+    constFactor = 2 / (phi - 2 + np.sqrt(phi ** 2 - 4 * phi))
 
     if debug:
         verbose = 1
@@ -114,52 +110,48 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
 
         # Find best positions, both globally and locally
         for p in particleList:
-            cost = cost_func(p.position)
-            p.set_cost(cost)
-            if cost < Gcost[L]:
-                Gcost[L] = cost
+            p.set_cost()
+            if p.currentCost < Gcost[L]:
+                Gcost[L] = p.currentCost
                 Gpos[L] = np.copy(p.position)
 
         # Update velocities
         for p in particleList:
+            # Update velocity
             localAcc = phi1 * np.random.rand() * (p.bestPosition - p.position)
             globalAcc = phi2 * np.random.rand() * (Gpos[L] - p.position)
             p.velocity = constFactor * (p.velocity + localAcc + globalAcc)
-        if debug:
-            print("Velocities renewed")
 
-        # Enforce bounds
-        for p in particleList:
+            # Move particle
             p.position += p.velocity
-            for i in range(bm.n_parameters()):
-                if p.position[i] < 0:
-                    p.position[i] = np.random.rand() / 4
-                elif p.position[i] > 1:
-                    p.position[i] = 1 - np.random.rand() / 4
+
+            # Clamp
+            p.clamp()
 
         if debug:
             print("Positions renewed")
             print(f'Finished population: {L}')
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
+
         if bm.is_converged():
             break
 
     # Iterations of TRR
     if debug:
         print("Beginning TRR")
-    bounds = ([0] * bm.n_parameters(), [1] * bm.n_parameters())
-    for p in particleList:
-        out = scipy.optimize.least_squares(signed_error, p.position, method='trf', diff_step=1e-3, max_nfev=2 * K, bounds=bounds, verbose=verbose)
-        p.velocity = out.x - p.position
-        p.position = out.x
-        p.set_cost(out.cost)
-        if out.cost < Gcost[L]:
-            Gcost[L] = out.cost
-            Gpos[L] = np.copy(p.position)
+
+    costs = [p.currentCost for p in particleList]
+    particleList = [p for _, p in sorted(zip(costs, particleList), key=lambda pair: pair[0])]
+    for p in particleList[:M]:
+        bounds = (bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
+        out = scipy.optimize.least_squares(signed_error, p.untransform(p.position), method='trf', jac=grad,
+                                           bounds=bounds, verbose=verbose)
+        p.position = p.transform(out.x)
+        p.set_cost(bm.rmse(out.fun + bm.DATA, bm.DATA))
 
     bm.evaluate()
-    return transform(Gpos[L])
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
