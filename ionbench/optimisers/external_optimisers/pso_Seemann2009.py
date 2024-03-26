@@ -52,6 +52,9 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
         def transform(self, parameters):
             return parameters
 
+        def untransform(self, parameters):
+            return parameters
+
     particleList = []
     for i in range(n):
         particleList.append(Particle())
@@ -100,7 +103,7 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
             break
 
     bm.evaluate()
-    return Gpos[L]
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
@@ -119,7 +122,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH()
+    bm = ionbench.problems.test.Test()
     mod = get_modification()
     mod.apply(bm)
     bm.useScaleFactors = True

@@ -7,8 +7,12 @@ class Particle:
     Particles operate on the interval [0,1] which is then mapped to [lb,ub] for all optimisers to evaluate the cost.
     """
     def __init__(self, bm, cost_func, x0):
-        self.lb = bm.input_parameter_space(bm.lb)
-        self.ub = bm.input_parameter_space(bm.ub)
+        if bm.parametersBounded:
+            self.lb = bm.input_parameter_space(bm.lb)
+            self.ub = bm.input_parameter_space(bm.ub)
+        else:
+            self.lb = None
+            self.ub = None
         self.cost_func = cost_func
         self.position = np.zeros(len(x0))
         self.velocity = np.zeros(len(x0))

@@ -244,7 +244,7 @@ def run(bm, x0=None, maxIter=1000, eps=1e-6, debug=False):
             break
 
     bm.evaluate()
-    return Gpos[L]
+    return Particle().untransform(Gpos[L])
 
 
 # noinspection PyUnusedLocal,PyShadowingNames
@@ -263,7 +263,7 @@ def get_modification(modNum=1):
 
 
 if __name__ == '__main__':
-    bm = ionbench.problems.test.Test()
+    bm = ionbench.problems.staircase.HH()
     mod = get_modification()
     mod.apply(bm)
     run(bm, maxIter=50, debug=True, **mod.kwargs)
