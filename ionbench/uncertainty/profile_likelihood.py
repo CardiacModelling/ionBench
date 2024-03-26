@@ -12,6 +12,7 @@ class ProfileManager:
     A middle-man for handling profile likelihood plots. This class acts as a wrapper for the benchmarker, such that the benchmarker always sees the full parameter vector, while the optimiser sees a reduced vector with one parameter missing.
     Contains methods for n_parameters(), cost(), grad(), signed_error(), set_params(), sample(), and evaluate(), all of which handle the mapping between the full set of parameters and the reduced optimised set of parameters.
     """
+
     def __init__(self, bm, fixedParam, fixedValue, x0):
         """
         Construct a ProfileManager.
@@ -119,23 +120,20 @@ def run(bm, variations, backwardPass=False, filename=''):
                 pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, bm._TRUE_PARAMETERS)
             else:
                 pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, out)
-            if var == 1:
-                costs[varIndex] = bm.cost(bm._TRUE_PARAMETERS)
-                out = pm.set_params(pm.sample())
-            else:
-                try:
-                    out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+            try:
+                out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+                pm.MLE = bm._TRUE_PARAMETERS
+                if pm.cost(out) >= 0.99 * pm.cost(
+                        pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
                     pm.MLE = bm._TRUE_PARAMETERS
-                    if pm.cost(out) >= 0.99 * pm.cost(
-                            pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
-                        pm.MLE = bm._TRUE_PARAMETERS
-                        out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
-                except Exception as e:
-                    print(e)
-                    out = pm.sample()
+                    out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+            except Exception as e:
+                print('The optimisation caused an error (detailed below). In an attempt to recover, the profile likelihood will jump to the best guess.')
+                print(e)
+                out = pm.sample()
 
-                costs[varIndex] = pm.cost(out)
-                out = pm.set_params(out)
+            costs[varIndex] = pm.cost(out)
+            out = pm.set_params(out)
             print('Variation: ' + str(var))
             print('Cost found: ' + str(costs[varIndex]))
         if not filename == '':
@@ -145,7 +143,7 @@ def run(bm, variations, backwardPass=False, filename=''):
 
 
 # noinspection PyProtectedMember
-def plot_profile_likelihood(modelType, numberToPlot, debug=False):
+def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=False):
     """
     Plot profile likelihood plots based on the pickled data in the current working directory.
 
@@ -166,27 +164,32 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
         bm = ionbench.problems.loewe2016.IKr()
     elif modelType == 'ikur':
         bm = ionbench.problems.loewe2016.IKur()
+    elif modelType == 'ina':
+        bm = ionbench.problems.moreno2016.INa()
     else:
         bm = None
     bm.useScaleFactors = True
-    ymin = np.inf
-    ymax = 0
-    for i in range(numberToPlot):
-        with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
-            variations, costs = pickle.load(f)
-        try:
-            with open(modelType + 'B_param' + str(i) + '.pickle', 'rb') as f:
-                variationsB, costsB = pickle.load(f)
-            if len(variationsB) == len(variations):
-                costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
-        except FileNotFoundError:
-            pass
-        if np.max(costs[costs < np.inf]) > ymax:
-            ymax = np.max(costs[costs < np.inf])
-        if np.min(costs[costs > 1e-15]) < ymin:
-            ymin = np.min(costs[costs > 1e-15])
-    ymin /= 2
-    ymax *= 5
+    ymax = None
+    ymin = None
+    if fixedLimits:
+        ymin = np.inf
+        ymax = 0
+        for i in range(numberToPlot):
+            with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
+                variations, costs = pickle.load(f)
+            try:
+                with open(modelType + 'B_param' + str(i) + '.pickle', 'rb') as f:
+                    variationsB, costsB = pickle.load(f)
+                if len(variationsB) == len(variations):
+                    costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
+            except FileNotFoundError:
+                pass
+            if np.max(costs[costs < 1e5], initial=0) > ymax:
+                ymax = np.max(costs[costs < 1e5], initial=0)
+            if np.min(costs[costs > 1e-15], initial=np.inf) < ymin:
+                ymin = np.min(costs[costs > 1e-15], initial=np.inf)
+        ymin /= 2
+        ymax *= 5
     for i in range(numberToPlot):
         with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
             variationsA, costsA = pickle.load(f)
@@ -198,8 +201,14 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
                 costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
         except FileNotFoundError:
             pass
-        plt.figure()
+        plt.figure(figsize=(4, 3))
         plt.semilogy(variations, costs, label='Optimised', zorder=1)
+        if not fixedLimits:
+            ymin = np.min(costs[costs > 1e-15], initial=np.inf)
+            ymax = np.max(costs[costs < 1e5], initial=0)
+            if ymax == ymin:
+                ymax *= 1.01
+                ymin *= 0.99
         costs = np.zeros(len(variations))
         for j in range(len(variations)):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
@@ -213,9 +222,11 @@ def plot_profile_likelihood(modelType, numberToPlot, debug=False):
                     plt.semilogy(variations, costsB, label='Backwards', zorder=3, linestyle='dotted')
             except NameError:
                 pass
+
         plt.ylim(ymin, ymax)
-        plt.title('Profile likelihood: ' + modelType)
         plt.xlabel('Factor for parameter ' + str(i))
         plt.ylabel('Cost')
         plt.legend()
+        plt.savefig(f'./figures/{modelType}/profileLikelihood-{modelType}-{i}{"-debug" if debug else ""}{"-variableLimits" if not fixedLimits else ""}.png', dpi=300,
+                    bbox_inches='tight')
         plt.show()
