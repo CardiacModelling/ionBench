@@ -138,13 +138,13 @@ class IKur(LoeweBenchmarker):
             [0.65, 10, 8.5, 30, 59, 2.5, 82, 17, 30.3, 9.6, 3, 1, 21, 185, 28, 158, 16, 99.45, 27.48, 3, 0.005, 0.05,
              15, 13, 138.994])
         self.STANDARD_LOG_TRANSFORM = (True, False, True, False, True, False, False, True, False, True, True, True,
-                                       False, False, True, False, False, False, True, True, False, True, False, True,
+                                       False, False, True, False, True, False, True, True, False, True, False, True,
                                        True)
         self._RATE_FUNCTIONS = (
             lambda p, V: p[0] / (np.exp((V + p[1]) / -p[2]) + np.exp((V - p[3]) / -p[4])),
             lambda p, V: 0.65 / (p[5] + np.exp((V + p[6]) / p[7])),
             lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])),
-            lambda p, V: np.exp((V - p[15]) / -p[16]))  # Used for rate bounds
+            lambda p, V: np.exp((V - p[15]) / p[16]))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
         self.COST_THRESHOLD = 0.01
 
