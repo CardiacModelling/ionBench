@@ -739,14 +739,22 @@ class Benchmarker:
             The penalty to apply for rate bound violations.
         """
         penalty = 0
-        for rateFunc in self._RATE_FUNCTIONS:
+        for i, rateFunc in enumerate(self._RATE_FUNCTIONS):
             k = max(rateFunc(parameters, self.V_HIGH), rateFunc(parameters, self.V_LOW))
-            if k < self.RATE_MIN:
-                penalty += 1e5
-                penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
-            elif k > self.RATE_MAX:
-                penalty += 1e5
-                penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MAX))
+            if 'moreno' in self.NAME:
+                if k < self.RATE_MIN:
+                    penalty += 1e5
+                    penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
+                elif (k > self.RATE_MAX and i not in [3, 5]) or (k > self.RATE_MAX*10000 and i in [3, 5]):
+                    penalty += 1e5
+                    penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MAX))
+            else:
+                if k < self.RATE_MIN:
+                    penalty += 1e5
+                    penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
+                elif k > self.RATE_MAX:
+                    penalty += 1e5
+                    penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MAX))
         return penalty
 
     def rmse(self, c1, c2):

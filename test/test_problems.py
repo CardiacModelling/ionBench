@@ -599,9 +599,6 @@ class TestLoeweIKur(Loewe):
     bm.plotter = False
     costBound = 0
 
-    def test_rate_bounds(self):
-        pass
-
 
 def sampler_bounds(bm, lb, ub):
     """
