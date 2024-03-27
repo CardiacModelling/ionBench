@@ -128,7 +128,8 @@ def run(bm, variations, backwardPass=False, filename=''):
                     pm.MLE = bm._TRUE_PARAMETERS
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
             except Exception as e:
-                print('The optimisation caused an error (detailed below). In an attempt to recover, the profile likelihood will jump to the best guess.')
+                print(
+                    'The optimisation caused an error (detailed below). In an attempt to recover, the profile likelihood will jump to the best guess.')
                 print(e)
                 out = pm.sample()
 
@@ -153,9 +154,12 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
         Type of model in benchmarker. This is used to load the benchmarker (options are hh, mm, ikr, ikur) and as the filename to load the pickled data [modelType]_param[i].pickle for i in range(numberToPlot)
     numberToPlot : int
         The number of profile likelihood plots to create. Should not exceed the number of parameters in the model.
+    fixedLimits : bool, optional
+        If True, the y-axis limits for all plots will be the same. If False, the limits will vary between the plots. The default is True.
     debug : bool, optional
         If True, extra plots will be drawn to separate the forwards and backwards passes of the profile likelihood optimisation. The default is False.
     """
+    # Initialise a benchmarker
     if modelType == 'hh':
         bm = ionbench.problems.staircase.HH()
     elif modelType == 'mm':
@@ -168,12 +172,16 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
         bm = ionbench.problems.moreno2016.INa()
     else:
         bm = None
+    # Use scale factors so only variations needs to be specified as the parameters
     bm.useScaleFactors = True
+    # Y axis limits
     ymax = None
     ymin = None
+    # If all limits should be the same, find them first
     if fixedLimits:
         ymin = np.inf
         ymax = 0
+        # Loop through each parameter and find the min and max cost
         for i in range(numberToPlot):
             with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
                 variations, costs = pickle.load(f)
@@ -184,13 +192,20 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
                     costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
             except FileNotFoundError:
                 pass
+            # If the max cost (ignoring penalties) is greater than the current max, update it
             if np.max(costs[costs < 1e5], initial=0) > ymax:
                 ymax = np.max(costs[costs < 1e5], initial=0)
+            # If the min cost (ignoring zeros or too close to 0) is less than the current min, update it
             if np.min(costs[costs > 1e-15], initial=np.inf) < ymin:
                 ymin = np.min(costs[costs > 1e-15], initial=np.inf)
+        # Add padding to the limits
         ymin /= 2
         ymax *= 5
+    # Cost threshold
+    threshold = np.inf
+    # Start plotting
     for i in range(numberToPlot):
+        # Load the pickled data
         with open(modelType + '_param' + str(i) + '.pickle', 'rb') as f:
             variationsA, costsA = pickle.load(f)
             variations, costs = variationsA, costsA
@@ -201,20 +216,32 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
                 costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
         except FileNotFoundError:
             pass
+        # Plot the profile likelihood
         plt.figure(figsize=(4, 3))
         plt.semilogy(variations, costs, label='Optimised', zorder=1)
+        # Calculate threshold - ignore REALLY unidentifiable parameters
+        lowCost = np.interp(0.95, variations, costs)
+        lowCost = lowCost if lowCost > 1e-14 else np.inf
+        highCost = np.interp(1.05, variations, costs)
+        highCost = highCost if highCost > 1e-14 else np.inf
+        threshold = min(threshold, lowCost, highCost)
+        # If we don't have fixed limits, find the min and max costs
         if not fixedLimits:
-            ymin = np.min(costs[costs > 1e-15], initial=np.inf)
+            # Ignore really small and large costs
+            ymin = np.min(costs[costs > 1e-30], initial=np.inf)
             ymax = np.max(costs[costs < 1e5], initial=0)
+            # Don't want upper and lower limits to be the same
             if ymax == ymin:
                 ymax *= 1.01
                 ymin *= 0.99
+        # Plot unoptimised cost slice
         costs = np.zeros(len(variations))
         for j in range(len(variations)):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = variations[j]
             costs[j] = bm.cost(p)
         plt.semilogy(variations, costs, label='Unoptimised', zorder=0)
+        # If debug, plot forwards and backwards cost separately
         if debug:
             plt.semilogy(variations, costsA, label='Forwards', zorder=2, linestyle='dashed')
             try:
@@ -222,11 +249,15 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
                     plt.semilogy(variations, costsB, label='Backwards', zorder=3, linestyle='dotted')
             except NameError:
                 pass
-
+        # set limits and add labels
         plt.ylim(ymin, ymax)
         plt.xlabel('Factor for parameter ' + str(i))
         plt.ylabel('Cost')
         plt.legend()
-        plt.savefig(f'./figures/{modelType}/profileLikelihood-{modelType}-{i}{"-debug" if debug else ""}{"-variableLimits" if not fixedLimits else ""}.png', dpi=300,
-                    bbox_inches='tight')
+        # Save and show figure
+        plt.savefig(
+            f'./figures/{modelType}/profileLikelihood-{modelType}-{i}{"-debug" if debug else ""}{"-variableLimits" if not fixedLimits else ""}.png',
+            dpi=300, bbox_inches='tight')
         plt.show()
+    # Print final cost threshold
+    print(f'Threshold calculated as {threshold}')
