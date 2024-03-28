@@ -1,4 +1,6 @@
 import ionbench
+import scipy
+import numpy as np
 
 
 def least_squares(bm, x0, debug, method, maxIter, **kwargs):
@@ -38,7 +40,8 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
     else:
         verbose = 1
 
-    out = scipy.optimize.least_squares(signed_error, x0, method=method, jac=grad, verbose=verbose, max_nfev=maxIter, **kwargs)
+    out = scipy.optimize.least_squares(signed_error, x0, method=method, jac=grad, verbose=verbose, max_nfev=maxIter,
+                                       **kwargs)
 
     if debug:
         print(f'Cost of {out.cost} found at:')

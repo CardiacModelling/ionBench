@@ -23,7 +23,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by LM.
     """
-    ionbench.utils.scipy_setup.least_squares(bm, x0, debug, method='lm', maxIter=maxIter)
+    out = ionbench.utils.scipy_setup.least_squares(bm, x0, debug, method='lm', maxIter=maxIter)
 
     bm.evaluate()
     return out.x
