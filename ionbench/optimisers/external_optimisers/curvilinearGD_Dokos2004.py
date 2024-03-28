@@ -249,12 +249,20 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                     if debug:
                         print('Alpha was minimised by taking the full step')
                 elif SSE(0) <= SSE(1):
-                    # Error when SSE(1) is larger than one of SSE(0). In this case, it is likely that 1 is just too large a step size, so we probably have SSE(0)<SSE(1)<SSE(1e9). In which case, any tiny step size will be good enough to start brent optimisation
+                    # Error when SSE(1) is larger than SSE(0). In this case, it is likely that 1 is just too large a step size, so we probably have SSE(0)<SSE(1)<SSE(1e9). In which case, any tiny step size will be good enough to start brent optimisation
                     assert SSE(0) <= SSE(1e9)  # This shouldn't be triggered
                     if debug:
                         print(
                             f'SSE(0) {SSE(0)} seems to be smaller than SSE(1) {SSE(1)}, I am going to assume it is also smaller than SSE(1e9) {SSE(1e9)} and that SSE(1e-6) {SSE(1e-6)} is smaller than them all')
-                    out = scipy.optimize.brent(SSE, brack=(0, 1e-6, 1e9), tol=1e-8, full_output=True)
+                    if SSE(1e-6) < SSE(0):
+                        initStep = 1e-6
+                    elif SSE(1e-9) < SSE(0):
+                        initStep = 1e-9
+                    else:
+                        x0 = model_params(x0)
+                        bm.evaluate()
+                        return x0
+                    out = scipy.optimize.brent(SSE, brack=(0, initStep, 1e9), tol=1e-8, full_output=True)
                     alpha = out[0]
                     falphaNew = out[1]
                 else:
