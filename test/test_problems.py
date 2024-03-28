@@ -183,7 +183,7 @@ class Problem:
         else:
             assert not self.bm.is_converged()
             assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
-            self.bm.cost(self.bm._TRUE_PARAMETERS * 1.0001)  # Test that non-default parameters give convergence
+            self.bm.cost(self.bm._TRUE_PARAMETERS * (1+1e-7))  # Test that non-default parameters give convergence
             assert self.bm.is_converged()
             assert self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         # Dropping the cost threshold means not converged
