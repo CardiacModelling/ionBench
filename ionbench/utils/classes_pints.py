@@ -49,6 +49,7 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     else:
         opt = pints.OptimisationController(error, x0, method=method)
     opt.set_max_iterations(maxIter)
+    opt.set_max_unchanged_iterations(threshold=1e-7)
     if debug:
         opt.set_log_interval(iters=1)
     return model, opt

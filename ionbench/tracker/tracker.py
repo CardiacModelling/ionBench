@@ -283,7 +283,7 @@ class Tracker:
 
     def cost_unchanged(self, index=None, max_unchanged_evals=2500, returnIndex=False):
         """
-        Checks if the cost had converged (remained unchanged for XX iterations) by the given index. If no index is given, the last index is used.
+        Checks if the cost had converged (remained unchanged for max_unchanged_evals function evaluations) by the given index. If no index is given, the last index is used.
 
         Parameters
         ----------
@@ -308,7 +308,7 @@ class Tracker:
         fsig = np.inf
         evalsUnchanged = 0
         for i in range(index):
-            if np.abs(self.bestCosts[i] - fsig) > 1e-11:
+            if np.abs(self.bestCosts[i] - fsig) > 1e-7:
                 evalsUnchanged = 0
                 fsig = self.bestCosts[i]
             else:
