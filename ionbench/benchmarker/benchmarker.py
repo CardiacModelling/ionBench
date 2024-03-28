@@ -621,7 +621,7 @@ class Benchmarker:
         sens : numpy array
             The sensitivities of the outputted current.
         """
-        log, e = self.simSens.run(self.T_MAX + 1, log_times=times)
+        log, e = self.simSens.run(self.T_MAX + 1, log=[self._OUTPUT_NAME], log_times=times)
         return np.array(log[self._OUTPUT_NAME]), e
 
     def solve_model(self, times, continueOnError=True):
@@ -643,7 +643,10 @@ class Benchmarker:
         """
         if continueOnError:
             try:
-                log = self.sim.run(self.T_MAX + 1, log_times=times)
+                if 'staircase' in self.NAME:
+                    log = self.sim.run(self.T_MAX + 1, log=[self._OUTPUT_NAME], log_times=times)
+                else:
+                    log = self.sim.run(self.T_MAX + 1, log_times=times)
                 return np.array(log[self._OUTPUT_NAME])
             except myokit.SimulationError:
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
