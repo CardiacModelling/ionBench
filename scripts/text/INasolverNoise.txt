@@ -1,0 +1,22 @@
+Initialising Moreno 2016 INa benchmark
+Benchmarker initialised
+Searching tolerance combinations for moreno2016.ina. Absolute tolerances between 1e-6 and 1e-7. Relative tolerances between 1e-6 and 1e-7.
+# We try a very narrow windows because the Moreno problem is very expensive to do this kind of search.
+Fail. abstol: 1e-06, reltol: 1e-06, time: 828.84, median error: 4.49e-07, error 25th percentile: 3.17e-07, error 75th percentile: 5.78e-07, cost at true parameters: 4.4526e-06, cost threshold: 1.70e-06
+Fail. abstol: 1e-06, reltol: 1e-07, time: 691.03, median error: 2.93e-07, error 25th percentile: 2.44e-07, error 75th percentile: 4.17e-07, cost at true parameters: 3.8063e-06, cost threshold: 1.70e-06
+Fail. abstol: 1e-07, reltol: 1e-06, time: 718.69, median error: 1.01e-07, error 25th percentile: 6.71e-08, error 75th percentile: 1.70e-07, cost at true parameters: 1.3849e-06, cost threshold: 1.70e-06
+Success. abstol: 1e-07, reltol: 1e-07, time: 716.31, median error: 3.74e-08, error 25th percentile: 2.73e-08, error 75th percentile: 5.43e-08, cost at true parameters: 6.6087e-07, cost threshold: 1.70e-06
+Tolerance Combinations that work:
+abstol: 1e-07, reltol: 1e-07, time: 716.31, median error: 3.74e-08, error 25th percentile: 2.73e-08, error 75th percentile: 5.43e-08, cost at true parameters: 6.6087e-07, cost threshold: 1.70e-06
+Choose an abstol:
+1e-7
+Choose a reltol:
+1e-7
+Checking timing.
+Gradient time: 11.5811
+Cost time: 2.7641
+Checking solver noise near the true parameters.
+The maximum cost (accounting for noise) near the true parameters is 7.0646e-07, which is below the cost threshold of 1.70e-06.
+Checking solver noise very carefully.
+Median error across parameter space: 4.51e-08, error 25th percentile: 2.60e-08, error 75th percentile: 7.06e-08
+Error successfully stayed below limits so these tolerances (1e-07, 1e-07) are acceptable.

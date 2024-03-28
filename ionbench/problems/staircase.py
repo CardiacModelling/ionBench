@@ -157,7 +157,7 @@ class HH(StaircaseBenchmarker):
         self._ANALYTICAL_MODEL = HHModel(model=self._MODEL, states=['ikr.act', 'ikr.rec'], current=self._OUTPUT_NAME,
                                          parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
                                                      range(self.n_parameters())], vm='membrane.V')
-        self._TOLERANCES = (1e-7, 1e-7)
+        self._TOLERANCES = (1e-5, 1e-5)
 
         super().__init__()
         print('Benchmarker initialised')
@@ -200,7 +200,7 @@ class MM(StaircaseBenchmarker):
                                              states=['iKr_Markov.' + s for s in ['Cr1', 'Cr2', 'Cr3', 'Or4', 'Ir5']],
                                              parameters=[self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in
                                                          range(self.n_parameters())])
-        self._TOLERANCES = (1e-9, 1e-7)
+        self._TOLERANCES = (1e-6, 1e-6)
         super().__init__()
         print('Benchmarker initialised')
 

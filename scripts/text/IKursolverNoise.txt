@@ -1,0 +1,30 @@
+Initialising Loewe 2016 IKur benchmark
+Benchmarker initialised
+Searching tolerance combinations for loewe2016.ikur. Absolute tolerances between 1e-7 and 1e-9. Relative tolerances between 1e-7 and 1e-9.
+Fail. abstol: 1e-07, reltol: 1e-07, time: 27.23, median error: 1.16e-06, error 25th percentile: 7.31e-08, error 75th percentile: 9.12e-06, cost at true parameters: 8.4966e-07, cost threshold: 1.89e-06
+Fail. abstol: 1e-07, reltol: 1e-08, time: 26.05, median error: 2.37e-07, error 25th percentile: 2.42e-08, error 75th percentile: 4.00e-06, cost at true parameters: 5.8291e-07, cost threshold: 1.89e-06
+Fail. abstol: 1e-07, reltol: 1e-09, time: 28.72, median error: 1.43e-07, error 25th percentile: 1.94e-08, error 75th percentile: 1.41e-06, cost at true parameters: 4.7365e-07, cost threshold: 1.89e-06
+Fail. abstol: 1e-08, reltol: 1e-07, time: 30.38, median error: 1.38e-08, error 25th percentile: 6.44e-10, error 75th percentile: 1.19e-06, cost at true parameters: 2.5523e-07, cost threshold: 1.89e-06
+Success. abstol: 1e-08, reltol: 1e-08, time: 24.03, median error: 3.60e-08, error 25th percentile: 1.13e-09, error 75th percentile: 4.90e-07, cost at true parameters: 1.2338e-07, cost threshold: 1.89e-06
+Success. abstol: 1e-08, reltol: 1e-09, time: 22.04, median error: 3.76e-09, error 25th percentile: 6.71e-10, error 75th percentile: 1.88e-07, cost at true parameters: 6.7642e-08, cost threshold: 1.89e-06
+Success. abstol: 1e-09, reltol: 1e-07, time: 20.81, median error: 8.73e-08, error 25th percentile: 3.21e-10, error 75th percentile: 5.94e-07, cost at true parameters: 4.2462e-07, cost threshold: 1.89e-06
+Success. abstol: 1e-09, reltol: 1e-08, time: 22.44, median error: 2.64e-08, error 25th percentile: 8.37e-10, error 75th percentile: 1.83e-07, cost at true parameters: 7.5846e-08, cost threshold: 1.89e-06
+Success. abstol: 1e-09, reltol: 1e-09, time: 22.65, median error: 3.89e-10, error 25th percentile: 2.90e-11, error 75th percentile: 5.15e-09, cost at true parameters: 1.2240e-08, cost threshold: 1.89e-06
+Tolerance Combinations that work:
+abstol: 1e-08, reltol: 1e-08, time: 24.03, median error: 3.60e-08, error 25th percentile: 1.13e-09, error 75th percentile: 4.90e-07, cost at true parameters: 1.2338e-07, cost threshold: 1.89e-06
+abstol: 1e-08, reltol: 1e-09, time: 22.04, median error: 3.76e-09, error 25th percentile: 6.71e-10, error 75th percentile: 1.88e-07, cost at true parameters: 6.7642e-08, cost threshold: 1.89e-06
+abstol: 1e-09, reltol: 1e-07, time: 20.81, median error: 8.73e-08, error 25th percentile: 3.21e-10, error 75th percentile: 5.94e-07, cost at true parameters: 4.2462e-07, cost threshold: 1.89e-06
+abstol: 1e-09, reltol: 1e-08, time: 22.44, median error: 2.64e-08, error 25th percentile: 8.37e-10, error 75th percentile: 1.83e-07, cost at true parameters: 7.5846e-08, cost threshold: 1.89e-06
+abstol: 1e-09, reltol: 1e-09, time: 22.65, median error: 3.89e-10, error 25th percentile: 2.90e-11, error 75th percentile: 5.15e-09, cost at true parameters: 1.2240e-08, cost threshold: 1.89e-06
+Choose an abstol:
+1e-8
+Choose a reltol:
+1e-8
+Checking timing.
+Gradient time: 1.0451
+Cost time: 0.0912
+Checking solver noise near the true parameters.
+The maximum cost (accounting for noise) near the true parameters is 1.2744e-07, which is below the cost threshold of 1.89e-06.
+Checking solver noise very carefully.
+Median error across parameter space: 2.64e-08, error 25th percentile: 1.55e-09, error 75th percentile: 6.93e-07
+Error successfully stayed below limits so these tolerances (1e-08, 1e-08) are acceptable.

@@ -69,7 +69,7 @@ class INa(ionbench.benchmarker.Benchmarker):
         self._ANALYTICAL_MODEL = LinearModel(model=self._MODEL, parameters=parameters, current=self._OUTPUT_NAME,
                                              states=['ina.' + s for s in ['ic3', 'ic2', 'if', 'c3', 'c2', 'c1', 'o',
                                                                           'is']], vm='membrane.V')
-        self._TOLERANCES = (1e-6, 1e-4)
+        self._TOLERANCES = (1e-7, 1e-7)
         self.sim = myokit.lib.markov.AnalyticalSimulation(self._ANALYTICAL_MODEL, protocol=self.protocol())
         if self.sensitivityCalc:
             # ODE solver

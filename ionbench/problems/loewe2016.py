@@ -115,7 +115,7 @@ class IKr(LoeweBenchmarker):
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
         self._OUTPUT_NAME = 'ikr.IKr'
         self._PARAMETER_CONTAINER = 'ikr'
-        self._TOLERANCES = (1e-5, 1e-5)
+        self._TOLERANCES = (1e-6, 1e-6)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikr.csv'))
         super().__init__(states=['ikr.xr'])
         print('Benchmarker initialised')
@@ -152,7 +152,7 @@ class IKur(LoeweBenchmarker):
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
         self._OUTPUT_NAME = 'ikur.IKur'
         self._PARAMETER_CONTAINER = 'ikur'
-        self._TOLERANCES = (1e-6, 1e-4)
+        self._TOLERANCES = (1e-8, 1e-8)
         self.load_data(dataPath=os.path.join(ionbench.DATA_DIR, 'loewe2016', 'ikur.csv'))
         super().__init__(states=['ikur.ua', 'ikur.ui'])
         print('Benchmarker initialised')
