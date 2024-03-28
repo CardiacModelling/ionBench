@@ -147,7 +147,7 @@ class HH(StaircaseBenchmarker):
                                 lambda p, V: p[4] * np.exp(p[5] * V),
                                 lambda p, V: p[6] * np.exp(-p[7] * V))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        self.COST_THRESHOLD = 0.02
+        self.COST_THRESHOLD = 1.57e-2
 
         # Myokit
         model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'beattie-2017-ikr-hh.mmt'))
@@ -189,7 +189,7 @@ class MM(StaircaseBenchmarker):
                                 lambda p, V: p[10] * np.exp(-p[11] * V),
                                 lambda p, V: p[12] * np.exp(-p[13] * V))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        self.COST_THRESHOLD = 0.0075
+        self.COST_THRESHOLD = 5.77e-3
 
         # Myokit
         model = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'staircase', 'fink-2008-ikr-mm.mmt'))

@@ -42,7 +42,7 @@ class INa(ionbench.benchmarker.Benchmarker):
                                 lambda p, V: p[14] * p[12] * np.exp(V / p[13]),
                                 lambda p, V: p[15] * p[8] * np.exp(-V / p[9]))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        self.COST_THRESHOLD = 0.01
+        self.COST_THRESHOLD = 1.70e-6
         protocol = self.protocol()
         self.TIMESTEP = 0.5  # Timestep in data between points
         self.T_MAX = protocol.characteristic_time()
