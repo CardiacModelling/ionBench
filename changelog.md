@@ -1,14 +1,30 @@
 # Changelog
 
-## v0.4.0-alpha
+## v0.5.0-alpha
 Planned changes:
-* Improved bounds
-* Refactoring benchmarker attributes
-* Standardising assumptions in optimisers
-* Standard termination criteria on all optimisers
-* Set seeds across ionBench
 
-## v0.3.4-alpha - Current release
+## v0.4.0-alpha - Current release
+There are a lot of changes here. A brief summary of the key ones are given below:
+
+
+Lots of refactoring, both in optimisers and problems. 
+Added utils module for common functions.
+Bug fixes in some optimisers.
+Changes to rate bounds. 
+Sped up the moreno problem so that it can now be used. 
+Staircase protocol now uses myokit.Protocol. 
+Added cost thresholds. 
+Added penalty function for out of bounds. 
+More information now tracked with the Tracker. 
+Updated modifications, removing some unnecessary options. 
+Staircase problem now has rate bounds built in fully. 
+Increased frequency of simulated data. 
+Fixed bugs in Loewe IKr and IKur. 
+Improvements to profile likelihood calculations and plots. 
+Standardised assumptions in optimisers. 
+Introduced standard termination criteria across all optimisers.
+
+## v0.3.4-alpha
 Initial state setting bug remaining in the previous release. Fixed here.
 
 ## v0.3.3-alpha
