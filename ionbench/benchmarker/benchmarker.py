@@ -335,7 +335,8 @@ class Benchmarker:
 
         """
         testOutput = np.array(
-            self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP), incrementSolveCounter=incrementSolveCounter))
+            self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP),
+                          incrementSolveCounter=incrementSolveCounter))
         cost = self.rmse(testOutput, self.DATA)
         return cost
 
@@ -438,7 +439,7 @@ class Benchmarker:
             for i in range(self.n_parameters()):
                 grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
             cost = float(penalty.data)
-            error = cost*np.array(len(self.DATA))
+            error = cost * np.array(len(self.DATA))
             J = np.zeros((len(self.DATA), self.n_parameters()))
             for i in range(len(self.DATA)):
                 J[i,] = grad
@@ -545,7 +546,7 @@ class Benchmarker:
             V = -120
         else:
             V = -80
-
+        At = np.zeros(self.n_parameters())
         if 'hh' in str(type(self._ANALYTICAL_MODEL)):
             t = [mg.tensor(a, dtype=np.double) for a in parameters]
             state = self._ANALYTICAL_MODEL._steady_state_function(V, *t)
@@ -601,7 +602,18 @@ class Benchmarker:
                     # If the negative values are very close to zero, then we can assume they are zero
                     state = [max(0, s) / np.sum(npstate) for s in npstate]
                 else:
-                    raise ValueError('Steady state contains significant (>1e-12) negative values. This needs fixing.')
+                    # Some parameter combinations lead to negative steady state values (not just rounding errors). We don't set the state in this case as a positive steady state doesn't exist.
+                    if np.any(At < 0):
+                        warnings.warn(
+                            'The parameters give negative transition probabilities which leads to an invalid steady state. Will use states defined in the problem instead.')
+                        state = None
+                    else:
+                        print(parameters)
+                        print(At)
+                        raise ValueError(
+                            'Steady state contains significant (>1e-12) negative values. This needs fixing.')
+
+        if state is not None:
             self.sim.set_state(state)
             if self.sensitivityCalc:
                 self.simSens.set_state(state)
@@ -748,7 +760,7 @@ class Benchmarker:
                 if k < self.RATE_MIN:
                     penalty += 1e5
                     penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
-                elif (k > self.RATE_MAX and i not in [3, 5]) or (k > self.RATE_MAX*10000 and i in [3, 5]):
+                elif (k > self.RATE_MAX and i not in [3, 5]) or (k > self.RATE_MAX * 10000 and i in [3, 5]):
                     penalty += 1e5
                     penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MAX))
             else:
