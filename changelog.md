@@ -3,7 +3,10 @@
 ## v0.5.0-alpha
 Planned changes:
 
-## v0.4.0-alpha - Current release
+## v0.4.1-alpha - Current release
+Hot fix: Fixed a bug in the steady state calculation for markov problems. 
+
+## v0.4.0-alpha
 There are a lot of changes here. A brief summary of the key ones are given below:
 
 
