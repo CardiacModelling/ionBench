@@ -3,7 +3,10 @@
 ## v0.5.0-alpha
 Planned changes:
 
-## v0.4.1-alpha - Current release
+## v0.4.2-alpha - Current release
+Fixed bugs in pints optimisers for Moreno. Corrected the stochastic search optimisers. 
+
+## v0.4.1-alpha
 Hot fix: Fixed a bug in the steady state calculation for markov problems. 
 
 ## v0.4.0-alpha
