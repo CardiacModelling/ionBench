@@ -68,8 +68,6 @@ def run(bm, x0=None, maxIter=1000, debug=False):
                     self.velocity[i] = 0
                 elif self.position[i] > 1:
                     self.position[i] = 1
-                    print(self.velocity)
-                    print(i)
                     self.velocity[i] = 0
 
     # noinspection PyShadowingNames

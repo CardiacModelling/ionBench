@@ -64,9 +64,9 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
         pop[i].find_cost()
 
     for gen in range(nGens):
-        print('----------------')
-        print(f'Generation {gen} of {nGens}')
         if debug:
+            print('----------------')
+            print(f'Generation {gen} of {nGens}')
             costMean = 0
             for p in pop:
                 costMean += p.cost / popSize
