@@ -144,6 +144,7 @@ class Tracker:
             plt.xlabel('Model solves')
             plt.ylabel('RMSE cost')
             plt.title(title)
+            plt.show()
 
         # Cost plot
         plot_costs(self.costs, 'Evaluated Cost')
@@ -222,8 +223,8 @@ class Tracker:
             print('Convergence reason:              Optimiser terminated early.')
             i = len(self.bestCosts) - 1
         else:
-            print('Convergence reason:              ' + 'Cost threshold' if self.cost_threshold(threshold,
-                                                                                                i) else 'Cost unchanged')
+            print('Convergence reason:              ' + ('Cost threshold' if self.cost_threshold(threshold,
+                                                                                                i) else 'Cost unchanged'))
         print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
         print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
         print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i]))
