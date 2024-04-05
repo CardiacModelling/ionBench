@@ -6,122 +6,108 @@ import os
 import pandas
 import re
 
+
+def expected_time(times, successes):
+    Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
+    Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]]) if not np.all(successes) else 0
+    expectedTime = Tsucc + Tfail * (1 - np.mean(successes)) / np.mean(successes)
+    return expectedTime
+
+
 bm = ionbench.problems.staircase.MM()
+bm.plotter = False
+# Find optimiser short name
+bmShortName = bm.NAME.split('.')[1].lower()
+os.chdir(os.path.join(os.getcwd(), bmShortName.upper()))
+
+# Find out how many runs were attempted
+maxRuns = 0
+for app in ionbench.APP_UNIQUE:
+    i = 0
+    try:
+        while True:
+            bm.tracker.load(f"{bmShortName}_{app['module']}modNum{app['modNum']}_run{i}.pickle")
+            i += 1
+    except FileNotFoundError as e:
+        maxRuns = max(maxRuns, i)
+print(f"{maxRuns} runs were attempted.")
+
 with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    titles = ['Optimiser Name', 'Mod Num', 'Mod Name']
-    variables = ['Conv Cost', 'Best Cost', 'Cost FE', 'Grad FE', 'Average Cost FE Time', 'Average Grad FE Time',
+    # Set titles
+    titles = ['Optimiser Name', 'Mod Name']
+    # Variable names for run specific data
+    variables = ['Cost', 'Cost Evals', 'Grad Evals', 'Cost Time', 'Grad Time',
                  'Successful']
-    for i in range(5):
+    # Add run specific titles
+    for i in range(maxRuns):
         for j in variables:
             titles.append(f'Run {i} - {j}')
-    titles += ['Success Rate', 'Tier', 'Success Rate', 'Expected Time (Sensitivities)',
-               'Expected Time (Finite Difference)', 'Expected Cost']
+    # Add final summary data titles
+    titles += ['Success Rate', 'Tier', 'Expected Time', 'Expected Cost']
+    # Write the title row
     writer.writerow(titles)
     # Loop through all unique approaches
     for app in ionbench.APP_UNIQUE:
-        # Data to track for each run
-        costAtConv = []
-        bestCost = []
-        costEvalsAtConv = []
-        gradEvalsAtConv = []
-        costAverTime = []
-        gradAverTime = []
+        # Print the approach and modification
+        print('---------------')
+        optimiserName = app['module'].split('.')[-1]
+        mod = importlib.import_module(app['module']).get_modification(app['modNum'])
+        modName = mod.NAME
+        # Output data
+        row = [optimiserName, mod.NAME]
+        print(f'Collating results for approach: {optimiserName}, modification: {modName}')
         try:
-            # Check if all tracking files exist
-            bm.tracker.load(f"{app['module']}modNum{app['modNum']}_run4.pickle")
-        except Exception as e:
-            # If they don't then skip this approach
-            print(e)
-            print(f"Tracking of {app['module']} failed.")
-            optimiserName = app['module'].split('.')[-1]
-            modNum = app['modNum']
-            mod = importlib.import_module(app['module']).get_modification(app['modNum'])
-            row = [optimiserName, modNum, mod.NAME]
-            row += [np.nan] * (len(titles) - 3)
+            bm.tracker.load(f"{bmShortName}_{app['module']}modNum{app['modNum']}_run{maxRuns-1}.pickle")
+        except FileNotFoundError as e:
+            print('Not all tracking files were found. Filling data with nans.')
+            # Not all tracking files were found, fill data with nans
+            row += [np.nan] * (len(titles) - 2)
             writer.writerow(row)
             continue
-        for runNum in range(5):
+        # Data to track for each run
+        costs = []
+        costEvals = []
+        gradEvals = []
+        costTime = []
+        gradTime = []
+        successOrFail = []
+        for runNum in range(maxRuns):
             # For each run, load the tracking file and extract the data
-            bm.tracker.load(f"{app['module']}modNum{app['modNum']}_run{runNum}.pickle")
-            costAverTime.append(np.mean(bm.tracker.costTimes))
-            gradAverTime.append(np.mean(bm.tracker.gradTimes))
-            bestCost.append(bm.tracker.bestCost)
+            bm.tracker.load(f"{bmShortName}_{app['module']}modNum{app['modNum']}_run{runNum}.pickle")
+            bm.evaluate()
             # Get data at convergence
             i = bm.tracker.when_converged(bm.COST_THRESHOLD)
             i = -1 if i is None else i
-            costAtConv.append(bm.tracker.costs[i])
-            gradEvalsAtConv.append(bm.tracker.gradSolves[i])
-            costEvalsAtConv.append(bm.tracker.modelSolves[i])
+            costs.append(bm.tracker.bestCosts[i])
+            a, b = bm.tracker.total_solve_time(i)
+            costTime.append(a)
+            gradTime.append(b)
+            gradEvals.append(bm.tracker.gradSolves[i])
+            costEvals.append(bm.tracker.modelSolves[i])
+            successOrFail.append(costs[runNum] < bm.COST_THRESHOLD)
+            row += [costs[runNum], costEvals[runNum], gradEvals[runNum], costTime[runNum], gradTime[runNum],
+                    successOrFail[runNum]]
             bm.reset()
         # Calculate the success rate
-        successOrFail = np.array(bestCost) < bm.COST_THRESHOLD
         successRate = np.mean(successOrFail)
-        # Handle times if either grad or cost wasn't used
-        if all(np.isnan(gradAverTime)):
-            gradAverTime = np.zeros(len(gradAverTime))
-        if all(np.isnan(costAverTime)):
-            costAverTime = np.zeros(len(costAverTime))
+        # Replace nans with 0 in times incase either cost or grad was unused
+        costTime = np.array([0 if np.isnan(t) else t for t in costTime])
+        gradTime = np.array([0 if np.isnan(t) else t for t in costTime])
         if successRate > 0:
             # If at least one run succeeded
             # Calculate average time per successful and failed run for cost and grad
-            # Cost times
-            Tsucc = np.mean([costEvalsAtConv[t] * costAverTime[t] for t in range(5) if successOrFail[t]])
-            Tfail = np.mean([costEvalsAtConv[t] * costAverTime[t] for t in range(5) if
-                             not successOrFail[t]]) if successRate < 1 else 0
-            expectedCostTime = Tsucc + Tfail * (1 - successRate) / successRate
-            # Grad times
-            Tsucc = np.mean([gradEvalsAtConv[t] * gradAverTime[t] for t in range(5) if successOrFail[t]])
-            Tfail = np.mean([gradEvalsAtConv[t] * gradAverTime[t] for t in range(5) if
-                             not successOrFail[t]]) if successRate < 1 else 0
-            expectedGradTime = Tsucc + Tfail * (1 - successRate) / successRate
+            time = expected_time(costTime, successOrFail) + expected_time(gradTime, successOrFail)
             tier = 1
             expectedCost = np.nan
-            timeSens = expectedCostTime + expectedGradTime
-            if 'SPSA' in app['module']:
-                fdGradCountLow = 2
-                fdGradCountUp = 2
-            else:
-                fdGradCountLow = bm.n_parameters()
-                fdGradCountUp = bm.n_parameters() + 1
-            fdTimeSuccLow = np.mean(
-                [(costEvalsAtConv[t] + gradEvalsAtConv[t] * fdGradCountLow) * costAverTime[t] for t in range(5) if
-                 successOrFail[t]])
-            fdTimeSuccUp = np.mean(
-                [(costEvalsAtConv[t] + gradEvalsAtConv[t] * fdGradCountUp) * costAverTime[t] for t in range(5) if
-                 successOrFail[t]])
-            fdTimeFailLow = np.mean(
-                [(costEvalsAtConv[t] + gradEvalsAtConv[t] * fdGradCountLow) * costAverTime[t] for t in range(5) if
-                 not successOrFail[t]]) if successRate < 1 else 0
-            fdTimeFailUp = np.mean(
-                [(costEvalsAtConv[t] + gradEvalsAtConv[t] * fdGradCountUp) * costAverTime[t] for t in range(5) if
-                 not successOrFail[t]]) if successRate < 1 else 0
-            fdTimeLow = fdTimeSuccLow + fdTimeFailLow * (1 - successRate) / successRate
-            fdTimeUp = fdTimeSuccUp + fdTimeFailUp * (1 - successRate) / successRate
-            fdTime = (fdTimeLow, fdTimeUp)
+            print(f'There were successes. Success rate: {successRate}, Expected Time: {time}')
         else:
+            # If all failed, report average time and cost
             tier = 2
-            timeSens = np.mean(np.array(costEvalsAtConv) * costAverTime + np.array(gradEvalsAtConv) * gradAverTime)
-            expectedCost = np.mean(bestCost)
-            expectedCostEvals = np.nan
-            expectedGradEvals = np.nan
-            if 'SPSA' in app['module']:
-                fdTimeLow = np.mean((np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * 2) * costAverTime)
-                fdTimeUp = fdTimeLow
-            else:
-                fdTimeLow = np.mean(
-                    (np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * (bm.n_parameters())) * costAverTime)
-                fdTimeUp = np.mean(
-                    (np.array(costEvalsAtConv) + np.array(gradEvalsAtConv) * (bm.n_parameters() + 1)) * costAverTime)
-            fdTime = (fdTimeLow, fdTimeUp)
-        optimiserName = app['module'].split('.')[-1]
-        modNum = app['modNum']
-        mod = importlib.import_module(app['module']).get_modification(app['modNum'])
-        row = [optimiserName, modNum, mod.NAME]
-        for i in range(5):
-            row += [costAtConv[i], bestCost[i], costEvalsAtConv[i], gradEvalsAtConv[i], costAverTime[i],
-                    gradAverTime[i], successOrFail[i]]
-        row += [successRate, tier, successRate, timeSens, fdTime, expectedCost]
+            time = np.mean(costTime + gradTime)
+            expectedCost = np.mean(costs)
+            print(f'There were no successes. Expected cost: {expectedCost}, Expected Time: {time}')
+        row += [successRate, tier, time, expectedCost]
         writer.writerow(row)
 
 
@@ -167,33 +153,26 @@ def full_name(s):
 
 
 df = pandas.read_csv('resultsFile.csv')
-df = df.sort_values(['Tier', 'Expected Time (Sensitivities)'])
+df = df.sort_values(['Tier', 'Expected Time'])
 df.to_csv('resultsFile-sorted.csv', index=False, na_rep='NA')
 
-header = ['Optimiser', 'Modification', 'Tier', 'Success Rate', 'Expected Time (Sensitivities; s)',
-          'Expected Time (Finite Difference; s)']
+header = ['Optimiser', 'Modification', 'Tier', 'Success Rate', 'Expected Time (s)']
 caption = 'Preliminary results for the successful approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
 label = 'tab:prelimResultsSucc'
 
 df2 = df[df['Tier'] == 1]
 df2.to_latex(buf='results-latex-succ.txt',
-             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'Expected Time (Sensitivities)',
-                      'Expected Time (Finite Difference)'], header=header, index=False, float_format='%.2f',
-             formatters={'Tier': lambda x: int(x), 'Optimiser Name': lambda x: full_name(x),
-                         'Mod Name': lambda x: full_name(x),
-                         'Expected Time (Finite Difference)': lambda x: f'({eval(x)[0]:.2f}, {eval(x)[1]:.2f})'},
+             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'Expected Time'], header=header,
+             index=False, float_format='%.2f', formatters={'Tier': lambda x: int(x), 'Mod Name': lambda x: full_name(x),
+                                                           'Optimiser Name': lambda x: full_name(x)},
              column_format='llrrr', longtable=True, label=label, caption=caption)
 
-header = ['Optimiser', 'Modification', 'Tier', 'Success Rate', 'Time (Sensitivities; s)', 'Time (Finite Difference; s)',
-          'Expected Cost']
+header = ['Optimiser', 'Modification', 'Tier', 'Expected Cost', 'Expected Time (s)']
 caption = 'Preliminary results for the failed approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
 label = 'tab:prelimResultsFail'
 df3 = df[df['Tier'] != 1]
 df3.to_latex(buf='results-latex-fail.txt',
-             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'Expected Time (Sensitivities)',
-                      'Expected Time (Finite Difference)', 'Expected Cost'], header=header, index=False,
-             float_format='%.2f', formatters={'Tier': lambda x: int(x), 'Optimiser Name': lambda x: full_name(x),
-                                              'Mod Name': lambda x: full_name(x), 'Expected Cost': lambda x: f'{x:.4f}',
-                                              'Expected Time (Finite Difference)': lambda
-                                              x: f'({eval(x)[0]:.2f}, {eval(x)[1]:.2f})'}, column_format='llrrrr',
-             longtable=True, label=label, caption=caption)
+             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Expected Cost', 'Expected Time'], header=header,
+             float_format='%.2f', formatters={'Mod Name': lambda x: full_name(x), 'Expected Cost': lambda x: f'{x:.4f}',
+                                              'Optimiser Name': lambda x: full_name(x), 'Tier': lambda x: int(x)},
+             index=False, column_format='llrrrr', longtable=True, label=label, caption=caption)
