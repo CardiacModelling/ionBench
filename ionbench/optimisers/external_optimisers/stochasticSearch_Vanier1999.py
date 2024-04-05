@@ -1,3 +1,9 @@
+"""
+The module provides the stochastic search algorithm from Vanier et al. 1999.
+This algorithm was previously described in Foster et al. 1993.
+We use the hyperparameters given by Vanier et al. 1999.
+Note that while Vanier et al. 1999 describes the variance as decreasing linearly, we use a geometric decrease as described in Foster et al. 1993.
+"""
 import numpy as np
 import ionbench
 
@@ -36,14 +42,16 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
         # sample initial point
         x0 = bm.sample()
     var = varInit
-    x0_cost = bm.cost(x0)
+    x0_cost = cost_func(x0)
     if debug:
         print(f'Starting cost is {x0_cost}')
     for i in range(maxIter):
-
-        trial = x0 + np.random.normal(loc=0, scale=np.sqrt(x0 * var))
+        trial = x0 + np.random.normal(loc=np.zeros(bm.n_parameters()), scale=np.sqrt(var))*(bm.input_parameter_space(bm.ub)-bm.input_parameter_space(bm.lb))
+        trial = bm.clamp_parameters(trial)
         trial_cost = cost_func(trial)
         if debug:
+            print(x0)
+            print(trial)
             print(f'var: {var}, trial cost: {trial_cost}')
         if trial_cost < x0_cost:
             x0 = trial
