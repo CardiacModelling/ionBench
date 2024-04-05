@@ -32,7 +32,11 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     if x0 is None:
         x0 = bm.sample()
     model = Model(bm)
-    problem = pints.SingleOutputProblem(model, np.arange(0, model.bm.T_MAX, model.bm.TIMESTEP), model.bm.DATA)
+    if 'moreno' in bm.NAME:
+        times = np.arange(len(bm.DATA))
+    else:
+        times = np.arange(0, bm.T_MAX, bm.TIMESTEP)
+    problem = pints.SingleOutputProblem(model, times, model.bm.DATA)
     error = pints.RootMeanSquaredError(problem)
     if bm.parametersBounded and not forceUnbounded:
         if bm.ratesBounded:
