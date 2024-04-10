@@ -595,6 +595,13 @@ class Benchmarker:
                 state = None
             else:
                 raise
+        except np.linalg.LinAlgError as e:
+            if 'infs or NaNs' in str(e):
+                # Infs or NaNs in matrix, caused error in myokit steady state
+                warnings.warn('Infs or NaNs in matrix so steady state is invalid. Will use states defined in problem instead.')
+                state = None
+            else:
+                raise
         if state is not None:
             if np.any(np.array(state) < 0):
                 npstate = np.array(state)
