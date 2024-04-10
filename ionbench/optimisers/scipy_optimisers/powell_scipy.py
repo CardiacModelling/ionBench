@@ -39,7 +39,7 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
             print(x0)
 
     if bm.parametersBounded:
-        bounds = minimize_bounds(bm, debug)
+        bounds = minimize_bounds(bm)
         out = scipy.optimize.minimize(cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
         out = scipy.optimize.minimize(cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})

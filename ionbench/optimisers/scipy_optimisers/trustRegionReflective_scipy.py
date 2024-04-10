@@ -23,11 +23,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by Trust Region Reflective.
     """
-    if bm.parametersBounded:
-        bounds = (bm.lb, bm.ub)
-        out = least_squares(bm, x0, debug, method='trf', maxIter=maxIter, bounds=bounds)
-    else:
-        out = least_squares(bm, x0, debug, method='trf', maxIter=maxIter)
+    out = least_squares(bm, x0, debug, method='trf', maxIter=maxIter)
 
     bm.evaluate()
     return out.x

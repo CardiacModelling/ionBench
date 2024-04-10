@@ -39,8 +39,11 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
         verbose = 2
     else:
         verbose = 1
-
-    out = scipy.optimize.least_squares(signed_error, x0, method=method, jac=grad, verbose=verbose, max_nfev=maxIter,
+    if bm.parametersBounded or 'staircase' in bm.NAME:
+        bounds = minimize_bounds(bm)
+    else:
+        bounds = (-np.inf, np.inf)
+    out = scipy.optimize.least_squares(signed_error, x0, method=method, bounds=bounds, jac=grad, verbose=verbose, max_nfev=maxIter,
                                        **kwargs)
 
     if debug:
@@ -50,34 +53,19 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
     return out
 
 
-def minimize_bounds(bm, debug):
+def minimize_bounds(bm):
     """
     Map the benchmarker bounds to the scipy bounds format.
     Parameters
     ----------
     bm : Benchmarker
         A benchmarker object.
-    debug : bool
-        If True, prints out the bounds before and after mapping.
     Returns
     -------
-    bounds : list
-        A list of tuples containing the lower and upper bounds for each parameter. None indicates no bound.
+    bounds : scipy.optimize.Bounds
+        Scipy bounds object which restricts scipy optimisation to remain inside parameter bounds.
     """
     lb = bm.input_parameter_space(bm.lb)
     ub = bm.input_parameter_space(bm.ub)
-    bounds = []
-    for i in range(bm.n_parameters()):
-        if lb[i] == np.inf:
-            lb[i] = None
-        if ub[i] == np.inf:
-            ub[i] = None
-        bounds.append((lb[i], ub[i]))
-    if debug:
-        print('Bounds transformed')
-        print('Old Bounds:')
-        print(bm.lb)
-        print(bm.ub)
-        print('New bounds')
-        print(bounds)
+    bounds = scipy.optimize.Bounds(lb=lb, ub=ub, keep_feasible=True)
     return bounds

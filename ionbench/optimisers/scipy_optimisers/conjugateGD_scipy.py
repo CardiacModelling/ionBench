@@ -1,3 +1,7 @@
+"""
+This module contains the conjugate gradient descent method implemented using scipy.optimize.minimize.
+It is an unconstrained optimiser and will struggle with the staircase problems due to the discontinuous nature of the cost/penalty function.
+"""
 import ionbench.problems.staircase
 import scipy.optimize
 
