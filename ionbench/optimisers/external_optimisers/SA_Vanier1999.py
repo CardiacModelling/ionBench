@@ -205,7 +205,10 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
         simplex.regen_noise()
         # Annealing schedule
         if i % N == 0:
-            temp = tempInitial * (1 - i / maxIter)  # Proportional decrease in temperature
+            if i < 1000:
+                temp = tempInitial * (1 - i / 1000)  # Proportional decrease in temperature
+            else:
+                temp = 0
 
         for p in simplex.points:
             if p.cost < bestCost:

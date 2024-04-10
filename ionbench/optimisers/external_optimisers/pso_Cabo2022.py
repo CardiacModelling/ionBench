@@ -127,7 +127,10 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         # Renew velocities
         c1 = 1.496
         c2 = 1.496
-        w = 0.7298 - (0.7298-0.3)*L/maxIter
+        if L < 1000:  # Dependence of w on maxIter has been removed
+            w = 0.7298 - (0.7298-0.3)*L/1000
+        else:
+            w = 0.3
         ringPos = best_in_ring(particleList)
         for i, p in enumerate(particleList):
             localAcc = c1 * np.random.rand() * (p.bestPosition - p.position)

@@ -80,8 +80,11 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
                 Gpos[L] = np.copy(p.position)
 
         # Renew velocities
-        c1 = 0.5 + L / maxIter * 2
-        c2 = 2.5 - c1
+        if L < 1000:  # Dependence of c1 and c2 on maxIter has been removed
+            c1 = 2.5 - L / 1000 * 2
+        else:
+            c1 = 0.5
+        c2 = 3 - c1
         w = np.random.uniform(0.5, 1)
         for p in particleList:
             localAcc = c1 * np.random.rand() * (p.bestPosition - p.position)
