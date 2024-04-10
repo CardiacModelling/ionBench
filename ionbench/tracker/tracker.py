@@ -314,7 +314,8 @@ class Tracker:
             if np.abs(self.bestCosts[i] - fsig) > 1e-7:
                 evalsUnchanged = 0
                 fsig = self.bestCosts[i]
-            else:
+            elif self.evals[i][-1] != 'none':
+                # Only increment if the model is solved. Not if a penalty function is used.
                 evalsUnchanged += 1
             if evalsUnchanged >= max_unchanged_evals:
                 return (True, i) if returnIndex else True
