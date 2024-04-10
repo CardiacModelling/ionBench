@@ -84,7 +84,9 @@ class Tracker:
                 self.gradSolveCount += 1
                 self.gradTimes.append(solveTime)
             self.check_repeated_param(estimatedParams, solveType)
-            self.evals.append((estimatedParams, solveType))
+        else:
+            solveType = 'none'
+        self.evals.append((estimatedParams, solveType))
         self.modelSolves.append(self.solveCount)
         self.gradSolves.append(self.gradSolveCount)
         if cost < self.bestCost:
@@ -354,11 +356,12 @@ class Tracker:
         None.
 
         """
-        for (p, st) in self.evals:
-            if all(p == param):
-                if st == solveType:
-                    warnings.warn(
-                        f'Duplicate solve. Both as {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
-                elif st == 'grad' and solveType == 'cost':
-                    warnings.warn(
-                        f'Duplicate solve. First as {st}, then as {solveType}. Cost can be found for free from a gradient solve. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+        if solveType != 'none':
+            for (p, st) in self.evals:
+                if all(p == param) and st != 'none':
+                    if st == solveType:
+                        warnings.warn(
+                            f'Duplicate solve. Both as {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                    elif st == 'grad' and solveType == 'cost':
+                        warnings.warn(
+                            f'Duplicate solve. First as {st}, then as {solveType}. Cost can be found for free from a gradient solve. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
