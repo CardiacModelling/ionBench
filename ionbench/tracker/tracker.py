@@ -227,10 +227,14 @@ class Tracker:
         else:
             print('Convergence reason:              ' + ('Cost threshold' if self.cost_threshold(threshold,
                                                                                                 i) else 'Cost unchanged'))
-        print('Cost evaluations at convergence: ' + str(self.modelSolves[i]))
-        print('Grad evaluations at convergence: ' + str(self.gradSolves[i]))
-        print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i]))
-        costTime, gradTime = self.total_solve_time(i)
+        print('Cost evaluations at convergence: ' + str(self.modelSolves[i] if len(self.modelSolves) > 0 else None))
+        print('Grad evaluations at convergence: ' + str(self.gradSolves[i] if len(self.gradSolves) > 0 else None))
+        print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i] if len(self.bestCosts) > 0 else self.bestCost))
+        if len(self.modelSolves) > 0:
+            costTime, gradTime = self.total_solve_time(i)
+        else:
+            costTime = 0
+            gradTime = 0
         print('Model solve time at convergence: {0:.6f}'.format(costTime))
         print('Grad solve time at convergence:  {0:.6f}'.format(gradTime))
 
