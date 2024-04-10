@@ -144,11 +144,17 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=
     costs = [p.currentCost for p in particleList]
     particleList = [p for _, p in sorted(zip(costs, particleList), key=lambda pair: pair[0])]
     for p in particleList[:M]:
-        bounds = (bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
-        out = scipy.optimize.least_squares(signed_error, p.untransform(p.position), method='trf', jac=grad,
-                                           bounds=bounds, verbose=verbose)
-        p.position = p.transform(out.x)
-        p.set_cost(bm.rmse(out.fun + bm.DATA, bm.DATA))
+        bounds = ionbench.utils.scipy_setup.minimize_bounds(bm)
+        try:
+            out = scipy.optimize.least_squares(signed_error, p.untransform(p.position), method='trf', jac=grad,
+                                               bounds=bounds, verbose=verbose)
+            p.position = p.transform(out.x)
+            p.set_cost(bm.rmse(out.fun + bm.DATA, bm.DATA))
+        except ValueError as e:
+            if 'Residuals are not finite' in str(e):
+                pass
+            else:
+                raise e
 
     bm.evaluate()
     return Particle().untransform(Gpos[L])

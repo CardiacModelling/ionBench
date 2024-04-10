@@ -127,12 +127,20 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
             # Clamp
             p.clamp()
 
-            bounds = (bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
-            out = scipy.optimize.least_squares(signed_error, p.untransform(p.position), method='trf', jac=grad, max_nfev=2 * K,
+            bounds = ionbench.utils.scipy_setup.minimize_bounds(bm)
+            try:
+                out = scipy.optimize.least_squares(signed_error, p.untransform(p.position), method='trf', jac=grad, max_nfev=2 * K,
                                                bounds=bounds, verbose=verbose)
-            p.velocity = p.transform(out.x) - old_position
-            p.position = p.transform(out.x)
-            p.set_cost(bm.rmse(out.fun+bm.DATA, bm.DATA))
+                p.velocity = p.transform(out.x) - old_position
+                p.position = p.transform(out.x)
+                p.set_cost(bm.rmse(out.fun+bm.DATA, bm.DATA))
+            except ValueError as e:
+                if 'Residuals are not finite' in str(e):
+                    # Reset cost as it may be changed by clamp
+                    p.set_cost()
+                else:
+                    raise e
+
 
         if debug:
             print("Positions renewed")
