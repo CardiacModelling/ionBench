@@ -51,7 +51,14 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             L += 1
         return L
 
-    cost_func = ionbench.utils.cache.get_cached_cost(bm)
+    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
+
+    def cost_func(x):
+        """
+        Cost function needs to use the signed_error function so that they use the same cache.
+        """
+        return bm.rmse(signed_error(x) + bm.DATA, bm.DATA)
 
     # Ensure popSize is defined
     if popSize is None:
@@ -76,7 +83,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             if debug:
                 print('Running lm on each point')
             for i in range(popSize):
-                out = scipy.optimize.least_squares(bm.signed_error, pop[i].x, method='lm', diff_step=1e-3, max_nfev=1000)
+                out = scipy.optimize.least_squares(bm.signed_error, pop[i].x, method='lm', jac=grad, max_nfev=1000)
                 pop[i].x = out.x
                 pop[i].cost = out.cost
 
