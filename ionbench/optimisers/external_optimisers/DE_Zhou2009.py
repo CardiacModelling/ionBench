@@ -114,7 +114,13 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
                 print(f'Perturbed point after crossover with L {L} and n {n}')
                 print(trial.x)
             # Save best out of trial or pop[i]
-            trial.find_cost()
+            try:
+                trial.find_cost()
+            except Exception as e:
+                print(e)
+                print('Error in trial.find_cost()')
+                print(trial.x)
+                raise e
             if trial.cost < pop[i].cost:
                 if debug:
                     print(f'Point accepted since trail cost is {trial.cost} and ith cost is {pop[i].cost}')
