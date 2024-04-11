@@ -1,4 +1,6 @@
 import pytest
+import scipy.stats
+
 import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
@@ -248,8 +250,7 @@ class Problem:
         self.bm.reset()
         self.bm.use_sensitivities()
         # Check gradient calculator is accurate
-        a = grad_check(bm=self.bm, x0=self.bm.sample(),
-                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        a = grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting)
         assert a < 0.01
         # Same under log transforms
         self.bm.log_transform([True] + [False] * (self.bm.n_parameters() - 1))
@@ -274,20 +275,17 @@ class Problem:
         self.bm.lb[0] = self.bm.ub[0]
         self.bm.lb[2] = self.bm.ub[2]
         # Check gradient calculator is accurate when outside of bounds
-        a = grad_check(bm=self.bm, x0=x0,
-                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        a = grad_check(bm=self.bm, x0=x0, plotting=plotting)
         assert a < 0.01
         # Handles rate bounds as well
         self.bm.add_rate_bounds()
         self.bm.lb = np.copy(self.bm._LOWER_BOUND)
         tmp = self.bm.RATE_MIN
         self.bm.RATE_MIN = self.bm.RATE_MAX
-        a = grad_check(bm=self.bm, x0=x0,
-                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        a = grad_check(bm=self.bm, x0=x0, plotting=plotting)
         assert a < 0.01
         self.bm.useScaleFactors = True
-        a = grad_check(bm=self.bm, x0=self.bm.input_parameter_space(x0),
-                       plotting=plotting)  # Within 1% to account for solver noise and finite difference error
+        a = grad_check(bm=self.bm, x0=self.bm.input_parameter_space(x0), plotting=plotting)
         assert a < 0.01
         self.bm.RATE_MIN = tmp
 
@@ -627,16 +625,17 @@ def grad_check(bm, x0, plotting=False):
     """
     Test function for checking gradient matches perturbing the cost function
     """
-    if plotting:
-        paramVec = np.linspace(0.999 * x0[0], 1.001 * x0[0], 10)
-    else:
-        paramVec = [0.999 * x0[0], 1.001 * x0[0]]
-    nPoints = len(paramVec)
+    nPoints = 50
+    paramVec = np.linspace(0.999 * x0[0], 1.001 * x0[0], nPoints)
+    if 'staircase' in bm.NAME:
+        bm.sim.set_tolerance(bm._TOLERANCES[0]/100, bm._TOLERANCES[1]/100)  # Use tighter tolerances here to avoid solver noise
     costs = np.zeros(nPoints)
     for i in range(nPoints):
         p = np.copy(x0)
         p[0] = paramVec[i]
         costs[i] = bm.cost(p)
+    if 'staircase' in bm.NAME:
+        bm.sim.set_tolerance(*bm._TOLERANCES)
     grad = bm.grad(x0)
 
     centreCost = bm.cost(x0)
@@ -645,5 +644,5 @@ def grad_check(bm, x0, plotting=False):
         plt.plot(paramVec, centreCost + grad[0] * (paramVec - x0[0]))
         plt.legend(['ODE cost', 'Grad'])
         plt.show()
-    actualGrad = (costs[-1] - costs[0]) / (paramVec[-1] - paramVec[0])
-    return (actualGrad - grad[0]) ** 2 / actualGrad
+    actualGrad, _, _, _, _ = scipy.stats.linregress(paramVec, costs)
+    return (actualGrad - grad[0])**2 / actualGrad
