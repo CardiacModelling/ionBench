@@ -439,7 +439,7 @@ class Benchmarker:
             for i in range(self.n_parameters()):
                 grad[i] = parametersMG[i].grad if parametersMG[i].grad is not None else 0
             cost = float(penalty.data)
-            error = cost * np.array(len(self.DATA))
+            error = cost * np.ones(len(self.DATA))
             J = np.zeros((len(self.DATA), self.n_parameters()))
             for i in range(len(self.DATA)):
                 J[i,] = grad
