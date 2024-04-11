@@ -266,7 +266,7 @@ class Problem:
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad_bounds(self, plotting=False):
         self.bm.reset()
-        mod = ionbench.modification.Modification(parameterBounds='Sampler')
+        mod = ionbench.modification.Modification(parameterBounds='on')
         mod.apply(self.bm)
         self.bm.use_sensitivities()
         x0 = self.bm.sample()
@@ -466,7 +466,7 @@ class Loewe(Problem):
         self.bm.reset()
         # Check sampler is inside the right bounds and doesn't just return default rates, across all transforms
         # Get bounds from a modification
-        mod = ionbench.modification.Modification(parameterBounds='Sampler')
+        mod = ionbench.modification.Modification(parameterBounds='on')
         mod.apply(self.bm)
         lb = self.bm.lb
         ub = self.bm.ub
