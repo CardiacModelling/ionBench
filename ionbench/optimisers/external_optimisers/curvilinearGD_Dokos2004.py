@@ -106,6 +106,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         return p
 
     signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
+    grad = ionbench.utils.cache.get_cached_grad(bm, returnCost=True, residuals=True)
 
     # sample initial point
     if x0 is None:
@@ -127,7 +128,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         # Initialisation routine for every weight update/reset
         falphaOld = np.inf  # Stores the weighted SSE from the previous iteration in curvilinear GD, for termination criteria of curvilinear gradient descent
         # find residuals and jacobian. Residuals will be used to find weights, J will be used in first iteration of curvilinear GD
-        r0, J = bm.grad(model_params(x0), returnCost=True, residuals=True)
+        r0, J = grad(model_params(x0))
         currentCost = np.sqrt(np.mean(r0 ** 2))
         if debug:
             print(f'Starting out optimisation loop. Weight counter {weightCounter}')
@@ -190,7 +191,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 print(f'Curvilinear GD Iteration: {k} of {maxInnerIter}')
             if k > 0:
                 # If first iteration of GD, r0 and J have already been calculated
-                r0, J = bm.grad(model_params(x0), returnCost=True, residuals=True)
+                r0, J = grad(model_params(x0))
 
             # apply weights to residuals and jacobian
             r0 = np.diag(w) @ r0
@@ -242,23 +243,38 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 alpha = out[0]
                 falphaNew = out[1]
             except ValueError as e:
-                # Option 1: SSE(1e9) is smaller than SSE(1)
-                if SSE(1e9) <= SSE(1):
+                # Failed. Time to find out why and try to recover
+                # Option 1: NaNs in either SSE(0) or SSE(1e9) but not SSE(1) so step still viable
+                if (np.isnan(SSE(0)) or np.isnan(SSE(1e9))) and not np.isnan(SSE(1)):
+                    # If SSE(1) is NOT WORSE than SSE(0) or SSE(1e9), then we can assume that it is a good step
+                    if debug:
+                        print(
+                            f'NaNs were found. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}. Will try to continue if possible')
+                    if not SSE(1) > SSE(0) and not SSE(1) > SSE(1e9):
+                        alpha = 1
+                        falphaNew = SSE(alpha)
+                    else:
+                        print(f'Failed. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
+                        raise e
+                # Option 2: SSE(1e9) is best - take full step
+                elif SSE(1e9) <= SSE(1) and SSE(1e9) <= SSE(0):
+                    # SSE(1e9)<SSE(1),SSE(0)
                     alpha = 1e9
                     falphaNew = SSE(alpha)
                     if debug:
-                        print('Alpha was minimised by taking the full step')
+                        print('Alpha was minimised (at least approximately) by taking the full step')
+                # Option 3: SSE(0) is smallest - start with even smaller step than 1
                 elif SSE(0) <= SSE(1):
-                    # Error when SSE(1) is larger than SSE(0). In this case, it is likely that 1 is just too large a step size, so we probably have SSE(0)<SSE(1)<SSE(1e9). In which case, any tiny step size will be good enough to start brent optimisation
-                    assert SSE(0) <= SSE(1e9)  # This shouldn't be triggered
+                    # SSE(0)<SSE(1),SSE(1e9)
                     if debug:
                         print(
-                            f'SSE(0) {SSE(0)} seems to be smaller than SSE(1) {SSE(1)}, I am going to assume it is also smaller than SSE(1e9) {SSE(1e9)} and that SSE(1e-6) {SSE(1e-6)} is smaller than them all')
+                            f'SSE(0) {SSE(0)} is smaller than SSE(1) {SSE(1)}, trying smaller steps for the initial guesses (1e-6 and 1e-9). If not, will assume converged')
                     if SSE(1e-6) < SSE(0):
                         initStep = 1e-6
                     elif SSE(1e-9) < SSE(0):
                         initStep = 1e-9
                     else:
+                        # The step needed would be too small so assume converged
                         x0 = model_params(x0)
                         bm.evaluate()
                         return x0
@@ -266,6 +282,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                     alpha = out[0]
                     falphaNew = out[1]
                 else:
+                    print(f'Failed. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
                     raise e
 
             # Take new step
@@ -302,6 +319,9 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             if debug:
                 print(
                     f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
+            break
+
+        if bm.is_converged():
             break
 
     x0 = model_params(x0)
