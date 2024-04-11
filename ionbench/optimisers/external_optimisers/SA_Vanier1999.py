@@ -20,7 +20,7 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
     N : float, optional
         Number of moves per temperature update. Vanier 1999 varies this problem specifically, between 5 and 300. The default is 5.
     maxIter : int, optional
-        Maximum number of iterations. Sets the budget which controls how fast the temperature decreases, smaller maxIter means faster decrease in temperature to ensure temperature approaches 0 (although it will terminate before reaching 0). The default is 1000.
+        Maximum number of iterations. The default is 1000.
     debug : bool, optional
         If True, debug information will be printed, reporting that status of the optimisation each generation. The default is False.
 
