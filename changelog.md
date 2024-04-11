@@ -3,7 +3,10 @@
 ## v0.5.0-alpha
 Planned changes:
 
-## v0.4.2-alpha - Current release
+## v0.4.3-alpha - Current release
+More optimiser, benchmarker and tracker bug fixes and improvements. 
+
+## v0.4.2-alpha
 Fixed bugs in pints optimisers for Moreno. Corrected the stochastic search optimisers. 
 
 ## v0.4.1-alpha
