@@ -18,7 +18,6 @@ bm = ionbench.problems.staircase.MM()
 bm.plotter = False
 # Find optimiser short name
 bmShortName = bm.NAME.split('.')[1].lower()
-os.chdir(os.path.join(os.getcwd(), bmShortName.upper()))
 
 # Find out how many runs were attempted
 maxRuns = 0
@@ -32,7 +31,7 @@ for app in ionbench.APP_UNIQUE:
         maxRuns = max(maxRuns, i)
 print(f"{maxRuns} runs were attempted.")
 
-with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvfile:
+with open(os.path.join(os.getcwd(), f'resultsFile-{bmShortName}.csv'), 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     # Set titles
     titles = ['Optimiser Name', 'Mod Name']
@@ -44,7 +43,7 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
         for j in variables:
             titles.append(f'Run {i} - {j}')
     # Add final summary data titles
-    titles += ['Success Rate', 'Tier', 'Expected Time', 'Expected Cost']
+    titles += ['Tier', 'Success Rate', 'Expected Time', 'Expected Cost']
     # Write the title row
     writer.writerow(titles)
     # Loop through all unique approaches
@@ -107,7 +106,7 @@ with open(os.path.join(os.getcwd(), 'resultsFile.csv'), 'w', newline='') as csvf
             time = np.mean(costTime + gradTime)
             expectedCost = np.mean(costs)
             print(f'There were no successes. Expected cost: {expectedCost}, Expected Time: {time}')
-        row += [successRate, tier, time, expectedCost]
+        row += [tier, successRate, time, expectedCost]
         writer.writerow(row)
 
 
@@ -152,27 +151,28 @@ def full_name(s):
     return s
 
 
-df = pandas.read_csv('resultsFile.csv')
+df = pandas.read_csv(f'resultsFile-{bmShortName}.csv')
 df = df.sort_values(['Tier', 'Expected Time'])
-df.to_csv('resultsFile-sorted.csv', index=False, na_rep='NA')
+df.to_csv(f'resultsFile-{bmShortName}-sorted.csv', index=False, na_rep='NA')
 
-header = ['Optimiser', 'Modification', 'Tier', 'Success Rate', 'Expected Time (s)']
-caption = 'Preliminary results for the successful approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
-label = 'tab:prelimResultsSucc'
+header = ['Optimiser', 'Modification', 'Success Rate (%)', 'Expected Time (s)']
+caption = f'Results for the successful approaches in ionBench on the {bm.NAME} problem. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
+label = f'tab:resultsSucc-{bmShortName}'
 
 df2 = df[df['Tier'] == 1]
-df2.to_latex(buf='results-latex-succ.txt',
-             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'Expected Time'], header=header,
-             index=False, float_format='%.2f', formatters={'Tier': lambda x: int(x), 'Mod Name': lambda x: full_name(x),
-                                                           'Optimiser Name': lambda x: full_name(x)},
+df2.to_latex(buf=f'results-{bmShortName}-latex-succ.txt',
+             columns=['Optimiser Name', 'Mod Name', 'Success Rate', 'Expected Time'], header=header,
+             index=False, float_format='%.2f', formatters={'Mod Name': lambda x: full_name(x),
+                                                           'Optimiser Name': lambda x: full_name(x),
+                                                           'Success Rate': lambda x: int(x*100)},
              column_format='llrrr', longtable=True, label=label, caption=caption)
 
-header = ['Optimiser', 'Modification', 'Tier', 'Expected Cost', 'Expected Time (s)']
-caption = 'Preliminary results for the failed approaches in ionBench. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
-label = 'tab:prelimResultsFail'
+header = ['Optimiser', 'Modification', 'Expected Cost', 'Expected Time (s)']
+caption = f'Results for the failed approaches in ionBench on the {bm.NAME} problem. NaN is reserved for results that either cannot be completed in a reasonable amount of time or for optimisers that are not yet finished. Abbreviations: GA - Genetic Algorithm, PSO - Particle Swarm Optimisation, TRR - Trust Region Reflective, PPSO - Perturbed Particle Swarm Optimisation, NM - Nelder Mead, DE - Differential Evolution, GD - Gradient Descent, CMAES - Covariance Matrix Adaption Evolution Strategy, SLSQP - Sequential Least SQuares Programming, LM - Levenberg-Marquardt.'
+label = f'tab:resultsFail-{bmShortName}'
 df3 = df[df['Tier'] != 1]
-df3.to_latex(buf='results-latex-fail.txt',
-             columns=['Optimiser Name', 'Mod Name', 'Tier', 'Expected Cost', 'Expected Time'], header=header,
+df3.to_latex(buf=f'results-{bmShortName}-latex-fail.txt',
+             columns=['Optimiser Name', 'Mod Name', 'Expected Cost', 'Expected Time'], header=header,
              float_format='%.2f', formatters={'Mod Name': lambda x: full_name(x), 'Expected Cost': lambda x: f'{x:.4f}',
-                                              'Optimiser Name': lambda x: full_name(x), 'Tier': lambda x: int(x)},
+                                              'Optimiser Name': lambda x: full_name(x)},
              index=False, column_format='llrrrr', longtable=True, label=label, caption=caption)
