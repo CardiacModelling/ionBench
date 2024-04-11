@@ -1,3 +1,9 @@
+"""
+This module describes the pattern search algorithm from Kohjitani et al. 2022.
+This algorithm is a simple pattern search algorithm that explores neighbouring points around a base point, and moves to the best neighbouring point if an improvement is found.
+The step size is reduced if no improvements are found in the neighbouring points.
+The algorithm terminates when the step size is sufficiently small.
+"""
 import ionbench
 import numpy as np
 
