@@ -153,6 +153,9 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=False
                 pass
             else:
                 raise e
+        if p.currentCost < Gcost[L]:
+            Gcost[L] = p.currentCost
+            Gpos[L] = np.copy(p.position)
 
     bm.evaluate()
     return Particle().untransform(Gpos[L])
