@@ -1,5 +1,7 @@
-# Only works with positive parameters, crossover isn't defined for the possibility of negative parameters
-
+"""
+Describes the genetic algorithm from Cairns et al. 2017.
+This algorithm uses a crossover method which is based on the binary representation of the parameters. It does not work (is not defined for) negative parameters and struggles to identify parameters under 1e-6.
+"""
 import numpy as np
 import ionbench
 import ionbench.utils.population_optimisers as pop_opt
@@ -78,15 +80,19 @@ def run(bm, x0=None, nGens=10, popSize=2500, tournamentSize=5, debug=False):
                 num2 = int(np.round(num2 * 1e6))
                 # Then map to binary string
                 # Find length of binary strings
-                binStrLen = int(np.log2(max(num1, num2))) + 1
-                bin1 = format(num1, '0' + str(binStrLen) + 'b')
-                bin2 = format(num2, '0' + str(binStrLen) + 'b')
-                # Random position between 0 and binStrLen (inclusive)
-                randPos = np.random.randint(0, binStrLen + 1)
-                # Crossover in binary
-                binNew = bin1[:randPos] + bin2[randPos:]
-                # Convert back to decimal float
-                numNew = int(binNew, 2) / 1e6
+                if num1 == num2:
+                    # Don't do crossover as not different, also avoids avoids issue with log2(0)
+                    numNew = num1/1e6
+                else:
+                    binStrLen = int(np.log2(max(num1, num2))) + 1
+                    bin1 = format(num1, '0' + str(binStrLen) + 'b')
+                    bin2 = format(num2, '0' + str(binStrLen) + 'b')
+                    # Random position between 0 and binStrLen (inclusive)
+                    randPos = np.random.randint(0, binStrLen + 1)
+                    # Crossover in binary
+                    binNew = bin1[:randPos] + bin2[randPos:]
+                    # Convert back to decimal float
+                    numNew = int(binNew, 2) / 1e6
                 child.x[i] = numNew
             newPop.append(child)
 
