@@ -291,7 +291,7 @@ class Liu2011(Modification):
 
 class Loewe2016(Modification):
     def __init__(self):
-        super().__init__(name='Loewe2012', logTransform='off', parameterBounds='on', scaleFactors='off')
+        super().__init__(name='Loewe2016', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Maryak1998(Modification):
