@@ -39,7 +39,7 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
         verbose = 2
     else:
         verbose = 1
-    if bm.parametersBounded or 'staircase' in bm.NAME:
+    if (bm.parametersBounded or 'staircase' in bm.NAME) and method != 'lm':
         bounds = minimize_bounds(bm)
     else:
         bounds = (-np.inf, np.inf)
