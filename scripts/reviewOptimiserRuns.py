@@ -78,12 +78,21 @@ with open(os.path.join(os.getcwd(), f'resultsFile-{bmShortName}.csv'), 'w', newl
             # Get data at convergence
             i = bm.tracker.when_converged(bm.COST_THRESHOLD)
             i = -1 if i is None else i
-            costs.append(bm.tracker.bestCosts[i])
+            try:
+                costs.append(bm.tracker.bestCosts[i])
+            except IndexError:
+                costs.append(np.inf)
             a, b = bm.tracker.total_solve_time(i)
             costTime.append(a)
             gradTime.append(b)
-            gradEvals.append(bm.tracker.gradSolves[i])
-            costEvals.append(bm.tracker.modelSolves[i])
+            try:
+                gradEvals.append(bm.tracker.gradSolves[i])
+            except IndexError:
+                gradEvals.append(np.nan)
+            try:
+                costEvals.append(bm.tracker.modelSolves[i])
+            except IndexError:
+                costEvals.append(np.nan)
             successOrFail.append(costs[runNum] < bm.COST_THRESHOLD)
             row += [costs[runNum], costEvals[runNum], gradEvals[runNum], costTime[runNum], gradTime[runNum],
                     successOrFail[runNum]]
