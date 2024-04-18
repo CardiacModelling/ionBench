@@ -455,7 +455,7 @@ class Benchmarker:
             try:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.T_MAX, self.TIMESTEP))
                 sens = np.array(sens)
-            except myokit.SimulationError:
+            except (myokit.SimulationError, np.linalg.LinAlgError):
                 # If the model fails to solve, we will assume the cost is infinite and the jacobian/gradient points back towards good parameters
                 end = time.monotonic()
                 warnings.warn(
@@ -667,7 +667,7 @@ class Benchmarker:
                 else:
                     log = self.sim.run(self.T_MAX + 1, log_times=times)
                 return np.array(log[self._OUTPUT_NAME])
-            except myokit.SimulationError:
+            except (myokit.SimulationError, np.linalg.LinAlgError):
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
