@@ -1,6 +1,5 @@
 import pints
 import numpy as np
-from functools import lru_cache
 import ionbench
 
 
@@ -37,7 +36,8 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     else:
         times = np.arange(0, bm.T_MAX, bm.TIMESTEP)
     problem = pints.SingleOutputProblem(model, times, model.bm.DATA)
-    error = pints.RootMeanSquaredError(problem)
+    error = ErrorWithGrad(problem, bm)
+
     if bm.parametersBounded and not forceUnbounded:
         if bm.ratesBounded:
             boundaries = AdvancedBoundaries(bm)
@@ -57,6 +57,21 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     if debug:
         opt.set_log_interval(iters=1)
     return model, opt
+
+
+class ErrorWithGrad(pints.RootMeanSquaredError):
+    """
+    Pints error measure that uses RMSE and additionally defines the gradient of the RMSE.
+    """
+    def __init__(self, problem, bm):
+        super().__init__(problem)
+        self.bm = bm
+        self.grad = ionbench.utils.cache.get_cached_grad(bm, returnCost=True)
+
+    def evaluateS1(self, x):
+        if 'moreno' in self.bm.NAME:
+            raise NotImplementedError('Moreno uses weighted RMSE in cost and grad, pints uses unweighted RMSE. No unweighted RMSE grad is available for Moreno.')
+        return self.grad(x)
 
 
 class Model(pints.ForwardModel):
