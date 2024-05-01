@@ -1,4 +1,5 @@
 from functools import lru_cache
+import copy
 
 
 def get_cached_cost(bm):
@@ -73,6 +74,6 @@ def get_cached_grad(bm, **kwargs):
         return bm.grad(p, **kwargs)
 
     def grad(p):
-        return cached_func(tuple(p))
+        return copy.deepcopy(cached_func(tuple(p)))
 
     return grad
