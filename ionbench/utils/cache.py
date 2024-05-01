@@ -1,6 +1,21 @@
 from functools import lru_cache
 import copy
 
+cachedFunctions = []
+
+
+def cache():
+    def decorator(func):
+        func = lru_cache(maxsize=None)(func)
+        cachedFunctions.append(func)
+        return func
+    return decorator
+
+
+def clear_all_caches():
+    for func in cachedFunctions:
+        func.cache_clear()
+
 
 def get_cached_cost(bm):
     """
@@ -17,7 +32,7 @@ def get_cached_cost(bm):
         Cached cost function.
     """
 
-    @lru_cache(maxsize=None)
+    @cache()
     def cached_func(p):
         return bm.cost(p)
 
@@ -42,7 +57,7 @@ def get_cached_signed_error(bm):
         Cached signed error (residuals) function.
     """
 
-    @lru_cache(maxsize=None)
+    @cache()
     def cached_func(p):
         return bm.signed_error(p)
 
@@ -69,7 +84,7 @@ def get_cached_grad(bm, **kwargs):
         Cached grad function.
     """
 
-    @lru_cache(maxsize=None)
+    @cache()
     def cached_func(p):
         return bm.grad(p, **kwargs)
 

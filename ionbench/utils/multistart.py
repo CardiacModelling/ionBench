@@ -1,6 +1,7 @@
 """
 Contains the multistart function (referenced as ionbench.multistart) which can perform multiple runs of the same optimisation function starting at different initial conditions.
 """
+import ionbench.utils.cache
 
 
 def multistart(opt, bm, initParams, filename, **kwargs):
@@ -33,4 +34,5 @@ def multistart(opt, bm, initParams, filename, **kwargs):
         print(out)
         outs.append(out)
         bm.reset(fullReset=False)
+        ionbench.utils.cache.clear_all_caches()
     return outs
