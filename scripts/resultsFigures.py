@@ -83,12 +83,13 @@ def success_plot(dfs, titles):
         axs[i // 2, i % 2].set_ylabel('Expected Time (s)')
         # Add y-axis grid lines
         axs[i // 2, i % 2].yaxis.grid(True, zorder=0)
-    # Remove six subfigure
+    # Remove sixth sub-figure
     axs[2, 1].remove()
     plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'expectedTime.png'), bbox_inches='tight')
     plt.show()
 
 
+# noinspection PyShadowingNames
 def fail_plot(dfs, titles):
     """
     Plot the expected time of failed optimisers.
@@ -146,6 +147,75 @@ def fail_plot(dfs, titles):
         plt.show()
 
 
+# noinspection PyShadowingNames
+def time_plot(dfs, titles, solveType='Cost'):
+    """
+    Plot the total solve time for each approach (cost or grad selected with solveType) across all runs against the average number of cost evaluations.
+    Parameters
+    ----------
+    dfs : list
+        A list of pandas.DataFrame containing the optimiser run data to plot.
+    titles : list
+        A list of strings for the titles of the plots.
+    solveType : str
+        The solve type to plot ('Cost' or 'Grad').
+
+    Returns
+    -------
+    None.
+    """
+    # Setup subplot figure
+    fig, axs = plt.subplots(3, 2, figsize=(10, 10), layout='constrained')
+    for i in range(len(dfs)):
+        # Get problem specific data and axes
+        df = dfs[i]
+        title = titles[i]
+        ax = axs[i // 2, i % 2]
+        fevals = []
+        times = []
+        # Get total number of function evals and total time for each problem
+        for row in range(len(df)):
+            f = []
+            t = []
+            for run in range(10):
+                f.append(df[f'Run {run} - {solveType} Evals'][row])
+                t.append(df[f'Run {run} - {solveType} Time'][row])
+            fevals.append(np.sum(f, where=~np.isnan(f)))
+            times.append(np.sum(t, where=~np.isnan(t)))
+        # Remove NaNs and zeros
+        fevals = np.array(fevals)
+        times = np.array(times)
+        pointsToKeep = np.logical_and(~np.isnan(fevals+times), fevals != 0, times != 0)
+        fevals = fevals[pointsToKeep]
+        times = times[pointsToKeep]
+        # Plot scatter plot
+        ax.scatter(fevals, times)
+        # Add line of best fit (fitted on log-log scale)
+        coeff = np.polyfit(np.log10(fevals), np.log10(times), 1)
+        x = np.linspace(np.min(fevals), np.max(fevals), 1000)
+        y = [10**coeff[1]*x_**coeff[0] for x_ in x]
+        ax.plot(x, y, color='red', zorder=0)
+        # Set log-log scale
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        # Set axis labels
+        ax.set_xlabel(f'{solveType} Evaluations')
+        ax.set_ylabel('Time (s)')
+        # Calculate average solve time across all solves
+        totTime = np.sum(times)
+        totEvals = np.sum(fevals)
+        print(
+            f'Problem: {title}, Solve Type: {solveType}, Total solves: {totEvals}, Total time: {totTime}, Average time per solve: {totTime / totEvals}')
+        ax.title.set_text(f'{title}. Avg. Time: {totTime/ totEvals:.2e}s')
+    # Remove sixth sub-figure
+    axs[2, 1].remove()
+    # Save and show plot
+    plt.savefig(
+        os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'{solveType.lower()}Time.png'),
+        bbox_inches='tight')
+    plt.show()
+
+
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
 titles = ['Staircase - HH', 'Staircase - MM', 'Loewe 2016 - IKr', 'Loewe 2016 - IKur', 'Moreno 2016 - INa']
 dfs = []
@@ -153,3 +223,5 @@ for bmShortName in bmShortNames:
     dfs.append(pandas.read_csv(f'resultsFile-{bmShortName}-sorted.csv'))
 success_plot(dfs, titles)
 fail_plot(dfs, titles)
+time_plot(dfs, titles)
+time_plot(dfs, titles, solveType='Grad')
