@@ -1,9 +1,9 @@
 # Changelog
 
-## v0.5.0-alpha
-Planned changes:
+## v0.5.0-alpha - Current release
+Refactored tracker (breaks compatibility with previous versions). Improved memory usage from caching. Added rProp optimiser from Pints. Other minor bug fixes and improvements.
 
-## v0.4.3-alpha - Current release
+## v0.4.3-alpha
 More optimiser, benchmarker and tracker bug fixes and improvements. 
 
 ## v0.4.2-alpha
