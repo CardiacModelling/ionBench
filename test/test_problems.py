@@ -89,7 +89,10 @@ class Problem:
     @pytest.mark.cheap
     def test_rate_bounds(self):
         self.bm.reset()
-        assert self.bm.ratesBounded is False
+        if 'staircase' in self.bm.NAME:
+            assert self.bm.ratesBounded is True
+        else:
+            assert self.bm.ratesBounded is False
         self.bm.add_rate_bounds()
         assert self.bm.ratesBounded is True
         tmp = self.bm.RATE_MIN
@@ -361,8 +364,12 @@ class Problem:
     @pytest.mark.cheap
     def test_reset(self):
         self.bm.reset(fullReset=True)
-        assert self.bm.parametersBounded is False
-        assert self.bm.ratesBounded is False
+        if 'staircase' in self.bm.NAME:
+            assert self.bm.parametersBounded is True
+            assert self.bm.ratesBounded is True
+        else:
+            assert self.bm.parametersBounded is False
+            assert self.bm.ratesBounded is False
         assert all([self.bm.logTransformParams[i] is False for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is False
         assert self.bm.tracker.costSolveCount == 0
@@ -387,8 +394,12 @@ class Problem:
         assert self.bm.useScaleFactors is True
         assert self.bm.tracker.costSolveCount == 0
         self.bm.reset()  # Full reset is True by default
-        assert self.bm.parametersBounded is False
-        assert self.bm.ratesBounded is False
+        if 'staircase' in self.bm.NAME:
+            assert self.bm.parametersBounded is True
+            assert self.bm.ratesBounded is True
+        else:
+            assert self.bm.parametersBounded is False
+            assert self.bm.ratesBounded is False
         assert all([self.bm.logTransformParams[i] is False for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is False
         assert self.bm.tracker.costSolveCount == 0

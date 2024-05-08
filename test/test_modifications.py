@@ -5,7 +5,7 @@ import pytest
 
 
 class TestModifications:
-    bm = ionbench.problems.staircase.HH()
+    bm = ionbench.problems.loewe2016.IKr()
 
     @pytest.mark.cheap
     def test_bounds(self):
@@ -16,7 +16,7 @@ class TestModifications:
         mod = modification.Modification(parameterBounds='on')
         mod.apply(self.bm)
         assert self.bm.parametersBounded
-        assert all(np.array(self.bm.lb) > 0)
+        assert all(np.array(self.bm.lb) > -np.inf)
         assert all(np.array(self.bm.ub) < np.inf)
         # Custom
         lb = np.random.rand(self.bm.n_parameters())
@@ -112,13 +112,14 @@ class TestModifications:
         assert all(np.array(self.bm.ub) == np.array(ub))
 
     @pytest.mark.cheap
-    def test_other_problems(self):
-        # Basic check for another benchmarker
-        mod = modification.Modification(logTransform='on', parameterBounds='on', scaleFactors='On')
-        newbm = ionbench.problems.loewe2016.IKr()
+    def test_staircase(self):
+        # Check staircase problems override bounds
+        mod = modification.Modification(logTransform='on', parameterBounds='off', scaleFactors='On', rateBounds='off')
+        newbm = ionbench.problems.staircase.HH()
         mod.apply(newbm)
         assert newbm.useScaleFactors
         assert all(np.array(newbm.logTransformParams) == np.array(newbm.STANDARD_LOG_TRANSFORM))
         assert any(newbm.logTransformParams)
         assert not all(newbm.logTransformParams)
         assert newbm.parametersBounded
+        assert newbm.ratesBounded
