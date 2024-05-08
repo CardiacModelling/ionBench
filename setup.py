@@ -123,7 +123,7 @@ setup(
                       "pandas",
                       "scipy",
                       "pints>=0.4.1",
-                      "myokit>=1.34.0",
+                      "myokit>=1.36.0",
                       "matplotlib>=3.7.1",
                       "mygrad>=2.2.0",
                       "pymoo>=0.6.0.1"],
