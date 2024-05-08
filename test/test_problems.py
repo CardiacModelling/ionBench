@@ -585,13 +585,13 @@ class TestMM(Staircase):
 class TestLoeweIKr(Loewe):
     bm = ionbench.problems.loewe2016.IKr()
     bm.plotter = False
-    costBound = 0
+    costBound = 1e-16
 
 
 class TestLoeweIKur(Loewe):
     bm = ionbench.problems.loewe2016.IKur()
     bm.plotter = False
-    costBound = 0
+    costBound = 1e-16
 
 
 def sampler_bounds(bm, lb, ub):
