@@ -246,12 +246,18 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 # Failed. Time to find out why and try to recover
                 # Option 1: NaNs in either SSE(0) or SSE(1e9) but not SSE(1) so step still viable
                 if (np.isnan(SSE(0)) or np.isnan(SSE(1e9))) and not np.isnan(SSE(1)):
-                    # If SSE(1) is NOT WORSE than SSE(0) or SSE(1e9), then we can assume that it is a good step
+                    # If SSE(1) is NOT WORSE than SSE(0) or SSE(1e9) (accounting for SSE(0) or SSE(1e9) being NaN), then we can assume that it is a good step
                     if debug:
                         print(
                             f'NaNs were found. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}. Will try to continue if possible')
                     if not SSE(1) > SSE(0) and not SSE(1) > SSE(1e9):
                         alpha = 1
+                        falphaNew = SSE(alpha)
+                    elif not SSE(1e-6) > SSE(0) and not SSE(1e-6) > SSE(1e9):
+                        alpha = 1e-6
+                        falphaNew = SSE(alpha)
+                    elif not SSE(1e-9) > SSE(0) and not SSE(1e-9) > SSE(1e9):
+                        alpha = 1e-9
                         falphaNew = SSE(alpha)
                     else:
                         print(f'Failed. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
