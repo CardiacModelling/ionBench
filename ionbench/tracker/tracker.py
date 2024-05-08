@@ -24,23 +24,24 @@ class Tracker:
     plot() is called during the benchmarker's .evaluate() method. It plots the performance metrics as functions of time (in the order in which parameter vectors were evaluated).
     """
 
-    def __init__(self, trueParams):
-        self.costs = []
-        self.paramRMSRE = []
-        self.paramIdentifiedCount = []
-        self.solveCount = 0
-        self.gradSolveCount = 0
-        self.firstParams = []
-        self.modelSolves = []
-        self.gradSolves = []
-        self._TRUE_PARAMETERS = np.copy(trueParams)
-        self._TRUE_PARAMETERS.flags['WRITEABLE'] = False
-        self.evals = []
-        self.bestParams = []
-        self.bestCost = np.inf
-        self.bestCosts = []
-        self.costTimes = []
-        self.gradTimes = []
+    def __init__(self):
+        # Performance metrics over time
+        self.costs = []  # Cost at evaluation (including from grad calls)
+        self.costSolves = []  # Number of cost solves at a given evaluation
+        self.gradSolves = []  # Number of grad solves at a given evaluation
+        self.evals = []  # (evaluated parameters, solve type) at each evaluation
+        self.bestCosts = []  # Best cost so far at each evaluation
+        self.costTimes = []  # Time taken for cost solves at each evaluation (0 for grad solves)
+        self.gradTimes = []  # Time taken for grad solves at each evaluation (0 for cost solves)
+
+        # Best and first parameters
+        self.bestParams = []  # Best parameters seen so far (lowest cost)
+        self.bestCost = np.inf  # Best cost seen so far (includes cost from grad evaluations)
+        self.firstParams = []  # First parameters, evaluated at the start of the optimisation
+
+        # Counters
+        self.costSolveCount = 0  # Current number of cost evaluations
+        self.gradSolveCount = 0  # Current number of grad evaluations
 
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.NaN):
         """
@@ -65,29 +66,38 @@ class Tracker:
         None.
 
         """
+        # Cast to numpy array
+        estimatedParams = np.array(estimatedParams)
+
+        # Set first parameters if not already set
         if len(self.firstParams) == 0:
             self.firstParams = np.copy(estimatedParams)
             self.firstParams.flags['WRITEABLE'] = False
-        # Cast to numpy arrays
-        estimatedParams = np.array(estimatedParams)
+
         # Update performance metrics
-        self.paramRMSRE.append(
-            np.sqrt(np.mean(((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) ** 2)))
-        self.paramIdentifiedCount.append(
-            np.sum(np.abs((estimatedParams - self._TRUE_PARAMETERS) / self._TRUE_PARAMETERS) < 0.05))
+        # Update list of costs
         self.costs.append(cost)
+
+        # If the model was solved (anything but penalty function), increment the solve counter
         if incrementSolveCounter:
             if solveType == 'cost':
-                self.solveCount += 1
-                self.costTimes.append(solveTime)
+                self.costSolveCount += 1
             elif solveType == 'grad':
                 self.gradSolveCount += 1
-                self.gradTimes.append(solveTime)
             self.check_repeated_param(estimatedParams, solveType)
         else:
+            # If not solved, set solveTime to 0 and label as unsolved with solveType='none'
+            solveTime = 0
             solveType = 'none'
+        # Update list of times (update with 0 if different solve type)
+        self.costTimes.append(solveTime if solveType == 'cost' else 0)
+        self.gradTimes.append(solveTime if solveType == 'grad' else 0)
+
+        # Update the list of evaluated parameters
         self.evals.append((estimatedParams, solveType))
-        self.modelSolves.append(self.solveCount)
+
+        # Update the list of cost and grad solve counts
+        self.costSolves.append(self.costSolveCount)
         self.gradSolves.append(self.gradSolveCount)
         if cost < self.bestCost:
             self.bestParams = estimatedParams
@@ -163,19 +173,17 @@ class Tracker:
         Parameters
         ----------
         filename : string
-            Filename for storing the tracked variables (solveCount, costs, modelSolves, paramRMSRE, paramIdentifiedCount). Variables will be pickled and stored in working directory.
+            Filename for storing the tracked variables. Variables will be pickled and stored in working directory.
 
         Returns
         -------
         None.
 
         """
-        data = {'solveCount': self.solveCount, 'gradSolveCount': self.gradSolveCount, 'costs': self.costs,
-                'modelSolves': self.modelSolves, 'gradSolves': self.gradSolves, 'paramRMSE': self.paramRMSRE,
-                'paramIdentifiedCount': self.paramIdentifiedCount, 'firstParams': self.firstParams, 'evals': self.evals,
-                'bestParams': self.bestParams, 'bestCost': self.bestCost, 'bestCosts': self.bestCosts,
-                'costTimes': self.costTimes,
-                'gradTimes': self.gradTimes}
+        data = {'costSolveCount': self.costSolveCount, 'gradSolveCount': self.gradSolveCount, 'costs': self.costs,
+                'costSolves': self.costSolves, 'gradSolves': self.gradSolves, 'firstParams': self.firstParams,
+                'evals': self.evals, 'bestParams': self.bestParams, 'bestCost': self.bestCost,
+                'bestCosts': self.bestCosts, 'costTimes': self.costTimes, 'gradTimes': self.gradTimes}
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -186,7 +194,7 @@ class Tracker:
         Parameters
         ----------
         filename : string
-            Filename to load the stored tracked variables (solveCount, costs, modelSolves, paramRMSRE, paramIdentifiedCount). Variables will be read for the working directory. Must be saved using the .save() method associated with a tracker.
+            Filename to load the stored tracked variables. Variables will be read for the working directory. Must be saved using the .save() method associated with a tracker.
 
         Returns
         -------
@@ -195,16 +203,10 @@ class Tracker:
         """
         with open(filename, 'rb') as f:
             data = pickle.load(f)
-        keys = ['solveCount', 'gradSolveCount', 'costs', 'modelSolves', 'gradSolves', 'paramRMSE',
-                'paramIdentifiedCount', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
+        keys = ['costSolveCount', 'gradSolveCount', 'costs', 'costSolves', 'gradSolves', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
                 'gradTimes']
-        try:
-            self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
-                data[key] if key in data.keys() else None for key in keys]
-        except AttributeError:
-            # Assume old (v0.3.4) format
-            self.solveCount, self.gradSolveCount, self.costs, self.modelSolves, self.gradSolves, self.paramRMSRE, self.paramIdentifiedCount, self.firstParams, self.evals, self.bestParams, self.bestCost, self.costTimes, self.gradTimes = data
-            self.bestCosts = np.minimum.accumulate(self.costs)
+        self.costSolveCount, self.gradSolveCount, self.costs, self.costSolves, self.gradSolves, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
+            data[key] if key in data.keys() else None for key in keys]
 
     def report_convergence(self, threshold):
         """
@@ -225,12 +227,12 @@ class Tracker:
             print('Convergence reason:              Optimiser terminated early.')
             i = len(self.bestCosts) - 1
         else:
-            print('Convergence reason:              ' + ('Cost threshold' if self.cost_threshold(threshold,
-                                                                                                i) else 'Cost unchanged'))
-        print('Cost evaluations at convergence: ' + str(self.modelSolves[i] if len(self.modelSolves) > 0 else None))
+            print('Convergence reason:              ' + ('Cost threshold' if
+                                                         self.cost_threshold(threshold, i) else 'Cost unchanged'))
+        print('Cost evaluations at convergence: ' + str(self.costSolves[i] if len(self.costSolves) > 0 else None))
         print('Grad evaluations at convergence: ' + str(self.gradSolves[i] if len(self.gradSolves) > 0 else None))
         print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i] if len(self.bestCosts) > 0 else self.bestCost))
-        if len(self.modelSolves) > 0:
+        if len(self.costSolves) > 0:
             costTime, gradTime = self.total_solve_time(i)
         else:
             costTime = 0
@@ -341,15 +343,7 @@ class Tracker:
         gradTime : float
             The total time taken to solve the model (excluding solves without sensitivities) up to (and including) the i-th solve.
         """
-        try:
-            gradCount = self.gradSolves[i]
-        except IndexError:
-            gradCount = 0
-        try:
-            costCount = self.modelSolves[i]
-        except IndexError:
-            costCount = 0
-        return np.sum(self.costTimes[:costCount + 1]), np.sum(self.gradTimes[:gradCount + 1])
+        return np.sum(self.costTimes[:i + 1]), np.sum(self.gradTimes[:i + 1])
 
     def check_repeated_param(self, param, solveType):
         """

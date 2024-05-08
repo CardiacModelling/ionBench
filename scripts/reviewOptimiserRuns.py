@@ -90,7 +90,7 @@ with open(os.path.join(os.getcwd(), f'resultsFile-{bmShortName}.csv'), 'w', newl
             except IndexError:
                 gradEvals.append(np.nan)
             try:
-                costEvals.append(bm.tracker.modelSolves[i])
+                costEvals.append(bm.tracker.costSolves[i])
             except IndexError:
                 costEvals.append(np.nan)
             successOrFail.append(costs[runNum] < bm.COST_THRESHOLD)

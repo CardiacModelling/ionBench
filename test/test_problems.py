@@ -118,17 +118,17 @@ class Problem:
         assert len(self.bm.tracker.costTimes) == 0
         assert len(self.bm.tracker.gradTimes) == 0
         # Solve count is 0 after reset
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
         # Solve count increments after solving
         self.bm.cost(self.bm._TRUE_PARAMETERS)
-        assert self.bm.tracker.solveCount == 1
+        assert self.bm.tracker.costSolveCount == 1
         # but not when out of bounds
         self.bm.add_parameter_bounds()
         self.bm.lb = 0.99*self.bm._TRUE_PARAMETERS
         p = np.copy(self.bm._TRUE_PARAMETERS)
         p[0] = 0.98 * self.bm._TRUE_PARAMETERS[0]
         self.bm.cost(p)
-        assert self.bm.tracker.solveCount == 1
+        assert self.bm.tracker.costSolveCount == 1
         self.bm.parametersBounded = False
         if 'ikur' not in self.bm.NAME:
             # or out of rate bounds
@@ -136,29 +136,25 @@ class Problem:
             tmp = self.bm.RATE_MIN
             self.bm.RATE_MIN = self.bm.RATE_MAX
             self.bm.cost(self.bm._TRUE_PARAMETERS)
-            assert self.bm.tracker.solveCount == 1
+            assert self.bm.tracker.costSolveCount == 1
             self.bm.RATE_MIN = tmp
             self.bm.cost(self.bm._TRUE_PARAMETERS)
-            assert self.bm.tracker.solveCount == 2
+            assert self.bm.tracker.costSolveCount == 2
             self.bm.ratesBounded = False
         else:
             self.bm.cost(self.bm._TRUE_PARAMETERS)
         # Solve count doesn't increment when evaluating
         self.bm.evaluate()
-        assert self.bm.tracker.solveCount == 2
-        # Only one cost time and no grad
-        assert len(self.bm.tracker.costTimes) == 2
-        assert len(self.bm.tracker.gradTimes) == 0
+        assert self.bm.tracker.costSolveCount == 2
+        assert self.bm.tracker.gradSolveCount == 0
         # returns to 0 after resetting
         self.bm.reset(fullReset=False)
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
         self.bm.parametersBounded = False
         # grad solve counter increments with grad but not normal solve counter
         self.bm.grad(self.bm._TRUE_PARAMETERS)
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
         assert self.bm.tracker.gradSolveCount == 1
-        assert len(self.bm.tracker.costTimes) == 0
-        assert len(self.bm.tracker.gradTimes) == 1
         self.bm.reset(fullReset=False)
         p1 = self.bm.sample()
         p2 = self.bm.sample()
@@ -376,7 +372,7 @@ class Problem:
         assert self.bm.ratesBounded is False
         assert all([self.bm.logTransformParams[i] is False for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is False
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
         mod = ionbench.modification.Clerx2019()
         mod.apply(self.bm)
         self.bm.useScaleFactors = True
@@ -390,19 +386,19 @@ class Problem:
         assert self.bm.ratesBounded is True
         assert any([self.bm.logTransformParams[i] is True for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is True
-        assert self.bm.tracker.solveCount == 1
+        assert self.bm.tracker.costSolveCount == 1
         self.bm.reset(fullReset=False)
         assert self.bm.parametersBounded is True
         assert self.bm.ratesBounded is True
         assert any([self.bm.logTransformParams[i] is True for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is True
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
         self.bm.reset()  # Full reset is True by default
         assert self.bm.parametersBounded is False
         assert self.bm.ratesBounded is False
         assert all([self.bm.logTransformParams[i] is False for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is False
-        assert self.bm.tracker.solveCount == 0
+        assert self.bm.tracker.costSolveCount == 0
 
 
 class Staircase(Problem):

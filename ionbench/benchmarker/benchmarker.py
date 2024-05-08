@@ -74,7 +74,7 @@ class Benchmarker:
         self.ratesBounded = False  # Should the rates be bounded
         self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
-        self.tracker = Tracker(self._TRUE_PARAMETERS)  # Tracks the performance metrics
+        self.tracker = Tracker()  # Tracks the performance metrics
         self.V_LOW = -120
         self.V_HIGH = 60
 
@@ -306,7 +306,7 @@ class Benchmarker:
         self.sim.reset()
         if self.sensitivityCalc:
             self.simSens.reset()
-        self.tracker = Tracker(self._TRUE_PARAMETERS)
+        self.tracker = Tracker()
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self.useScaleFactors = False
@@ -819,7 +819,7 @@ class Benchmarker:
         print('===      Evaluating Performance      ===')
         print('========================================')
         print('')
-        print('Number of cost evaluations:      ' + str(self.tracker.solveCount))
+        print('Number of cost evaluations:      ' + str(self.tracker.costSolveCount))
         print('Number of grad evaluations:      ' + str(self.tracker.gradSolveCount))
         print('Best cost:                       {0:.6f}'.format(self.tracker.bestCost))
         self.tracker.report_convergence(self.COST_THRESHOLD)

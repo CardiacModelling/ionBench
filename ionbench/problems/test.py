@@ -112,7 +112,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals, cost, error)
 
     def reset(self, fullReset=True):
-        self.tracker = ionbench.tracker.Tracker(self._TRUE_PARAMETERS)
+        self.tracker = ionbench.tracker.Tracker()
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self.useScaleFactors = False
