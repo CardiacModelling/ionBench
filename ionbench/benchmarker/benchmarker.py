@@ -70,9 +70,13 @@ class Benchmarker:
             self._RATE_FUNCTIONS = None
 
         self.useScaleFactors = False
-        self.parametersBounded = False  # Should the parameters be bounded
-        self.ratesBounded = False  # Should the rates be bounded
         self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
+        if 'staircase' in self.NAME:
+            self.add_parameter_bounds()
+            self.add_rate_bounds()
+        else:
+            self.parametersBounded = False  # Should the parameters be bounded
+            self.ratesBounded = False  # Should the rates be bounded
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker()  # Tracks the performance metrics
         self.V_LOW = -120
@@ -301,7 +305,7 @@ class Benchmarker:
         Parameters
         ----------
         fullReset : bool, optional
-            If True, transforms and bounds will be reset (turned off). The default is True.
+            If True, transforms and bounds will be reset (turned off except staircase which will turn bounds on). The default is True.
         """
         self.sim.reset()
         if self.sensitivityCalc:
@@ -310,8 +314,12 @@ class Benchmarker:
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self.useScaleFactors = False
-            self.parametersBounded = False
-            self.ratesBounded = False
+            if 'staircase' in self.NAME:
+                self.add_rate_bounds()
+                self.add_parameter_bounds()
+            else:
+                self.parametersBounded = False
+                self.ratesBounded = False
             self.lb = np.copy(self._LOWER_BOUND)
             self.ub = np.copy(self._UPPER_BOUND)
             self.RATE_MIN = 1.67e-5
@@ -425,9 +433,9 @@ class Benchmarker:
             self.use_sensitivities()
         # Now to find grad, cost, J (jacobian) and error (residuals)
         # First check if the parameters are out of bounds
-        # Abort solving if the parameters are out of bounds (if staircase, don't check bounded)
-        inParameterBounds = self.in_parameter_bounds(parameters, boundedCheck='staircase' not in self.NAME)
-        inRateBounds = self.in_rate_bounds(parameters, boundedCheck='staircase' not in self.NAME)
+        # Abort solving if the parameters are out of bounds
+        inParameterBounds = self.in_parameter_bounds(parameters)
+        inRateBounds = self.in_rate_bounds(parameters)
         if not inParameterBounds or not inRateBounds:
             # Gradient out of bounds so use penalty function
             # Calculate gradient of penalty function
@@ -703,9 +711,9 @@ class Benchmarker:
 
         # Abort solving if the parameters are out of bounds
         penalty = 0
-        if self.parametersBounded or 'staircase' in self.NAME:
+        if self.parametersBounded:
             penalty += self.parameter_penalty(parameters)
-        if self.ratesBounded or 'staircase' in self.NAME:
+        if self.ratesBounded:
             penalty += self.rate_penalty(parameters)
         if penalty > 0:
             self.tracker.update(parameters, cost=penalty, incrementSolveCounter=False)

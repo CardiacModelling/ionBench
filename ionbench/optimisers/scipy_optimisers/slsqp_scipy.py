@@ -32,11 +32,11 @@ def run(bm, x0=None, maxIter=1000, debug=False):
         if debug:
             print('Sampling x0')
             print(x0)
-    if bm.ratesBounded or 'staircase' in bm.NAME:
+    if bm.ratesBounded:
         constraints = {'type': 'eq', 'fun': lambda p: bm.parameter_penalty(bm.original_parameter_space(p))+bm.rate_penalty(bm.original_parameter_space(p))}
     else:
         constraints = ()
-    if bm.parametersBounded or 'staircase' in bm.NAME:
+    if bm.parametersBounded:
         bounds = minimize_bounds(bm)
         out = scipy.optimize.minimize(cost, x0, jac=grad, method='SLSQP', constraints=constraints, options={'disp': debug, 'maxiter': maxIter}, bounds=bounds)
     else:

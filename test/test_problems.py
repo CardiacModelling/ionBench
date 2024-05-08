@@ -75,13 +75,10 @@ class Problem:
         # Check cost is small inside bounds when bounded
         p[0] = self.bm._TRUE_PARAMETERS[0]
         assert self.bm.cost(p) < 1e5
-        # Check parametersBounded = False turns off bounds (unless staircase)
+        # Check parametersBounded = False turns off bounds
         self.bm.parametersBounded = False
         p[0] *= 0.98
-        if 'staircase' in self.bm.NAME:
-            assert self.bm.cost(p) > 1e5
-        else:
-            assert self.bm.cost(p) < 1e5
+        assert self.bm.cost(p) < 1e5
         self.bm.parametersBounded = True
         # Check penalty increases with more bound violations
         p = np.copy(self.bm._TRUE_PARAMETERS) * 0.98
@@ -101,13 +98,9 @@ class Problem:
         # Move rate bounds so default rates are outside
         self.bm.RATE_MIN = self.bm.RATE_MAX * 2
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
-        # Turn off rate bounds should allow solving again (except for staircase)
+        # Turn off rate bounds should allow solving again
         self.bm.ratesBounded = False
-        assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5 or 'staircase' in self.bm.NAME
-        if 'staircase' in self.bm.NAME:
-            assert self.bm.cost(self.bm._TRUE_PARAMETERS) > 1e5
-            self.bm.RATE_MIN = tmp
-            assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
+        assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
         self.bm.RATE_MIN = tmp
 
     @pytest.mark.cheap
@@ -292,8 +285,8 @@ class Problem:
         if 'moreno' not in self.bm.NAME:
             self.bm.reset()
             p = self.bm.sample()
-            assert self.bm.in_parameter_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
-            assert self.bm.in_rate_bounds(p, boundedCheck='staircase' not in self.bm.NAME)
+            assert self.bm.in_parameter_bounds(p)
+            assert self.bm.in_rate_bounds(p)
             out = self.bm.simulate(parameters=p, times=np.arange(0, self.bm.T_MAX, self.bm.TIMESTEP))
             assert np.abs((out[0] - out[1])) < 1e-8
         self.bm.reset()

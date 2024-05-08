@@ -106,6 +106,10 @@ class Modification:
             print(
                 "'" + setting + "' is not a valid option for bounds. Please use either 'off', 'on', or 'Custom'.")
 
+        # If staircase, override with True
+        if 'staircase' in bm.NAME:
+            bm.add_parameter_bounds()
+
     @staticmethod
     def apply_rate_bounds(setting, bm):
         """
@@ -125,6 +129,10 @@ class Modification:
         else:
             print(
                 "'" + setting + "' is not a valid option for bounds. Please use either 'off', or 'on'.")
+
+        # If staircase, override with True
+        if 'staircase' in bm.NAME:
+            bm.add_rate_bounds()
 
     @staticmethod
     def apply_scale_factors(setting, bm):
