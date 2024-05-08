@@ -851,5 +851,5 @@ class Benchmarker:
                 plt.title('Improvement after fitting: ' + self.NAME)
                 plt.show()
             except IndexError:
-                # If the tracker has no data (eg. tracker.firstParams is empty), then we can't plot
+                # If the tracker has no data (e.g. tracker.firstParams is empty), then we can't plot
                 pass
