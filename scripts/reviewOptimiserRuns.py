@@ -56,10 +56,13 @@ for app in ionbench.APP_UNIQUE:
         # Get data at convergence
         i = bm.tracker.when_converged(bm.COST_THRESHOLD)
         a, b = bm.tracker.total_solve_time(i)
-        i = -1 if i is None else i
-        data[f'Run {runNum} - Successful'] = bm.tracker.bestCosts[i] < bm.COST_THRESHOLD
         data[f'Run {runNum} - Cost Time'] = a
         data[f'Run {runNum} - Grad Time'] = b
+        i = -1 if i is None else i
+        try:
+            data[f'Run {runNum} - Successful'] = bm.tracker.bestCosts[i] < bm.COST_THRESHOLD
+        except IndexError:
+            data[f'Run {runNum} - Successful'] = False
         try:
             data[f'Run {runNum} - Cost Evals'] = bm.tracker.costSolves[i]
         except IndexError:
