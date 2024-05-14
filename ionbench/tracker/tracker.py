@@ -343,6 +343,8 @@ class Tracker:
         gradTime : float
             The total time taken to solve the model (excluding solves without sensitivities) up to (and including) the i-th solve.
         """
+        if i is None:
+            return np.sum(self.costTimes), np.sum(self.gradTimes)
         return np.sum(self.costTimes[:i + 1]), np.sum(self.gradTimes[:i + 1])
 
     def check_repeated_param(self, param, solveType):
