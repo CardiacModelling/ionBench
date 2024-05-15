@@ -20,11 +20,12 @@ def simplify_name(name):
     name = name.replace('patternSearch', 'Pattern Search')
     name = name.replace('randomSearch', 'Random Search')
     name = name.replace('stochasticSearch', 'Stochastic Search')
+    name = name.replace('curvilinearGD', 'Curvilinear GD')
     name = name.replace('slsqp', 'SLSQP')
     name = name.replace('conjugateGD', 'Conjugate GD')
     name = name.replace('cmaes', 'CMA-ES')
-    name = name.replace('hybridPSOTRRTRR', 'Hybrid PSO-TRR+TRR')
-    name = name.replace('hybridPSOTRR', 'Hybrid PSO-TRR')
+    name = name.replace('hybridPSOTRRTRR', 'Hybrid PSO/TRR+TRR')
+    name = name.replace('hybridPSOTRR', 'Hybrid PSO/TRR')
     name = name.replace('PSOTRR', 'PSO+TRR')
     name = name.replace('_', ' ')
     # Remove duplicate words (when paper name is in both optimiser and modification)
@@ -57,7 +58,7 @@ def success_plot(dfs, titles):
         A list of strings for the titles of the plots.
     """
     # Create subplot figure
-    fig, axs = plt.subplots(3, 2, figsize=(10, 10), layout='constrained')
+    fig, axs = plt.subplots(3, 2, figsize=(7.5, 8.5), layout='constrained')
     # Maximum number of successful approaches across the problems
     maxSuccess = np.max([len(df[df['Tier'] == 1]) for df in dfs])
     for i in range(len(dfs)):
@@ -67,7 +68,7 @@ def success_plot(dfs, titles):
         y = np.zeros(len(df))  # Expected time
         x = []  # Approach names
         for j in range(len(df)):
-            y[j] = df['Expected Time'][j]
+            y[j] = df['ERT - Evals'][j]
             x.append(simplify_name(df['Optimiser Name'][j] + ' - ' + df['Mod Name'][j]))
         # Bar chart plot
         axs[i // 2, i % 2].bar(np.arange(len(y)), y, tick_label=x, log=True, zorder=3)
@@ -80,71 +81,13 @@ def success_plot(dfs, titles):
         axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
         # Set title and ylabel
         axs[i // 2, i % 2].title.set_text(title)
-        axs[i // 2, i % 2].set_ylabel('Expected Time (s)')
+        axs[i // 2, i % 2].set_ylabel('ERT (FEs)')
         # Add y-axis grid lines
         axs[i // 2, i % 2].yaxis.grid(True, zorder=0)
     # Remove sixth sub-figure
     axs[2, 1].remove()
-    plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'expectedTime.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'expectedTime.png'), bbox_inches='tight', dpi=300)
     plt.show()
-
-
-# noinspection PyShadowingNames
-def fail_plot(dfs, titles):
-    """
-    Plot the expected time of failed optimisers.
-    Parameters
-    ----------
-    dfs : list
-        A list of pandas.DataFrame containing the optimiser run data to plot.
-    titles : list
-        A list of strings for the titles of the plots.
-    """
-    for i in range(len(dfs)):
-        df = dfs[i]
-        title = titles[i]
-        # Find optimal time and cutoff time
-        df2 = df[df['Tier'] == 1].reset_index()
-        optimalTime = np.min(df2['Expected Time'])
-        nRuns = 10
-        maxSuccessRate = 1-0.05**(1/nRuns)
-        cutoffTime = optimalTime*maxSuccessRate
-        # Create figure
-        plt.figure(figsize=(8, 8), layout='constrained', dpi=300)
-        # Get data, dropping SPSA for now while we decide how to time it
-        df = df[np.logical_and(df['Tier'] == 2, df['Mod Name'] != 'Maryak1998')].reset_index()
-        y = np.zeros(len(df))  # Expected cost
-        x = np.zeros(len(df))  # Expected time
-        names = []  # Approach names
-        for j in range(len(df)):
-            y[j] = df['Expected Cost'][j]
-            x[j] = df['Expected Time'][j]
-            names.append(simplify_name(df['Optimiser Name'][j] + ' \n ' + df['Mod Name'][j]))
-        # Scatter plot of cost vs time
-        plt.scatter(x, y, zorder=3)
-        # Cutoff-time line
-        plt.axvline(cutoffTime, color='k', linestyle='--', zorder=0)
-        # Log-log plot
-        axs = plt.gca()
-        axs.set_yscale('log')
-        axs.set_xscale('log')
-        # Round limits to nearest power of 10
-        tmp = axs.get_xlim()
-        axs.set_xlim(10 ** np.floor(np.log10(tmp[0])), 10 ** np.ceil(np.log10(tmp[1])))
-        tmp = axs.get_ylim()
-        axs.set_ylim(10 ** np.floor(np.log10(tmp[0])), 10 ** np.ceil(np.log10(tmp[1])))
-        # Add text labels and automatically adjust positions
-        texts = [plt.text(x[i], y[i], names[i], ha='center', va='center') for i in range(len(x))]
-        adjust_text(texts, arrowprops={'arrowstyle': '->', 'color': 'red'}, force_explode=(0.2, 0.3), force_static=(0.2, 0.3), force_text=(0.3, 0.3))
-        # Set title, ylabel and xlabel
-        axs.title.set_text(title)
-        axs.set_ylabel('Expected Cost')
-        axs.set_xlabel('Expected Time (s)')
-        # Add y-axis grid lines
-        axs.yaxis.grid(True, zorder=0)
-        # Save and show plot
-        plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'failed-{title.replace(" ", "").lower()}.png'), bbox_inches='tight')
-        plt.show()
 
 
 # noinspection PyShadowingNames
@@ -165,7 +108,7 @@ def time_plot(dfs, titles, solveType='Cost'):
     None.
     """
     # Setup subplot figure
-    fig, axs = plt.subplots(3, 2, figsize=(10, 10), layout='constrained')
+    fig, axs = plt.subplots(3, 2, figsize=(7.5, 7.5), layout='constrained')
     for i in range(len(dfs)):
         # Get problem specific data and axes
         df = dfs[i]
@@ -212,7 +155,7 @@ def time_plot(dfs, titles, solveType='Cost'):
     # Save and show plot
     plt.savefig(
         os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'{solveType.lower()}Time.png'),
-        bbox_inches='tight')
+        bbox_inches='tight', dpi=300)
     plt.show()
 
 
@@ -220,8 +163,12 @@ bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
 titles = ['Staircase - HH', 'Staircase - MM', 'Loewe 2016 - IKr', 'Loewe 2016 - IKur', 'Moreno 2016 - INa']
 dfs = []
 for bmShortName in bmShortNames:
-    dfs.append(pandas.read_csv(f'resultsFile-{bmShortName}-sorted.csv'))
+    df = pandas.read_csv(f'resultsSummary-{bmShortName}.csv')
+    dfs.append(df)
 success_plot(dfs, titles)
-fail_plot(dfs, titles)
+
+dfs = []
+for bmShortName in bmShortNames:
+    dfs.append(pandas.read_csv(f'resultsFile-{bmShortName}.csv'))
 time_plot(dfs, titles)
 time_plot(dfs, titles, solveType='Grad')
