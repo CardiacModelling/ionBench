@@ -31,10 +31,13 @@ def get_cached_cost(bm):
     cost_func : function
         Cached cost function.
     """
-
-    @cache()
-    def cached_func(p):
-        return bm.cost(p)
+    if ionbench.cache_enabled:
+        @cache()
+        def cached_func(p):
+            return bm.cost(p)
+    else:
+        def cached_func(p):
+            return bm.cost(p)
 
     def cost_func(p):
         return cached_func(tuple(p))
@@ -57,9 +60,13 @@ def get_cached_signed_error(bm):
         Cached signed error (residuals) function.
     """
 
-    @cache()
-    def cached_func(p):
-        return bm.signed_error(p)
+    if ionbench.cache_enabled:
+        @cache()
+        def cached_func(p):
+            return bm.signed_error(p)
+    else:
+        def cached_func(p):
+            return bm.signed_error(p)
 
     def signed_error(p):
         return cached_func(tuple(p))
@@ -84,9 +91,13 @@ def get_cached_grad(bm, **kwargs):
         Cached grad function.
     """
 
-    @cache()
-    def cached_func(p):
-        return bm.grad(p, **kwargs)
+    if ionbench.cache_enabled:
+        @cache()
+        def cached_func(p):
+            return bm.grad(p, **kwargs)
+    else:
+        def cached_func(p):
+            return bm.grad(p, **kwargs)
 
     def grad(p):
         return copy.deepcopy(cached_func(tuple(p)))

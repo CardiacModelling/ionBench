@@ -42,3 +42,5 @@ for i in range(len(OPT_EXT)):
 
 APP_ALL = APP_SCIPY + APP_PINTS + APP_EXT
 APP_UNIQUE = [APP_ALL[i] for i in range(len(APP_ALL)) if i not in [3, 8, 9, 12, 13, 17, 18]]
+
+cache_enabled = True
