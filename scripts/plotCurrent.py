@@ -50,7 +50,7 @@ def plot_moreno(axs, xLabels, xCoords, titles, yLabels, xTicks):
     for i in range(len(lengths)):
         indexes = np.arange(sum(lengths[:i]), sum(lengths[:i+1]))
         current = data[indexes]
-        axs[f'm{i}'].plot(xCoords[i], current, 'k.-')
+        axs[f'm{i}'].plot(xCoords[i], current, 'r.-')
         if i == 2:
             axs[f'm{i}'].set_xscale('log')
         axs[f'm{i}'].set_xlabel(xLabels[i])
