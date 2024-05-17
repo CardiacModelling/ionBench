@@ -66,12 +66,11 @@ class ErrorWithGrad(pints.RootMeanSquaredError):
     def __init__(self, problem, bm):
         super().__init__(problem)
         self.bm = bm
-        self.grad = ionbench.utils.cache.get_cached_grad(bm, returnCost=True)
 
     def evaluateS1(self, x):
         if 'moreno' in self.bm.NAME:
             raise NotImplementedError('Moreno uses weighted RMSE in cost and grad, pints uses unweighted RMSE. No unweighted RMSE grad is available for Moreno.')
-        return self.grad(x)
+        return self.bm.grad(x, returnCost=True)
 
 
 class Model(pints.ForwardModel):
@@ -94,7 +93,6 @@ class Model(pints.ForwardModel):
 
         """
         self.bm = bm
-        self.cached_error = ionbench.utils.cache.get_cached_signed_error(self.bm)
         super().__init__()
 
     def n_parameters(self):
@@ -127,7 +125,7 @@ class Model(pints.ForwardModel):
 
         """
         # Reset the simulation
-        return self.cached_error(parameters)+self.bm.DATA
+        return self.bm.signed_error(parameters)+self.bm.DATA
 
 
 class AdvancedBoundaries(pints.Boundaries):
