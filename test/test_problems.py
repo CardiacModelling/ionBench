@@ -126,19 +126,16 @@ class Problem:
         self.bm.cost(p)
         assert self.bm.tracker.costSolveCount == 1
         self.bm.parametersBounded = False
-        if 'ikur' not in self.bm.NAME:
-            # or out of rate bounds
-            self.bm.add_rate_bounds()
-            tmp = self.bm.RATE_MIN
-            self.bm.RATE_MIN = self.bm.RATE_MAX
-            self.bm.cost(self.bm._TRUE_PARAMETERS)
-            assert self.bm.tracker.costSolveCount == 1
-            self.bm.RATE_MIN = tmp
-            self.bm.cost(self.bm._TRUE_PARAMETERS)
-            assert self.bm.tracker.costSolveCount == 2
-            self.bm.ratesBounded = False
-        else:
-            self.bm.cost(self.bm._TRUE_PARAMETERS)
+        # or out of rate bounds
+        self.bm.add_rate_bounds()
+        tmp = self.bm.RATE_MIN
+        self.bm.RATE_MIN = self.bm.RATE_MAX
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
+        assert self.bm.tracker.costSolveCount == 1
+        self.bm.RATE_MIN = tmp
+        self.bm.cost(self.bm._TRUE_PARAMETERS*(1+1e-12))
+        assert self.bm.tracker.costSolveCount == 2
+        self.bm.ratesBounded = False
         # Solve count doesn't increment when evaluating
         self.bm.evaluate()
         assert self.bm.tracker.costSolveCount == 2
@@ -201,41 +198,49 @@ class Problem:
         assert not self.bm.is_converged()
         assert not self.bm.tracker.cost_threshold(self.bm.COST_THRESHOLD)
         self.bm.reset()
+        # Generate 6 random points and order them by cost
+        points = [self.bm.sample() for _ in range(6)]
+        costs = [self.bm.cost(p) for p in points]
+        order = np.argsort(costs)
+        points = [points[i] for i in order]
+        self.bm.reset()
         # First point is an improvement
-        self.bm.cost(p)
+        self.bm.cost(points[0])
         # 2 points without improvement aren't enough
-        [self.bm.cost(p) for _ in range(2)]
+        self.bm.cost(points[1])
+        self.bm.cost(points[2])
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
         # Third point is enough
-        self.bm.cost(p)
+        self.bm.cost(points[3])
         assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
         # Sampling better points resets counter
         self.bm.reset()
-        self.bm.cost(p)
+        self.bm.cost(points[1])
+        self.bm.cost(points[2])
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
-        # Failing to improve here would converge so give better point
-        c1 = self.bm.cost(self.bm._TRUE_PARAMETERS)
+        c1 = self.bm.cost(points[0])
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
         # Three worse points from here needed to converge
-        [self.bm.cost(p) for _ in range(2)]
+        [self.bm.cost(p) for p in points[3:5]]
         assert not self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
-        self.bm.cost(p)
+        self.bm.cost(points[5])
         assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
-        # Sampling worse points doesn't undo convergence
-        c2 = self.bm.cost(p)
+        # Sampling better points doesn't undo convergence
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
         assert self.bm.tracker.cost_unchanged(max_unchanged_evals=3)
-        assert c1 < c2
         assert self.bm.is_converged()
         self.bm.reset()
 
     @pytest.mark.cheap
-    def test_repeated_params_warning(self):
+    def test_check_repeated_params(self):
         self.bm.reset()
         self.bm.reset(fullReset=True)
         self.bm.cost(self.bm._TRUE_PARAMETERS)
         self.bm.cost(self.bm.sample())
-        with pytest.warns(UserWarning):
-            self.bm.cost(self.bm._TRUE_PARAMETERS)
+        assert len(self.bm.tracker.evals) == 2
+        self.bm.cost(self.bm._TRUE_PARAMETERS)
+        assert len(self.bm.tracker.evals) == 2
+        assert self.bm.tracker.check_repeated_param(self.bm._TRUE_PARAMETERS, 'cost')
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad(self, plotting=False):
