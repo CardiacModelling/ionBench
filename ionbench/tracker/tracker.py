@@ -45,7 +45,7 @@ class Tracker:
 
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.NaN):
         """
-        This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class.
+        This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class. Updates are not applied if the model did not need to be solved (because those parameters have been solved previously).
 
         Parameters
         ----------
@@ -74,35 +74,34 @@ class Tracker:
             self.firstParams = np.copy(estimatedParams)
             self.firstParams.flags['WRITEABLE'] = False
 
-        # Update performance metrics
-        # Update list of costs
-        self.costs.append(cost)
+        # Only update lists if parameters actually needed to be solved (equivalent to caching)
+        if not self.check_repeated_param(estimatedParams, solveType):
+            # Update performance metrics
+            self.costs.append(cost)
+            # If the model was solved (anything but penalty function), increment the solve counter
+            if incrementSolveCounter:
+                if solveType == 'cost':
+                    self.costSolveCount += 1
+                elif solveType == 'grad':
+                    self.gradSolveCount += 1
+            else:
+                # If not solved (penalty function), set solveTime to 0 and label as unsolved with solveType='none'
+                solveTime = 0
+                solveType = 'none'
+            # Update list of times (update with 0 if different solve type)
+            self.costTimes.append(solveTime if solveType == 'cost' else 0)
+            self.gradTimes.append(solveTime if solveType == 'grad' else 0)
 
-        # If the model was solved (anything but penalty function), increment the solve counter
-        if incrementSolveCounter:
-            if solveType == 'cost':
-                self.costSolveCount += 1
-            elif solveType == 'grad':
-                self.gradSolveCount += 1
-            self.check_repeated_param(estimatedParams, solveType)
-        else:
-            # If not solved, set solveTime to 0 and label as unsolved with solveType='none'
-            solveTime = 0
-            solveType = 'none'
-        # Update list of times (update with 0 if different solve type)
-        self.costTimes.append(solveTime if solveType == 'cost' else 0)
-        self.gradTimes.append(solveTime if solveType == 'grad' else 0)
+            # Update the list of evaluated parameters
+            self.evals.append((estimatedParams, solveType))
 
-        # Update the list of evaluated parameters
-        self.evals.append((estimatedParams, solveType))
-
-        # Update the list of cost and grad solve counts
-        self.costSolves.append(self.costSolveCount)
-        self.gradSolves.append(self.gradSolveCount)
-        if cost < self.bestCost:
-            self.bestParams = estimatedParams
-            self.bestCost = cost
-        self.bestCosts.append(self.bestCost)
+            # Update the list of cost and grad solve counts
+            self.costSolves.append(self.costSolveCount)
+            self.gradSolves.append(self.gradSolveCount)
+            if cost < self.bestCost:
+                self.bestParams = estimatedParams
+                self.bestCost = cost
+            self.bestCosts.append(self.bestCost)
 
     def plot(self):
         """
@@ -349,7 +348,7 @@ class Tracker:
 
     def check_repeated_param(self, param, solveType):
         """
-        Checks if a parameter vector has been evaluated before and reports a warning if it has.
+        Reports whether a parameter vector has been evaluated before in such a way that the current parameters did not need to be solved.
 
         Parameters
         ----------
@@ -360,15 +359,17 @@ class Tracker:
 
         Returns
         -------
-        None.
+        repeat : bool
+            True if the parameter vector has been evaluated before, False otherwise.
 
         """
         if solveType != 'none':
             for (p, st) in self.evals:
                 if all(p == param) and st != 'none':
                     if st == solveType:
-                        warnings.warn(
-                            f'Duplicate solve. Both as {st}. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                        # Previously evaluated the same parameter vector with the same solve type
+                        return True
                     elif st == 'grad' and solveType == 'cost':
-                        warnings.warn(
-                            f'Duplicate solve. First as {st}, then as {solveType}. Cost can be found for free from a gradient solve. This means the implementation of this optimiser can to be improved and the number of function evaluations can be reduced.')
+                        # Previously evaluated a grad which can automatically return the cost for free
+                        return True
+        return False
