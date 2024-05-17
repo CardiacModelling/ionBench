@@ -26,8 +26,8 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
     out : scipy.optimize.OptimizeResult
         The result of the optimisation.
     """
-    signed_error = ionbench.utils.cache.get_cached_signed_error(bm)
-    grad = ionbench.utils.cache.get_cached_grad(bm, residuals=True)
+    def grad(p):
+        return bm.grad(p, residuals=True)
 
     if x0 is None:
         x0 = bm.sample()
@@ -43,7 +43,7 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
         bounds = minimize_bounds(bm)
     else:
         bounds = (-np.inf, np.inf)
-    out = scipy.optimize.least_squares(signed_error, x0, method=method, bounds=bounds, jac=grad, verbose=verbose, max_nfev=maxIter,
+    out = scipy.optimize.least_squares(bm.signed_error, x0, method=method, bounds=bounds, jac=grad, verbose=verbose, max_nfev=maxIter,
                                        **kwargs)
 
     if debug:

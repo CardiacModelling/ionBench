@@ -30,8 +30,6 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
     xbest : list
         The best parameters identified by Powell's Simplex.
     """
-    cost = ionbench.utils.cache.get_cached_cost(bm)
-
     if x0 is None:
         x0 = bm.sample()
         if debug:
@@ -40,9 +38,9 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
 
     if bm.parametersBounded:
         bounds = minimize_bounds(bm)
-        out = scipy.optimize.minimize(cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
+        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev}, bounds=bounds)
     else:
-        out = scipy.optimize.minimize(cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
+        out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
 
     if debug:
         print(f'Cost of {out.fun} found at:')

@@ -29,16 +29,13 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
     xbest : list
         The best parameters identified by Conjugate Gradient Descent.
     """
-    cost = ionbench.utils.cache.get_cached_cost(bm)
-    grad = ionbench.utils.cache.get_cached_grad(bm)
-
     if x0 is None:
         x0 = bm.sample()
         if debug:
             print('Sampling x0')
             print(x0)
 
-    out = scipy.optimize.minimize(cost, x0, jac=grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
+    out = scipy.optimize.minimize(bm.cost, x0, jac=bm.grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
 
     if debug:
         print(f'Cost of {out.fun} found at:')
