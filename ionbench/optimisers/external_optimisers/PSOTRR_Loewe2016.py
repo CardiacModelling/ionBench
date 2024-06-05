@@ -8,6 +8,7 @@ The maximum number of TRR iterations to run on the final M particles is undefine
 import numpy as np
 import scipy
 import ionbench
+import warnings
 
 
 # noinspection PyShadowingNames
@@ -77,7 +78,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=False
     L = None
 
     if (phi1 + phi2) ** 2 - 4 * (phi1 + phi2) < 0:
-        print(
+        warnings.warn(
             "Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
         phi1 = 2.05
         phi2 = 2.05
@@ -148,7 +149,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=False
                                                bounds=bounds, verbose=verbose)
             p.position = p.transform(out.x)
             p.set_cost(bm.rmse(out.fun + bm.DATA, bm.DATA))
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             if 'Residuals are not finite' in str(e):
                 pass
             else:

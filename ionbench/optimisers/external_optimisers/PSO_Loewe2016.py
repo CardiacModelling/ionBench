@@ -5,6 +5,7 @@ No initial position or velocity sampling given, so we assume ionBench defaults.
 """
 import numpy as np
 import ionbench
+import warnings
 
 
 # noinspection PyShadowingNames
@@ -70,7 +71,7 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, debug=False):
     L = None
 
     if (phi1 + phi2) ** 2 - 4 * (phi1 + phi2) < 0:
-        print(
+        warnings.warn(
             "Invalid constriction factor using specified values for phi1 and phi2. Using defaults of phi1=phi2=2.05 instead.")
         phi1 = 2.05
         phi2 = 2.05
