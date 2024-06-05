@@ -8,6 +8,7 @@ import csv
 import ionbench
 from scipy.stats import norm
 import warnings
+import time
 
 import ionbench.tracker.tracker
 
@@ -30,6 +31,8 @@ class Test(ionbench.benchmarker.Benchmarker):
             self.DATA = None
         self._LOWER_BOUND = self._TRUE_PARAMETERS * 0.5
         self._UPPER_BOUND = self._TRUE_PARAMETERS * 1.5
+        self.lb = np.copy(self._LOWER_BOUND)
+        self.ub = np.copy(self._UPPER_BOUND)
         super().__init__()
 
     def sample(self, n=1):
@@ -59,9 +62,15 @@ class Test(ionbench.benchmarker.Benchmarker):
     def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
         # Calculate function at times for parameters and return
         parameters = self.original_parameter_space(parameters)
+        start = time.monotonic()
         if not self.in_parameter_bounds(parameters):
-            return [np.inf for _ in times]
-        return norm(parameters[0], parameters[1]).pdf(times)
+            out = [np.inf for _ in times]
+        else:
+            out = norm(parameters[0], parameters[1]).pdf(times)
+        end = time.monotonic()
+        self.tracker.update(parameters, cost=self.rmse(out, self.DATA), incrementSolveCounter=incrementSolveCounter,
+                            solveTime=end - start)
+        return out
 
     def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
         # Calculate gradient wrt parameters
@@ -87,18 +96,23 @@ class Test(ionbench.benchmarker.Benchmarker):
                 J = np.zeros((len(error), self.n_parameters()))
                 for i in range(len(error)):
                     J[i,] = grad
+            start = time.monotonic()
+            end = start
         else:
             # Get sensitivities
+            start = time.monotonic()
             curr = self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP))
             sens = np.zeros((len(curr), self.n_parameters()))
             for t in range(len(curr)):
                 sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
                 sens[t, 1] = curr[t] * ((t - parameters[0]) ** 2 / parameters[1] ** 3 - 1 / parameters[1])
+            end = time.monotonic()
 
         # Convert to cost derivative or residual jacobian
         error = curr - self.DATA
         cost = np.sqrt(np.mean(error ** 2))
-
+        self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
+                            solveTime=end - start)
         if residuals:
             J = sens
         else:
