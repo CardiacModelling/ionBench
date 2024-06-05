@@ -134,7 +134,7 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
                 p.velocity = p.transform(out.x) - old_position
                 p.position = p.transform(out.x)
                 p.set_cost(bm.rmse(out.fun+bm.DATA, bm.DATA))
-            except ValueError as e:
+            except ValueError as e:  # pragma: no cover
                 if 'Residuals are not finite' in str(e):
                     # Reset cost as it may be changed by clamp
                     p.set_cost()

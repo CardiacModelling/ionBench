@@ -116,7 +116,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
             # Save best out of trial or pop[i]
             try:
                 trial.find_cost()
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 print(e)
                 print('Error in trial.find_cost()')
                 print(trial.x)
