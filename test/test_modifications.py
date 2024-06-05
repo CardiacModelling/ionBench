@@ -1,6 +1,7 @@
 import ionbench
 from ionbench import modification
 import numpy as np
+from importlib import import_module
 import pytest
 
 
@@ -123,3 +124,19 @@ class TestModifications:
         assert not all(newbm.logTransformParams)
         assert newbm.parametersBounded
         assert newbm.ratesBounded
+
+
+def test_loading():
+    bm = ionbench.problems.test.Test()
+    # Check all modifications load correctly
+    for app in ionbench.APP_ALL:
+        opt = app['module']
+        module = import_module(opt)
+        mod = module.get_modification(modNum=app['modNum'])
+        mod.apply(bm)
+
+    # Check empty modifications for any other modNum
+    for opt in ionbench.OPT_ALL:
+        module = import_module(opt)
+        mod = module.get_modification(modNum=0)
+        mod.apply(bm)
