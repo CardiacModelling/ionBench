@@ -168,10 +168,3 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Loewe2016()
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH()
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, n=5, debug=True, **mod.kwargs)

@@ -54,10 +54,3 @@ def get_modification(modNum=1):
     else:
         mod = ionbench.modification.Empty(name='cmaes_pints')
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH()
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, **mod.kwargs)

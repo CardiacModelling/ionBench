@@ -221,11 +221,3 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Chen2012()
     return mod
-
-
-if __name__ == '__main__':
-    groups = [[0, 2, 4, 6], [1, 3, 5, 7], [8]]
-    bm = ionbench.problems.staircase.HH()
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, groups=groups, debug=True, **mod.kwargs)

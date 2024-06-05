@@ -169,10 +169,3 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Cabo2022()
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.loewe2016.IKr()
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, maxIter=200, debug=True, **mod.kwargs)

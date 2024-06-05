@@ -52,10 +52,3 @@ def get_modification(modNum=1):
     else:
         mod = ionbench.modification.Empty(name='trr_scipy')
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH(sensitivities=True)
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, debug=True, **mod.kwargs)

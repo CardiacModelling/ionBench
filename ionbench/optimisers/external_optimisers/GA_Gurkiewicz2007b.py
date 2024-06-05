@@ -85,10 +85,3 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Gurkiewicz2007()
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.staircase.HH()
-    mod = get_modification()
-    mod.apply(bm)
-    run(bm, nGens=10, debug=True, **mod.kwargs)

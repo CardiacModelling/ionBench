@@ -122,11 +122,3 @@ def get_modification(modNum=1):
     """
     mod = ionbench.modification.Seemann2009()
     return mod
-
-
-if __name__ == '__main__':
-    bm = ionbench.problems.test.Test()
-    mod = get_modification()
-    mod.apply(bm)
-    bm.useScaleFactors = True
-    run(bm, maxIter=50, debug=True, **mod.kwargs)
