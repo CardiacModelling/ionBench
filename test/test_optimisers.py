@@ -16,7 +16,7 @@ class TestScipy:
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
-        x0_opt = module.run(self.bmTest)
+        x0_opt = module.run(self.bmTest, debug=True)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
 
@@ -34,7 +34,7 @@ class TestPints:
         if 'cmaes' in opt:
             # Turn off bounds since rate bounds don't make sense here
             self.bmTest._parameters_bounded = False
-        x0_opt = module.run(self.bmTest)
+        x0_opt = module.run(self.bmTest, debug=True)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
 
@@ -51,10 +51,10 @@ class TestExternal:
         mod.apply(self.bmTest)
         if 'maxIter' in signature(module.run).parameters:
             if 'loewe' in opt.lower():
-                x0_opt = module.run(self.bmTest, n=5, maxIter=10000)
+                x0_opt = module.run(self.bmTest, n=5, maxIter=10000, debug=True)
             else:
-                x0_opt = module.run(self.bmTest, maxIter=10000)
+                x0_opt = module.run(self.bmTest, maxIter=10000, debug=True)
         else:
-            x0_opt = module.run(self.bmTest)
+            x0_opt = module.run(self.bmTest, debug=True)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
