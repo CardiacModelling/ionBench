@@ -112,6 +112,20 @@ class TestModifications:
         assert all(np.array(self.bm.lb) == np.array(lb))
         assert all(np.array(self.bm.ub) == np.array(ub))
 
+    def test_incorrect_settings(self):
+        self.bm.reset()
+        mod = modification.Modification(logTransform='not a setting', parameterBounds='no thank you', scaleFactors='yes please', rateBounds='i would rather not')
+        # Should not change settings
+        rb = self.bm.ratesBounded
+        pb = self.bm.parametersBounded
+        lt = self.bm.logTransformParams
+        sft = self.bm.useScaleFactors
+        mod.apply(self.bm)
+        assert rb == self.bm.ratesBounded
+        assert pb == self.bm.parametersBounded
+        assert lt == self.bm.logTransformParams
+        assert sft == self.bm.useScaleFactors
+
     @pytest.mark.cheap
     def test_staircase(self):
         # Check staircase problems override bounds
