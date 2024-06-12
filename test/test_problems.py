@@ -1,3 +1,4 @@
+import os
 import pytest
 import scipy.stats
 
@@ -18,6 +19,15 @@ class Problem:
         self.bm.reset()
         # Check cost of default params is sufficiently low (0 for loewe)
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) <= self.costBound
+        # Check squared error works
+        self.bm.squared_error(self.bm.sample())
+
+    def test_evaluate(self):
+        # No errors on empty evaluate
+        self.bm.plotter = True
+        self.bm.reset()
+        self.bm.evaluate()
+        self.bm.plotter = False
 
     @pytest.mark.cheap
     def test_hasattr(self):
@@ -105,6 +115,12 @@ class Problem:
         self.bm.ratesBounded = False
         assert self.bm.cost(self.bm._TRUE_PARAMETERS) < 1e5
         self.bm.RATE_MIN = tmp
+        # Test rate upper bounds
+        self.bm.reset()
+        self.bm.add_rate_bounds()
+        p = self.bm.sample()
+        self.bm.RATE_MAX = self.bm.RATE_MIN
+        assert self.bm.cost(p) > 1e5
 
     @pytest.mark.cheap
     def test_tracker_solve_count(self):
@@ -162,6 +178,19 @@ class Problem:
         self.bm.cost(self.bm._TRUE_PARAMETERS)
         assert all(self.bm._TRUE_PARAMETERS == self.bm.tracker.bestParams)
         self.bm.reset()
+
+    def test_tracker_save_load(self):
+        self.bm.reset()
+        self.bm.sample()
+        self.bm.cost()
+        cost = np.copy(self.bm.tracker.costs[0])
+        time = np.copy(self.bm.tracker.costTimes[0])
+        self.bm.tracker.save('temporary_test_tracker.pickle')
+        self.bm.reset()
+        self.bm.tracker.load('temporary_test_tracker.pickle')
+        assert cost == self.bm.tracker.costs[0]
+        assert time == self.bm.tracker.costTimes[0]
+        os.remove('temporary_test_tracker.pickle')
 
     @pytest.mark.cheap
     def test_convergence(self):
@@ -258,8 +287,8 @@ class Problem:
         # Same under scale factor only
         self.bm.log_transform([False] * self.bm.n_parameters())
         assert grad_check(bm=self.bm, x0=self.bm.sample(), plotting=plotting) < 0.01
-        # Reset bm
-        self.bm.useScaleFactors = False
+        # Input space = False
+        self.bm.grad(self.bm.sample(), inInputSpace=False)
 
     @pytest.mark.filterwarnings("ignore:Current:UserWarning")
     def test_grad_bounds(self, plotting=False):
@@ -408,6 +437,7 @@ class Problem:
         assert all([self.bm.logTransformParams[i] is False for i in range(self.bm.n_parameters())])
         assert self.bm.useScaleFactors is False
         assert self.bm.tracker.costSolveCount == 0
+        assert self.bm.tracker.total_solve_time(i=None) == (0, 0)
 
 
 class Staircase(Problem):
@@ -524,7 +554,7 @@ class Loewe(Problem):
 
 
 class TestMoreno(Problem):
-    bm = ionbench.problems.moreno2016.INa()
+    bm = ionbench.problems.moreno2016.INa(sensitivities=True)
     bm.plotter = False
     costBound = 1e-4
 
@@ -556,6 +586,9 @@ class TestMoreno(Problem):
         assert sampler_different(self.bm, np.zeros(self.bm.n_parameters()))
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm.useScaleFactors = False
+        # n>1
+        self.bm.reset()
+        assert len(self.bm.sample(5)) == 5
 
     @pytest.mark.cheap
     def test_transforms(self):
@@ -580,25 +613,25 @@ class TestMoreno(Problem):
 
 
 class TestHH(Staircase):
-    bm = ionbench.problems.staircase.HH()
+    bm = ionbench.problems.staircase.HH(sensitivities=True)
     bm.plotter = False
     costBound = 0.04  # Accounts for noise
 
 
 class TestMM(Staircase):
-    bm = ionbench.problems.staircase.MM()
+    bm = ionbench.problems.staircase.MM(sensitivities=True)
     bm.plotter = False
     costBound = 0.02  # Accounts for noise
 
 
 class TestLoeweIKr(Loewe):
-    bm = ionbench.problems.loewe2016.IKr()
+    bm = ionbench.problems.loewe2016.IKr(sensitivities=True)
     bm.plotter = False
     costBound = 1e-16
 
 
 class TestLoeweIKur(Loewe):
-    bm = ionbench.problems.loewe2016.IKur()
+    bm = ionbench.problems.loewe2016.IKur(sensitivities=True)
     bm.plotter = False
     costBound = 1e-16
 
