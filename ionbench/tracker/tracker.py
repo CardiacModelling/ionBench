@@ -149,7 +149,7 @@ class Tracker:
             c = np.array(costs)
             try:
                 plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 # All points out of bounds
                 pass
             plt.xlabel('Model solves')

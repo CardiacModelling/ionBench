@@ -27,7 +27,7 @@ class Test(ionbench.benchmarker.Benchmarker):
         self.TIMESTEP = 1  # Timestep in data between points
         try:
             self.load_data(os.path.join(ionbench.DATA_DIR, 'test', 'data.csv'))
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: no cover
             self.DATA = None
         self._LOWER_BOUND = self._TRUE_PARAMETERS * 0.5
         self._UPPER_BOUND = self._TRUE_PARAMETERS * 1.5
@@ -137,11 +137,11 @@ class Test(ionbench.benchmarker.Benchmarker):
             self.RATE_MIN = None
             self.RATE_MAX = None
 
-    def use_sensitivities(self):
+    def use_sensitivities(self):  # pragma: no cover
         # Not needed for test function. Override to avoid trying to access myokit objects
         pass
 
-    def evaluate(self):
+    def evaluate(self):  # pragma: no cover
         # Not needed for test function. Override to avoid trying to access myokit objects
         pass
 

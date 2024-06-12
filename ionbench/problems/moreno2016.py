@@ -274,7 +274,7 @@ class INa(ionbench.benchmarker.Benchmarker):
                 log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes)
                 # log = self.sim.run(self.T_MAX + 1, log_times=self._logTimes, log=[self._OUTPUT_NAME]) # Setting output name only works for ODE sims, not analytical
                 return self.sum_stats(np.array(log[self._OUTPUT_NAME], dtype='float64'))
-            except (myokit.SimulationError, np.linalg.LinAlgError):
+            except (myokit.SimulationError, np.linalg.LinAlgError):  # pragma: no cover
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(self.DATA), dtype='float64')
         else:

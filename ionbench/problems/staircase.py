@@ -31,7 +31,7 @@ class StaircaseBenchmarker(ionbench.benchmarker.Benchmarker):
         try:
             self.load_data(
                 os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + ('HH' if 'hh' in self.NAME else 'MM') + '.csv'))
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: no cover
             self.DATA = None
 
         # Myokit
