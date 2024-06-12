@@ -59,3 +59,75 @@ def test_loewe2016():
         ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bm, phi1=1, phi2=1, maxIter=5)
     with pytest.warns(UserWarning):
         ionbench.optimisers.external_optimisers.hybridPSOTRRTRR_Loewe2016.run(bm, phi1=1, phi2=1, maxIter=5)
+
+
+def test_gurkiewicz2007():
+    """
+    Checks GA Gurkiewicz warns about using a population size that is too small.
+    """
+    bm = ionbench.problems.test.Test()
+    with pytest.warns(UserWarning):
+        ionbench.optimisers.external_optimisers.GA_Gurkiewicz2007a.run(bm, popSize=1, nGens=5)
+    with pytest.warns(UserWarning):
+        ionbench.optimisers.external_optimisers.GA_Gurkiewicz2007b.run(bm, popSize=1, nGens=5)
+
+
+def test_cairns2017():
+    """
+    Checks GA Cairns returns an error when not using bounded parameters.
+    """
+    bm = ionbench.problems.test.Test()
+    with pytest.raises(RuntimeError):
+        ionbench.optimisers.external_optimisers.GA_Cairns2017.run(bm)
+
+
+def test_SA_Vanier_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.SA_Vanier1999.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.SA_Vanier1999.run(bm, maxIter=100000, debug=True)
+
+
+def test_PSO_Seemann_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.pso_Seemann2009.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.pso_Seemann2009.run(bm, maxIter=5000)
+
+
+def test_PSO_Cabo_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.pso_Cabo2022.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.pso_Cabo2022.run(bm, maxIter=5000)
+
+
+def test_Kohjitani_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm, maxIter=5000)
+    bm.reset(False)
+    ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm, maxIter=5)
+    bm.reset(False)
+    ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm, maxfev=5)
+
+
+def test_NMPSO_Liu_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm, maxIter=5000)
+
+
+def test_Zhou_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.DE_Zhou2009.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.DE_Zhou2009.run(bm, x0=bm.sample(), debug=True)
