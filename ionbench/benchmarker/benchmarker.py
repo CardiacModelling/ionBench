@@ -24,49 +24,49 @@ class Benchmarker:
 
     def __init__(self):
         # Ensure any undefined attributes (those defined by subclasses) are defined if missing
-        if not hasattr(self, 'DATA'):
+        if not hasattr(self, 'DATA'):  # pragma: no cover
             self.DATA = np.array(None)
-        if not hasattr(self, '_LOWER_BOUND'):
+        if not hasattr(self, '_LOWER_BOUND'):  # pragma: no cover
             self._LOWER_BOUND = np.array(None)
-        if not hasattr(self, '_UPPER_BOUND'):
+        if not hasattr(self, '_UPPER_BOUND'):  # pragma: no cover
             self._UPPER_BOUND = np.array(None)
-        if not hasattr(self, 'lb'):
+        if not hasattr(self, 'lb'):  # pragma: no cover
             self.lb = np.array(None)
-        if not hasattr(self, 'ub'):
+        if not hasattr(self, 'ub'):  # pragma: no cover
             self.ub = np.array(None)
-        if not hasattr(self, 'simSens'):
+        if not hasattr(self, 'simSens'):  # pragma: no cover
             self.simSens = None
-        if not hasattr(self, 'sensitivityCalc'):
+        if not hasattr(self, 'sensitivityCalc'):  # pragma: no cover
             self.sensitivityCalc = None
-        if not hasattr(self, 'RATE_MIN'):
+        if not hasattr(self, 'RATE_MIN'):  # pragma: no cover
             self.RATE_MIN = None
-        if not hasattr(self, 'RATE_MAX'):
+        if not hasattr(self, 'RATE_MAX'):  # pragma: no cover
             self.RATE_MAX = None
-        if not hasattr(self, 'COST_THRESHOLD'):
+        if not hasattr(self, 'COST_THRESHOLD'):  # pragma: no cover
             self.COST_THRESHOLD = None
-        if not hasattr(self, '_TRUE_PARAMETERS'):
+        if not hasattr(self, '_TRUE_PARAMETERS'):  # pragma: no cover
             self._TRUE_PARAMETERS = np.array(None)
-        if not hasattr(self, 'sim'):
+        if not hasattr(self, 'sim'):  # pragma: no cover
             self.sim = None
-        if not hasattr(self, 'T_MAX'):
+        if not hasattr(self, 'T_MAX'):  # pragma: no cover
             self.T_MAX = None
-        if not hasattr(self, 'TIMESTEP'):
+        if not hasattr(self, 'TIMESTEP'):  # pragma: no cover
             self.TIMESTEP = None
-        if not hasattr(self, '_PARAMETER_CONTAINER'):
+        if not hasattr(self, '_PARAMETER_CONTAINER'):  # pragma: no cover
             self._PARAMETER_CONTAINER = ''
-        if not hasattr(self, '_OUTPUT_NAME'):
+        if not hasattr(self, '_OUTPUT_NAME'):  # pragma: no cover
             self._OUTPUT_NAME = ''
-        if not hasattr(self, '_TOLERANCES'):
+        if not hasattr(self, '_TOLERANCES'):  # pragma: no cover
             self._TOLERANCES = None
-        if not hasattr(self, 'NAME'):
+        if not hasattr(self, 'NAME'):  # pragma: no cover
             self.NAME = ''
-        if not hasattr(self, '_MODEL'):
+        if not hasattr(self, '_MODEL'):  # pragma: no cover
             self._MODEL = None
-        if not hasattr(self, 'WEIGHTS'):
+        if not hasattr(self, 'WEIGHTS'):  # pragma: no cover
             self.WEIGHTS = None
-        if not hasattr(self, '_ANALYTICAL_MODEL'):
+        if not hasattr(self, '_ANALYTICAL_MODEL'):  # pragma: no cover
             self._ANALYTICAL_MODEL = None
-        if not hasattr(self, '_RATE_FUNCTIONS'):
+        if not hasattr(self, '_RATE_FUNCTIONS'):  # pragma: no cover
             self._RATE_FUNCTIONS = None
 
         self.useScaleFactors = False
@@ -109,11 +109,11 @@ class Benchmarker:
                     tmp.append(float(row[0]))
             self.DATA = np.array(tmp)
 
-    def sample(self, n=1):
+    def sample(self, n=1):  # pragma: no cover
         raise NotImplementedError
 
     @staticmethod
-    def protocol():
+    def protocol():  # pragma: no cover
         raise NotImplementedError
 
     def add_parameter_bounds(self):
@@ -463,7 +463,7 @@ class Benchmarker:
             try:
                 curr, sens = self.solve_with_sensitivities(times=np.arange(0, self.T_MAX, self.TIMESTEP))
                 sens = np.array(sens)
-            except (myokit.SimulationError, np.linalg.LinAlgError):
+            except (myokit.SimulationError, np.linalg.LinAlgError):  # pragma: no cover
                 # If the model fails to solve, we will assume the cost is infinite and the jacobian/gradient points back towards good parameters
                 end = time.monotonic()
                 warnings.warn(
@@ -593,17 +593,17 @@ class Benchmarker:
         # Check our steady state calculations don't differ from myokit
         try:
             myokitState = self._ANALYTICAL_MODEL.steady_state(V, parameters)
-            if np.linalg.norm(np.subtract(myokitState, state)) > 1e-6:
+            if np.linalg.norm(np.subtract(myokitState, state)) > 1e-6:  # pragma: no cover
                 raise RuntimeError(
                     f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState - state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
-        except myokit.lib.markov.LinearModelError as e:
+        except myokit.lib.markov.LinearModelError as e:  # pragma: no cover
             if 'eigenvalues' in str(e):
                 warnings.warn(
                     'Positive eigenvalues found so steady state is unstable. Will use states defined in problem instead.')
                 state = None
             else:
                 raise
-        except np.linalg.LinAlgError as e:
+        except np.linalg.LinAlgError as e:  # pragma: no cover
             if 'infs or NaNs' in str(e):
                 # Infs or NaNs in matrix, caused error in myokit steady state
                 warnings.warn('Infs or NaNs in matrix so steady state is invalid. Will use states defined in problem instead.')
@@ -616,7 +616,7 @@ class Benchmarker:
                 if np.all(np.abs(npstate[npstate < 0]) < 1e-12):
                     # If the negative values are very close to zero, then we can assume they are zero
                     state = [max(0, s) / np.sum(npstate) for s in npstate]
-                else:
+                else:  # pragma: no cover
                     # Some parameter combinations lead to negative steady state values (not just rounding errors). We don't set the state in this case as a positive steady state doesn't exist.
                     if np.any(At < 0):
                         warnings.warn(
@@ -675,7 +675,7 @@ class Benchmarker:
                 else:
                     log = self.sim.run(self.T_MAX + 1, log_times=times)
                 return np.array(log[self._OUTPUT_NAME])
-            except (myokit.SimulationError, np.linalg.LinAlgError):
+            except (myokit.SimulationError, np.linalg.LinAlgError):  # pragma: no cover
                 warnings.warn("Failed to solve model. Will report infinite output in the hope of continuing the run.")
                 return np.array([np.inf] * len(times))
         else:
