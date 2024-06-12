@@ -13,6 +13,7 @@ class TestScipy:
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
+        self.bmTest.reset()
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
@@ -28,6 +29,7 @@ class TestPints:
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
+        self.bmTest.reset()
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
@@ -46,6 +48,7 @@ class TestExternal:
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     @pytest.mark.cheap
     def test_minimum_finding(self, opt):
+        self.bmTest.reset()
         module = import_module(opt)
         mod = module.get_modification()
         mod.apply(self.bmTest)
