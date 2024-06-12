@@ -206,7 +206,7 @@ class MM(StaircaseBenchmarker):
 
 
 # noinspection PyProtectedMember
-def generate_data(modelType):
+def generate_data(modelType):  # pragma: no cover
     """
     Generate the data files for the staircase benchmarker problems.
 

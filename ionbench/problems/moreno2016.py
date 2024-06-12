@@ -349,7 +349,7 @@ class INa(ionbench.benchmarker.Benchmarker):
 
 
 # noinspection PyProtectedMember
-def generate_data():
+def generate_data():  # pragma: no cover
     """
     Generate the data files for the Moreno 2016 benchmarker problems. The true parameters are the same as the default for this benchmark problem.
 

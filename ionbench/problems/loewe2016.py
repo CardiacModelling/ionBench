@@ -159,7 +159,7 @@ class IKur(LoeweBenchmarker):
 
 
 # noinspection PyProtectedMember
-def generate_data(modelType):
+def generate_data(modelType):  # pragma: no cover
     """
     Generate the data files for the Loewe 2016 benchmarker problems. The true parameters are the same as the default for these benchmark problems.
 

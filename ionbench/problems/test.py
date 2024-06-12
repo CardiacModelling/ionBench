@@ -147,7 +147,7 @@ class Test(ionbench.benchmarker.Benchmarker):
 
 
 # noinspection PyProtectedMember
-def generate_data():
+def generate_data():  # pragma: no cover
     """
     Generate the data files for the test benchmarker problem.
 
