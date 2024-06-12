@@ -162,19 +162,9 @@ class Abed2013(Modification):
         super().__init__(name='Abed2013', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
-class Achard2006(Modification):
-    def __init__(self):
-        super().__init__(name='Achard2006', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
 class Balser1990(Modification):
     def __init__(self):
         super().__init__(name='Balser1990', logTransform='off', parameterBounds='off', scaleFactors='off')
-
-
-class Belletti2021(Modification):
-    def __init__(self):
-        super().__init__(name='Belletti2021', logTransform='off', parameterBounds='off', scaleFactors='on')
 
 
 class BenShalom2012(Modification):
@@ -234,19 +224,9 @@ class Dokos2004(Modification):
         super().__init__(name='Dokos2004', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
-class Druckmann2007(Modification):
-    def __init__(self):
-        super().__init__(name='Druckmann2007', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
 class Du2014(Modification):
     def __init__(self):
         super().__init__(name='Du2014', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Epstein2016(Modification):
-    def __init__(self):
-        super().__init__(name='Epstein2016', logTransform='on', parameterBounds='on', scaleFactors='on')
 
 
 class Groenendaal2015(Modification):
@@ -266,25 +246,10 @@ class Gurkiewicz2007(Modification):
         super().__init__(name='Gurkiewicz2007', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
-class Hendrikson2011(Modification):
-    def __init__(self):
-        super().__init__(name='Hendrikson2011', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Houston2020(Modification):
-    def __init__(self):
-        super().__init__(name='Houston2020', logTransform='on', parameterBounds='on', scaleFactors='off')
-
-
 class JedrzejewskiSzmek2018(Modification):
     def __init__(self):
         super().__init__(name='JedrzejewskiSzmek2018', logTransform='off', parameterBounds='on', scaleFactors='off',
                          kwargs={'popSize': 8})
-
-
-class Kaur2014(Modification):
-    def __init__(self):
-        super().__init__(name='Kaur2014', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Kohjitani2022(Modification):
@@ -307,29 +272,9 @@ class Maryak1998(Modification):
         super().__init__(name='Maryak1998', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
-class Meliza2014(Modification):
-    def __init__(self):
-        super().__init__(name='Meliza2014', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
 class Moreno2016(Modification):
     def __init__(self):
         super().__init__(name='Moreno2016', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Munch2022(Modification):
-    def __init__(self):
-        super().__init__(name='Munch2022', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Nogaret2016(Modification):
-    def __init__(self):
-        super().__init__(name='Nogaret2016', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Nogaret2022(Modification):
-    def __init__(self):
-        super().__init__(name='Nogaret2022', logTransform='off', parameterBounds='on', scaleFactors='off')
 
 
 class Sachse2003(Modification):
@@ -347,29 +292,9 @@ class Smirnov2020(Modification):
         super().__init__(name='Smirnov2020', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
-class Syed2005(Modification):
-    def __init__(self):
-        super().__init__(name='Syed2005', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
-class Taylor2020(Modification):
-    def __init__(self):
-        super().__init__(name='Taylor2020', logTransform='off', parameterBounds='on', scaleFactors='off')
-
-
 class Vanier1999(Modification):
     def __init__(self):
         super().__init__(name='Vanier1999', logTransform='off', parameterBounds='on', scaleFactors='on')
-
-
-class Vavoulis2012(Modification):
-    def __init__(self):
-        super().__init__(name='Vavoulis2012', logTransform='on', parameterBounds='on', scaleFactors='on')
-
-
-class Weber2008(Modification):
-    def __init__(self):
-        super().__init__(name='Weber2008', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
 class Wilhelms2012a(Modification):
