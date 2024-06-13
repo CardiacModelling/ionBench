@@ -470,6 +470,9 @@ class Staircase(Problem):
         assert sampler_different(self.bm, np.zeros(self.bm.n_parameters()))
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm.useScaleFactors = False
+        # n>1
+        self.bm.reset()
+        assert len(self.bm.sample(5)) == 5
 
     @pytest.mark.cheap
     def test_transforms(self):
@@ -525,6 +528,9 @@ class Loewe(Problem):
         assert sampler_different(self.bm, np.zeros(self.bm.n_parameters()))
         self.bm.log_transform([False] * self.bm.n_parameters())
         self.bm.useScaleFactors = False
+        # n>1
+        self.bm.reset()
+        assert len(self.bm.sample(5)) == 5
 
     @pytest.mark.cheap
     def test_transforms(self):

@@ -1,8 +1,17 @@
 # Extra tests to provide full coverage over ionBench where other tests do not reach
 from importlib import import_module
+import numpy as np
 import ionbench
 import pytest
 
+
+# Problems
+def test_problems_coverage():
+    bm = ionbench.problems.loewe2016.IKr()
+    bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
+    bm.grad(bm.sample())  # Triggers use_sensitivities() through grad
+    bm = ionbench.problems.moreno2016.INa()
+    bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
 
 # Optimisers
 def test_scipy_optimisers():
