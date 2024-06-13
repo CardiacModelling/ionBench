@@ -142,7 +142,6 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
                 else:
                     raise e
 
-
         if debug:
             print("Positions renewed")
             print(f'Finished population {L}')
@@ -151,6 +150,12 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
 
         if bm.is_converged():
             break
+
+    # Find best positions, both globally and locally
+    for p in particleList:
+        if p.currentCost < Gcost[L]:
+            Gcost[L] = p.currentCost
+            Gpos[L] = np.copy(p.position)
 
     bm.evaluate()
     return Particle().untransform(Gpos[L])
