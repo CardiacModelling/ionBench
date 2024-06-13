@@ -37,45 +37,45 @@ class ProfileManager:
         self.fixedParam = fixedParam
         self.fixedValue = fixedValue
         self.MLE = x0
-        self._bounded = False
+        self.parametersBounded = False
 
-    def n_parameters(self):
+    def n_parameters(self):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .n_parameters() method. Reduces the parameter count by 1 to account for the fixed parameter.
         """
         return self.bm.n_parameters() - 1
 
-    def cost(self, params):
+    def cost(self, params):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .cost() method. Inserts the fixed parameter before evaluating.
         """
         return self.bm.cost(self.set_params(params))
 
-    def grad(self, params, **kwargs):
+    def grad(self, params, **kwargs):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .grad() method. 
         """
         return np.delete(self.bm.grad(self.set_params(params), **kwargs), self.fixedParam, 1)
 
-    def signed_error(self, params):
+    def signed_error(self, params):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .signed_error() method. Inserts the fixed parameter before evaluating.
         """
         return self.bm.signed_error(self.set_params(params))
 
-    def set_params(self, params):
+    def set_params(self, params):  # pragma: no cover
         """
         Inserts the fixed parameter into the inputted parameter vector.
         """
         return np.insert(params, self.fixedParam, self.fixedValue)
 
-    def sample(self):
+    def sample(self):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .sample() method. Since sampling is used to define the initial points, this method returns the true parameters with the fixed parameter removed.
         """
         return np.delete(self.MLE, self.fixedParam)
 
-    def evaluate(self, x):
+    def evaluate(self):  # pragma: no cover
         """
         ProfileManager wrapper for the benchmarker's .evaluate() method. This method does nothing, but is necessary since optimisers will attempt to call it.
         """
@@ -127,7 +127,7 @@ def run(bm, variations, backwardPass=False, filename=''):
                         pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
                     pm.MLE = bm._TRUE_PARAMETERS
                     out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 print(
                     'The optimisation caused an error (detailed below). In an attempt to recover, the profile likelihood will jump to the best guess.')
                 print(e)
@@ -160,17 +160,17 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
         If True, extra plots will be drawn to separate the forwards and backwards passes of the profile likelihood optimisation. The default is False.
     """
     # Initialise a benchmarker
-    if modelType == 'hh':
+    if modelType == 'hh':  # pragma: no cover
         bm = ionbench.problems.staircase.HH()
-    elif modelType == 'mm':
+    elif modelType == 'mm':  # pragma: no cover
         bm = ionbench.problems.staircase.MM()
-    elif modelType == 'ikr':
+    elif modelType == 'ikr':  # pragma: no cover
         bm = ionbench.problems.loewe2016.IKr()
-    elif modelType == 'ikur':
+    elif modelType == 'ikur':  # pragma: no cover
         bm = ionbench.problems.loewe2016.IKur()
-    elif modelType == 'ina':
+    elif modelType == 'ina':  # pragma: no cover
         bm = ionbench.problems.moreno2016.INa()
-    else:
+    else:  # pragma: no cover
         bm = None
     # Use scale factors so only variations needs to be specified as the parameters
     bm.useScaleFactors = True
@@ -190,7 +190,7 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
                     variationsB, costsB = pickle.load(f)
                 if len(variationsB) == len(variations):
                     costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
-            except FileNotFoundError:
+            except FileNotFoundError:  # pragma: no cover
                 pass
             # If the max cost (ignoring penalties) is greater than the current max, update it
             if np.max(costs[costs < 1e5], initial=0) > ymax:
@@ -214,7 +214,7 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
                 variationsB, costsB = pickle.load(f)
             if len(variationsB) == len(variationsA):
                 costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: no cover
             pass
         # Plot the profile likelihood
         plt.figure(figsize=(4, 3))
@@ -226,7 +226,7 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
         highCost = highCost if highCost > 1e-14 else np.inf
         threshold = min(threshold, lowCost, highCost)
         # If we don't have fixed limits, find the min and max costs
-        if not fixedLimits:
+        if not fixedLimits:  # pragma: no cover
             # Ignore really small and large costs
             ymin = np.min(costs[costs > 1e-30], initial=np.inf)
             ymax = np.max(costs[costs < 1e5], initial=0)
@@ -247,7 +247,7 @@ def plot_profile_likelihood(modelType, numberToPlot, fixedLimits=True, debug=Fal
             try:
                 if len(variationsB) == len(variationsA):
                     plt.semilogy(variations, costsB, label='Backwards', zorder=3, linestyle='dotted')
-            except NameError:
+            except NameError:  # pragma: no cover
                 pass
         # set limits and add labels
         plt.ylim(ymin, ymax)
