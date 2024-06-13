@@ -642,6 +642,21 @@ class TestLoeweIKur(Loewe):
     costBound = 1e-16
 
 
+class TestTest(Problem):
+    bm = ionbench.problems.test.Test()
+    bm.plotter = False
+    costBound = 1e-16
+
+    def test_grad_bounds(self, plotting=False):
+        pass
+
+    def test_steady_state(self):
+        pass
+
+    def test_rate_bounds(self):
+        pass
+
+
 def sampler_bounds(bm, lb, ub):
     """
     Test function for checking that sampled parameters lie within the expected bounds

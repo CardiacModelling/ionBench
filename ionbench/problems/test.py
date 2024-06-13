@@ -17,10 +17,10 @@ class Test(ionbench.benchmarker.Benchmarker):
     def __init__(self):
         self.NAME = "test"
         self.COST_THRESHOLD = 0.001
-        self._TRUE_PARAMETERS = np.array([2, 4])
+        self._TRUE_PARAMETERS = np.array([2., 4.])
         self._RATE_FUNCTIONS = ()
-        self.RATE_MIN = None
-        self.RATE_MAX = None
+        self.RATE_MIN = 0
+        self.RATE_MAX = 1
         self.STANDARD_LOG_TRANSFORM = (False, True)
         self.sensitivityCalc = True
         self.T_MAX = 20
@@ -33,6 +33,8 @@ class Test(ionbench.benchmarker.Benchmarker):
         self._UPPER_BOUND = self._TRUE_PARAMETERS * 1.5
         self.lb = np.copy(self._LOWER_BOUND)
         self.ub = np.copy(self._UPPER_BOUND)
+        self.sim = FakeSim()
+        self.simSens = FakeSim()
         super().__init__()
 
     def sample(self, n=1):
@@ -59,83 +61,18 @@ class Test(ionbench.benchmarker.Benchmarker):
         else:
             return params
 
-    def simulate(self, parameters, times, continueOnError=True, incrementSolveCounter=True):
-        # Calculate function at times for parameters and return
-        parameters = self.original_parameter_space(parameters)
-        start = time.monotonic()
-        if not self.in_parameter_bounds(parameters):
-            out = [np.inf for _ in times]
-        else:
-            out = norm(parameters[0], parameters[1]).pdf(times)
-        end = time.monotonic()
-        self.tracker.update(parameters, cost=self.rmse(out, self.DATA), incrementSolveCounter=incrementSolveCounter,
-                            solveTime=end - start)
+    def solve_model(self, times, continueOnError=True):
+        out = norm(self.sim.parameters['.p1'], self.sim.parameters['.p2']).pdf(times)
         return out
 
-    def grad(self, parameters, incrementSolveCounter=True, inInputSpace=True, returnCost=False, residuals=False):
-        # Calculate gradient wrt parameters
-        # Undo any transforms
-        curr = None
-        sens = None
-        J = None
-        grad = None
-
-        if inInputSpace:
-            parameters = self.original_parameter_space(parameters)
-        else:
-            parameters = np.copy(parameters)
-
-        # Abort solving if the parameters are out of bounds
-        if not self.in_parameter_bounds(parameters):
-            warnings.warn(
-                'Tried to evaluate gradient when out of bounds. ionBench will try to resolve this by assuming infinite cost and a gradient that points back towards good parameters.')
-            error = np.array([np.inf] * len(np.arange(0, self.T_MAX, self.TIMESTEP)))
-            # use grad to point back to reasonable parameter space
-            grad = -1 / (self.original_parameter_space(self.sample()) - parameters)
-            if residuals:
-                J = np.zeros((len(error), self.n_parameters()))
-                for i in range(len(error)):
-                    J[i,] = grad
-            start = time.monotonic()
-            end = start
-        else:
-            # Get sensitivities
-            start = time.monotonic()
-            curr = self.simulate(parameters, np.arange(0, self.T_MAX, self.TIMESTEP))
-            sens = np.zeros((len(curr), self.n_parameters()))
-            for t in range(len(curr)):
-                sens[t, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
-                sens[t, 1] = curr[t] * ((t - parameters[0]) ** 2 / parameters[1] ** 3 - 1 / parameters[1])
-            end = time.monotonic()
-
-        # Convert to cost derivative or residual jacobian
-        error = curr - self.DATA
-        cost = np.sqrt(np.mean(error ** 2))
-        self.tracker.update(parameters, cost=cost, incrementSolveCounter=incrementSolveCounter,
-                            solveTime=end - start)
-        if residuals:
-            J = sens
-        else:
-            grad = np.zeros(self.n_parameters())
-            for i in range(self.n_parameters()):
-                if cost > 0:
-                    grad[i] = np.dot(error, sens[:, i]) / (len(error) * cost)
-                else:
-                    grad[i] = 0
-
-        return self.map_derivative(J, grad, parameters, inInputSpace, returnCost, residuals, cost, error)
-
-    def reset(self, fullReset=True):
-        self.tracker = ionbench.tracker.Tracker()
-        if fullReset:
-            self.log_transform([False] * self.n_parameters())
-            self.useScaleFactors = False
-            self.parametersBounded = False
-            self.ratesBounded = False
-            self.lb = np.copy(self._LOWER_BOUND)
-            self.ub = np.copy(self._UPPER_BOUND)
-            self.RATE_MIN = None
-            self.RATE_MAX = None
+    def solve_with_sensitivities(self, times):
+        parameters = np.array([self.simSens.parameters['.p1'], self.simSens.parameters['.p2']])
+        curr = norm(self.sim.parameters['.p1'], self.sim.parameters['.p2']).pdf(times)
+        sens = np.zeros((len(times), 1, self.n_parameters()))
+        for t in range(len(times)):
+            sens[t, 0, 0] = curr[t] * (t - parameters[0]) / parameters[1] ** 2
+            sens[t, 0, 1] = curr[t] * ((t - parameters[0]) ** 2 / parameters[1] ** 3 - 1 / parameters[1])
+        return curr, sens
 
     def use_sensitivities(self):  # pragma: no cover
         # Not needed for test function. Override to avoid trying to access myokit objects
@@ -143,6 +80,25 @@ class Test(ionbench.benchmarker.Benchmarker):
 
     def evaluate(self):  # pragma: no cover
         # Not needed for test function. Override to avoid trying to access myokit objects
+        pass
+
+    def set_steady_state(self, parameters):
+        pass
+
+
+class FakeSim:
+    """
+    A fake myokit simulation object to ignore any Simulation methods for the test problem.
+    It stores set parameters.
+    """
+    def __init__(self):
+        self.parameters = {}
+
+    def reset(self):
+        pass
+
+    def set_constant(self, name, value):
+        self.parameters[name] = value
         pass
 
 

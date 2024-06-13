@@ -12,6 +12,9 @@ def test_problems_coverage():
     bm.grad(bm.sample())  # Triggers use_sensitivities() through grad
     bm = ionbench.problems.moreno2016.INa()
     bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
+    bm = ionbench.problems.test.Test()
+    assert len(bm.sample(5)) == 5
+
 
 # Optimisers
 def test_scipy_optimisers():
