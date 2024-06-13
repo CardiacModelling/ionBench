@@ -181,8 +181,8 @@ class Problem:
 
     def test_tracker_save_load(self):
         self.bm.reset()
-        self.bm.sample()
-        self.bm.cost()
+        p = self.bm.sample()
+        self.bm.cost(p)
         cost = np.copy(self.bm.tracker.costs[0])
         time = np.copy(self.bm.tracker.costTimes[0])
         self.bm.tracker.save('temporary_test_tracker.pickle')
