@@ -143,3 +143,23 @@ def test_Zhou_long():
     mod.apply(bm)
     bm.COST_THRESHOLD = 0
     ionbench.optimisers.external_optimisers.DE_Zhou2009.run(bm, x0=bm.sample(), debug=True)
+
+
+def test_hybrid_Loewe_long():
+    bm = ionbench.problems.test.Test()
+    mod = ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = 0
+    ionbench.optimisers.external_optimisers.hybridPSOTRR_Loewe2016.run(bm, x0=bm.sample(), debug=True)
+    bm.reset(False)
+    ionbench.optimisers.external_optimisers.hybridPSOTRRTRR_Loewe2016.run(bm, x0=bm.sample(), debug=True)
+
+
+def test_dokos_long():
+    bm = ionbench.problems.test.Test()
+    # Add noise to get good weight updates
+    bm.DATA += np.random.normal(0, 0.003, len(bm.DATA))
+    mod = ionbench.optimisers.external_optimisers.curvilinearGD_Dokos2004.get_modification()
+    mod.apply(bm)
+    bm.COST_THRESHOLD = -1
+    ionbench.optimisers.external_optimisers.curvilinearGD_Dokos2004.run(bm, costThreshold=-1, maxIter=250, maxInnerIter=4, debug=True)
