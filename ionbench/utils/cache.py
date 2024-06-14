@@ -36,7 +36,7 @@ def get_cached_cost(bm):
         @cache()
         def cached_func(p):
             return bm.cost(p)
-    else:
+    else:  # pragma: no cover
         def cached_func(p):
             return bm.cost(p)
 
@@ -65,7 +65,7 @@ def get_cached_signed_error(bm):
         @cache()
         def cached_func(p):
             return bm.signed_error(p)
-    else:
+    else:  # pragma: no cover
         def cached_func(p):
             return bm.signed_error(p)
 
@@ -96,7 +96,7 @@ def get_cached_grad(bm, **kwargs):
         @cache()
         def cached_func(p):
             return bm.grad(p, **kwargs)
-    else:
+    else:  # pragma: no cover
         def cached_func(p):
             return bm.grad(p, **kwargs)
 

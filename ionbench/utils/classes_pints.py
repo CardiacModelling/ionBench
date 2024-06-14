@@ -31,7 +31,7 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
     if x0 is None:
         x0 = bm.sample()
     model = Model(bm)
-    if 'moreno' in bm.NAME:
+    if 'moreno' in bm.NAME:  # pragma: no cover
         times = np.arange(len(bm.DATA))
     else:
         times = np.arange(0, bm.T_MAX, bm.TIMESTEP)
@@ -44,10 +44,10 @@ def pints_setup(bm, x0, method, maxIter, debug, forceUnbounded=False):
         else:
             boundaries = pints.RectangularBoundaries(bm.input_parameter_space(bm.lb), bm.input_parameter_space(bm.ub))
         counter = 1
-        while not boundaries.check(x0):
+        while not boundaries.check(x0):  # pragma: no cover
             x0 = bm.sample()
             counter += 1
-        if counter > 10:
+        if counter > 10:  # pragma: no cover
             print(f'Struggled to find parameters in bounds. Required {counter} iterations.')
         opt = pints.OptimisationController(error, x0, method=method, boundaries=boundaries)
     else:
@@ -68,7 +68,7 @@ class ErrorWithGrad(pints.RootMeanSquaredError):
         self.bm = bm
 
     def evaluateS1(self, x):
-        if 'moreno' in self.bm.NAME:
+        if 'moreno' in self.bm.NAME:  # pragma: no cover
             raise NotImplementedError('Moreno uses weighted RMSE in cost and grad, pints uses unweighted RMSE. No unweighted RMSE grad is available for Moreno.')
         return self.bm.grad(x, returnCost=True)
 

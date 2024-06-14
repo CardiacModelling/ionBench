@@ -14,7 +14,7 @@ import mygrad as mg
 # =============================================================================
 
 
-#  Code taken from https://github.com/myokit/myokit/blob/main/myokit/lib/markov.py on 2024/02/07 (last edit was commit https://github.com/myokit/myokit/commit/31fe43cea4af9efcfb0d428e056e5d82173170c3) under the following license.
+#  Code taken from https://github.com/myokit/myokit/blob/main/myokit/lib/markov.py on 2024/02/07 (last edit was commit https://github.com/myokit/myokit/commit/31fe43cea4af9efcfb0d428e056e5d82173170c3) under the following license. It has been changed to work with MyGrad rather than numpy and with comments to ignore some code for coverage calculations.
 # =============================================================================
 # BSD 3-Clause License
 #
@@ -65,7 +65,7 @@ def get_matrix_function(model):
         # Check if this expression is a linear combination of the states
         try:
             factors = myokit.lib.markov._linear_combination(e, model._states)
-        except ValueError:
+        except ValueError:  # pragma: no cover
             raise myokit.lib.markov.LinearModelError(
                 'Unable to write expression as linear combination of'
                 ' states: ' + str(e) + '.')
@@ -86,7 +86,7 @@ def get_matrix_function(model):
     if model._current is not None:
         try:
             factors = myokit.lib.markov._linear_combination(current_expression, model._states)
-        except ValueError:
+        except ValueError:  # pragma: no cover
             raise myokit.lib.markov.LinearModelError(
                 'Unable to write expression as linear combination of'
                 ' states: ' + str(e) + '.')
