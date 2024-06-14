@@ -43,14 +43,18 @@ def run(bm, x0=None, maxIter=1000, eps=1e-6, debug=False):
 
     # noinspection PyShadowingNames
     class Particle(ionbench.utils.particle_optimisers.Particle):
-        def __init__(self, position=None):
+        def __init__(self, position=None, transform=False):
             super().__init__(bm, cost_func, x0)
             if position is None:
                 # Initial sampling (using util.particle_optimisers.Particle default)
                 self.set_position(x0)
             else:
                 # Force to be position (position is in input space, store in transformed [0,1] space)
-                self.position = self.transform(position)
+                # This is only used for the initial population, after that the Nelder Mead and PSO are automatically using the transformed space.
+                if transform:
+                    self.position = self.transform(position)
+                else:
+                    self.position = np.copy(position)
             # Clamp to bounds
             self.clamp()
 
@@ -182,11 +186,11 @@ def run(bm, x0=None, maxIter=1000, eps=1e-6, debug=False):
     for i in range(n):
         if i < m + 1:
             if i == 0:
-                particleList.append(Particle(position=x0))
+                particleList.append(Particle(position=x0, transform=True))
             else:
                 perturb = np.ones(m)
                 perturb[i - 1] = 1.05
-                particleList.append(Particle(position=x0 * perturb))
+                particleList.append(Particle(position=x0 * perturb, transform=True))
         else:
             particleList.append(Particle())
 
