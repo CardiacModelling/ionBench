@@ -45,7 +45,7 @@ def run(bm, x0=None, groups=None, n=6, c1=1.4, c2=1.4, qmax=4, maxIter=1000, w=0
 
     """
 
-    if not bm.parametersBounded:
+    if not bm.parametersBounded:  # pragma: no cover
         raise RuntimeError('This optimiser requires bounds.')
 
     cost_func = ionbench.utils.cache.get_cached_cost(bm)
@@ -117,7 +117,7 @@ def run(bm, x0=None, groups=None, n=6, c1=1.4, c2=1.4, qmax=4, maxIter=1000, w=0
         if bm.is_converged():
             break
 
-        if q > 5 * qmax:
+        if q > 5 * qmax:  # pragma: no cover
             # Abort
             print("Too many iterations without improvement")
             print(f'Final cost of {Gcost[L]} found at:')

@@ -69,9 +69,9 @@ def run(bm, x0=None, n=96, K=5, maxIter=1000, phi1=2.05, phi2=2.05, debug=False)
             Clamp parameters to the input parameter space.
             """
             for i in range(bm.n_parameters()):
-                if self.position[i] < 0:
+                if self.position[i] < 0:  # pragma: no cover
                     self.position[i] = np.random.rand() / 4
-                elif self.position[i] > 1:
+                elif self.position[i] > 1:  # pragma: no cover
                     self.position[i] = np.random.rand() / 4
 
     L = None

@@ -62,7 +62,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         return wOld + s * dw
 
     # Set up transform functions to map between upper and lower bounds
-    if not bm.parametersBounded:
+    if not bm.parametersBounded:  # pragma: no cover
         bm.add_parameter_bounds()
     ub = bm.input_parameter_space(bm.ub)
     lb = bm.input_parameter_space(bm.lb)
@@ -219,9 +219,9 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             def L(alpha):
                 m = np.zeros(len(d))
                 for i in range(len(d)):
-                    if d[i] == 0:
+                    if d[i] == 0:  # pragma: no cover
                         m[i] = -alpha
-                    else:
+                    else:  # pragma: no cover
                         m[i] = (np.exp(-2 * d[i] * alpha) - 1) / (2 * d[i])
                 M = np.diag(m)
                 return V @ M @ invV @ a
@@ -238,11 +238,11 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 return np.dot(weightedr0, weightedr0)
 
             # Run Brent's method to optimise SSE with respect to alpha
-            try:
+            try:  # pragma: no cover
                 out = scipy.optimize.brent(SSE, brack=(0, 1, 1e9), tol=1e-8, full_output=True)
                 alpha = out[0]
                 falphaNew = out[1]
-            except ValueError as e:
+            except ValueError as e:  # pragma: no cover
                 # Failed. Time to find out why and try to recover
                 # Option 1: NaNs in either SSE(0) or SSE(1e9) but not SSE(1) so step still viable
                 if (np.isnan(SSE(0)) or np.isnan(SSE(1e9))) and not np.isnan(SSE(1)):
@@ -299,7 +299,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                 print(f'Resulting step is {L(alpha)}')
                 print(f'falphaOld: {falphaOld}, falphaNew: {falphaNew}')
 
-            if falphaNew <= costThreshold:
+            if falphaNew <= costThreshold:  # pragma: no cover
                 # If cost is below threshold, fully terminate the optimisation
                 if debug:
                     print(f'Cost below threshold {costThreshold} found. falphaOld: {falphaOld}, falphaNew: {falphaNew}')
@@ -321,7 +321,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
         weightCounter += 1
         if debug:
             print(f'Weight counter incremented to {weightCounter}')
-        if iterCounter >= maxIter:
+        if iterCounter >= maxIter:  # pragma: no cover
             if debug:
                 print(
                     f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')

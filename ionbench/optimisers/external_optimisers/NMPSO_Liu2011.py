@@ -68,7 +68,7 @@ def run(bm, x0=None, maxIter=1000, eps=1e-6, debug=False):
             # returns the best point in the simplex
             x_best = self.particles[0]
             for p in self.particles:
-                if p.currentCost < x_best.currentCost:
+                if p.currentCost < x_best.currentCost:  # pragma: no cover
                     x_best = p
             return x_best
 

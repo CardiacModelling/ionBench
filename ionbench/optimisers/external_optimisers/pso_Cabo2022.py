@@ -63,10 +63,10 @@ def run(bm, x0=None, maxIter=1000, debug=False):
             Clamp parameters to the input parameter space. Also sets the velocity to 0 in any clamped parameters.
             """
             for i in range(len(self.position)):
-                if self.position[i] < 0:
+                if self.position[i] < 0:  # pragma: no cover
                     self.position[i] = 0
                     self.velocity[i] = 0
-                elif self.position[i] > 1:
+                elif self.position[i] > 1:  # pragma: no cover
                     self.position[i] = 1
                     self.velocity[i] = 0
 

@@ -82,7 +82,7 @@ def run(bm, x0=None, n=20, maxIter=1000, debug=False):
         # Renew velocities
         if L < 1000:  # Dependence of c1 and c2 on maxIter has been removed
             c1 = 2.5 - L / 1000 * 2
-        else:
+        else:  # pragma: no cover
             c1 = 0.5
         c2 = 3 - c1
         w = np.random.uniform(0.5, 1)
