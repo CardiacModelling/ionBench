@@ -131,10 +131,10 @@ def test_Kohjitani_long():
 
 def test_NMPSO_Liu_long():
     bm = ionbench.problems.test.Test()
-    mod = ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.get_modification()
+    mod = ionbench.optimisers.external_optimisers.NMPSO_Liu2011.get_modification()
     mod.apply(bm)
     bm.COST_THRESHOLD = 0
-    ionbench.optimisers.external_optimisers.patternSearch_Kohjitani2022.run(bm, maxIter=5000)
+    ionbench.optimisers.external_optimisers.NMPSO_Liu2011.run(bm, maxIter=1000, eps=0, debug=True)
 
 
 def test_Zhou_long():
