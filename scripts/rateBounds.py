@@ -152,6 +152,8 @@ def paper_plot():
     # Figure titles
     subfigs[0].suptitle('Rate bounds')
     subfigs[1].suptitle('Penalty function')
+    subfigs[0].text(0.02, 0.95, 'A', fontsize=12, fontweight='bold')
+    subfigs[1].text(0.02, 0.95, 'B', fontsize=12, fontweight='bold')
     plt.savefig(
         os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'rateBounds.png'),
         bbox_inches='tight', dpi=300)
