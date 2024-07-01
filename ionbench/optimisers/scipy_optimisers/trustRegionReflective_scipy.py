@@ -32,23 +32,23 @@ def run(bm, x0=None, maxIter=1000, debug=False):
 # noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
-    modNum = 1 -> Du2014
-    modNum = 2 -> Loewe2016
-    modNum = 3 -> Wilhelms2012b
+    modNum = 1 -> Wilhelms2012b
+    modNum = 2 -> Du2014
+    modNum = 3 -> Loewe2016
 
     Returns
     -------
     mod : modification
-        Modification corresponding to inputted modNum. Default is modNum = 1, so Du2014.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Wilhelms2012b.
 
     """
 
     if modNum == 1:
-        mod = ionbench.modification.Du2014()
-    elif modNum == 2:
-        mod = ionbench.modification.Loewe2016()
-    elif modNum == 3:
         mod = ionbench.modification.Wilhelms2012b()
+    elif modNum == 2:
+        mod = ionbench.modification.Du2014()
+    elif modNum == 3:
+        mod = ionbench.modification.Loewe2016()
     else:
         mod = ionbench.modification.Empty(name='trr_scipy')
     return mod
