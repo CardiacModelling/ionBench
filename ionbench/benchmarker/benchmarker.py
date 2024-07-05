@@ -292,6 +292,21 @@ class Benchmarker:
             return True
         return self.rate_penalty(parameters) == 0
 
+    def set_max_iter_flag(self, hitMaxIter=True):
+        """
+        Sets a flag in ionBench to indicate that the optimisation algorithm has hit the maximum number of iterations. This is used to note any optimisation runs that may need repeating, as we try to avoid terminating due to maximum number of iterations. This flag is also set for similar termination criteria like maximum number of function evaluations. The flag is stored in the Tracker.
+
+        Parameters
+        ----------
+        hitMaxIter : bool, optional
+        Set tracker.maxIterFlag to this value. The default is True.
+
+        Returns
+        -------
+        None.
+        """
+        self.tracker.maxIterFlag = hitMaxIter
+
     def n_parameters(self):
         """
         Returns the number of parameters in the model.

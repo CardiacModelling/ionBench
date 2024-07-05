@@ -50,7 +50,7 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
         a = percentChangeInMinParam * np.min(np.abs(x0)) * (A + 1)**alpha / np.abs(approxGrad)
         if debug:
             print(f'No value of a was specified. "Optimal" value determined as {a}')
-
+    k = None
     for k in range(maxIter):
         if debug:
             print(f'Iteration {k} of {maxIter}')
@@ -75,6 +75,9 @@ def run(bm, x0=None, a=None, A=None, alpha=0.602, maxIter=1000, debug=False):
             print(x0)
         if bm.is_converged():
             break
+
+    if k >= maxIter-1:
+        bm.set_max_iter_flag()
 
     # Return the best point in the final simplex
     bm.evaluate()

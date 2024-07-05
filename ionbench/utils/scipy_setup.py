@@ -46,6 +46,9 @@ def least_squares(bm, x0, debug, method, maxIter, **kwargs):
     out = scipy.optimize.least_squares(bm.signed_error, x0, method=method, bounds=bounds, jac=grad, verbose=verbose, max_nfev=maxIter,
                                        **kwargs)
 
+    if out.nfev >= maxIter:
+        bm.set_max_iter_flag()
+
     if debug:
         print(f'Cost of {out.cost} found at:')
         print(out.x)

@@ -105,10 +105,12 @@ def run(bm, x0=None, maxIter=1000, CrtStp=2e-5, Stp=1 / 100, RedFct=1 / 4, maxfe
             funcCounter += 4
             if funcCounter > maxfev:
                 print("Exceeded maximum number of function evaluations.")
+                bm.set_max_iter_flag()
                 bm.evaluate()
                 return NP
             if iterCounter > maxIter:
                 print("Exceeded maximum number of iterations.")
+                bm.set_max_iter_flag()
                 bm.evaluate()
                 return NP
 

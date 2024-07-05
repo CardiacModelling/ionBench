@@ -33,6 +33,7 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     cost_best = cost_func(x0)
     if debug:
         print(f'Starting cost is {cost_best}')
+    i = None
     for i in range(maxIter):
         x_new = bm.sample()
         cost_new = cost_func(x_new)
@@ -45,6 +46,10 @@ def run(bm, x0=None, maxIter=1000, debug=False):
                 print('Improvement found')
         if bm.is_converged():
             break
+
+    if i >= maxIter-1:
+        bm.set_max_iter_flag()
+
     if debug:
         print('Complete')
         print(f'Final cost is {cost_best}')

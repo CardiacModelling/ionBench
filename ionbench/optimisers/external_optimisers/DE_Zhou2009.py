@@ -69,7 +69,7 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
     for i in range(popSize):
         pop[i] = Individual()
         pop[i].find_cost()
-
+    gen = None
     for gen in range(nGens):
         if debug:
             print('----------------')
@@ -128,6 +128,9 @@ def run(bm, x0=None, nGens=4000, popSize=None, F=0.5, CR=0.3, debug=False):
 
         if bm.is_converged():
             break
+
+    if gen >= nGens-1:
+        bm.set_max_iter_flag()
 
     # Find best point in final pop
     bestInd = Individual()

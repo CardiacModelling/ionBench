@@ -43,6 +43,9 @@ class Tracker:
         self.costSolveCount = 0  # Current number of cost evaluations
         self.gradSolveCount = 0  # Current number of grad evaluations
 
+        # Flags
+        self.maxIterFlag = False  # Flag to indicate optimisation was cut short by maxIter or maxfev
+
     def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.NaN):
         """
         This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class. Updates are not applied if the model did not need to be solved (because those parameters have been solved previously).
@@ -182,7 +185,7 @@ class Tracker:
         data = {'costSolveCount': self.costSolveCount, 'gradSolveCount': self.gradSolveCount, 'costs': self.costs,
                 'costSolves': self.costSolves, 'gradSolves': self.gradSolves, 'firstParams': self.firstParams,
                 'evals': self.evals, 'bestParams': self.bestParams, 'bestCost': self.bestCost,
-                'bestCosts': self.bestCosts, 'costTimes': self.costTimes, 'gradTimes': self.gradTimes}
+                'bestCosts': self.bestCosts, 'costTimes': self.costTimes, 'gradTimes': self.gradTimes, 'maxIterFlag': self.maxIterFlag}
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -203,8 +206,8 @@ class Tracker:
         with open(filename, 'rb') as f:
             data = pickle.load(f)
         keys = ['costSolveCount', 'gradSolveCount', 'costs', 'costSolves', 'gradSolves', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
-                'gradTimes']
-        self.costSolveCount, self.gradSolveCount, self.costs, self.costSolves, self.gradSolves, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes = [
+                'gradTimes', 'maxIterFlag']
+        self.costSolveCount, self.gradSolveCount, self.costs, self.costSolves, self.gradSolves, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes, self.maxIterFlag = [
             data[key] if key in data.keys() else None for key in keys]
 
     def report_convergence(self, threshold):
@@ -223,7 +226,10 @@ class Tracker:
         """
         i = self.when_converged(threshold)
         if i is None:
-            print('Convergence reason:              Optimiser terminated early.')
+            if self.maxIterFlag:
+                print('Convergence reason:              Maximum iterations reached.')
+            else:
+                print('Convergence reason:              Unknown optimiser specific termination.')
             i = len(self.bestCosts) - 1
         else:
             print('Convergence reason:              ' + ('Cost threshold' if

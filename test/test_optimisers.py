@@ -61,3 +61,27 @@ class TestExternal:
             x0_opt = module.run(self.bmTest, debug=True)
         cost_opt = self.bmTest.cost(x0_opt)
         assert cost_opt < 5e-3
+
+
+class TestMaxIterFlag:
+    bmTest = ionbench.problems.test.Test()
+    bmTest.COST_THRESHOLD = 0
+    @pytest.mark.parametrize("opt", ionbench.OPT_ALL)
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.cheap
+    def test_max_iter_flag(self, opt):
+        self.bmTest.reset()
+        module = import_module(opt)
+        mod = module.get_modification()
+        mod.apply(self.bmTest)
+        inputs = {}
+        if 'maxIter' in signature(module.run).parameters:
+            inputs['maxIter'] = 2
+        if 'nGens' in signature(module.run).parameters:
+            inputs['nGens'] = 2
+        if 'n' in signature(module.run).parameters:
+            inputs['n'] = 5
+        if 'popSize' in signature(module.run).parameters:
+            inputs['popSize'] = 20
+        module.run(self.bmTest, debug=True, **inputs)
+        assert self.bmTest.tracker.maxIterFlag is True

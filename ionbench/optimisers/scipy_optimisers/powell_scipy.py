@@ -42,6 +42,9 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
     else:
         out = scipy.optimize.minimize(bm.cost, x0, method='powell', options={'disp': debug, 'xtol': xtol, 'ftol': ftol, 'maxiter': maxIter, 'maxfev': maxfev})
 
+    if out.nit >= maxIter or out.nfev >= maxfev:
+        bm.set_max_iter_flag()
+
     if debug:
         print(f'Cost of {out.fun} found at:')
         print(out.x)

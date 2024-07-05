@@ -247,6 +247,9 @@ def run(bm, x0=None, maxIter=1000, eps=1e-6, debug=False):
         if bm.is_converged() or s.stop():
             break
 
+    if L >= maxIter-1:
+        bm.set_max_iter_flag()
+
     bm.evaluate()
     return Particle().untransform(Gpos[L])
 

@@ -45,6 +45,7 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
     x0_cost = cost_func(x0)
     if debug:
         print(f'Starting cost is {x0_cost}')
+    i = None
     for i in range(maxIter):
         trial = x0 + np.random.normal(loc=np.zeros(bm.n_parameters()), scale=np.sqrt(var))*(bm.input_parameter_space(bm.ub)-bm.input_parameter_space(bm.lb))
         trial = bm.clamp_parameters(trial)
@@ -63,6 +64,9 @@ def run(bm, x0=None, varInit=0.5, varMin=0.05, varCont=0.95, maxIter=1000, debug
             var = varInit
         if bm.is_converged():
             break
+
+    if i >= maxIter-1:
+        bm.set_max_iter_flag()
 
     if debug:
         print('Complete')

@@ -136,6 +136,9 @@ def run(bm, x0=None, n=96, maxIter=1000, phi1=2.05, phi2=2.05, M=12, debug=False
         if bm.is_converged():
             break
 
+    if L >= maxIter-1:
+        bm.set_max_iter_flag()
+
     # Iterations of TRR
     if debug:
         print("Beginning TRR")

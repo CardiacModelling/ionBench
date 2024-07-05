@@ -27,6 +27,8 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     """
     model, opt = classes_pints.pints_setup(bm, x0, pints.SNES, maxIter, debug)
     x, f = opt.run()
+    if opt.iterations() >= maxIter:
+        model.bm.set_max_iter_flag()
     model.bm.evaluate()
     return x
 

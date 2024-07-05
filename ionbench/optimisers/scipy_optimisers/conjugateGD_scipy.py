@@ -37,6 +37,9 @@ def run(bm, x0=None, gtol=0.001, maxIter=1000, debug=False):
 
     out = scipy.optimize.minimize(bm.cost, x0, jac=bm.grad, method='CG', options={'disp': debug, 'gtol': gtol, 'maxiter': maxIter})
 
+    if out.nit >= maxIter:
+        bm.set_max_iter_flag()
+
     if debug:
         print(f'Cost of {out.fun} found at:')
         print(out.x)

@@ -325,6 +325,7 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             if debug:
                 print(
                     f'Reached maximum number of iterations so terminating early. iterCounter: {iterCounter}, maxIter: {maxIter}')
+            bm.set_max_iter_flag()
             break
 
         if bm.is_converged():

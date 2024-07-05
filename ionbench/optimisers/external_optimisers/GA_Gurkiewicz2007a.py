@@ -41,6 +41,7 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
 
     pop = pop_opt.get_pop(bm, x0, popSize, cost_func)
 
+    gen = None
     for gen in range(nGens):
         elites = pop_opt.get_elites(pop, 1)
         if debug:
@@ -70,6 +71,9 @@ def run(bm, x0=None, nGens=50, popSize=50, crossoverProb=0.5, debug=False):
 
         if bm.is_converged():
             break
+
+    if gen >= nGens - 1:
+        bm.set_max_iter_flag()
 
     elites = pop_opt.get_elites(pop, 1)
     bm.evaluate()

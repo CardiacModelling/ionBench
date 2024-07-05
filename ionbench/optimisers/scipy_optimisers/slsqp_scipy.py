@@ -39,6 +39,9 @@ def run(bm, x0=None, maxIter=1000, debug=False):
     else:
         out = scipy.optimize.minimize(bm.cost, x0, jac=bm.grad, method='SLSQP', constraints=constraints, options={'disp': debug, 'maxiter': maxIter})
 
+    if out.nit >= maxIter:
+        bm.set_max_iter_flag()
+
     if debug:
         print(f'Cost of {out.fun} found at:')
         print(out.x)

@@ -198,6 +198,7 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
 
     # Build the simplex
     simplex = Simplex(points)
+    i = None
     for i in range(maxIter):
         # Take a modified nelder mead step
         simplex.step()
@@ -218,6 +219,9 @@ def run(bm, x0=None, tempInitial=None, N=5, maxIter=1000, debug=False):
             print(f'Best cost so far is {bestCost}')
         if bm.is_converged():
             break
+
+    if i >= maxIter-1:
+        bm.set_max_iter_flag()
 
     # Return the best point in the final simplex
     bm.evaluate()

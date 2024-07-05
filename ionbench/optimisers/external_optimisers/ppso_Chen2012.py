@@ -204,6 +204,9 @@ def run(bm, x0=None, groups=None, n=6, c1=1.4, c2=1.4, qmax=4, maxIter=1000, w=0
             print(f'Best cost so far: {Gcost[L]}')
             print(f'Found at position: {Gpos[L]}')
 
+    if L >= maxIter-1:
+        bm.set_max_iter_flag()
+
     bm.evaluate()
     return Particle().untransform(Gpos[L])
 
