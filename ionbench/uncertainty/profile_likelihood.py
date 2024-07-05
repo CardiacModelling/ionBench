@@ -83,7 +83,7 @@ class ProfileManager:
 
 
 # noinspection PyUnboundLocalVariable,PyProtectedMember
-def run(bm, variations, backwardPass=False, filename=''):
+def run(bm, variations, backwardPass=False, optimiser=ionbench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run, filename=''):
     """
     Generate a profile likelihood style plot, reporting the fitted cost as a function of each fixed parameter.
 
@@ -95,6 +95,8 @@ def run(bm, variations, backwardPass=False, filename=''):
         A list of parameter variations to apply for each parameter. It should be a list of length bm.n_parameters(), where the ith element is a list of variations to use to fix parameter i and fit the remaining parameters.
     backwardPass : bool, optional
         If False, the profile likelihood curve will be found by going left to right, using the optimised parameters from the left (lower variation) to initiate the optimisation. If True, it will travel right to left and the final name will be appended with 'B'. Both can be combined when plotting which can be advantageous to ensure a smooth profile likelihood plot. The default is False.
+    optimiser: function, optional
+        The optimiser to use for the profile likelihood plots. The default is trust region reflective.
     filename : string, optional
         A name to use to save the cost data. It will pickle the cost and variations and save them under [filename]_param[i].pickle. The default is '', in which case no data will be saved.
 
@@ -121,12 +123,12 @@ def run(bm, variations, backwardPass=False, filename=''):
             else:
                 pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, out)
             try:
-                out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+                out = optimiser(pm)
                 pm.MLE = bm._TRUE_PARAMETERS
                 if pm.cost(out) >= 0.99 * pm.cost(
                         pm.sample()):  # If optimised cost not significantly better than unoptimised from default rates
                     pm.MLE = bm._TRUE_PARAMETERS
-                    out = ionbench.optimisers.scipy_optimisers.lm_scipy.run(pm)
+                    out = optimiser(pm)
             except Exception as e:  # pragma: no cover
                 print(
                     'The optimisation caused an error (detailed below). In an attempt to recover, the profile likelihood will jump to the best guess.')
