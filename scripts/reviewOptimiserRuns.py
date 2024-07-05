@@ -120,3 +120,4 @@ for bm in bms:
     summary = df[['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'ERT - Time', 'ERT - Evals', 'Success Count', 'Failure Count', 'Average Runtime', 'Time Ratio']]
     df = df.sort_values(['Tier', 'ERT - Evals', 'Average Runtime'])
     summary.to_csv(f'resultsSummary-{bmShortName}.csv', index=False, na_rep='NA')
+    print(f'Average cost time: {costTime/costEvals}, Average grad time: {gradTime/gradEvals}, Ratio: {gradToCost}')
