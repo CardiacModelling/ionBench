@@ -23,7 +23,16 @@ def plot_current(bm, title, ax1):
         ax1.set_ylabel('Current', color='r', loc='bottom', labelpad=0)
     # Plot voltage
     p = bm.protocol()
-    ax2.plot(time, p.value_at_times(time), 'b-', zorder=1)
+    v = np.array(p.value_at_times(time))
+    if 'staircase' in bm.NAME:
+        # Add ramps
+        v1 = -150 + 0.1 * time
+        v2 = 5694 - 0.4 * time
+        v1i = np.logical_and(300 <= time, time < 700)
+        v2i = np.logical_and(14410 <= time, time < 14510)
+        v[v1i] = v1[v1i]
+        v[v2i] = v2[v2i]
+    ax2.plot(time, v, 'b-', zorder=1)
     if left:
         ax2.set_ylabel('Voltage (mV)', color='b', loc='top', labelpad=0)
     else:
