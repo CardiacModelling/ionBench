@@ -265,9 +265,14 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
     for i in range(numberToPlot, int(np.ceil(numberToPlot/5))*5):
         axs[i//5, i % 5].axis('off')
 
-    axs[0, 0].set_ylim(ylim)
     if maxCost/minCost < 1e3:
+        axs[0, 0].set_ylim(ylim)
         axs[0, 0].set_yticks(yticks)
+    else:
+        ylim = [10 ** np.floor(np.log10(ylim[0])), 10 ** np.ceil(np.log10(ylim[1]))]
+        axs[0, 0].set_ylim(ylim)
+        axs[0, 0].set_yticks(ylim)
+
     # Turn off minor ticks
     for ax in axs.flatten():
         ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
