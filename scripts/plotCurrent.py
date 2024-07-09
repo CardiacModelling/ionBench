@@ -59,47 +59,45 @@ def plot_moreno(axs, xLabels, xCoords, titles, yLabels, xTicks):
     for i in range(len(lengths)):
         indexes = np.arange(sum(lengths[:i]), sum(lengths[:i+1]))
         current = data[indexes]
-        axs[f'm{i}'].plot(xCoords[i], current, 'r.-')
+        axs[i].plot(xCoords[i], current, 'r.-')
         if i == 2:
-            axs[f'm{i}'].set_xscale('log')
-        axs[f'm{i}'].set_xlabel(xLabels[i])
-        axs[f'm{i}'].set_ylabel(yLabels[i])
-        axs[f'm{i}'].set_title(titles[i])
-        axs[f'm{i}'].set_xticks(xTicks[i])
-        axs[f'm{i}'].grid(axis='y')
+            axs[i].set_xscale('log')
+        axs[i].set_xlabel(xLabels[i])
+        axs[i].set_ylabel(yLabels[i])
+        axs[i].set_title(titles[i])
+        axs[i].set_xticks(xTicks[i])
+        axs[i].grid(axis='y')
 
 
+fig = plt.figure(layout='constrained', figsize=(7.5, 7.5))
+subfigs = fig.subfigures(2, 1, height_ratios=[2, 1])
+
+axsTop = subfigs[0].subplots(2, 2)
 bms = [staircase.HH(), staircase.MM(), loewe2016.IKr(), loewe2016.IKur()]
 titles = ['Staircase HH', 'Staircase MM', 'Loewe 2016 IKr', 'Loewe 2016 IKur']
 panels = [[bms[0].NAME, bms[1].NAME,],
           [bms[2].NAME, bms[3].NAME]]
-fig, axsDict = plt.subplot_mosaic(panels, figsize=(7.5, 5))
-for bm, title in zip(bms, titles):
-    plot_current(bm, title, axsDict[bm.NAME])
-plt.subplots_adjust(left=0.09,
+for bm, title, ax in zip(bms, titles, axsTop.flat):
+    plot_current(bm, title, ax)
+subfigs[0].subplots_adjust(left=0.09,
                     bottom=0.1,
                     right=0.9,
                     top=0.95,
                     wspace=0.55,
                     hspace=0.4)
-fig.align_labels()
-fig.savefig(
-    os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'data' + '.png'),
-    bbox_inches='tight', dpi=300)
-plt.show()
+subfigs[0].align_labels()
 
-panels = [['m0', 'm1', 'm2', 'm3']]
-fig, axsDict = plt.subplot_mosaic(panels, figsize=(7.5, 2.5), layout='constrained')
+axsBot = subfigs[1].subplots(1, 4)
 xLabels = ['Voltage (mV)', 'Voltage (mV)', 'Time (ms)', 'Voltage (mV)']
 xCoords = [np.arange(-120, -30, 10), np.arange(-75, 25, 5),
            [1, 5, 10, 25, 50, 100, 150, 250, 500, 1000], np.arange(-20, 25, 5)]
 xTicks = [np.arange(-120, -30, 40), np.arange(-75, 30, 50), [1, 10, 100, 1000], np.arange(-20, 25, 20)]
 titles = ['SSI', 'Act', 'RFI', 'Tau']
 yLabels = ['Normalised Peak', 'Normalised Steady State', 'Ratio of Peaks', 'Time to 50% Current (ms)']
-plot_moreno(axsDict, xLabels, xCoords, titles, yLabels, xTicks)
-fig.suptitle('Moreno INa')
-fig.align_labels()
+plot_moreno(axsBot, xLabels, xCoords, titles, yLabels, xTicks)
+subfigs[1].suptitle('Moreno INa')
+subfigs[1].align_labels()
 fig.savefig(
-    os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'data_moreno' + '.png'),
+    os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'data' + '.png'),
     bbox_inches='tight', dpi=300)
 plt.show()
