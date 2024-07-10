@@ -282,7 +282,7 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
     fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0))
     fig.suptitle(f'Profile likelihoods for {title}')
     # Save and show figure
-    if filepath is not '':
+    if filepath != '':
         fig.savefig(os.path.join(filepath, f'profileLikelihood-{modelType}'),
                     dpi=300, bbox_inches='tight')
     fig.show()
