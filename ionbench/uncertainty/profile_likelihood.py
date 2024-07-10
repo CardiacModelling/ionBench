@@ -41,6 +41,10 @@ class ProfileManager:
         self.fixedValue = fixedValue
         self.MLE = x0
         self.parametersBounded = False
+        self.NAME = bm.NAME
+        self.T_MAX = bm.T_MAX
+        self.TIMESTEP = bm.TIMESTEP
+        self.DATA = bm.DATA
 
     def n_parameters(self):  # pragma: no cover
         """
