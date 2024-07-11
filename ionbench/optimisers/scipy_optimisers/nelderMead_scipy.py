@@ -57,7 +57,7 @@ def run(bm, x0=None, xtol=1e-4, ftol=1e-4, maxIter=1000, maxfev=20000, debug=Fal
 def get_modification(modNum=1):
     """
     modNum = 1 -> Balser1990
-    modNum = 2 -> Davies2011
+    modNum = 2 -> Davies2012
     modNum = 4 -> Moreno2016
 
     Returns
@@ -70,7 +70,7 @@ def get_modification(modNum=1):
     if modNum == 1:
         mod = ionbench.modification.Balser1990()
     elif modNum == 2:
-        mod = ionbench.modification.Davies2011()
+        mod = ionbench.modification.Davies2012()
     elif modNum == 3:
         mod = ionbench.modification.Moreno2016()
     else:

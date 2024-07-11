@@ -213,9 +213,9 @@ class Clerx2019(Modification):
         super().__init__(name='Clerx2019', logTransform='on', parameterBounds='on', rateBounds='on', scaleFactors='off')
 
 
-class Davies2011(Modification):
+class Davies2012(Modification):
     def __init__(self):
-        super().__init__(name='Davies2011', logTransform='off', parameterBounds='on', scaleFactors='on')
+        super().__init__(name='Davies2012', logTransform='off', parameterBounds='on', scaleFactors='on')
 
 
 class Dokos2004(Modification):
