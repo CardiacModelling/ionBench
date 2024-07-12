@@ -10,8 +10,6 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DATA_DIR = os.path.join(ROOT_DIR, "data")
 
-TEST_DIR = os.path.join(os.path.dirname(ROOT_DIR), "test")
-
 OPT_SCIPY = ['ionbench.optimisers.scipy_optimisers.' + st + '_scipy' for st in ['conjugateGD', 'lm', 'nelderMead', 'powell', 'slsqp', 'trustRegionReflective']]
 
 OPT_PINTS = ['ionbench.optimisers.pints_optimisers.' + st + '_pints' for st in ['cmaes', 'nelderMead', 'pso', 'snes', 'xnes', 'rprop']]
