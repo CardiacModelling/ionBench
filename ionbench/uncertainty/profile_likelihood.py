@@ -224,6 +224,19 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
 
         # Plot the profile likelihood
         axs[i//5, i % 5].semilogy(variations, costs, label='Optimised' if i == 0 else None, zorder=1)
+
+        # If debug, plot forwards and backwards cost separately
+        if debug:
+            axs[i//5, i % 5].semilogy(variations, costsA, label='Forwards' if i == 0 else None, zorder=2, linestyle='dashed')
+            try:
+                if len(variationsB) == len(variationsA):
+                    axs[i//5, i % 5].semilogy(variations, costsB, label='Backwards' if i == 0 else None, zorder=3, linestyle='dotted')
+            except NameError:  # pragma: no cover
+                pass
+        axs[i//5, i % 5].set_xlabel(f'Parameter {i}')
+        if i % 5 == 0:
+            axs[i//5, i % 5].set_ylabel('Cost')
+
     # Get cost threshold
     threshold = scipy.stats.mstats.gmean(perturbedCosts)
 
@@ -254,17 +267,6 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
             p[i] = variations[j]
             costs[j] = bm.cost(p)
         axs[i//5, i % 5].semilogy(variations, costs, label='Unoptimised' if i == 0 else None, zorder=0)
-        # If debug, plot forwards and backwards cost separately
-        if debug:
-            axs[i//5, i % 5].semilogy(variations, costsA, label='Forwards' if i == 0 else None, zorder=2, linestyle='dashed')
-            try:
-                if len(variationsB) == len(variationsA):
-                    axs[i//5, i % 5].semilogy(variations, costsB, label='Backwards' if i == 0 else None, zorder=3, linestyle='dotted')
-            except NameError:  # pragma: no cover
-                pass
-        axs[i//5, i % 5].set_xlabel(f'Parameter {i}')
-        if i % 5 == 0:
-            axs[i//5, i % 5].set_ylabel('Cost')
 
     for i in range(numberToPlot, int(np.ceil(numberToPlot/5))*5):
         axs[i//5, i % 5].axis('off')
