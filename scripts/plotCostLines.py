@@ -39,5 +39,5 @@ for bm, name in zip(bms, names):
         if np.any(line.get_ydata() > 1e5):
             plt.ylim(0.95*np.min(line.get_ydata()), 1.05*np.max(line.get_ydata(), initial=0, where=line.get_ydata() < 1e5))
         plt.title(f'{name} cost function. Run {i}')
-        plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'{name.lower()}_cost_plot_{i}' + '.png'))
+        plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'costPlots', f'{name.lower()}_{i}.png'))
         plt.show()
