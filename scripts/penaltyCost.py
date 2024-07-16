@@ -1,4 +1,4 @@
-# Checks that all the problems show costs well below 1e4 (the minimum penalty cost).
+# Checks that all the problems show costs well below 1e5 (the minimum penalty cost).
 # Maximum observed cost is ~5000 for Loewe IKur so penalty of 1e5 is fine.
 
 import ionbench
