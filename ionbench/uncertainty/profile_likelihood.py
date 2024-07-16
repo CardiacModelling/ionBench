@@ -206,7 +206,8 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
                 variationsB, costsB = pickle.load(f)
             if len(variationsB) == len(variationsA):
                 costs = np.array([min(costs[i], costsB[i]) for i in range(len(costs))])
-        except FileNotFoundError:  # pragma: no cover
+        except FileNotFoundError as e:  # pragma: no cover
+            print(e)
             pass
 
         if minCost > np.min(costs[costs > 0]):
@@ -289,7 +290,7 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
     fig.suptitle(f'Profile likelihoods for {title}')
     # Save and show figure
     if filepath != '':
-        fig.savefig(os.path.join(filepath, f'profileLikelihood-{modelType}'),
+        fig.savefig(os.path.join(filepath, f'profileLikelihood-{modelType}{"-debug" if debug else ""}'),
                     dpi=300, bbox_inches='tight')
     fig.show()
 
