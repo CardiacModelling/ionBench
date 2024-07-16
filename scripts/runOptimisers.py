@@ -1,7 +1,9 @@
 import ionbench
 import importlib
+import numpy as np
 
 bm = ionbench.problems.staircase.HH()
+np.random.seed(0)
 initParams = bm.sample(n=5)
 print(initParams)
 for app in ionbench.APP_UNIQUE:
