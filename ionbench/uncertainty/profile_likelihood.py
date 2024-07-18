@@ -88,6 +88,12 @@ class ProfileManager:
         """
         pass
 
+    def set_max_iter_flag(self):  # pragma: no cover
+        """
+        ProfileManager wrapper for the benchmarker's .set_max_iter_flag() method. This method does nothing, but is necessary since optimisers will attempt to call it.
+        """
+        pass
+
 
 # noinspection PyUnboundLocalVariable,PyProtectedMember
 def run(bm, variations, backwardPass=False, optimiser=ionbench.optimisers.scipy_optimisers.trustRegionReflective_scipy.run, filename=''):
