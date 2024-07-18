@@ -9,7 +9,7 @@ We do this through the automatic differentiation package MyGrad. This allows us 
 
 The file [autodiff.py](../../ionbench/utils/autodiff.py) contains an edited copy of the Markov model steady state calculation that uses MyGrad instead of numpy. 
 
-Checks in the `set_steady_state()` function ensures that the steady state calculations are accurate to the current myokit implementation.
+Checks in the `set_steady_state()` function ensures that the steady state calculations are accurate to the current myokit implementation. If they are different, an error is thrown, and if myokit detects an issue (like an unstable steady state), then the simulation uses fixed initial states instead (those defined in the *.mmt* files) with all ion channels fully closed.
 
 This file also contains a linear system solver (`linalg_solve()`)that allows MyGrad autodiff to be used.
 
