@@ -169,7 +169,7 @@ class Balser1990(Modification):
 
 class BenShalom2012(Modification):
     def __init__(self):
-        super().__init__(name='BenShalom2012', logTransform='off', parameterBounds='on', scaleFactors='off')
+        super().__init__(name='BenShalom2012', logTransform='off', parameterBounds='on', scaleFactors='off', kwargs={'crossoverProb': 0.1})
 
 
 class Bot2012(Modification):
