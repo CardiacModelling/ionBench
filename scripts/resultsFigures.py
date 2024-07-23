@@ -4,7 +4,6 @@ import pandas
 import re
 import os
 import ionbench
-from adjustText import adjust_text
 
 
 def apply_identifiers(name, types):
@@ -75,7 +74,6 @@ def success_plot(dfs, titles):
         # Rotate x-axis labels
         plt.setp(axs[i // 2, i % 2].get_xticklabels(), rotation=30, ha='right', rotation_mode='anchor')
         # Set y-axis limits
-        tmp = axs[i // 2, i % 2].get_ylim()
         axs[i // 2, i % 2].set_ylim(1e2, 1e6)
         # Set x-axis limits
         axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
