@@ -7,42 +7,41 @@ import ionbench
 from adjustText import adjust_text
 
 
+def apply_identifiers(name, types):
+    ids = 'abcdefghijklmnopqrstuvwxyz'
+    for i, t in enumerate(types):
+        if t in name:
+            name += ids[i]
+    return name
+
+
 def simplify_name(name):
-    # Replace shorthand names
-    name = name.replace('_scipy', '')
-    name = name.replace('_pints', '')
-    name = name.replace('trustRegionReflective', 'TRR')
-    name = name.replace('lm ', 'LM ')
-    name = name.replace('ppso', 'PPSO')
-    name = name.replace('pso', 'PSO')
-    name = name.replace('nelderMead', 'Nelder Mead')
-    name = name.replace('powell', 'Powell')
-    name = name.replace('patternSearch', 'Pattern Search')
-    name = name.replace('randomSearch', 'Random Search')
-    name = name.replace('stochasticSearch', 'Stochastic Search')
-    name = name.replace('curvilinearGD', 'Curvilinear GD')
-    name = name.replace('slsqp', 'SLSQP')
-    name = name.replace('conjugateGD', 'Conjugate GD')
-    name = name.replace('cmaes', 'CMA-ES')
-    name = name.replace('hybridPSOTRRTRR', 'Hybrid PSO/TRR+TRR')
-    name = name.replace('hybridPSOTRR', 'Hybrid PSO/TRR')
-    name = name.replace('PSOTRR', 'PSO+TRR')
-    name = name.replace('_', ' ')
-    # Remove duplicate words (when paper name is in both optimiser and modification)
-    words = name.split(sep=' ')
-    words.reverse()
-    words = sorted(set(words), key=words.index)
-    words.reverse()
-    name = ' '.join(words)
-    # Add hyphens in names
-    words = name.split(sep=' ')
-    words[-1] = re.sub(r'(\w)([A-Z])', r'\1-\2', words[-1])
-    name = ' '.join(words)
-    # Add space before years
-    name = re.sub(r'(.*)(\d{4})', r'\1 \2', name)
-    # Remove any spaces around \n
-    name = name.replace(' \n', '\n')
-    name = name.replace('\n ', '\n')
+    # Apply any a-z identifiers
+    if 'Balser' in name:
+        name = apply_identifiers(name, ['lm', 'nelderMead'])
+    if 'Vanier' in name:
+        name = apply_identifiers(name, ['conjugate', 'SA', 'stochastic', 'random'])
+    if 'Sachse' in name:
+        name = apply_identifiers(name, ['conjugate', 'powell'])
+    if 'Gurkiewicz' in name and 'Ben' not in name:
+        name = apply_identifiers(name, ['a', 'b'])
+    if 'Seemann' in name:
+        name = apply_identifiers(name, ['pso', 'powell'])
+    if 'Wilhelms' in name:
+        # Wilhelms is already identified by modification
+        pass
+    if 'Loewe' in name:
+        if name.startswith('PSOTRR'):
+            name = 'extra_identifier' + name
+        name = apply_identifiers(name, ['ZZZ', 'PSO_', 'extra_identifier', 'hybridPSOTRR_', 'hybridPSOTRRTRR_'])
+
+    # Remove optimiser information
+    name = name.split(' - ')[-1]
+
+    # Special characters
+    if 'Szmek' in name:
+        name = name.replace('Jedrzej', 'Jȩdrzej')
+
     return name
 
 
@@ -71,12 +70,13 @@ def success_plot(dfs, titles):
             y[j] = df['ERT - Evals'][j]
             x.append(simplify_name(df['Optimiser Name'][j] + ' - ' + df['Mod Name'][j]))
         # Bar chart plot
-        axs[i // 2, i % 2].bar(np.arange(len(y)), y, tick_label=x, log=True, zorder=3)
+        colours = ['#DBB40C'] + ['#1F77B4']*(len(df)-1)
+        axs[i // 2, i % 2].bar(np.arange(len(y)), y, tick_label=x, log=True, zorder=3, color=colours)
         # Rotate x-axis labels
         plt.setp(axs[i // 2, i % 2].get_xticklabels(), rotation=30, ha='right', rotation_mode='anchor')
         # Set y-axis limits
         tmp = axs[i // 2, i % 2].get_ylim()
-        axs[i // 2, i % 2].set_ylim(0.1, 10 ** np.ceil(np.log10(tmp[1])))
+        axs[i // 2, i % 2].set_ylim(1e2, 1e6)
         # Set x-axis limits
         axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
         # Set title and ylabel
@@ -84,6 +84,7 @@ def success_plot(dfs, titles):
         axs[i // 2, i % 2].set_ylabel('ERT (FEs)')
         # Add y-axis grid lines
         axs[i // 2, i % 2].yaxis.grid(True, zorder=0)
+        axs[i // 2, i % 2].minorticks_off()
     # Remove sixth sub-figure
     axs[2, 1].remove()
     plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'expectedTime.png'), bbox_inches='tight', dpi=300)
