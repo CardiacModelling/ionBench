@@ -159,7 +159,7 @@ def run(bm, variations, backwardPass=False, optimiser=ionbench.optimisers.scipy_
 
 
 # noinspection PyProtectedMember
-def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
+def plot_profile_likelihood(modelType, filepath='', sharey=True, debug=False):
     """
     Plot profile likelihood plots based on the pickled data in the current working directory.
 
@@ -167,10 +167,10 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
     ----------
     modelType : string
         Type of model in benchmarker. This is used to load the benchmarker (options are hh, mm, ikr, ikur) and as the filename to load the pickled data [modelType]_param[i].pickle for i in range(numberToPlot)
-    numberToPlot : int
-        The number of profile likelihood plots to create. Should not exceed the number of parameters in the model.
     filepath : string, optional
         The filepath to a directory to save the figure inside. The default is '', in which case the figure will not be saved.
+    sharey : bool, optional
+        If True, all subplots will share the same y-axis. The default is True.
     debug : bool, optional
         If True, extra plots will be drawn to separate the forwards and backwards passes of the profile likelihood optimisation. The default is False.
     """
@@ -194,9 +194,13 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
         bm = None
     # Use scale factors so only variations needs to be specified as the parameters
     bm.useScaleFactors = True
-
+    numberToPlot = bm.n_parameters()
+    if sharey:
+        rowSize = 5
+    else:
+        rowSize = 3
     perturbedCosts = []
-    fig, axs = plt.subplots(int(np.ceil(numberToPlot/5)), 5, figsize=(7.5, np.ceil(numberToPlot/5)*1.5), layout='tight', sharey=True, sharex=True)
+    fig, axs = plt.subplots(int(np.ceil(numberToPlot/rowSize)), rowSize, figsize=(7.5, np.ceil(numberToPlot/rowSize)*1.5), layout='tight', sharey=sharey, sharex=True)
     minCost = np.inf
     maxCost = 0
     for i in range(numberToPlot):
@@ -230,20 +234,24 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
             perturbedCosts.append(highCost)
 
         # Plot the profile likelihood
-        axs[i//5, i % 5].semilogy(variations, costs, label='Optimised' if i == 0 else None, zorder=1)
+        axs[i//rowSize, i % rowSize].semilogy(variations, costs, label='Optimised' if i == 0 else None, zorder=1)
 
         # If debug, plot forwards and backwards cost separately
         if debug:
-            axs[i//5, i % 5].semilogy(variations, costsA, label='Forwards' if i == 0 else None, zorder=2, linestyle='dashed')
+            axs[i//rowSize, i % rowSize].semilogy(variations, costsA, label='Forwards' if i == 0 else None, zorder=2, linestyle='dashed')
             try:
                 if len(variationsB) == len(variationsA):
-                    axs[i//5, i % 5].semilogy(variations, costsB, label='Backwards' if i == 0 else None, zorder=3, linestyle='dotted')
+                    axs[i//rowSize, i % rowSize].semilogy(variations, costsB, label='Backwards' if i == 0 else None, zorder=3, linestyle='dotted')
             except NameError:  # pragma: no cover
                 pass
-        axs[i//5, i % 5].set_xlabel(f'Parameter {i}')
-        if i % 5 == 0:
-            axs[i//5, i % 5].set_ylabel('Cost')
+        axs[i//rowSize, i % rowSize].set_xlabel(f'Parameter {i}')
+        if i % rowSize == 0:
+            axs[i//rowSize, i % rowSize].set_ylabel('Cost')
 
+        if not sharey:
+            # Penalty costs need to be removed now because sharey=False is a bit lazy with ticks
+            ylim = (np.min(costs), np.max([costs[costs < 1e5]]))
+            axs[i//rowSize, i % rowSize].set_ylim(ylim)
     # Get cost threshold
     threshold = scipy.stats.mstats.gmean(perturbedCosts)
 
@@ -273,30 +281,34 @@ def plot_profile_likelihood(modelType, numberToPlot, filepath='', debug=False):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
             p[i] = variations[j]
             costs[j] = bm.cost(p)
-        axs[i//5, i % 5].semilogy(variations, costs, label='Unoptimised' if i == 0 else None, zorder=0)
+        axs[i//rowSize, i % rowSize].semilogy(variations, costs, label='Unoptimised' if i == 0 else None, zorder=0, scaley=False)
 
-    for i in range(numberToPlot, int(np.ceil(numberToPlot/5))*5):
-        axs[i//5, i % 5].axis('off')
+    for i in range(numberToPlot, int(np.ceil(numberToPlot/rowSize))*rowSize):
+        axs[i//rowSize, i % rowSize].axis('off')
 
-    if maxCost/minCost < 1e3:
-        axs[0, 0].set_ylim(ylim)
-        axs[0, 0].set_yticks(yticks)
-    else:
-        ylim = [10 ** np.floor(np.log10(ylim[0])), 10 ** np.ceil(np.log10(ylim[1]))]
-        axs[0, 0].set_ylim(ylim)
-        axs[0, 0].set_yticks(ylim)
+    if sharey:
+        if maxCost/minCost < 1e3:
+            axs[0, 0].set_ylim(ylim)
+            axs[0, 0].set_yticks(yticks)
+        else:
+            ylim = [10 ** np.floor(np.log10(ylim[0])), 10 ** np.ceil(np.log10(ylim[1]))]
+            axs[0, 0].set_ylim(ylim)
+            axs[0, 0].set_yticks(ylim)
 
     # Turn off minor ticks
     for ax in axs.flatten():
         ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         ax.yaxis.set_minor_locator(mpl.ticker.NullLocator())
+        if not sharey:
+            # Set major ticks, don't bother with the log scale
+            ax.yaxis.set_major_locator(mpl.ticker.MaxNLocator(nbins=4))
 
     # add labels
     fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0))
     fig.suptitle(f'Profile likelihoods for {title}')
     # Save and show figure
     if filepath != '':
-        fig.savefig(os.path.join(filepath, f'profileLikelihood-{modelType}{"-debug" if debug else ""}'),
+        fig.savefig(os.path.join(filepath, f'profileLikelihood-{modelType}{"-nonshared" if not sharey else ""}{"-debug" if debug else ""}'),
                     dpi=300, bbox_inches='tight')
     fig.show()
 

@@ -24,3 +24,5 @@ Sometimes the profile likelihood plots can have problems, so we also allow you t
 The results are saved to a file, which can be plotted using the `plot_profile_likelihood()` function.
 
 The `plot_profile_likelihood()` function reads the results from the file and plots them. It automatically checks for backwards profile likelihoods and plots the minimum of the two (with a debug option to view them both separately). The plotting also prints the cost threshold calculated from the profile likelihood plots.
+
+By default, the plots for each problem use the same y-axis. This can be disabled by setting `share_y` to `False`.
