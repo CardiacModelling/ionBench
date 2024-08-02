@@ -55,19 +55,27 @@ def bootstrap_success_rate(m, n):
     return np.clip(float(s(xBar)), 0, 1)
 
 
-def bootstrap_times(times):
+def bootstrap_times(times, mask):
     """
     Generate a bootstrap sample.
     Parameters
     ----------
     times : np.array
         Vector of times to generate the bootstrap sample from.
+    mask : list
+        A list of booleans indicating which runs to include in the sample.
+
     Returns
     -------
     u : np.array
         The bootstrapped sample of times.
     """
-    sample = np.random.choice(times, size=len(times))
+    if not np.any(mask):
+        # If there weren't any successful/failed runs, draw a single sample
+        sample = np.random.choice(times)
+    else:
+        count = np.sum(mask)
+        sample = np.random.choice(times[mask], size=count)
     return np.mean(sample)
 
 
@@ -88,13 +96,9 @@ def bootstrap_ERT(m, successes, times):
         The bootstrap sample of ERT.
     """
     rateSample = bootstrap_success_rate(m, len(successes))
-    if np.all(successes) or not np.any(successes):
-        timeSample = bootstrap_times(times)
-        ERT = timeSample/rateSample
-    else:
-        sucTimeSample = bootstrap_times(times[successes])
-        failTimeSample = bootstrap_times(times[~successes])
-        ERT = sucTimeSample + failTimeSample*rateSample/(1-rateSample)
+    failTimeSample = bootstrap_times(times, successes)
+    sucTimeSample = bootstrap_times(times, ~successes)
+    ERT = sucTimeSample + failTimeSample * rateSample / (1 - rateSample)
     return ERT
 
 
