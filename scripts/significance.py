@@ -3,7 +3,21 @@ import matplotlib.pyplot as plt
 import pandas
 from scipy.stats import binom
 from scipy.stats import beta
-from scipy.interpolate import BSpline
+
+# Inverting curve
+# Digitized from Wang and Hutson 2013 - Figure 1
+xInvert = [0, 9.6070e-2, 1.2955e-1, 1.5502e-1, 1.7613e-1, 1.9578e-1, 2.1325e-1, 5.0218e-2, 2.2999e-1, 2.4672e-1, 2.6274e-1,
+     2.7875e-1, 2.9549e-1, 3.0932e-1, 3.2387e-1, 3.3843e-1, 3.5371e-1, 3.6754e-1, 3.8210e-1, 3.9592e-1, 4.1121e-1,
+     4.2358e-1, 4.3886e-1, 4.5269e-1, 4.6652e-1, 4.8035e-1, 4.9345e-1, 5.0801e-1, 5.2256e-1, 5.3493e-1, 5.4876e-1,
+     5.6332e-1, 5.7715e-1, 5.9098e-1, 6.0480e-1, 6.2009e-1, 6.3464e-1, 6.4847e-1, 6.6303e-1, 6.7831e-1, 6.9287e-1,
+     7.0815e-1, 7.2271e-1, 7.3799e-1, 7.5400e-1, 7.7074e-1, 7.8748e-1, 8.0713e-1, 8.2606e-1, 8.4862e-1, 8.7336e-1,
+     9.0975e-1, 9.4178e-1, 1]
+yInvert = [0, 1.0917e-2, 3.0568e-2, 5.1310e-2, 7.2052e-2, 9.1703e-2, 1.1135e-1, 1.0917e-3, 1.3100e-1, 1.5175e-1, 1.7140e-1,
+     1.9214e-1, 2.1179e-1, 2.3253e-1, 2.5218e-1, 2.7183e-1, 2.9258e-1, 3.1114e-1, 3.3188e-1, 3.5262e-1, 3.7227e-1,
+     3.9192e-1, 4.1266e-1, 4.3231e-1, 4.5197e-1, 4.7162e-1, 4.9236e-1, 5.1201e-1, 5.3166e-1, 5.5131e-1, 5.7205e-1,
+     5.9170e-1, 6.1135e-1, 6.3210e-1, 6.5175e-1, 6.7140e-1, 6.9323e-1, 7.1179e-1, 7.3144e-1, 7.5109e-1, 7.7293e-1,
+     7.9148e-1, 8.1114e-1, 8.3188e-1, 8.5153e-1, 8.7118e-1, 8.9192e-1, 9.1266e-1, 9.3122e-1, 9.5087e-1, 9.7271e-1,
+     9.9236e-1, 9.9891e-1, 1]
 
 
 # Define functions
@@ -22,13 +36,13 @@ def mue(successes):
     n = len(successes)
     x = np.sum(successes)
     if x == n:
-        return 0.5*(1+0.5**(1/n))
+        return 0.5 * (1 + 0.5 ** (1 / n))
     elif x == 0:
-        return 0.5*(1-0.5**(1/n))
+        return 0.5 * (1 - 0.5 ** (1 / n))
     p = np.linspace(0, 1, 10000)
-    pR = p[len(p)-1-np.argmax((binom.cdf(x, n, p) >= 0.5)[::-1])]
+    pR = p[len(p) - 1 - np.argmax((binom.cdf(x, n, p) >= 0.5)[::-1])]
     pL = p[np.argmax(1 - binom.cdf(x, n, p) + binom.pmf(x, n, p) >= 0.5)]
-    mue = 0.5*(pR + pL)
+    mue = 0.5 * (pR + pL)
     return mue
 
 
@@ -49,10 +63,9 @@ def bootstrap_success_rate(m, n):
     u = np.random.rand(n)
     x = np.zeros(n)
     for i in range(n):
-        x[i] = 1-beta.cdf(1-m, 3*u[i], 3*(1-u[i]))
+        x[i] = 1 - beta.cdf(1 - m, 3 * u[i], 3 * (1 - u[i]))
     xBar = np.mean(x)
-    s = BSpline(t=[0, 0, 0, 0, 0.293, 0.498, 0.699, 1, 1, 1, 1], c=[0.005, -0.033, 0.159, 0.495, 0.835, 1.033, 0.996], k=3)
-    return np.clip(float(s(xBar)), 0, 1)
+    return np.interp(xBar, xInvert, yInvert)
 
 
 def bootstrap_times(times, mask):
@@ -117,12 +130,15 @@ for bmShortName in bmShortNames:
             significance.append(0)
             continue
         successes = np.array([df[f'Run {i} - Successful'][app] for i in range(maxRuns)])
-        times = np.array([df[f'Run {i} - Cost Evals'][app] + df[f'Run {i} - Grad Evals'][app]*df2['Time Ratio'][app] for i in range(maxRuns)])
+        times = np.array(
+            [df[f'Run {i} - Cost Evals'][app] + df[f'Run {i} - Grad Evals'][app] * df2['Time Ratio'][app] for i in
+             range(maxRuns)])
         m = mue(successes)
         if app == 0:
             for b in range(bootstrapCount):
                 bestSamples[b] = bootstrap_ERT(m, successes, times)
-            print(f'Mean ERT: {np.mean(bestSamples)}, SE ERT: {np.std(bestSamples)}, Median ERT: {np.median(bestSamples)}')
+            print(
+                f'Mean ERT: {np.mean(bestSamples)}, SE ERT: {np.std(bestSamples)}, Median ERT: {np.median(bestSamples)}')
             significance.append(np.nan)
         else:
             samples = np.zeros(bootstrapCount)
