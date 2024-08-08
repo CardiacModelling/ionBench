@@ -255,7 +255,21 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, numPoints=51, d
             ylim = (np.min(costs), np.max([costs[costs < 1e5]]))
             axs[i//rowSize, i % rowSize].set_ylim(ylim)
     # Get cost threshold
-    threshold = scipy.stats.mstats.gmean(perturbedCosts)
+    perturbedCosts = np.array(perturbedCosts)
+    threshold = np.min(perturbedCosts[np.logical_and(perturbedCosts > 1e-10, perturbedCosts > bm.cost(bm.input_parameter_space(bm._TRUE_PARAMETERS)))])
+    thresholdIndex = np.argmin(np.abs(perturbedCosts - threshold))
+    thresholdPlot = thresholdIndex//2
+    if thresholdIndex % 2 == 0:
+        x = 0.95
+    else:
+        x = 1.05
+    # Round cost threshold up to 3 sig fig
+    print(f'Threshold before: {threshold}')
+    threshold = float(np.format_float_scientific(threshold + 0.5 * 10 ** (np.floor(np.log10(threshold)) - 2), 2))
+    print(f'Threshold after: {threshold}')
+
+
+    axs[thresholdPlot//rowSize, thresholdPlot % rowSize].axvline(x, color='black', linestyle='dotted', label='Threshold')
 
     # Generate lots of tick options
     ylim = [10**(np.log10(minCost)-axs[0, 0].margins()[1]*(np.log10(maxCost)-np.log10(minCost))), 10**(np.log10(maxCost)+axs[0, 0].margins()[1]*(np.log10(maxCost)-np.log10(minCost)))]
@@ -285,6 +299,8 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, numPoints=51, d
             p[i] = x[j]
             costs[j] = bm.cost(p)
         axs[i//rowSize, i % rowSize].semilogy(x, costs, label='Unoptimised' if i == 0 else None, zorder=0, scaley=False)
+        # Add horizontal line at cost threshold
+        axs[i//rowSize, i % rowSize].axhline(threshold, color='black', linestyle='dotted')
 
     for i in range(numberToPlot, int(np.ceil(numberToPlot/rowSize))*rowSize):
         axs[i//rowSize, i % rowSize].axis('off')

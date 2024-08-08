@@ -109,7 +109,7 @@ class IKr(LoeweBenchmarker):
         self._RATE_FUNCTIONS = (lambda p, V: p[0] * (V + p[1]) / (1 - np.exp((V + p[1]) / (-p[2]))),
                                 lambda p, V: 7.3898e-5 * (V + p[3]) / (np.exp((V + p[3]) / p[4]) - 1))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        self.COST_THRESHOLD = 4.69e-6
+        self.COST_THRESHOLD = 2.95e-6
 
         # Myokit
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikr.mmt'))
@@ -146,7 +146,7 @@ class IKur(LoeweBenchmarker):
             lambda p, V: p[11] / (p[12] + np.exp((V - p[13]) / -p[14])),
             lambda p, V: np.exp((V - p[15]) / p[16]))  # Used for rate bounds
         self.sensitivityCalc = sensitivities
-        self.COST_THRESHOLD = 1.89e-6
+        self.COST_THRESHOLD = 2.80e-7
 
         # Myokit
         self._MODEL = myokit.load_model(os.path.join(ionbench.DATA_DIR, 'loewe2016', 'courtemanche-1998-ikur.mmt'))
