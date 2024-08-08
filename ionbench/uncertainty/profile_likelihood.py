@@ -159,7 +159,7 @@ def run(bm, variations, backwardPass=False, optimiser=ionbench.optimisers.scipy_
 
 
 # noinspection PyProtectedMember
-def plot_profile_likelihood(modelType, filepath='', sharey=True, debug=False):
+def plot_profile_likelihood(modelType, filepath='', sharey=True, numPoints=51, debug=False):
     """
     Plot profile likelihood plots based on the pickled data in the current working directory.
 
@@ -171,6 +171,8 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, debug=False):
         The filepath to a directory to save the figure inside. The default is '', in which case the figure will not be saved.
     sharey : bool, optional
         If True, all subplots will share the same y-axis. The default is True.
+    numPoints: int, optional
+        The number of points to use for the unoptimised cost slice. The default is 50.
     debug : bool, optional
         If True, extra plots will be drawn to separate the forwards and backwards passes of the profile likelihood optimisation. The default is False.
     """
@@ -276,12 +278,13 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, debug=False):
 
     for i in range(numberToPlot):
         # Plot unoptimised cost slice
-        costs = np.zeros(len(variations))
-        for j in range(len(variations)):
+        costs = np.zeros(numPoints)
+        x = np.linspace(np.min(variations), np.max(variations), numPoints)
+        for j in range(numPoints):
             p = bm.input_parameter_space(bm._TRUE_PARAMETERS)
-            p[i] = variations[j]
+            p[i] = x[j]
             costs[j] = bm.cost(p)
-        axs[i//rowSize, i % rowSize].semilogy(variations, costs, label='Unoptimised' if i == 0 else None, zorder=0, scaley=False)
+        axs[i//rowSize, i % rowSize].semilogy(x, costs, label='Unoptimised' if i == 0 else None, zorder=0, scaley=False)
 
     for i in range(numberToPlot, int(np.ceil(numberToPlot/rowSize))*rowSize):
         axs[i//rowSize, i % rowSize].axis('off')
