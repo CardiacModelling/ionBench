@@ -89,9 +89,9 @@ def paper_plot():
     ax1 = axBot[0]
     ax2 = axBot[1]
     pl = np.linspace(-1, 1, 1000)
-    pu = np.logspace(4, 6, 1000)
+    pu = np.logspace(3, 5, 1000)
     lb = 1e-3
-    ub = 1e5
+    ub = 1e4
 
     @np.vectorize
     def pen(pi, lb, ub):
@@ -145,8 +145,8 @@ def paper_plot():
 
 paper_plot()
 
-bm = ionbench.problems.staircase.HH()
-staircase_plots(bm, [(0, 1), (2, 3), (4, 5), (6, 7)], nPoints=1000)
+#bm = ionbench.problems.staircase.HH()
+#staircase_plots(bm, [(0, 1), (2, 3), (4, 5), (6, 7)], nPoints=1000)
 
-bm = ionbench.problems.staircase.MM()
-staircase_plots(bm, [(0, 1), (2, 14), (3, 4), (5, 6), (7, 8), (10, 11), (12, 13), (9, 14)], nPoints=1000)
+#bm = ionbench.problems.staircase.MM()
+#staircase_plots(bm, [(0, 1), (2, 14), (3, 4), (5, 6), (7, 8), (10, 11), (12, 13), (9, 14)], nPoints=1000)
