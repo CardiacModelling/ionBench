@@ -74,7 +74,7 @@ def success_plot(dfs, titles):
         # Rotate x-axis labels
         plt.setp(axs[i // 2, i % 2].get_xticklabels(), rotation=30, ha='right', rotation_mode='anchor')
         # Set y-axis limits
-        axs[i // 2, i % 2].set_ylim(1e2, 1e6)
+        axs[i // 2, i % 2].set_ylim(1e2, 1e7)
         # Set x-axis limits
         axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
         # Set title and ylabel
