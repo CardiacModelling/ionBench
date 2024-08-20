@@ -116,7 +116,8 @@ for bm in bms:
     gradTime = np.sum([df[f'Run {i} - Grad Time'].sum() for i in range(maxRuns)])
     gradToCost = (gradTime/gradEvals)/(costTime/costEvals)
     df['Time Ratio'] = gradToCost
-    df['ERT - Evals'] = df['ERT - Cost Evals'] + gradToCost*df['ERT - Grad Evals']
+    df.loc[df['Optimiser Name'] == 'SPSA_Spall1998', 'Time Ratio'] = 2
+    df['ERT - Evals'] = df['ERT - Cost Evals'] + df['Time Ratio']*df['ERT - Grad Evals']
     summary = df[['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'ERT - Time', 'ERT - Evals', 'Success Count', 'Failure Count', 'Average Runtime', 'Time Ratio']]
     df = df.sort_values(['Tier', 'ERT - Evals', 'Average Runtime'])
     summary.to_csv(f'resultsSummary-{bmShortName}.csv', index=False, na_rep='NA')
