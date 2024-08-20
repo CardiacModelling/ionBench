@@ -119,9 +119,14 @@ def time_plot(dfs, titles, solveType='Cost'):
         for row in range(len(df)):
             f = []
             t = []
-            for run in range(10):
-                f.append(df[f'Run {run} - {solveType} Evals'][row])
-                t.append(df[f'Run {run} - {solveType} Time'][row])
+            run = 0
+            while True:
+                try:
+                    f.append(df[f'Run {run} - {solveType} Evals'][row])
+                    t.append(df[f'Run {run} - {solveType} Time'][row])
+                except KeyError:
+                    break
+                run += 1
             fevals.append(np.sum(f, where=~np.isnan(f)))
             times.append(np.sum(t, where=~np.isnan(t)))
         # Remove NaNs and zeros
