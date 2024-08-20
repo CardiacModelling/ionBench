@@ -77,7 +77,7 @@ for bm in bms:
         data['Success Rate - MLE'] = np.mean(successOrFail)
         data['Success Rate'] = mue(successOrFail)
         # If at least one run succeeded
-        data['Tier'] = 1 if data['Success Rate'] > 0 else 2
+        data['Tier'] = 1 if np.any(successOrFail) else 2
         costTime = [data[f'Run {i} - Cost Time'] for i in range(maxRuns)]
         costEvals = [data[f'Run {i} - Cost Evals'] for i in range(maxRuns)]
         gradTime = [data[f'Run {i} - Grad Time'] for i in range(maxRuns)]
