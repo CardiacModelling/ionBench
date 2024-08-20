@@ -42,8 +42,12 @@ def expected_time(times, successes):
     expectedTime : float
         The expected time to successfully solve the problem.
     """
-    Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
-    Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]]) if not np.all(successes) else 0
+    if np.all(successes) or not np.any(successes):
+        Tsucc = np.mean(times)
+        Tfail = np.mean(times)
+    else:
+        Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
+        Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]]) if not np.all(successes) else 0
     success_rate = mue(successes)
     expectedTime = Tsucc + Tfail * (1 - success_rate) / success_rate
     return expectedTime
