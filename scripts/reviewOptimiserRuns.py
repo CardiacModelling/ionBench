@@ -5,13 +5,7 @@ import csv
 import os
 import pandas
 import re
-
-
-def expected_time(times, successes):
-    Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
-    Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]]) if not np.all(successes) else 0
-    expectedTime = Tsucc + Tfail * (1 - np.mean(successes)) / np.mean(successes)
-    return expectedTime
+from ionbench.utils.results import mue, expected_time
 
 
 bms = [ionbench.problems.staircase.HH(), ionbench.problems.staircase.MM(), ionbench.problems.loewe2016.IKr(), ionbench.problems.loewe2016.IKur(), ionbench.problems.moreno2016.INa()]
@@ -80,26 +74,22 @@ for bm in bms:
             bm.reset()
         # Calculate the success rate
         successOrFail = [data[f'Run {i} - Successful'] for i in range(maxRuns)]
-        data['Success Rate'] = np.mean(successOrFail)
-        if data['Success Rate'] > 0:
-            # If at least one run succeeded
-            data['Tier'] = 1
-            costTime = [data[f'Run {i} - Cost Time'] for i in range(maxRuns)]
-            costEvals = [data[f'Run {i} - Cost Evals'] for i in range(maxRuns)]
-            gradTime = [data[f'Run {i} - Grad Time'] for i in range(maxRuns)]
-            gradEvals = [data[f'Run {i} - Grad Evals'] for i in range(maxRuns)]
-            # Calculate average time per successful and failed run for cost and grad
-            data['ERT - Time'] = expected_time(costTime, successOrFail) + expected_time(gradTime, successOrFail)
-            data['ERT - Cost Evals'] = expected_time(costEvals, successOrFail)
-            data['ERT - Grad Evals'] = expected_time(gradEvals, successOrFail)
-            print(f'There were successes. Success rate: {data["Success Rate"]}')
+        data['Success Rate - MLE'] = np.mean(successOrFail)
+        data['Success Rate'] = mue(successOrFail)
+        # If at least one run succeeded
+        data['Tier'] = 1 if data['Success Rate'] > 0 else 2
+        costTime = [data[f'Run {i} - Cost Time'] for i in range(maxRuns)]
+        costEvals = [data[f'Run {i} - Cost Evals'] for i in range(maxRuns)]
+        gradTime = [data[f'Run {i} - Grad Time'] for i in range(maxRuns)]
+        gradEvals = [data[f'Run {i} - Grad Evals'] for i in range(maxRuns)]
+        # Calculate average time per successful and failed run for cost and grad
+        data['ERT - Time'] = expected_time(costTime, successOrFail) + expected_time(gradTime, successOrFail)
+        data['ERT - Cost Evals'] = expected_time(costEvals, successOrFail)
+        data['ERT - Grad Evals'] = expected_time(gradEvals, successOrFail)
+        if data['Tier'] == 1:
+            print(f'There were successes. Success rate (MLE): {data["Success Rate - MLE"]}, Success rate (MUE): {data["Success Rate"]}')
         else:
-            # If all failed, report average time and cost
-            data['Tier'] = 2
-            data['ERT - Time'] = np.inf
-            data['ERT - Cost Evals'] = np.inf
-            data['ERT - Grad Evals'] = np.inf
-            print('There were no successes.')
+            print(f'There were no successes.')
         data['Expected Cost'] = np.mean([data[f'Run {i} - Cost'] for i in range(maxRuns)])
         data['Success Count'] = np.sum([data[f'Run {i} - Successful'] for i in range(maxRuns)])
         data['Failure Count'] = maxRuns - data['Success Count']

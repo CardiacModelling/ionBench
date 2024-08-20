@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
-from scipy.stats import binom
 from scipy.stats import beta
+from ionbench.utils.results import mue
 
 # Inverting curve
 # Digitized from Wang and Hutson 2013 - Figure 1
@@ -21,31 +21,6 @@ yInvert = [0, 1.0917e-2, 3.0568e-2, 5.1310e-2, 7.2052e-2, 9.1703e-2, 1.1135e-1, 
 
 
 # Define functions
-def mue(successes):
-    """
-    Calculate the median-unbiased estimator of the success rate.
-    Parameters
-    ----------
-    successes : list
-        A list of booleans indicating whether each run was successful.
-    Returns
-    -------
-    mue : float
-        The median-unbiased estimator of the success rate.
-    """
-    n = len(successes)
-    x = np.sum(successes)
-    if x == n:
-        return 0.5 * (1 + 0.5 ** (1 / n))
-    elif x == 0:
-        return 0.5 * (1 - 0.5 ** (1 / n))
-    p = np.linspace(0, 1, 10000)
-    pR = p[len(p) - 1 - np.argmax((binom.cdf(x, n, p) >= 0.5)[::-1])]
-    pL = p[np.argmax(1 - binom.cdf(x, n, p) + binom.pmf(x, n, p) >= 0.5)]
-    mue = 0.5 * (pR + pL)
-    return mue
-
-
 def bootstrap_success_rate(m, n):
     """
     Generate a bootstrap sample.

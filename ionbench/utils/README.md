@@ -81,3 +81,6 @@ The `get_pop()` function generates a list of __Individual__s from a benchmarker,
 `get_elites()` returns the top `n` individuals from a population.
 
 `set_elites()` replaces the worst individuals with the inputted elites.
+
+## Results
+The [results](../../ionbench/utils/results.py) file contains the function for calculating the MUE (Median Unbiased Estimator) of the success rate. It also contains a function for calculating the ERT (Expected Run Time) until a success.
