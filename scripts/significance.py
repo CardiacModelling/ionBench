@@ -86,7 +86,7 @@ def bootstrap_ERT(m, successes, times):
     rateSample = bootstrap_success_rate(m, len(successes))
     failTimeSample = bootstrap_times(times, successes)
     sucTimeSample = bootstrap_times(times, ~successes)
-    ERT = sucTimeSample + failTimeSample * rateSample / (1 - rateSample)
+    ERT = sucTimeSample + failTimeSample * (1 - rateSample) / rateSample
     return ERT
 
 
