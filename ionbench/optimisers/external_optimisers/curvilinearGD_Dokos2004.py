@@ -207,9 +207,14 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
             H = 2 * np.transpose(J) @ J
 
             # Eigen value decomposition on hessian H
-            d, V = np.linalg.eig(H)
-            invV = np.linalg.inv(V)
-
+            try:  # pragma: no cover
+                d, V = np.linalg.eig(H)
+                invV = np.linalg.inv(V)
+            except np.linalg.LinAlgError as e:
+                print('Encountered a fatal error in optimisation. Infs or nans in Hessian. Terminating early')
+                x0 = model_params(x0)
+                bm.evaluate()
+                return x0
             if debug:
                 print('Eigenvalues:')
                 print(d)
@@ -260,8 +265,10 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                         alpha = 1e-9
                         falphaNew = SSE(alpha)
                     else:
-                        print(f'Failed. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
-                        raise e
+                        print(f'Failed. SSE(0): {SSE(0)}, SSE(1e-9): {SSE(1e-9)}, SSE(1e-6): {SSE(1e-6)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
+                        x0 = model_params(x0)
+                        bm.evaluate()
+                        return x0
                 # Option 2: SSE(1e9) is best - take full step
                 elif SSE(1e9) <= SSE(1) and SSE(1e9) <= SSE(0):
                     # SSE(1e9)<SSE(1),SSE(0)
@@ -288,8 +295,10 @@ def run(bm, x0=None, maxIter=1000, maxInnerIter=100, costThreshold=0, debug=Fals
                     alpha = out[0]
                     falphaNew = out[1]
                 else:
-                    print(f'Failed. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}')
-                    raise e
+                    print(f"Failed to find bounds for Brent's method. SSE(0): {SSE(0)}, SSE(1): {SSE(1)}, SSE(1e9): {SSE(1e9)}")
+                    x0 = model_params(x0)
+                    bm.evaluate()
+                    return x0
 
             # Take new step
             x0 = x0 + L(alpha)
