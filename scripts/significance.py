@@ -124,4 +124,5 @@ for bmShortName in bmShortNames:
             significance.append(np.mean(B < A))
             print(significance[-1])
     df2['Significance'] = significance
+    df2['Rerun'] = np.array(significance) > 0.05  # If 5% of samples are better than best, result isn't significant so needs to be rerun
     df2.to_csv(f'resultsSummary-{bmShortName}.csv', index=False, na_rep='NA')
