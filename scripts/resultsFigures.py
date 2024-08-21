@@ -45,7 +45,7 @@ def simplify_name(name):
 
 
 # noinspection PyShadowingNames
-def success_plot(dfs, titles):
+def success_plot(dfs, titles, supp_plot=False):
     """
     Plot the success rate of each optimiser.
     Parameters
@@ -54,6 +54,8 @@ def success_plot(dfs, titles):
         A list of pandas.DataFrames containing the optimiser run data to plot.
     titles : list
         A list of strings for the titles of the plots.
+    supp_plot : bool
+        Whether to plot the supplementary figure (separate with and without sensitivity solves for ERT).
     """
     # Create subplot figure
     fig, axs = plt.subplots(3, 2, figsize=(7.5, 8.5), layout='constrained')
@@ -64,19 +66,31 @@ def success_plot(dfs, titles):
         df = df[df['Tier'] == 1]
         title = titles[i]
         y = np.zeros(len(df))  # Expected time
+        y1 = np.zeros(len(df))  # Expected time without sensitivity
+        y2 = np.zeros(len(df))  # Expected time with sensitivity
         x = []  # Approach names
         for j in range(len(df)):
-            y[j] = df['ERT - Evals'][j]
+            if supp_plot:
+                y1[j] = df['ERT - Cost Evals'][j]
+                y2[j] = df['ERT - Grad Evals'][j]
+            else:
+                y[j] = df['ERT - Evals'][j]
             x.append(simplify_name(df['Optimiser Name'][j] + ' - ' + df['Mod Name'][j]))
         # Bar chart plot
         colours = ['#DBB40C'] + ['#1F77B4']*(len(df)-1)
-        axs[i // 2, i % 2].bar(np.arange(len(y)), y, tick_label=x, log=True, zorder=3, color=colours)
+        if supp_plot:
+            axs[i // 2, i % 2].bar(np.arange(len(y1)), y1, log=True, zorder=3, color='#1f77b4', width=0.4)
+            axs[i // 2, i % 2].bar(np.arange(len(y2)) + 0.4, y2, log=True, zorder=3, color='#ff7f0e', width=0.4)
+            axs[i // 2, i % 2].set_xticks(np.arange(len(y)) + 0.2, x)
+            axs[0, 1].legend(['Without Sensitivity', 'With Sensitivity'])
+            axs[i // 2, i % 2].set_xlim(-0.6, maxSuccess)
+            axs[i // 2, i % 2].set_ylim(10, 1e7)
+        else:
+            axs[i // 2, i % 2].bar(np.arange(len(y)), y, tick_label=x, log=True, zorder=3, color=colours)
+            axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
+            axs[i // 2, i % 2].set_ylim(1e2, 1e7)
         # Rotate x-axis labels
         plt.setp(axs[i // 2, i % 2].get_xticklabels(), rotation=30, ha='right', rotation_mode='anchor')
-        # Set y-axis limits
-        axs[i // 2, i % 2].set_ylim(1e2, 1e7)
-        # Set x-axis limits
-        axs[i // 2, i % 2].set_xlim(-1, maxSuccess)
         # Set title and ylabel
         axs[i // 2, i % 2].title.set_text(title)
         axs[i // 2, i % 2].set_ylabel('ERT (FEs)')
@@ -85,7 +99,7 @@ def success_plot(dfs, titles):
         axs[i // 2, i % 2].minorticks_off()
     # Remove sixth sub-figure
     axs[2, 1].remove()
-    plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'expectedTime.png'), bbox_inches='tight', dpi=300)
+    plt.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', f'expectedTime{"-supp" if supp_plot else ""}.png'), bbox_inches='tight', dpi=300)
     plt.show()
 
 
@@ -165,14 +179,13 @@ def time_plot(dfs, titles, solveType='Cost'):
 
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
 titles = ['Staircase - HH', 'Staircase - MM', 'Loewe 2016 - IKr', 'Loewe 2016 - IKur', 'Moreno 2016 - INa']
-dfs = []
+dfsSumm = []
+dfsFull = []
 for bmShortName in bmShortNames:
-    df = pandas.read_csv(f'resultsSummary-{bmShortName}.csv')
-    dfs.append(df)
-success_plot(dfs, titles)
+    dfsSumm.append(pandas.read_csv(f'resultsSummary-{bmShortName}.csv'))
+    dfsFull.append(pandas.read_csv(f'resultsFile-{bmShortName}.csv'))
+success_plot(dfsSumm, titles)
+success_plot(dfsFull, titles, supp_plot=True)
 
-dfs = []
-for bmShortName in bmShortNames:
-    dfs.append(pandas.read_csv(f'resultsFile-{bmShortName}.csv'))
-time_plot(dfs, titles)
-time_plot(dfs, titles, solveType='Grad')
+time_plot(dfsFull, titles)
+time_plot(dfsFull, titles, solveType='Grad')
