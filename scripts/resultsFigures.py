@@ -103,6 +103,107 @@ def success_plot(dfs, titles, supp_plot=False):
     plt.show()
 
 
+def fail_plot(dfs, dfsSumm, titles):
+    # Create subplot figure
+    fig, axs = plt.subplots(3, 1, figsize=(7.5, 8.75), constrained_layout=True)
+    axs = axs.flatten()
+    # Settings for each subplot
+    kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-5, 10), (1e2, 1e6), (1e-5, 10)]}
+    for plotNum in range(len(axs)):
+        data = []
+        for i in range(len(dfs)):
+            df = dfs[i]
+            xName = []
+            originalIndex = []
+            xTime = []
+            xCost = []
+            # Get minimum costs for each approach
+            for j in range(len(df)):
+                costs = []
+                times = []
+                run = 0
+                while True:
+                    try:
+                        costs.append(df[f'Run {run} - Cost'][j])
+                        t = df[f'Run {run} - Cost Evals'][j] + df[f'Run {run} - Grad Evals'][j]*dfsSumm[i]['Time Ratio'][j]
+                        times.append(t)
+                    except KeyError:
+                        break
+                    run += 1
+                ind = np.argmin(costs)
+                xName.append(simplify_name(df['Optimiser Name'][j] + ' - ' + df['Mod Name'][j]))
+                originalIndex.append(j)
+                xTime.append(times[ind])
+                xCost.append(costs[ind])
+            # Sort data by keyword settings
+            sortedData = sorted(zip(xName, xTime, xCost, originalIndex), key=lambda x: x[kwargs['sortVar'][plotNum]])
+            data.append(sortedData)
+        # Find some global sorting for all approaches
+        bestFit = []
+        # Let each problem vote for the best approach
+        scores = {}
+        for i in data:  # For each sorted data set (different problems)
+            for count, j in enumerate(i):
+                if j[0] not in scores:
+                    scores[j[0]] = 0
+                scores[j[0]] += count  # Lower score means better approach
+                # Add random perturbation to avoid ties
+                scores[j[0]] += np.random.rand() * 1e-6
+        # Sort data by score
+        for i in data:
+            sortedData = sorted(i, key=lambda x: scores[x[0]])
+            bestFit.append(sortedData)
+        # Plot the curves in global sort order
+        for i in range(len(bestFit)):
+            data = bestFit[i]
+            df = dfs[i]
+            xName, xTime, xCost, originalIndex = zip(*data)
+            xName, xTime, xCost, originalIndex = list(xName), list(xTime), list(xCost), list(originalIndex)
+            x = list(range(len(xName)))
+            # Remove excess points (remove nans, remove tier 1 if plotting cost)
+            for j in reversed(range(len(xName))):
+                if df['Tier'][originalIndex[j]] not in [2]:
+                    del xName[j]
+                    del xTime[j]
+                    del xCost[j]
+                    del x[j]
+            # Plot data
+            if kwargs['plotVar'][plotNum] == 'time':
+                axs[plotNum].semilogy(x, xTime, 'o-', label=titles[i] if plotNum == 0 else None)
+            else:
+                axs[plotNum].semilogy(x, xCost, 'o-', label=titles[i] if plotNum == 0 else None)
+        # Set axis labels and ticks
+        x = range(34)
+        xName, _, _, _ = zip(*data)  # Not sure if this is sorted okay
+        if kwargs['placeTicks'][plotNum]:
+            axs[plotNum].set_xticks(ticks=x, labels=xName, rotation=90, horizontalalignment="center")
+        else:
+            axs[plotNum].set_xticks(ticks=x, labels=['']*len(x))
+        if kwargs['plotVar'][plotNum] == 'time':
+            axs[plotNum].set_ylabel('Time of best run')
+        else:
+            axs[plotNum].set_ylabel('Cost of best run')
+        axs[plotNum].grid(axis='x')
+        axs[plotNum].set_xlim((-0.5, 33.5))
+        axs[plotNum].set_ylim(kwargs['ylim'][plotNum])
+    # Add cost thresholds
+    for i in axs[[0, 2]]:
+        i.axhline(0.01558, -1, 34, color='#1f77b4', linestyle='--', label='Staircase HH - Cost Threshold' if i == axs[0] else None, zorder=0)
+        i.axhline(0.005767, -1, 34, color='#ff7f0e', linestyle='--', label='Staircase MM - Cost Threshold' if i == axs[0] else None, zorder=0)
+    # Titles and legends
+    axs[0].set_title('Approaches sorted by time')
+    axs[2].set_title('Approaches sorted by cost')
+    fig.legend(loc="outside lower center", ncol=3)
+    # Figure labels (A, B, C)
+    fig.text(0.01, 0.982, 'A', fontsize=12, fontweight='bold')
+    fig.text(0.01, 0.812, 'B', fontsize=12, fontweight='bold')
+    fig.text(0.01, 0.44, 'C', fontsize=12, fontweight='bold')
+    # Align ylabels
+    fig.align_ylabels()
+    fig.show()
+    fig.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'allApproaches.png'), bbox_inches='tight', dpi=300)
+
+
 # noinspection PyShadowingNames
 def time_plot(dfs, titles, solveType='Cost'):
     """
@@ -186,6 +287,6 @@ for bmShortName in bmShortNames:
     dfsFull.append(pandas.read_csv(f'resultsFile-{bmShortName}.csv'))
 success_plot(dfsSumm, titles)
 success_plot(dfsFull, titles, supp_plot=True)
-
+fail_plot(dfsFull, dfsSumm, titles)
 time_plot(dfsFull, titles)
 time_plot(dfsFull, titles, solveType='Grad')
