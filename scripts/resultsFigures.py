@@ -178,7 +178,7 @@ def time_plot(dfs, titles, solveType='Cost'):
 
 
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
-titles = ['Staircase - HH', 'Staircase - MM', 'Loewe 2016 - IKr', 'Loewe 2016 - IKur', 'Moreno 2016 - INa']
+titles = ['Staircase HH', 'Staircase MM', 'Loewe 2016 IKr', 'Loewe 2016 IKur', 'Moreno 2016 INa']
 dfsSumm = []
 dfsFull = []
 for bmShortName in bmShortNames:
