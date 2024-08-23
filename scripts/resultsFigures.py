@@ -14,6 +14,10 @@ def apply_identifiers(name, types):
     return name
 
 
+def sorting_score(x, xmin, xmax):
+    return np.linalg.norm((x-xmin)/(xmax-xmin))
+
+
 def simplify_name(name):
     # Apply any a-z identifiers
     if 'Balser' in name:
@@ -111,6 +115,8 @@ def fail_plot(dfs, dfsSumm, titles):
     kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-5, 10), (1e2, 1e6), (1e-5, 10)]}
     for plotNum in range(len(axs)):
         data = []
+        maxs = []
+        mins = []
         for i in range(len(dfs)):
             df = dfs[i]
             xName = []
@@ -135,20 +141,23 @@ def fail_plot(dfs, dfsSumm, titles):
                 originalIndex.append(j)
                 xTime.append(times[ind])
                 xCost.append(costs[ind])
-            # Sort data by keyword settings
+            maxs.append(np.nanmax(xCost if kwargs['sortVar'][plotNum] == 2 else xTime))
+            mins.append(np.nanmin(xCost if kwargs['sortVar'][plotNum] == 2 else xTime))
             sortedData = sorted(zip(xName, xTime, xCost, originalIndex), key=lambda x: x[kwargs['sortVar'][plotNum]])
             data.append(sortedData)
         # Find some global sorting for all approaches
         bestFit = []
         # Let each problem vote for the best approach
         scores = {}
-        for i in data:  # For each sorted data set (different problems)
-            for count, j in enumerate(i):
+        for prob, i in enumerate(data):  # For each sorted data set (different problems)
+            for j in i:
                 if j[0] not in scores:
                     scores[j[0]] = 0
-                scores[j[0]] += count  # Lower score means better approach
-                # Add random perturbation to avoid ties
-                scores[j[0]] += np.random.rand() * 1e-6
+                inc = sorting_score(j[kwargs['sortVar'][plotNum]], mins[prob], maxs[prob])  # Lower score means better approach
+                if np.isnan(inc):
+                    scores[j[0]] += 1
+                else:
+                    scores[j[0]] += inc
         # Sort data by score
         for i in data:
             sortedData = sorted(i, key=lambda x: scores[x[0]])
