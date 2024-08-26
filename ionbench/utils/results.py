@@ -27,7 +27,7 @@ def mue(successes):
     return mue
 
 
-def expected_time(times, successes):
+def expected_time(times, successes, bootstrap=False):
     """
     Calculate the expected time to solve a problem using the median-unbiased estimator of the success rate.
     Parameters
@@ -36,6 +36,8 @@ def expected_time(times, successes):
         A list of times to solve the problem.
     successes : list
         A list of booleans indicating whether each run was successful.
+    bootstrap : bool, optional
+        If True, then whenever successes contains only True or only False, the corresponding missing time information is taken as a random sample from the times. Otherwise, the average of all times is taken.
 
     Returns
     -------
@@ -43,11 +45,17 @@ def expected_time(times, successes):
         The expected time to successfully solve the problem.
     """
     if np.all(successes) or not np.any(successes):
-        Tsucc = np.mean(times)
-        Tfail = np.mean(times)
+        if np.all(successes) and bootstrap:
+            Tfail = np.random.choice(times)
+        else:
+            Tfail = np.mean(times)
+        if not np.any(successes) and bootstrap:
+            Tsucc = np.random.choice(times)
+        else:
+            Tsucc = np.mean(times)
     else:
         Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
-        Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]]) if not np.all(successes) else 0
+        Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]])
     success_rate = mue(successes)
     expectedTime = Tsucc + Tfail * (1 - success_rate) / success_rate
     return expectedTime
