@@ -83,9 +83,8 @@ def bootstrap_ERT(m, successes, times):
     u : np.array
         The bootstrap sample of ERT.
     """
-    rateSample = bootstrap_success_rate(m, len(successes))
-    failTimeSample = bootstrap_times(times, successes)
-    sucTimeSample = bootstrap_times(times, ~successes)
+    failTimeSample = bootstrap_times(times, ~successes)
+    sucTimeSample = bootstrap_times(times, successes)
     ERT = sucTimeSample + failTimeSample * (1 - rateSample) / rateSample
     return ERT
 
