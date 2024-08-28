@@ -15,7 +15,7 @@ def apply_identifiers(name, types):
 
 
 def sorting_score(x, xmin, xmax):
-    return np.linalg.norm((x-xmin)/(xmax-xmin))
+    return np.linalg.norm(np.log(x/xmin)/np.log(xmax/xmin))
 
 
 def simplify_name(name):
