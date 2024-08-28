@@ -1,34 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
-from ionbench.utils.results import expected_time
-
-
-def bootstrap_ERT(successes, times):
-    """
-    Generate a bootstrap sample of ERT.
-    Parameters
-    ----------
-    successes : list
-        A list of booleans indicating whether each run was successful.
-    times : np.array
-        Vector of times to generate the bootstrap sample from.
-    Returns
-    -------
-    u : np.array
-        The bootstrap sample of ERT.
-    """
-    count = len(successes)
-    mask = np.random.choice(count, count)
-    successes = successes[mask]
-    times = times[mask]
-    ERT = expected_time(times, successes, bootstrap=True)
-    return ERT
+from ionbench.utils.results import bootstrap_ERT
 
 
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
 dfs = []
-bootstrapCount = 1000
+bootstrapCount = 10000
 for bmShortName in bmShortNames:
     print(bmShortName)
     significance = []
@@ -49,6 +27,7 @@ for bmShortName in bmShortNames:
                 bestSamples[b] = bootstrap_ERT(successes, times)
             print(
                 f'Mean ERT: {np.mean(bestSamples)}, SE ERT: {np.std(bestSamples)}, Median ERT: {np.median(bestSamples)}')
+            print(f'ERT estimate: {df2["ERT - Evals"][app]}')
             significance.append(np.nan)
         else:
             samples = np.zeros(bootstrapCount)

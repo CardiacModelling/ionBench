@@ -1,30 +1,44 @@
-from scipy.stats import binom
+from scipy.stats import beta
 import numpy as np
 
 
-def mue(successes):
+def bootstrap_success_rate(success):
     """
-    Calculate the median-unbiased estimator of the success rate.
+    Draw a smooth bootstrapped sample of the success rate based on the observed successes.
+    Parameters
+    ----------
+    success : list
+        A list of booleans indicating whether each run was successful.
+
+    Returns
+    -------
+    successRate : float
+        The success rate of the sample.
+    """
+
+    return beta.rvs(np.sum(success) + 0.5, len(success) - np.sum(success) + 0.5)
+
+
+def bootstrap_ERT(successes, times):
+    """
+    Generate a bootstrap sample of ERT.
     Parameters
     ----------
     successes : list
         A list of booleans indicating whether each run was successful.
+    times : np.array
+        Vector of times to generate the bootstrap sample from.
     Returns
     -------
-    mue : float
-        The median-unbiased estimator of the success rate.
+    u : np.array
+        The bootstrap sample of ERT.
     """
-    n = len(successes)
-    x = np.sum(successes)
-    if x == n:
-        return 0.5 * (1 + 0.5 ** (1 / n))
-    elif x == 0:
-        return 0.5 * (1 - 0.5 ** (1 / n))
-    p = np.linspace(0, 1, 10000)
-    pR = p[len(p) - 1 - np.argmax((binom.cdf(x, n, p) >= 0.5)[::-1])]
-    pL = p[np.argmax(1 - binom.cdf(x, n, p) + binom.pmf(x, n, p) >= 0.5)]
-    mue = 0.5 * (pR + pL)
-    return mue
+    count = len(successes)
+    mask = np.random.choice(count, count)
+    successes = successes[mask]
+    times = times[mask]
+    ERT = expected_time(times, successes, bootstrap=True)
+    return ERT
 
 
 def expected_time(times, successes, bootstrap=False):
@@ -56,6 +70,11 @@ def expected_time(times, successes, bootstrap=False):
     else:
         Tsucc = np.mean([times[i] for i in range(len(times)) if successes[i]])
         Tfail = np.mean([times[i] for i in range(len(times)) if not successes[i]])
-    success_rate = mue(successes)
+    if bootstrap:
+        success_rate = bootstrap_success_rate(successes)
+    else:
+        success_rate = np.mean(successes)
+    if success_rate == 0:
+        return np.inf
     expectedTime = Tsucc + Tfail * (1 - success_rate) / success_rate
     return expectedTime

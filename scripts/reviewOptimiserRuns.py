@@ -5,7 +5,7 @@ import csv
 import os
 import pandas
 import re
-from ionbench.utils.results import mue, expected_time
+from ionbench.utils.results import expected_time
 
 
 bms = [ionbench.problems.staircase.HH(), ionbench.problems.staircase.MM(), ionbench.problems.loewe2016.IKr(), ionbench.problems.loewe2016.IKur(), ionbench.problems.moreno2016.INa()]
@@ -74,8 +74,7 @@ for bm in bms:
             bm.reset()
         # Calculate the success rate
         successOrFail = [data[f'Run {i} - Successful'] for i in range(maxRuns)]
-        data['Success Rate - MLE'] = np.mean(successOrFail)
-        data['Success Rate'] = mue(successOrFail)
+        data['Success Rate'] = np.mean(successOrFail)
         # If at least one run succeeded
         data['Tier'] = 1 if np.any(successOrFail) else 2
         costTime = [data[f'Run {i} - Cost Time'] for i in range(maxRuns)]
@@ -87,7 +86,7 @@ for bm in bms:
         data['ERT - Cost Evals'] = expected_time(costEvals, successOrFail)
         data['ERT - Grad Evals'] = expected_time(gradEvals, successOrFail)
         if data['Tier'] == 1:
-            print(f'There were successes. Success rate (MLE): {data["Success Rate - MLE"]}, Success rate (MUE): {data["Success Rate"]}')
+            print(f'There were successes. Success rate: {data["Success Rate"]}')
         else:
             print(f'There were no successes.')
         data['Expected Cost'] = np.mean([data[f'Run {i} - Cost'] for i in range(maxRuns)])
