@@ -44,6 +44,11 @@ def simplify_name(name):
     # Special characters
     if 'Szmek' in name:
         name = name.replace('Jedrzej', 'Jȩdrzej')
+        name = name.replace('Szmek', '-Szmek')
+    if 'Orovio' in name:
+        name = name.replace('Orovio', '-Orovio')
+    if 'Shalom' in name:
+        name = name.replace('Shalom', '-Shalom')
 
     return name
 
