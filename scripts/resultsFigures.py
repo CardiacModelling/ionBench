@@ -117,7 +117,7 @@ def fail_plot(dfs, dfsSumm, titles):
     fig, axs = plt.subplots(3, 1, figsize=(7.5, 8.75), constrained_layout=True)
     axs = axs.flatten()
     # Settings for each subplot
-    kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-5, 10), (1e2, 1e6), (1e-5, 10)]}
+    kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-6, 10), (1e2, 1e6), (1e-6, 10)]}
     for plotNum in range(len(axs)):
         data = []
         maxs = []
