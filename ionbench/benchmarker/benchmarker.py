@@ -609,8 +609,8 @@ class Benchmarker:
         try:
             myokitState = self._ANALYTICAL_MODEL.steady_state(V, parameters)
             if np.linalg.norm(np.subtract(myokitState, state)) > 1e-6:  # pragma: no cover
-                raise RuntimeError(
-                    f'Steady state calculated by ionBench differed from myokit by {np.linalg.norm(myokitState - state)}. Needs looking into to see if either myokit has changed steady states or the ionBench matrix solver is failing somewhere.')
+                warnings.warn(f'Myokit and ionBench seems to slightly (norm: {np.linalg.norm(myokitState - state)}) disagree on the steady state. Will use the myokit steady state.')
+                state = myokitState
         except myokit.lib.markov.LinearModelError as e:  # pragma: no cover
             if 'eigenvalues' in str(e):
                 warnings.warn(
@@ -640,8 +640,9 @@ class Benchmarker:
                     else:
                         print(parameters)
                         print(At)
-                        raise ValueError(
-                            'Steady state contains significant (>1e-12) negative values. This needs fixing.')
+                        warnings.warn(
+                            "Steady state contains significant (>1e-12) negative values. If you see this, please open an issue on the GitHub repo. For now, I will continue with the myokits state (which hopefully doesn't have negative values)")
+                        state = myokitState
 
         if state is not None:
             self.sim.set_state(state)
