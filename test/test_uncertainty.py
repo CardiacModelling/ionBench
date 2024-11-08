@@ -19,8 +19,8 @@ def test_profile_likelihood(monkeypatch):
     bm = ionbench.problems.staircase.HH()
     ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='hh')
     ionbench.uncertainty.profile_likelihood.run(bm, variations, filename='hh', backwardPass=True)
-    ionbench.uncertainty.profile_likelihood.plot_profile_likelihood(modelType='hh', numberToPlot=9, debug=True)
-    ionbench.uncertainty.profile_likelihood.plot_profile_likelihood(modelType='hh', numberToPlot=9, fixedLimits=False, debug=True)
+    ionbench.uncertainty.profile_likelihood.plot_profile_likelihood(modelType='hh', debug=True)
+    ionbench.uncertainty.profile_likelihood.plot_profile_likelihood(modelType='hh', sharey=False, debug=True)
     for i in range(9):
         os.remove(f'hh_param{i}.pickle')
         os.remove(f'hhB_param{i}.pickle')
