@@ -36,6 +36,7 @@ class Modification:
         """
         if kwargs is None:
             kwargs = {}
+        # Store a dictionary of settings
         self.dict = {'log transform': logTransform, 'parameterBounds': parameterBounds, 'rateBounds': rateBounds,
                      'scale factors': scaleFactors}
         self.customLogTransform = customLogTransform

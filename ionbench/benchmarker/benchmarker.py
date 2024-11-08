@@ -72,11 +72,13 @@ class Benchmarker:
         self.useScaleFactors = False
         self.logTransformParams = [False] * self.n_parameters()  # Are any of the parameter log-transformed
         if 'staircase' in self.NAME:
+            # Staircase problems should have bounds turned on
             self.add_parameter_bounds()
             self.add_rate_bounds()
         else:
-            self.parametersBounded = False  # Should the parameters be bounded
-            self.ratesBounded = False  # Should the rates be bounded
+            # Otherwise they start turned off
+            self.parametersBounded = False
+            self.ratesBounded = False
         self.plotter = True  # Should the performance metrics be plotted when evaluate() is called
         self.tracker = Tracker()  # Tracks the performance metrics
         self.V_LOW = -120
@@ -101,6 +103,7 @@ class Benchmarker:
         None.
 
         """
+        # Load the current/output data from ionBench
         if not dataPath == '':
             tmp = []
             with open(dataPath, newline='') as csvfile:
@@ -147,10 +150,14 @@ class Benchmarker:
             Parameter vector where the parameters that are out of bounds are clamped to the bounds.
 
         """
+        # Don't edit the inputted parameter vector
         p = np.copy(parameters)
+        # If out of bounds
         if not self.in_parameter_bounds(parameters):
+            # Find bounds in input space
             lb = self.input_parameter_space(self.lb)
             ub = self.input_parameter_space(self.ub)
+            # Clamp to input space bounds
             for i in range(self.n_parameters()):
                 if p[i] < lb[i]:
                     p[i] = lb[i]
@@ -193,10 +200,13 @@ class Benchmarker:
             Parameter vector mapped to input space.
 
         """
+        # Don't edit the inputted parameter vector
         parameters = np.copy(parameters)
         for i in range(self.n_parameters()):
+            # Apply scale factor transforms
             if self.useScaleFactors:
                 parameters[i] = parameters[i] / self._TRUE_PARAMETERS[i]
+            # Apply log transforms
             if self.logTransformParams[i]:
                 parameters[i] = np.log(parameters[i])
 
@@ -217,10 +227,13 @@ class Benchmarker:
             Parameter vector mapped to the original parameter space.
 
         """
+        # Don't edit the inputted parameter vector
         parameters = np.copy(parameters)
-        for i in range(self.n_parameters()):
+        for i in range(self.n_parameters()):  # Note the reverse order compared with input_parameter_space
+            # Remove log transforms
             if self.logTransformParams[i]:
                 parameters[i] = np.exp(parameters[i])
+            # Remove scale factor transform
             if self.useScaleFactors:
                 parameters[i] = parameters[i] * self._TRUE_PARAMETERS[i]
 
@@ -241,7 +254,9 @@ class Benchmarker:
             Vector of transform derivatives. To map a derivative that was calculated in original parameter space to one calculated in input parameter space, it should be multiplied element-wise by derivs.
 
         """
+        # Create transform vector of all 1s
         derivs = np.ones(self.n_parameters())
+        # Apply transforms to derivs
         for i in range(self.n_parameters()):
             if self.logTransformParams[i]:
                 derivs[i] *= np.exp(parameters[i])
@@ -322,13 +337,18 @@ class Benchmarker:
         fullReset : bool, optional
             If True, transforms and bounds will be reset (turned off except staircase which will turn bounds on). The default is True.
         """
+        # Reset the simulation object
         self.sim.reset()
+        # If we have sensitivities enabled, reset that too
         if self.sensitivityCalc:
             self.simSens.reset()
+        # Generate a new tracker
         self.tracker = Tracker()
+        # Are we resetting the modification too?
         if fullReset:
             self.log_transform([False] * self.n_parameters())
             self.useScaleFactors = False
+            # Keep staircase bounds consistent
             if 'staircase' in self.NAME:
                 self.add_rate_bounds()
                 self.add_parameter_bounds()
@@ -405,7 +425,9 @@ class Benchmarker:
         """
         Turn on sensitivities for a benchmarker. Also sets the parameter self.sensitivityCalc to True. If sensitivities are already enabled (by checking bm.sensitivityCalc), then this method will do nothing.
         """
+        # Check sensitivities aren't already enabled
         if not self.sensitivityCalc:
+            # Enable sensitivities and compile
             paramNames = [self._PARAMETER_CONTAINER + '.p' + str(i + 1) for i in range(self.n_parameters())]
             self.simSens = myokit.Simulation(self._MODEL, protocol=self.protocol(),
                                              sensitivities=([self._OUTPUT_NAME], paramNames))
@@ -525,7 +547,7 @@ class Benchmarker:
                 J *= derivs
             else:
                 grad *= derivs
-
+        # Handle return options
         if returnCost:
             if residuals:
                 return error, J
@@ -551,7 +573,7 @@ class Benchmarker:
             self.sim.set_constant(self._PARAMETER_CONTAINER + '.p' + str(i + 1), parameters[i])
             if self.sensitivityCalc:
                 self.simSens.set_constant(self._PARAMETER_CONTAINER + '.p' + str(i + 1), parameters[i])
-        # Workaround for myokit bug
+        # Workaround for old myokit bug - https://github.com/myokit/myokit/issues/1044 - fixed in 1.36.0
         if 'moreno' in self.NAME:
             self.sim.set_parameters(self.sim.parameters())
 
@@ -565,12 +587,14 @@ class Benchmarker:
         parameters : list or numpy array
             Vector of parameters to use for the calculation of the steady state.
         """
+        # Initial membrane voltage
         if 'moreno' in self.NAME:
             V = -120
         else:
             V = -80
         At = np.zeros(self.n_parameters())
         if 'hh' in str(type(self._ANALYTICAL_MODEL)):
+            # HH does autodiff through myokit
             t = [mg.tensor(a, dtype=np.double) for a in parameters]
             state = self._ANALYTICAL_MODEL._steady_state_function(V, *t)
             s_state = np.zeros((len(parameters), len(state)))
@@ -583,6 +607,7 @@ class Benchmarker:
             state = [float(state[i]) for i in range(len(state))]
             s_state = [list(s_state[i]) for i in range(self.n_parameters())]
         else:
+            # MM does autodiff through ionBench reproduction of some myokit code
             assert 'markov' in str(type(self._ANALYTICAL_MODEL))
             n = len(self._ANALYTICAL_MODEL._states)
             f = ionbench.utils.autodiff.get_matrix_function(self._ANALYTICAL_MODEL)
@@ -625,6 +650,7 @@ class Benchmarker:
                 state = None
             else:
                 raise
+        # Now the steady state has been calculated we check it makes sense
         if state is not None:
             if np.any(np.array(state) < 0):
                 npstate = np.array(state)
@@ -643,7 +669,7 @@ class Benchmarker:
                         warnings.warn(
                             "Steady state contains significant (>1e-12) negative values. If you see this, please open an issue on the GitHub repo. For now, I will continue with the myokits state (which hopefully doesn't have negative values)")
                         state = myokitState
-
+        # Finally, set the initial state
         if state is not None:
             self.sim.set_state(state)
             if self.sensitivityCalc:
@@ -785,9 +811,11 @@ class Benchmarker:
             The penalty to apply for rate bound violations.
         """
         penalty = 0
+        # Loop though the problem-specific rate functions
         for i, rateFunc in enumerate(self._RATE_FUNCTIONS):
+            # Is the rate maximised at high or low voltages
             k = max(rateFunc(parameters, self.V_HIGH), rateFunc(parameters, self.V_LOW))
-            if 'moreno' in self.NAME:
+            if 'moreno' in self.NAME:  # Moreno is naturally out of bounds for some rates so the bounds are wider there
                 if k < self.RATE_MIN:
                     penalty += 1e5
                     penalty += 1e5 * np.log(1 + np.abs(k - self.RATE_MIN))
@@ -860,7 +888,7 @@ class Benchmarker:
                 self.set_steady_state(self.tracker.bestParams)
                 lastOut = self.solve_model(np.arange(0, self.T_MAX, self.TIMESTEP), continueOnError=True)
                 plt.figure()
-                if "moreno" in self.NAME:
+                if "moreno" in self.NAME:  # Moreno plots summary statistics not current
                     plt.plot(self.DATA)
                     plt.plot(firstOut)
                     plt.plot(lastOut)

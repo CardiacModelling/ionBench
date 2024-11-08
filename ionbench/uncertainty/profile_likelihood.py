@@ -120,22 +120,26 @@ def run(bm, variations, backwardPass=False, optimiser=ionbench.optimisers.scipy_
     """
     bm.plotter = False
     if backwardPass:
-        filename += 'B'
+        filename += 'B'  # New filename if solving backwards
     for i in range(bm.n_parameters()):
+        # For each parameter...
         print('Working on parameter ' + str(i))
         costs = np.zeros(len(variations[i]))
         for j in range(len(variations[i])):
+            # For each variation of that parameter...
             bm.reset()
             if backwardPass:
                 varIndex = len(variations[i]) - j - 1
             else:
                 varIndex = j
             var = variations[i][varIndex]
+            # Create the profile manager, aligning on end points
             if j == 0:
                 pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, bm._TRUE_PARAMETERS)
             else:
                 pm = ProfileManager(bm, i, bm._TRUE_PARAMETERS[i] * var, out)
             try:
+                # Try to optimise the cost
                 out = optimiser(pm)
                 pm.MLE = bm._TRUE_PARAMETERS
                 if pm.cost(out) >= 0.99 * pm.cost(

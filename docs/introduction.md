@@ -6,38 +6,34 @@ There are currently four performance metrics in ***ionBench***. Each metric meas
 
 The first of these is the cost function. A good algorithm should result in a model which reproduces the data it was fitted to. This is tested by calculating the RMSE (Root Mean Squared Error) between the model predictions and the data. This is also typically the function that is minimised by these optimisers. 
 
-The second metric is the time spent solving the model. All algorithms are able to identify the true parameters if given an infinite amount of computation time (since any algorithm can be utilised in a multistart approach). To better compare algorithms, we want to identify how fast an algorithm can identify parameters which reproduce the data. While ideally, we would track the number of model solves to remove the variance from the run time, different approaches can lead to more or less stiff parameters being solved and this influences the solve time.
+The second metric is the time spent solving the model. All algorithms are able to identify the true parameters if given an infinite amount of computation time (since any algorithm can be utilised in a multistart approach). To better compare algorithms, we want to identify how fast an algorithm can identify parameters which reproduce the data. We track the number of model solves, whether these solves were the more expensive 'with sensitivities' versions for calculating gradients, and the time for each solve.
 
-Metrics for the accuracy of the estimated parameters are also tracked but not reported. While identification of the original parameters is important, it requires the underlying problem to be identifiable. This is not always the case, and so the accuracy of the estimated parameters is not always a good metric for algorithm performance.
-
-The model solves are separated into two groups, model solves for the cost function and model solves for a gradient calculation using myokit sensitivities.
-
-These performance metrics are tracked automatically when using ***ionBench***. They are stored in a __Tracker__ object associated with each benchmarker problem object. 
+These performance metrics are tracked automatically when using ***ionBench***. They are stored in a __Tracker__ object associated with each benchmarker problem. 
 
 ## The Benchmarker class
 The __Benchmarker__ class contains the majority of the features needed to evaluate the performance of the optimisation algorithms. A __Benchmarker__ object should only be used as part of the construction of a specific problem. Each problem has its own __Benchmarker__ subclass that inherits all the methods and data from the __Benchmarker__ class but also contains lots of problem-specific information. 
 
-The main feature of the __Benchmarker__ classes are there abstraction of the cost function, `benchmarker.cost(parameters)`. This evaluates a RMSE cost function at the inputted parameters compared with the __Benchmarkers__ pregenerated synthetic data (`benchmarker.signed_error(parameters)` and `benchmarker.squared_error(parameters)` are also available as alternative cost functions, returning vectors of residuals and squared residuals, respectively). Through the use of the __Tracker__ class, the benchmarker will also record the number of times the model has been solved, the time spent on each solve, the evaluated cost at all the inputted parameters, all evaluated parameters and whether they were solved with or without sensitivities, and error in parameter space at all evaluated parameters.
+The main feature of the __Benchmarker__ classes are their abstraction of the cost function, `benchmarker.cost(parameters)`. This evaluates a RMSE cost function at the inputted parameters compared with the __Benchmarkers__ pregenerated synthetic data (`benchmarker.signed_error(parameters)` and `benchmarker.squared_error(parameters)` are also available as alternative cost functions, returning vectors of residuals and squared residuals, respectively). Through the use of the __Tracker__ class, the benchmarker will also record the number of times the model has been solved, the time spent on each solve, the evaluated cost at all the inputted parameters, all evaluated parameters and whether they were solved with or without sensitivities.
 
 In addition to evaluating the cost of a set of parameters, the benchmarkers can also evaluate the gradient of the cost function at a set of parameters. This can be done by calling `benchmarker.grad(parameters)` and can also be used to find the jacobian of the signed error.
 
-Once fitting is complete, `benchmarker.evaluate()` can be called. This will report the performance metrics like best cost and number of model solves and time spent solving the model. In addition, calling this function will also plot some of these metrics over the course of the optimisation, a plot of the model output compared with the data, and histograms of the time to solve the model. Plotting can be disabled by setting `benchmarker.plotter = False`. 
+Once fitting is complete, `benchmarker.evaluate()` will be called. This will report the performance metrics like best cost and number of model solves and time spent solving the model. In addition, calling this function will also plot some of these metrics over the course of the optimisation, a plot of the model output compared with the data, and histograms of the time to solve the model. Plotting can be disabled by setting `benchmarker.plotter = False`. 
 
 Log transforms can also be specified in the benchmarker using `benchmarker.log_transform()` and inputting a list of booleans indicating which parameters you wish to log transform (base e), all future inputted parameters in the benchmarker will then be interpreted in log-space (or a mixed space if only some parameters are log transformed). The information stored in the __Tracker__ does not use any transforms.
 
-When working with log transforms (or equivalently scale factor transforms using `benchmarker._useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
+When working with log transforms (or equivalently scale factor transforms using `benchmarker.useScaleFactors=True`), it can be useful to use the functions `benchmarker.input_parameter_space()` and `benchmarker.original_parameter_space()` for transforming parameters. 
 
-Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds()`. This will set `bm.lb=bm._LOWER_BOUND`, `bm.ub=bm._UPPER_BOUND` and `benchmarker._bounded=True`. If an optimisers tries to find the cost of a parameter outside of these bounds, the model will not be solved and the cost will be given by the penalty function. The __Tracker__ will record these parameters but remember that the model was not solved.
+Parameter upper and lower bounds can be included by using `benchmarker.add_parameter_bounds()`. This will set `bm.lb=bm._LOWER_BOUND`, `bm.ub=bm._UPPER_BOUND` and `benchmarker.parametersBounded=True`. If an optimisers tries to find the cost of a parameter outside of these bounds, the model will not be solved and the cost will be given by the penalty function. The __Tracker__ will record these parameters but remember that the model was not solved.
 
 Similarly, rate bounds can be added with `benchmarker.add_rate_bounds()`.
 
 Other useful functions include:
 
-* `benchmarker.reset()` which resets the simulation object and the __Tracker__ (solve count, costs, parameter RMSEs, number of identified parameters) without the need to recompile the Myokit model. 
+* `benchmarker.reset()` which resets the simulation object and the __Tracker__ (solve count, costs, parameter RMSEs, number of identified parameters) without the need to recompile the Myokit model. It also resets any bounds and transforms, although this can be changed by passing `full=False`.
 * `benchmarker.n_parameters()` which returns the number of parameters in the model.
 
 ## Problems
-There are seven benchmarking problems currently in ***ionBench***. These are two problems from Loewe et al. 2016, one from Moreno et al. 2016 and two developed specifically for ***ionBench***, one of which is based on Clerx et al. 2019. Each problem has an associated __Benchmarker__ class that inherits from the main __Benchmarker__ class described above. The problems store general information like log-transform status or parameter bounds, problem-specific information such as a problems Myokit model, the synthetic data and a parameter sampling method `benchmarker.sample()`, and run-specific information such as the __Tracker__ object which stores the evaluated performance metrics over time. 
+There are five benchmarking problems currently in ***ionBench***. These are two problems from Loewe et al. 2016, one from Moreno et al. 2016 and two developed specifically for ***ionBench***, one of which is based on Clerx et al. 2019. Each problem has an associated __Benchmarker__ class that inherits from the main __Benchmarker__ class described above. The problems store general information like log-transform status or parameter bounds, problem-specific information such as a problems Myokit model, the synthetic data and a parameter sampling method `benchmarker.sample()`, and run-specific information such as the __Tracker__ object which stores the evaluated performance metrics over time. 
 
 Each problem also has an associated `generate_data()` method which will simulate the model and store the model output data in the __data__ directory. 
 
@@ -65,9 +61,9 @@ Optimisers will automatically load parameter bounds from the benchmarker if they
 
 
 ### Pints
-The Pints optimisers currently available are CMA-ES, Nelder-Mead, PSO, SNES, and XNES. 
+The Pints optimisers currently available are CMA-ES, Nelder-Mead, PSO, rProp, SNES, and XNES. 
 
-The Pints optimisers are the only ones which can incorporate rate bounds into the optimisation. 
+The Pints optimisers are the only ones which can incorporate rate bounds into the optimisation directly, with others relying on the ionBench penalty function. 
 
 ### Scipy
 The Scipy optimisers currently available are LM (Levenberg-Marquardt), Nelder-Mead, Powell's simplex method, Conjugate Gradient Descent, SLSQP, and Trust Region Reflective. 
@@ -85,4 +81,4 @@ They can be particularly useful if you want to apply problem-specific settings, 
 Each optimiser has a `.get_modification()` function which will get a modification relevant to that particular optimiser. The choice of modification can be changed by varying the optional input `modNum`.
 
 ## Uncertainty
-There are two uncertainty and unindentifiability tools built into ***ionBench***. The first is a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem. The second is a Fisher's Information Matrix calculator. This uses the curvature of the likelihood to find the FIM.
+There are uncertainty and unindentifiability tools built into ***ionBench***. We provide a profile likelihood calculator, which will generate, plot and save profile likelihood plots for the inputted benchmarker problem.

@@ -126,9 +126,12 @@ class Tracker:
             name : string
                 Name for title. Either 'cost' or 'gradient'
             """
+            # Only attempt to plot if there is actually time data to plot
             if len(times) > 0:
                 plt.figure()
+                # Histogram of times
                 n, _, _ = plt.hist(times)
+                # Vertical line at mean
                 plt.vlines(x=np.mean(times), ymin=0, ymax=np.max(n), colors=['k'],
                            label=f'Mean: {np.mean(times):.3f}')
                 plt.xlabel('Time (sec)')
@@ -148,8 +151,10 @@ class Tracker:
                 Title for the plot.
             """
             plt.figure()
+            # Scatter plot of costs
             plt.scatter(range(len(costs)), costs, c="k", marker=".")
             c = np.array(costs)
+            # Set y-axis limits to exclude out of bounds point if possible
             try:
                 plt.ylim(np.min(c[c < 1e5]), np.max(c[c < 1e5]))
             except ValueError:  # pragma: no cover
@@ -182,10 +187,12 @@ class Tracker:
         None.
 
         """
+        # Store data in a dictionary
         data = {'costSolveCount': self.costSolveCount, 'gradSolveCount': self.gradSolveCount, 'costs': self.costs,
                 'costSolves': self.costSolves, 'gradSolves': self.gradSolves, 'firstParams': self.firstParams,
                 'evals': self.evals, 'bestParams': self.bestParams, 'bestCost': self.bestCost,
                 'bestCosts': self.bestCosts, 'costTimes': self.costTimes, 'gradTimes': self.gradTimes, 'maxIterFlag': self.maxIterFlag}
+        # Pickle dictionary to save
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
@@ -203,8 +210,10 @@ class Tracker:
         None.
 
         """
+        # Load pickled dictionary
         with open(filename, 'rb') as f:
             data = pickle.load(f)
+        # Read off data from dictionary
         keys = ['costSolveCount', 'gradSolveCount', 'costs', 'costSolves', 'gradSolves', 'firstParams', 'evals', 'bestParams', 'bestCost', 'bestCosts', 'costTimes',
                 'gradTimes', 'maxIterFlag']
         self.costSolveCount, self.gradSolveCount, self.costs, self.costSolves, self.gradSolves, self.firstParams, self.evals, self.bestParams, self.bestCost, self.bestCosts, self.costTimes, self.gradTimes, self.maxIterFlag = [
@@ -224,8 +233,10 @@ class Tracker:
         None.
 
         """
+        # Find out when we converged to the cost threshold (None if didn't converge)
         i = self.when_converged(threshold)
         if i is None:
+            # Check if we converged due to maxIter
             if self.maxIterFlag:
                 print('Convergence reason:              Maximum iterations reached.')
             else:
@@ -234,9 +245,11 @@ class Tracker:
         else:
             print('Convergence reason:              ' + ('Cost threshold' if
                                                          self.cost_threshold(threshold, i) else 'Cost unchanged'))
+        # Avoid printing if no data
         print('Cost evaluations at convergence: ' + str(self.costSolves[i] if len(self.costSolves) > 0 else None))
         print('Grad evaluations at convergence: ' + str(self.gradSolves[i] if len(self.gradSolves) > 0 else None))
         print('Best cost at convergence:        {0:.6f}'.format(self.bestCosts[i] if len(self.bestCosts) > 0 else self.bestCost))
+        # Calculate total solve time at convergence
         if len(self.costSolves) > 0:
             costTime, gradTime = self.total_solve_time(i)
         else:
@@ -259,10 +272,10 @@ class Tracker:
         int
             The number of model solves at convergence. Returns None if the optimisation has not converged.
         """
-        # Find cost unchanged using bisection search
+        # Check if cost has converged and find index if it has
         converged, unchangedIndex = self.cost_unchanged(returnIndex=True)
         unchangedIndex = unchangedIndex if converged else np.inf
-        # Find cost threshold
+        # Check if cost has reached threshold and find index if it has
         if self.cost_threshold(threshold):
             # First index where cost is below threshold
             thresholdIndex = np.argmax(np.array(self.bestCosts) < threshold)
@@ -270,6 +283,7 @@ class Tracker:
             thresholdIndex = np.inf
         # Return the first index where one of the conditions is satisfied
         convergedIndex = min(unchangedIndex, thresholdIndex)
+        # Return None if neither converged
         if convergedIndex == np.inf:
             return None
         return convergedIndex
@@ -317,10 +331,12 @@ class Tracker:
         """
         if index is None:
             index = len(self.bestCosts)
+        # If we haven't reached max_unchanged_evals, then we can't have converged
         if index < max_unchanged_evals:
             return (False, None) if returnIndex else False
         fsig = np.inf
         evalsUnchanged = 0
+        # Go through each index until it hasn't improved for max_unchanged_evals
         for i in range(index):
             if np.abs(self.bestCosts[i] - fsig) > 1e-7:
                 evalsUnchanged = 0
@@ -369,8 +385,11 @@ class Tracker:
             True if the parameter vector has been evaluated before, False otherwise.
 
         """
+        # Only care about repeated parameters if these parameters were solved
         if solveType != 'none':
+            # Check against all previous parameters
             for (p, st) in self.evals:
+                # Are the parameters equal and were they solved
                 if all(p == param) and st != 'none':
                     if st == solveType:
                         # Previously evaluated the same parameter vector with the same solve type

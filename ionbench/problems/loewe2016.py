@@ -15,13 +15,16 @@ class LoeweBenchmarker(ionbench.benchmarker.Benchmarker):
         # Benchmarker
         p = self.protocol()
         self.TIMESTEP = 0.5  # Timestep in data between points
-        self.T_MAX = p.characteristic_time()
+        self.T_MAX = p.characteristic_time()  # Length of protocol
+        # Parameter bounds (hidden from user)
         self._LOWER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 0.1 if self.STANDARD_LOG_TRANSFORM[i] else
                                       self._TRUE_PARAMETERS[i] - 60 for i in range(self.n_parameters())])
         self._UPPER_BOUND = np.array([self._TRUE_PARAMETERS[i] * 10 if self.STANDARD_LOG_TRANSFORM[i] else
                                       self._TRUE_PARAMETERS[i] + 60 for i in range(self.n_parameters())])
+        # Parameter bounds (available to user)
         self.lb = np.copy(self._LOWER_BOUND)
         self.ub = np.copy(self._UPPER_BOUND)
+        # Rate bounds
         self.RATE_MIN = 1.67e-5
         self.RATE_MAX = 1e3
 
