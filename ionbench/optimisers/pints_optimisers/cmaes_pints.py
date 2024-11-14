@@ -28,7 +28,8 @@ def run(bm, x0=None, popSize=None, maxIter=1000, debug=False):
 
     """
     model, opt = classes_pints.pints_setup(bm, x0, pints.CMAES, maxIter, debug)
-    opt.optimiser().set_population_size(popSize)
+    if popSize is not None:
+        opt.optimiser().set_population_size(popSize)
     x, f = opt.run()
     if opt.iterations() >= maxIter:
         model.bm.set_max_iter_flag()
