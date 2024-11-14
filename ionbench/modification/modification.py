@@ -168,6 +168,11 @@ class Balser1990(Modification):
         super().__init__(name='Balser1990', logTransform='off', parameterBounds='off', scaleFactors='off')
 
 
+class Beattie2018(Modification):
+    def __init__(self):
+        super().__init__(name='Beattie2018', logTransform='on', parameterBounds='on', rateBounds='on', scaleFactors='off')
+
+
 class BenShalom2012(Modification):
     def __init__(self):
         super().__init__(name='BenShalom2012', logTransform='off', parameterBounds='on', scaleFactors='off', kwargs={'crossoverProb': 0.1})

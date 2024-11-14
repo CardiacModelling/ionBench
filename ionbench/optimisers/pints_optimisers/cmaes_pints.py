@@ -39,20 +39,23 @@ def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
 # noinspection PyShadowingNames
 def get_modification(modNum=1):
     """
-    modNum = 1 -> Clerx2019
+    modNum = 1 -> Beattie2018
     modNum = 2 -> JedrzejewskiSzmek2018
+    modNum = 3 -> Clerx2019
 
     Returns
     -------
     mod : modification
-        Modification corresponding to inputted modNum. Default is modNum = 1, so Clerx2019.
+        Modification corresponding to inputted modNum. Default is modNum = 1, so Beattie2018.
 
     """
 
     if modNum == 1:
-        mod = ionbench.modification.Clerx2019()
+        mod = ionbench.modification.Beattie2018()
     elif modNum == 2:
         mod = ionbench.modification.JedrzejewskiSzmek2018()
+    elif modNum == 3:
+        mod = ionbench.modification.Clerx2019()
     else:
         mod = ionbench.modification.Empty(name='cmaes_pints')
     return mod
