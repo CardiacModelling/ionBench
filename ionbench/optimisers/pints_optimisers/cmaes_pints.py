@@ -4,7 +4,7 @@ from ionbench.utils import classes_pints
 
 
 # noinspection PyShadowingNames
-def run(bm, x0=None, popSize=12, maxIter=1000, debug=False):
+def run(bm, x0=None, popSize=None, maxIter=1000, debug=False):
     """
     Runs CMA-ES from Pints using a benchmarker.
 
