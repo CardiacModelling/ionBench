@@ -1,6 +1,7 @@
 import ionbench
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
 import matplotlib as mpl
 import os
 
@@ -69,8 +70,17 @@ def paper_plot():
         # Set plot parameters
         ax.set_ylim([-0.02, 0.42])
         ax.set_xlim([lb[0] * 0.3, ub[0] / 0.3])
-        ax.set_yticks([lb[1], ub[1]])
-        ax.set_xticks([lb[0], np.sqrt(lb[0] * ub[0]), ub[0]])
+        ax.set_yticks([lb[1], (lb[1]+ub[1])/2, ub[1]])
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+        ax.set_xticks(np.logspace(-7, 3, 11), labels=["$10^{-7}$", "", "", "", "", "$10^{-2}$", "", "", "", "", "$10^{3}$"])
+        xticks = []
+        for i in range(-7, 3):
+            xticks.append(2 * 10 ** i)
+            xticks.append(4 * 10 ** i)
+            xticks.append(6 * 10 ** i)
+            xticks.append(8 * 10 ** i)
+        ax.set_xticks(xticks, minor=True)
+        ax.xaxis.set_minor_formatter("")
         if V < 0:
             ax.yaxis.tick_right()
             ax.yaxis.set_label_position('right')
