@@ -95,8 +95,6 @@ for bm in bms:
         data['Average Runtime'] = np.mean([data[f'Run {i} - Cost Time'] + data[f'Run {i} - Grad Time'] for i in range(maxRuns)])
         allData.append(data)
     df = pandas.DataFrame.from_records(allData)
-    df = df.sort_values(['Tier', 'ERT - Time', 'Average Runtime'])
-    df.to_csv(f'resultsFile-{bmShortName}.csv', index=False, na_rep='NA')
 
     # Produce summary information
     costEvals = np.sum([df[f'Run {i} - Cost Evals'].sum() for i in range(maxRuns)])
@@ -104,10 +102,15 @@ for bm in bms:
     gradEvals = np.sum([df[f'Run {i} - Grad Evals'].sum() for i in range(maxRuns)])
     gradTime = np.sum([df[f'Run {i} - Grad Time'].sum() for i in range(maxRuns)])
     gradToCost = (gradTime/gradEvals)/(costTime/costEvals)
-    df['Time Ratio'] = gradToCost
-    df.loc[df['Optimiser Name'] == 'SPSA_Spall1998', 'Time Ratio'] = 2
-    df['ERT - Evals'] = df['ERT - Cost Evals'] + df['Time Ratio']*df['ERT - Grad Evals']
-    summary = df[['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'ERT - Time', 'ERT - Evals', 'Success Count', 'Failure Count', 'Average Runtime', 'Time Ratio']]
-    df = df.sort_values(['Tier', 'ERT - Evals', 'Average Runtime'])
+    if gradToCost > bm.n_parameters()+1:
+        gradToCost = bm.n_parameters()+1
+    summary = df[['Optimiser Name', 'Mod Name', 'Tier', 'Success Rate', 'Success Count', 'Failure Count', 'Average Runtime']]
+    summary['Time Ratio'] = gradToCost
+    summary.loc[summary['Optimiser Name'] == 'SPSA_Spall1998', 'Time Ratio'] = 2
+    summary['ERT - Evals'] = df['ERT - Cost Evals'] + summary['Time Ratio'] * df['ERT - Grad Evals']
+    df['ERT - Evals'] = summary['ERT - Evals']
+    summary = summary.sort_values(['Tier', 'ERT - Evals', 'Average Runtime'])
     summary.to_csv(f'resultsSummary-{bmShortName}.csv', index=False, na_rep='NA')
+    df = df.sort_values(['Tier', 'ERT - Evals', 'Average Runtime'])
+    df.to_csv(f'resultsFile-{bmShortName}.csv', index=False, na_rep='NA')
     print(f'Average cost time: {costTime/costEvals}, Average grad time: {gradTime/gradEvals}, Ratio: {gradToCost}')
