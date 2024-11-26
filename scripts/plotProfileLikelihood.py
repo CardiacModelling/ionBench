@@ -2,13 +2,8 @@ import ionbench
 from ionbench.uncertainty.profile_likelihood import plot_profile_likelihood
 import os
 
-# Set working directory to results locations
-script_path = os.path.abspath(os.path.dirname(__file__))
-results_dir = os.path.join(script_path, '..', 'results', 'uncertainty')
-os.chdir(results_dir)
-
-debug = False
-filepath = os.path.join(os.getcwd(), '..', '..', 'scripts', 'figures')
+debug = True
+filepath = os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures')
 plot_profile_likelihood(modelType='hh', filepath=filepath, debug=debug)
 
 plot_profile_likelihood(modelType='mm', filepath=filepath, debug=debug)

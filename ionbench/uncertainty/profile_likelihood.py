@@ -250,7 +250,7 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, numPoints=51, d
                     axs[i//rowSize, i % rowSize].semilogy(variations, costsB, label='Backwards' if i == 0 else None, zorder=3, linestyle='dotted')
             except NameError:  # pragma: no cover
                 pass
-        axs[i//rowSize, i % rowSize].set_xlabel(f'Parameter {i}')
+        axs[i//rowSize, i % rowSize].set_xlabel(f'Parameter {i+1}')
         if i % rowSize == 0:
             axs[i//rowSize, i % rowSize].set_ylabel('Cost')
 
