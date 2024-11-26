@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas
 from ionbench.utils.results import bootstrap_ERT
 
+np.random.seed(0)
 
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
 dfs = []
