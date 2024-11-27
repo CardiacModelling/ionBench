@@ -114,14 +114,16 @@ def success_plot(dfs, titles, supp_plot=False):
 
 def fail_plot(dfs, dfsSumm, titles):
     # Create subplot figure
-    fig, axs = plt.subplots(3, 1, figsize=(7.5, 8.75), constrained_layout=True)
+    fig, axs = plt.subplots(3, 1, figsize=(7.5, 8.75), constrained_layout=True, height_ratios=[4, 3, 4])
     axs = axs.flatten()
     # Settings for each subplot
-    kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-6, 10), (1e2, 1e6), (1e-6, 10)]}
+    kwargs = {'sortVar': [1, 1, 2], 'plotVar': ['cost', 'time', 'cost'], 'placeTicks': [False, True, True], 'ylim': [(1e-8, 1e2), (1e1, 1e7), (1e-8, 1e2)]}
     for plotNum in range(len(axs)):
         data = []
         maxs = []
         mins = []
+        nanpoint = kwargs['ylim'][plotNum][1]/np.sqrt(10)  # Where to plot NaNs
+        successpoint = kwargs['ylim'][plotNum][0]*np.sqrt(10)  # Where to plot successful runs
         for i in range(len(dfs)):
             df = dfs[i]
             xName = []
@@ -168,50 +170,77 @@ def fail_plot(dfs, dfsSumm, titles):
             sortedData = sorted(i, key=lambda x: scores[x[0]])
             bestFit.append(sortedData)
         # Plot the curves in global sort order
+        colours = ['#1f77b4', '#8c564b', '#2ca02c', '#d62728', '#9467bd']
         for i in range(len(bestFit)):
             data = bestFit[i]
             df = dfs[i]
             xName, xTime, xCost, originalIndex = zip(*data)
             xName, xTime, xCost, originalIndex = list(xName), list(xTime), list(xCost), list(originalIndex)
             x = list(range(len(xName)))
-            # Remove excess points (remove nans, remove tier 1 if plotting cost)
+            # Adjust nans and successes
             for j in reversed(range(len(xName))):
                 if df['Tier'][originalIndex[j]] not in [2]:
-                    del xName[j]
-                    del xTime[j]
-                    del xCost[j]
-                    del x[j]
+                    if np.isnan(df['Tier'][originalIndex[j]]):
+                        # NaNs should be set to max value in plot
+                        xCost[j] = nanpoint
+                        xTime[j] = nanpoint
+                    if df['Tier'][originalIndex[j]] == 1:
+                        xCost[j] = successpoint
+            x = np.array(x)
+            xTime = np.array(xTime)
+            xCost = np.array(xCost)
             # Plot data
             if kwargs['plotVar'][plotNum] == 'time':
-                axs[plotNum].semilogy(x, xTime, 'o-', label=titles[i] if plotNum == 0 else None)
+                axs[plotNum].semilogy(x, xTime, '-', label=titles[i] if plotNum == 0 else None, color=colours[i])
+                axs[plotNum].semilogy(x[xTime == nanpoint], xTime[xTime == nanpoint], 'D', color=colours[i], markerfacecolor='none')
+                axs[plotNum].semilogy(x[xTime != nanpoint], xTime[xTime != nanpoint], 'o', color=colours[i])
             else:
-                axs[plotNum].semilogy(x, xCost, 'o-', label=titles[i] if plotNum == 0 else None)
+                axs[plotNum].semilogy(x, xCost, '-', label=titles[i] if plotNum == 0 else None, color=colours[i])
+                axs[plotNum].semilogy(x[xCost == nanpoint], xCost[xCost == nanpoint], 'D', color=colours[i], markerfacecolor='none')
+                axs[plotNum].semilogy(x[xCost == successpoint], xCost[xCost == successpoint], 'D', color=colours[i])
+                axs[plotNum].semilogy(x[np.logical_and(xCost != nanpoint, xCost != successpoint)], xCost[np.logical_and(xCost != nanpoint, xCost != successpoint)], 'o', color=colours[i])
         # Set axis labels and ticks
         x = range(34)
-        xName, _, _, _ = zip(*data)  # Not sure if this is sorted okay
+        xName, _, _, _ = zip(*data)
         if kwargs['placeTicks'][plotNum]:
             axs[plotNum].set_xticks(ticks=x, labels=xName, rotation=90, horizontalalignment="center")
         else:
             axs[plotNum].set_xticks(ticks=x, labels=['']*len(x))
         if kwargs['plotVar'][plotNum] == 'time':
+            ytickLabels = [f'$10^{{{i}}}$' for i in range(int(np.log10(kwargs['ylim'][plotNum][0])), int(np.log10(kwargs['ylim'][plotNum][1] / 100) + 2), 2)] + ['N/A']
+            ytick = list(np.logspace(np.log10(kwargs['ylim'][plotNum][0]), np.log10(kwargs['ylim'][plotNum][1] / 100), len(ytickLabels) - 1)) + [nanpoint]
             axs[plotNum].set_ylabel('Time of best run')
         else:
             axs[plotNum].set_ylabel('Cost of best run')
+            ytickLabels = ['✓'] + [f'$10^{{{i}}}$' for i in range(int(np.log10(kwargs['ylim'][plotNum][0]*100)), int(np.log10(kwargs['ylim'][plotNum][1]/100) + 2), 2)] + ['N/A']
+            ytick = [successpoint] + list(np.logspace(np.log10(kwargs['ylim'][plotNum][0]*100), np.log10(kwargs['ylim'][plotNum][1]/100), len(ytickLabels)-2))+[nanpoint]
+            axs[plotNum].fill_between([-0.5, 33.5], kwargs['ylim'][plotNum][0], kwargs['ylim'][plotNum][0] * 10, color='#66c2a5')
+        axs[plotNum].set_yticks(ytick, labels=ytickLabels)
+        axs[plotNum].fill_between([-0.5, 33.5], kwargs['ylim'][plotNum][1]/10, kwargs['ylim'][plotNum][1], color='#fc8d62')
         axs[plotNum].grid(axis='x')
         axs[plotNum].set_xlim((-0.5, 33.5))
         axs[plotNum].set_ylim(kwargs['ylim'][plotNum])
     # Add cost thresholds
     for i in axs[[0, 2]]:
-        i.axhline(0.01558, -1, 34, color='#1f77b4', linestyle='--', label='Staircase HH - Cost Threshold' if i == axs[0] else None, zorder=0)
-        i.axhline(0.005767, -1, 34, color='#ff7f0e', linestyle='--', label='Staircase MM - Cost Threshold' if i == axs[0] else None, zorder=0)
+        i.axhline(0.0157, -1, 34, color=colours[0], linestyle='--', label=None, zorder=0)
+        i.axhline(0.00577, -1, 34, color=colours[1], linestyle='--', label=None, zorder=0)
+        i.axhline(2.95e-6, -1, 34, color=colours[2], linestyle='--', label=None, zorder=0)
+        i.axhline(2.80e-7, -1, 34, color=colours[3], linestyle='--', label=None, zorder=0)
+        i.axhline(1.7e-6, -1, 34, color=colours[4], linestyle='--', label=None, zorder=0)
+    # Add lines specifically for the legend
+    axs[0].plot(-1, 1, '--', color='black', label='Cost thresholds')
+    axs[0].plot(-1, 1, 'D', color='black', label='Success')
+    axs[0].plot(-1, 1, 'D', color='black', markerfacecolor='none', label='N/A')
     # Titles and legends
     axs[0].set_title('Approaches sorted by time')
     axs[2].set_title('Approaches sorted by cost')
-    fig.legend(loc="outside lower center", ncol=3)
+    handles, labels = axs[0].get_legend_handles_labels()
+    order = [0, 4, 1, 5, 2, 6, 3, 7]
+    fig.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc="outside lower center", ncol=4)
     # Figure labels (A, B, C)
-    fig.text(0.01, 0.982, 'A', fontsize=12, fontweight='bold')
-    fig.text(0.01, 0.812, 'B', fontsize=12, fontweight='bold')
-    fig.text(0.01, 0.44, 'C', fontsize=12, fontweight='bold')
+    fig.text(0.022, 0.982, 'A', fontsize=12, fontweight='bold')
+    fig.text(0.022, 0.8, 'B', fontsize=12, fontweight='bold')
+    fig.text(0.022, 0.444, 'C', fontsize=12, fontweight='bold')
     # Align ylabels
     fig.align_ylabels()
     fig.show()
@@ -282,7 +311,7 @@ def time_plot(dfs, titles, solveType='Cost'):
         totEvals = np.sum(fevals)
         print(
             f'Problem: {title}, Solve Type: {solveType}, Total solves: {totEvals}, Total time: {totTime}, Average time per solve: {totTime / totEvals}')
-        ax.title.set_text(f'{title}. Avg. Time: {totTime/ totEvals:.2e}s')
+        ax.title.set_text(f'{title} Avg. Time: {totTime/ totEvals:.2e}s')
     # Remove sixth sub-figure
     axs[2, 1].remove()
     # Save and show plot
@@ -293,7 +322,7 @@ def time_plot(dfs, titles, solveType='Cost'):
 
 
 bmShortNames = ['hh', 'mm', 'ikr', 'ikur', 'ina']
-titles = ['Staircase HH', 'Staircase MM', 'Loewe 2016 IKr', 'Loewe 2016 IKur', 'Moreno 2016 INa']
+titles = ['Staircase HH', 'Staircase MM', r'Loewe $\mathrm{I}_\mathrm{Kr}$', r'Loewe $\mathrm{I}_\mathrm{Kur}$', r'Moreno $\mathrm{I}_\mathrm{Na}$']
 dfsSumm = []
 dfsFull = []
 for bmShortName in bmShortNames:
