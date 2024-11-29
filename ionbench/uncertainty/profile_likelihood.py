@@ -189,13 +189,13 @@ def plot_profile_likelihood(modelType, filepath='', sharey=True, numPoints=51, d
         title = 'Staircase MM'
     elif modelType == 'ikr':  # pragma: no cover
         bm = ionbench.problems.loewe2016.IKr()
-        title = 'Loewe IKr'
+        title = r'Loewe $\mathrm{I}_\mathrm{Kr}$'
     elif modelType == 'ikur':  # pragma: no cover
         bm = ionbench.problems.loewe2016.IKur()
-        title = 'Loewe IKur'
+        title = r'Loewe $\mathrm{I}_\mathrm{Kur}$'
     elif modelType == 'ina':  # pragma: no cover
         bm = ionbench.problems.moreno2016.INa()
-        title = 'Moreno INa'
+        title = r'Moreno $\mathrm{I}_\mathrm{Na}$'
     else:  # pragma: no cover
         bm = None
     # Use scale factors so only variations needs to be specified as the parameters
