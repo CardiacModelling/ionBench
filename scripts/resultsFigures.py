@@ -193,7 +193,8 @@ def fail_plot(dfs, dfsSumm, titles):
             if kwargs['plotVar'][plotNum] == 'time':
                 axs[plotNum].semilogy(x, xTime, '-', label=titles[i] if plotNum == 0 else None, color=colours[i])
                 axs[plotNum].semilogy(x[xTime == nanpoint], xTime[xTime == nanpoint], 'D', color=colours[i], markerfacecolor='none')
-                axs[plotNum].semilogy(x[xTime != nanpoint], xTime[xTime != nanpoint], 'o', color=colours[i])
+                axs[plotNum].semilogy(x[xCost == successpoint], xTime[xCost == successpoint], 'D', color=colours[i])
+                axs[plotNum].semilogy(x[np.logical_and(xCost != nanpoint, xCost != successpoint)], xTime[np.logical_and(xCost != nanpoint, xCost != successpoint)], 'o', color=colours[i])
             else:
                 axs[plotNum].semilogy(x, xCost, '-', label=titles[i] if plotNum == 0 else None, color=colours[i])
                 axs[plotNum].semilogy(x[xCost == nanpoint], xCost[xCost == nanpoint], 'D', color=colours[i], markerfacecolor='none')
