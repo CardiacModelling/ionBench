@@ -46,7 +46,7 @@ class Tracker:
         # Flags
         self.maxIterFlag = False  # Flag to indicate optimisation was cut short by maxIter or maxfev
 
-    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.NaN):
+    def update(self, estimatedParams, cost=np.inf, incrementSolveCounter=True, solveType='cost', solveTime=np.nan):
         """
         This method updates the performance metric tracking vectors with new values. It should only need to be called by a benchmarker class. Updates are not applied if the model did not need to be solved (because those parameters have been solved previously).
 
