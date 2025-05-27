@@ -206,7 +206,7 @@ class MM(StaircaseBenchmarker):
 
 
 # noinspection PyProtectedMember
-def generate_data(modelType):  # pragma: no cover
+def generate_data(modelType, noiseStrength=0.05):  # pragma: no cover
     """
     Generate the data files for the staircase benchmarker problems.
 
@@ -214,6 +214,8 @@ def generate_data(modelType):  # pragma: no cover
     ----------
     modelType : string
         'HH' to generate the data for the Hodgkin-Huxley benchmark problem. 'MM' to generate the data for the Markov model benchmark problem.
+    noiseStrength : float, optional
+        The strength of the noise to add to the data. The default is 0.05, which is 5% of the mean absolute value of the data.
 
     Returns
     -------
@@ -228,7 +230,7 @@ def generate_data(modelType):  # pragma: no cover
     bm.set_params(bm._TRUE_PARAMETERS)
     bm.set_steady_state(bm._TRUE_PARAMETERS)
     out = bm.solve_model(np.arange(0, bm.T_MAX, bm.TIMESTEP), continueOnError=False)
-    out += np.random.normal(0, np.mean(np.abs(out)) * 0.05, len(out))
+    out += np.random.normal(0, np.mean(np.abs(out)) * noiseStrength, len(out))
     with open(os.path.join(ionbench.DATA_DIR, 'staircase', 'data' + modelType + '.csv'), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(map(lambda x: [x], out))
