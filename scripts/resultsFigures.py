@@ -112,7 +112,7 @@ def success_plot(dfs, titles, supp_plot=False):
     plt.show()
 
 
-def fail_plot(dfs, dfsSumm, titles):
+def fail_plot(dfs, dfsSumm, titles, number=-1):
     # Create subplot figure
     fig, axs = plt.subplots(3, 1, figsize=(7.5, 8.75), constrained_layout=True, height_ratios=[4, 3, 4])
     axs = axs.flatten()
@@ -124,7 +124,7 @@ def fail_plot(dfs, dfsSumm, titles):
         mins = []
         nanpoint = kwargs['ylim'][plotNum][1]/np.sqrt(10)  # Where to plot NaNs
         successpoint = kwargs['ylim'][plotNum][0]*np.sqrt(10)  # Where to plot successful runs
-        for i in range(len(dfs)):
+        for i in range(len(dfs)) if number < 0 else [number]:
             df = dfs[i]
             xName = []
             originalIndex = []
@@ -171,8 +171,8 @@ def fail_plot(dfs, dfsSumm, titles):
             bestFit.append(sortedData)
         # Plot the curves in global sort order
         colours = ['#1f77b4', '#8c564b', '#2ca02c', '#d62728', '#9467bd']
-        for i in range(len(bestFit)):
-            data = bestFit[i]
+        for i in range(len(bestFit)) if number < 0 else [number]:
+            data = bestFit[i if number < 0 else 0]
             df = dfs[i]
             xName, xTime, xCost, originalIndex = zip(*data)
             xName, xTime, xCost, originalIndex = list(xName), list(xTime), list(xCost), list(originalIndex)
@@ -222,12 +222,13 @@ def fail_plot(dfs, dfsSumm, titles):
         axs[plotNum].set_xlim((-0.5, 33.5))
         axs[plotNum].set_ylim(kwargs['ylim'][plotNum])
     # Add cost thresholds
+    thresholds = [0.0157, 0.00577, 2.95e-6, 2.80e-7, 1.7e-6]
     for i in axs[[0, 2]]:
-        i.axhline(0.0157, -1, 34, color=colours[0], linestyle='--', label=None, zorder=0)
-        i.axhline(0.00577, -1, 34, color=colours[1], linestyle='--', label=None, zorder=0)
-        i.axhline(2.95e-6, -1, 34, color=colours[2], linestyle='--', label=None, zorder=0)
-        i.axhline(2.80e-7, -1, 34, color=colours[3], linestyle='--', label=None, zorder=0)
-        i.axhline(1.7e-6, -1, 34, color=colours[4], linestyle='--', label=None, zorder=0)
+        if number < 0:
+            for j in range(len(thresholds)):
+                i.axhline(thresholds[j], -1, 34, color=colours[j], linestyle='--', label=None, zorder=0)
+        else:
+            i.axhline(thresholds[number], -1, 34, color=colours[number], linestyle='--', label=None, zorder=0)
     # Add lines specifically for the legend
     axs[0].plot(-1, 1, '--', color='black', label='Cost thresholds')
     axs[0].plot(-1, 1, 'D', color='black', label='Success')
@@ -236,16 +237,19 @@ def fail_plot(dfs, dfsSumm, titles):
     axs[0].set_title('Approaches sorted by time')
     axs[2].set_title('Approaches sorted by cost')
     handles, labels = axs[0].get_legend_handles_labels()
-    order = [0, 4, 1, 5, 2, 6, 3, 7]
-    fig.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc="outside lower center", ncol=4)
+    if number < 0:
+        order = [0, 4, 1, 5, 2, 6, 3, 7]
+        fig.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc="outside lower center", ncol=4)
+    else:
+        fig.legend(loc="outside lower center", ncol=4)
     # Figure labels (A, B, C)
     fig.text(0.022, 0.982, 'A', fontsize=12, fontweight='bold')
     fig.text(0.022, 0.8, 'B', fontsize=12, fontweight='bold')
     fig.text(0.022, 0.444, 'C', fontsize=12, fontweight='bold')
     # Align ylabels
     fig.align_ylabels()
+    fig.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'allApproaches'+('-supp'+str(number) if number>=0 else '')+'.png'), bbox_inches='tight', dpi=300)
     fig.show()
-    fig.savefig(os.path.join(ionbench.ROOT_DIR, '..', 'scripts', 'figures', 'allApproaches.png'), bbox_inches='tight', dpi=300)
 
 
 # noinspection PyShadowingNames
@@ -332,5 +336,7 @@ for bmShortName in bmShortNames:
 success_plot(dfsSumm, titles)
 success_plot(dfsFull, titles, supp_plot=True)
 fail_plot(dfsFull, dfsSumm, titles)
+for i in range(len(dfsFull)):
+    fail_plot(dfsFull, dfsSumm, titles, number=i)
 time_plot(dfsFull, titles)
 time_plot(dfsFull, titles, solveType='Grad')
