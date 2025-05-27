@@ -95,10 +95,12 @@ def paper_plot():
         lh.set_alpha(1)
 
     # Plot the penalty function
-    axBot = subfigs[1].subplots(1, 2)
+    axBot = subfigs[1].subplots(1, 3)
     ax1 = axBot[0]
     ax2 = axBot[1]
-    pl = np.linspace(-1, 1, 1000)
+    ax3 = axBot[2]
+    pl = np.linspace(-1, 0, 1000)
+    pm = np.logspace(-4, -2, 1000)
     pu = np.logspace(3, 5, 1000)
     lb = 1e-3
     ub = 1e4
@@ -116,19 +118,25 @@ def paper_plot():
 
     ax1.plot(pl, pen(pl, lb, ub))
     ax1.set_xscale('linear')
-    ax1.set_title('Lower bound')
     ax1.set_ylabel('Penalty')
-    ax2.plot(pu, pen(pu, lb, ub))
+    ax2.plot(pm, pen(pm, lb, ub))
     ax2.set_xscale('log')
-    ax2.set_title('Upper bound')
+    ax3.plot(pu, pen(pu, lb, ub))
+    ax3.set_xscale('log')
+    ax2.set_xscale('log')
     ax2.sharey(ax1)
+    ax3.sharey(ax1)
+    ax2.tick_params(left=False, right=False, labelleft=False, labelright=False)
 
     # split axes
     # hide the spines
     ax1.spines['right'].set_visible(False)
+    ax3.spines['left'].set_visible(False)
     ax2.spines['left'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
     # Move the ticks to the right side
-    ax2.yaxis.tick_right()
+    ax3.yaxis.tick_right()
+    ax1.set_xticks([-1, 0])
 
     # Add diagonal lines // to the split
     d = .015  # "/" size
@@ -138,6 +146,11 @@ def paper_plot():
     kwargs.update(transform=ax2.transAxes)
     ax2.plot((-d, +d), (1 - d, 1 + d), **kwargs)
     ax2.plot((-d, +d), (-d, +d), **kwargs)
+    ax2.plot((1 - d, 1 + d), (-d, +d), **kwargs)
+    ax2.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs)
+    kwargs.update(transform=ax3.transAxes)
+    ax3.plot((-d, +d), (1 - d, 1 + d), **kwargs)
+    ax3.plot((-d, +d), (-d, +d), **kwargs)
 
     # Add common x axis label
     subfigs[1].supxlabel('Parameter/Rate')
