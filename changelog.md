@@ -1,6 +1,9 @@
 # Changelog
 
-## v0.5.1-alpha - Current release
+## v1.0.0 - Current release
+numpy v2 compatibility, noise strength is now configurable during data generation for Staircase problems, editted rate bounds figure and added some alternative versions of the allApproaches figure.
+
+## v0.5.1-alpha
 Improved documentation. Some small tweaks to approaches. New significance testing.
 
 ## v0.5.0-alpha
