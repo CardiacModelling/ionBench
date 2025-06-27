@@ -69,7 +69,7 @@ def plot_moreno(axs, xLabels, xCoords, titles, yLabels, xTicks):
         axs[i].grid(axis='y')
 
 
-fig = plt.figure(layout='constrained', figsize=(7.5, 7.5))
+fig = plt.figure(layout='constrained', figsize=(7.3, 7.3))
 subfigs = fig.subfigures(2, 1, height_ratios=[2, 1])
 
 axsTop = subfigs[0].subplots(2, 2)
