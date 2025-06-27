@@ -28,7 +28,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version="1.0.0",  # Required
+    version="1.0.1",  # Required
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
@@ -63,7 +63,7 @@ setup(
     author="Matt J. Owen",  # Optional
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email="matt.owen@nottingham.ac.uk",  # Optional
+    author_email="matt.owen@bristol.ac.uk",  # Optional
     # Classifiers help users find your project by categorizing it.
     #
     # For a list of valid classifiers, see https://pypi.org/classifiers/
