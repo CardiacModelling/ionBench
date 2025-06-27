@@ -34,8 +34,8 @@ def paper_plot():
     """
     Plot the figure for the rate bounds in the paper.
     """
-    fig = plt.figure(figsize=(5, 6.5), constrained_layout=True)
-    subfigs = fig.subfigures(2, 1)
+    fig = plt.figure(figsize=(5, 5.5), constrained_layout=True)
+    subfigs = fig.subfigures(2, 1, height_ratios = [4,3])
     axTops = subfigs[0].subplots(1, 2)
 
     # Plot the rate bounds
@@ -99,11 +99,11 @@ def paper_plot():
     ax1 = axBot[0]
     ax2 = axBot[1]
     ax3 = axBot[2]
-    pl = np.linspace(-1, 0, 1000)
+    pl = np.linspace(-10, 0, 1000)
     pm = np.logspace(-4, -2, 1000)
-    pu = np.logspace(3, 5, 1000)
+    pu = np.logspace(4, 6, 1000)
     lb = 1e-3
-    ub = 1e4
+    ub = 1e5
 
     @np.vectorize
     def pen(pi, lb, ub):
@@ -136,8 +136,10 @@ def paper_plot():
     ax2.spines['right'].set_visible(False)
     # Move the ticks to the right side
     ax3.yaxis.tick_right()
-    ax1.set_xticks([-1, 0])
-
+    ax1.set_xticks([0, -5, -10])
+    ax1.xaxis.set_minor_locator(AutoMinorLocator())
+    
+    
     # Add diagonal lines // to the split
     d = .015  # "/" size
     kwargs = dict(transform=ax1.transAxes, color='k', clip_on=False)
